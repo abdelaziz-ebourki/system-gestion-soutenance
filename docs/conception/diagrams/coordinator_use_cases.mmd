@@ -1,0 +1,14 @@
+useCaseDiagram
+    actor Coord as "Coordinateur (Métier)"
+    
+    package "Système de Gestion des Soutenances" {
+        usecase UC4 as "Importer les listes (CSV/Excel)"
+        usecase UC5 as "Définir les périodes de soutenance"
+        usecase UC6 as "Assigner les jurys & Gérer les conflits"
+        usecase UC7 as "Valider et publier le planning final"
+    }
+    
+    Coord --> UC4
+    Coord --> UC5
+    Coord --> UC6
+    Coord --> UC7

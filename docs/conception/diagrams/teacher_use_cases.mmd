@@ -1,0 +1,12 @@
+useCaseDiagram
+    actor Teacher as "Enseignant / Jury"
+    
+    package "Système de Gestion des Soutenances" {
+        usecase UC8 as "Consulter son planning personnel"
+        usecase UC9 as "Déclarer ses indisponibilités"
+        usecase UC10 as "Saisir les notes et observations"
+    }
+    
+    Teacher --> UC8
+    Teacher --> UC9
+    Teacher --> UC10
