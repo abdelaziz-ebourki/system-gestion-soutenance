@@ -1,9 +1,0 @@
-flowchart TD
-    A[Collecte des données] --> B[Création du planning initial]
-    B --> C[Envoi des disponibilités aux enseignants]
-    C --> D[Réception des réponses]
-    D --> E{Disponibilités compatibles ?}
-    E -->|Non| G[Modification du planning]
-    G --> H[Nouvel envoi d'emails]
-    H --> C
-    E -->|Oui| F[Affectation des jurys]

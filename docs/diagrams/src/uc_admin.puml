@@ -1,0 +1,47 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  actor {
+    BackgroundColor #F2F4F7
+  }
+  usecase {
+    BackgroundColor #F2F4F7
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrateur" as Admin
+
+rectangle "Module Administration" {
+    usecase "Gérer comptes utilisateurs" as UC1
+    usecase "Gérer salles" as UC2
+    usecase "Gérer soutenances" as UC3
+    usecase "Configurer paramètres système" as UC4
+    usecase "Gérer enseignants" as UC5
+    usecase "Consulter tableau de bord" as Dashboard
+    usecase "S'authentifier" as Auth
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> Dashboard
+
+UC1 ..> Auth : <<include>>
+UC2 ..> Auth : <<include>>
+UC3 ..> Auth : <<include>>
+UC4 ..> Auth : <<include>>
+UC5 ..> Auth : <<include>>
+Dashboard ..> Auth : <<include>>
+@enduml

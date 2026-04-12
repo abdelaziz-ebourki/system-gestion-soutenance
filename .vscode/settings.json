@@ -1,7 +1,32 @@
 {
+	"files.associations": {
+		"*.xml": "html",
+		"*.svg": "html"
+	},
+
 	"editor.rulers": [100],
 	"[latex]": {
 		"editor.wordWrap": "wordWrapColumn",
 		"editor.wordWrapColumn": 100
-	}
+	},
+	"latex-workshop.latex.tools": [
+		{
+			"name": "pdflatex",
+			"command": "pdflatex",
+			"args": ["-interaction=nonstopmode", "-shell-escape", "%DOC%"]
+		},
+		{
+			"name": "latexmk",
+			"command": "latexmk",
+			"args": [
+				"-pdf",
+				"-interaction=nonstopmode",
+				"-shell-escape",
+				"-synctex=1",
+				"%DOC%"
+			]
+		}
+	],
+	"plantuml.exportOutDir": "docs/diagrams/svg/",
+	"plantuml.exportSubFolder": false
 }

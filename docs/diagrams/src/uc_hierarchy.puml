@@ -1,0 +1,33 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  actor {
+    BackgroundColor #F2F4F7
+  }
+  usecase {
+    BackgroundColor #F2F4F7
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+left to right direction
+
+actor "Utilisateur" as User
+actor "Administrateur" as Admin
+actor "Coordinateur" as Coord
+actor "Enseignant / Membre de jury" as Jury
+actor "Étudiant" as Student
+
+Admin --|> User
+Coord --|> User
+Jury --|> User
+Student --|> User
+
+User -> (S'authentifier)
+@enduml

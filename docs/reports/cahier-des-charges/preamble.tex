@@ -1,0 +1,108 @@
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{parskip}
+\usepackage{tcolorbox}
+\usepackage{svg}
+\tcbuselibrary{skins, breakable}
+\usepackage{float}
+
+\usetikzlibrary{shapes,arrows,positioning,fit,backgrounds}
+
+% --- Layout ---
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\setlength{\headheight}{15pt}
+
+% --- Colors ---
+\definecolor{primary}{RGB}{0,51,102}
+\definecolor{secondary}{RGB}{200,220,240}
+\definecolor{accent}{RGB}{0,102,204}
+
+% --- Typography ---
+\titleformat{\section}{\Large\bfseries\color{primary}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{primary}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{primary}}{\thesubsubsection}{1em}{}
+
+% --- Header/Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{Cahier des charges}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\arraystretch}{1.2}
+
+% --- TikZ Styles ---
+\tikzset{
+    % Base style for consistency
+    base_node/.style={
+            draw=primary,
+            fill=primary!5,
+            line width=1pt,
+            rounded corners=3pt,
+            text centered,
+            font=\small
+        },
+    % General flow blocks
+    block/.style={base_node, rectangle, text width=4.5cm, minimum height=0.8cm},
+    decision/.style={base_node, diamond, text width=2.5cm, inner sep=0pt},
+    arrow/.style={-latex, thick, color=primary},
+    % Actor/System diagrams
+    system/.style={base_node, rectangle, text width=5.5cm, minimum height=1.8cm, font=\large\bfseries\color{primary}, rounded corners=5pt},
+    actor/.style={base_node, rectangle, text width=4cm, minimum height=1.2cm, font=\small\bfseries},
+    biArrow/.style={latex-latex, thick, color=primary},
+    % Architecture layers
+    layer/.style={base_node, rectangle, text width=7cm, minimum height=1.2cm, font=\bfseries}
+}
+
+% --- Project Boxes (Modern Flat Style) ---
+\newtcolorbox{projectbox}[1]{
+    enhanced,
+    breakable,
+    colback=primary!5,
+    colframe=primary,
+    boxrule=0pt,
+    leftrule=4pt,
+    sharp corners,
+    fonttitle=\bfseries,
+    coltitle=primary,
+    attach title to upper,
+    after title={ :\enskip},
+    title=#1,
+    top=10pt,
+    bottom=10pt,
+    left=10pt,
+    right=10pt
+}
+
+% --- Hyperlinks (MUST BE LOADED BEFORE CLEVEREF) ---
+\usepackage[
+    colorlinks = true,
+    linkcolor  = primary,
+    urlcolor   = accent,
+    citecolor  = primary,
+    bookmarks  = true
+]{hyperref}
+
+% --- Cross-referencing (MUST BE LOADED AFTER HYPERREF) ---
+\usepackage[capitalise, french, noabbrev]{cleveref}
+
+\crefname{figure}{figure}{figures}
+\Crefname{figure}{Figure}{Figures}
+\crefname{table}{tableau}{tableaux}
+\Crefname{table}{Tableau}{Tableaux}
+\crefname{section}{section}{sections}
+\Crefname{section}{Section}{Sections}

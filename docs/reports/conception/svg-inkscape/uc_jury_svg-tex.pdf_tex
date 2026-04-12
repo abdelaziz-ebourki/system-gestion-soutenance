@@ -1,0 +1,89 @@
+%% Creator: Inkscape 1.4.3 (1:1.4.3+202512261035+0d15f75042), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'uc_jury_svg-tex.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{891.75bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.44659378)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{uc_jury_svg-tex.pdf}}%
+    \put(0.4646762,0.35200513){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Jury}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{uc_jury_svg-tex.pdf}}%
+    \put(0.5954096,0.31276585){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter planning\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{uc_jury_svg-tex.pdf}}%
+    \put(0.58751697,0.24714508){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter convocation\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{uc_jury_svg-tex.pdf}}%
+    \put(0.58349851,0.17965611){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Déclarer indisponibilité\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{uc_jury_svg-tex.pdf}}%
+    \put(0.56101714,0.10878788){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter informations étudiant\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{uc_jury_svg-tex.pdf}}%
+    \put(0.32778117,0.10834374){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Saisir évaluation\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{uc_jury_svg-tex.pdf}}%
+    \put(0.02810353,0.10831287){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Valider / modifier évaluation\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{uc_jury_svg-tex.pdf}}%
+    \put(0.88201242,0.17975146){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}S'authentifier\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{uc_jury_svg-tex.pdf}}%
+    \put(0.02817494,0.38312372){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Enseignant / Membre de jury\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{uc_jury_svg-tex.pdf}}%
+    \put(0.23423045,0.11488898){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{uc_jury_svg-tex.pdf}}%
+    \put(0.47224558,0.11573002){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{uc_jury_svg-tex.pdf}}%
+    \put(0.78511354,0.27384609){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{uc_jury_svg-tex.pdf}}%
+    \put(0.78511354,0.22170143){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{uc_jury_svg-tex.pdf}}%
+    \put(0.78511354,0.18721867){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{uc_jury_svg-tex.pdf}}%
+    \put(0.78511354,0.16198738){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{uc_jury_svg-tex.pdf}}%
+    \put(0.62867956,0.06190328){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

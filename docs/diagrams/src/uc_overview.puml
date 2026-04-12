@@ -1,0 +1,38 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  actor {
+    BackgroundColor #F2F4F7
+  }
+  usecase {
+    BackgroundColor #F2F4F7
+  }
+  arrow {
+    LineColor #003366
+  }
+  rectangle {
+    BackgroundColor #F2F4F7
+  }
+</style>
+skinparam shadowing false
+skinparam actorStyle rectangle
+skinparam packageStyle rectangle
+
+actor "Administrateur" as Admin
+actor "Coordinateur" as Coord
+actor "Enseignant / Membre de jury" as Jury
+actor "Étudiant" as Student
+
+rectangle "Système de gestion des soutenances" as System {
+}
+
+Admin <--> System
+Coord <--> System
+Jury <--> System
+Student <--> System
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  actor {
+    BackgroundColor #F2F4F7
+  }
+  usecase {
+    BackgroundColor #F2F4F7
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+left to right direction
+
+actor "Enseignant / Membre de jury" as Jury
+
+rectangle "Module Jury" {
+    usecase "Consulter planning" as UC1
+    usecase "Consulter convocation" as UC2
+    usecase "Déclarer indisponibilité" as UC3
+    usecase "Consulter informations étudiant" as UC4
+    usecase "Saisir évaluation" as UC5
+    usecase "Valider / modifier évaluation" as UC6
+    usecase "S'authentifier" as Auth
+}
+
+Jury --> UC1
+Jury --> UC2
+Jury --> UC3
+Jury --> UC4
+Jury --> UC5
+
+UC6 ..> UC5 : <<extend>>
+UC5 ..> UC4 : <<include>>
+
+UC1 ..> Auth : <<include>>
+UC2 ..> Auth : <<include>>
+UC3 ..> Auth : <<include>>
+UC4 ..> Auth : <<include>>
+UC5 ..> Auth : <<include>>
+@enduml

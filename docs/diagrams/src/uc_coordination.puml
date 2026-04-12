@@ -1,0 +1,59 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  actor {
+    BackgroundColor #F2F4F7
+  }
+  usecase {
+    BackgroundColor #F2F4F7
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+left to right direction
+actor "Coordinateur" as Coord
+
+rectangle "Module Coordination" {
+    usecase "Assigner jurys" as UC1
+    usecase "Consulter rapports" as UC2
+    usecase "Valider planning" as UC3
+    usecase "Planifier soutenances" as UC4
+    usecase "Générer convocations" as UC5
+    usecase "Générer fiches d'évaluation" as UC6
+    usecase "Gérer étudiants" as UC7
+    usecase "Importer listes" as UC8
+    usecase "Consulter tableau de bord" as Dashboard
+    usecase "Vérifier conflits" as Check
+    usecase "S'authentifier" as Auth
+}
+
+Coord --> UC1
+Coord --> UC2
+Coord --> UC3
+Coord --> UC4
+Coord --> UC5
+Coord --> UC6
+Coord --> UC7
+Coord --> Dashboard
+
+UC8 ..> UC7 : <<extend>>
+
+UC1 ..> Check : <<include>>
+UC3 ..> Check : <<include>>
+Check ..> Auth : <<include>>
+
+UC1 ..> Auth : <<include>>
+UC2 ..> Auth : <<include>>
+UC3 ..> Auth : <<include>>
+UC4 ..> Auth : <<include>>
+UC5 ..> Auth : <<include>>
+UC6 ..> Auth : <<include>>
+UC7 ..> Auth : <<include>>
+Dashboard ..> Auth : <<include>>
+@enduml
