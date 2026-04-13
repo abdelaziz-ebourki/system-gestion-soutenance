@@ -50,11 +50,11 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.44659378)%
+  \begin{picture}(1,0.51808242)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{uc_jury_svg-tex.pdf}}%
-    \put(0.4646762,0.35200513){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Jury}\end{tabular}}}}%
+    \put(0.4646762,0.42349378){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Jury}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{uc_jury_svg-tex.pdf}}%
     \put(0.5954096,0.31276585){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter planning\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=3]{uc_jury_svg-tex.pdf}}%
@@ -68,22 +68,26 @@
     \put(0,0){\includegraphics[width=\unitlength,page=7]{uc_jury_svg-tex.pdf}}%
     \put(0.02810353,0.10831287){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Valider / modifier évaluation\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=8]{uc_jury_svg-tex.pdf}}%
-    \put(0.88201242,0.17975146){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}S'authentifier\end{tabular}}}}%
+    \put(0.57215813,0.38083078){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Générer fiches d'évaluation\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=9]{uc_jury_svg-tex.pdf}}%
-    \put(0.02817494,0.38312372){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Enseignant / Membre de jury\end{tabular}}}}%
+    \put(0.88201242,0.21255213){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}S'authentifier\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=10]{uc_jury_svg-tex.pdf}}%
-    \put(0.23423045,0.11488898){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
+    \put(0.02817494,0.45461237){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Enseignant / Membre de jury\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=11]{uc_jury_svg-tex.pdf}}%
-    \put(0.47224558,0.11573002){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.23423045,0.11404794){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=12]{uc_jury_svg-tex.pdf}}%
-    \put(0.78511354,0.27384609){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.47224558,0.11573002){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=13]{uc_jury_svg-tex.pdf}}%
-    \put(0.78511354,0.22170143){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.78511354,0.27889234){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=14]{uc_jury_svg-tex.pdf}}%
-    \put(0.78511354,0.18721867){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.78511354,0.23768124){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=15]{uc_jury_svg-tex.pdf}}%
-    \put(0.78511354,0.16198738){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.78511354,0.19731118){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=16]{uc_jury_svg-tex.pdf}}%
-    \put(0.62867956,0.06190328){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.78511354,0.16955677){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{uc_jury_svg-tex.pdf}}%
+    \put(0.62867956,0.0619033){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{uc_jury_svg-tex.pdf}}%
+    \put(0.78511354,0.33524222){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
   \end{picture}%
 \endgroup%

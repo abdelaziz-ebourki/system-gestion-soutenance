@@ -50,38 +50,30 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.71174377)%
+  \begin{picture}(1,0.48398577)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{uc_admin_svg-tex.pdf}}%
-    \put(0.4911032,0.68688128){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Administration}\end{tabular}}}}%
+    \put(0.4911032,0.45912327){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Administration}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{uc_admin_svg-tex.pdf}}%
-    \put(0.28213067,0.61470135){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer comptes utilisateurs\end{tabular}}}}%
+    \put(0.28213067,0.38694334){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer comptes utilisateurs\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=3]{uc_admin_svg-tex.pdf}}%
-    \put(0.3525832,0.5049647){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer salles\end{tabular}}}}%
+    \put(0.3525832,0.27720669){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer salles\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=4]{uc_admin_svg-tex.pdf}}%
-    \put(0.31853922,0.4022951){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer soutenances\end{tabular}}}}%
+    \put(0.2597395,0.16434832){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Configurer paramètres système\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=5]{uc_admin_svg-tex.pdf}}%
-    \put(0.2597395,0.28534479){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Configurer paramètres système\end{tabular}}}}%
+    \put(0.32028598,0.0452198){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer enseignants\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=6]{uc_admin_svg-tex.pdf}}%
-    \put(0.32028598,0.16621624){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer enseignants\end{tabular}}}}%
+    \put(0.80030296,0.21882491){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}S'authentifier\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=7]{uc_admin_svg-tex.pdf}}%
-    \put(0.28303929,0.05266904){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter tableau de bord\end{tabular}}}}%
+    \put(0,0.16161438){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Administrateur\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=8]{uc_admin_svg-tex.pdf}}%
-    \put(0.80030296,0.34266831){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}S'authentifier\end{tabular}}}}%
+    \put(0.63629893,0.32826049){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=9]{uc_admin_svg-tex.pdf}}%
-    \put(0,0.2826108){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Administrateur\end{tabular}}}}%
+    \put(0.63629893,0.25993309){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=10]{uc_admin_svg-tex.pdf}}%
-    \put(0.63629893,0.54605409){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.63629893,0.19302918){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=11]{uc_admin_svg-tex.pdf}}%
-    \put(0.63629893,0.4535274){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=12]{uc_admin_svg-tex.pdf}}%
-    \put(0.63629893,0.3852){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=13]{uc_admin_svg-tex.pdf}}%
-    \put(0.63629893,0.31829608){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=14]{uc_admin_svg-tex.pdf}}%
-    \put(0.63629893,0.26847402){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=15]{uc_admin_svg-tex.pdf}}%
-    \put(0.63629893,0.19872313){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.63629893,0.1446306){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
   \end{picture}%
 \endgroup%

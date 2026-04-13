@@ -60,7 +60,7 @@
     \caption{Hiérarchie générale des acteurs}
 \end{figure}
 
-\subsection{Cas d'utilisation par module}
+\subsection{Cas d'utilisation}
 
 % --- Administrateur ---
 \subsubsection{Module Administration}
@@ -70,8 +70,29 @@
         \includesvg{../../diagrams/svg/uc_admin.svg}
     }
     \caption{Cas d'utilisation : Administration du système}
-
 \end{figure}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{10cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Cas d'utilisation}    & \textbf{Description}                                                                            \\
+        \midrule
+        Gérer comptes utilisateurs    & Création, modification (incluant rôles et mots de passe) et suppression des comptes.            \\
+        \addlinespace
+        Gérer salles                  & Administration du catalogue des salles, incluant la saisie des capacités et des disponibilités. \\
+        \addlinespace
+        Gérer enseignants             & Gestion de la base de données des enseignants et de leurs informations académiques.             \\
+        \addlinespace
+        Configurer paramètres système & Définition des paramètres globaux de l'application et supervision du fonctionnement.            \\
+        \addlinespace
+        S'authentifier                & Accès sécurisé à l'application via un identifiant et un mot de passe haché.                     \\
+        \bottomrule
+    \end{tabular}
+    \caption{Description des cas d'utilisation -- Administrateur}
+\end{table}
 
 % --- Coordinateur ---
 \subsubsection{Module Coordination}
@@ -83,6 +104,42 @@
     \caption{Cas d'utilisation : Coordination des soutenances}
 \end{figure}
 
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{10cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Cas d'utilisation} & \textbf{Description}                                                                                       \\
+        \midrule
+        Assigner jurys             & Constitution des commissions (président, rapporteur, examinateur) avec recherche d'équilibre de la charge. \\
+        \addlinespace
+        Planifier soutenances      & Création des sessions, définition des dates, horaires et affectation des salles aux étudiants.             \\
+        \addlinespace
+        Valider planning           & Confirmation finale du planning après traitement des alertes et détection des conflits.                    \\
+        \addlinespace
+        Gérer étudiants            & Administration des dossiers étudiants (inscription, filière, niveau académique).                           \\
+        \addlinespace
+        Gérer les projets          & Gestion des thèmes, titres de PFE et association entre étudiants, projets et encadrants.                   \\
+        \addlinespace
+        Importer listes            & Chargement massif de données (CSV/Excel) pour les étudiants, enseignants et projets.                       \\
+        \addlinespace
+        Consulter planning         & Visualisation globale filtrable (par date, salle, enseignant, filière ou étudiant).                        \\
+        \addlinespace
+        Rechercher / Filtrer       & Recherche multicritère avancée pour la supervision et le suivi des dossiers.                               \\
+        \addlinespace
+        Générer convocations       & Production automatique des documents officiels (PDF) pour les étudiants et les membres de jury.            \\
+        \addlinespace
+        Générer planning général   & Production du planning complet et de la liste de présence pour la session de soutenance.                   \\
+        \addlinespace
+        Consulter rapports         & Accès aux synthèses, statistiques d'activité et procès-verbaux (PV) simplifiés.                            \\
+        \addlinespace
+        Vérifier conflits          & Détection des chevauchements (salles, enseignants), doubles planifications et doublons.                    \\
+        \bottomrule
+    \end{tabular}
+    \caption{Description des cas d'utilisation -- Coordinateur}
+\end{table}
+
 % --- Enseignant ---
 \subsubsection{Module Jury}
 \begin{figure}[H]
@@ -93,6 +150,32 @@
     \caption{Cas d'utilisation : Enseignant et Jury}
 \end{figure}
 
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{10cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Cas d'utilisation}      & \textbf{Description}                                                                   \\
+        \midrule
+        Consulter planning              & Accès au planning personnel des sessions où l'enseignant est mobilisé.                 \\
+        \addlinespace
+        Consulter convocation           & Visualisation et téléchargement des convocations individuelles reçues.                 \\
+        \addlinespace
+        Saisir évaluation               & Enregistrement des notes et des observations pendant ou après la soutenance.           \\
+        \addlinespace
+        Valider / modifier évaluation   & Finalisation de la notation et modification des remarques avant clôture.               \\
+        \addlinespace
+        Consulter informations étudiant & Consultation des détails du projet et du dossier de l'étudiant évalué.                 \\
+        \addlinespace
+        Générer fiches d'évaluation     & Création et téléchargement des supports de notation pour la session.                   \\
+        \addlinespace
+        Déclarer indisponibilité        & Signalement des créneaux horaires où l'enseignant n'est pas disponible pour les jurys. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Description des cas d'utilisation -- Enseignant}
+\end{table}
+
 % --- Étudiant ---
 \subsubsection{Module Étudiant}
 \begin{figure}[H]
@@ -102,5 +185,23 @@
     }
     \caption{Cas d'utilisation : Espace Étudiant}
 \end{figure}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{10cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Cas d'utilisation}    & \textbf{Description}                                                        \\
+        \midrule
+        Télécharger convocation       & Récupération du document PDF officiel pour la présentation à la soutenance. \\
+        \addlinespace
+        Consulter infos de soutenance & Visualisation de la date, l'heure, la salle et la composition du jury.      \\
+        \addlinespace
+        Consulter résultats           & Consultation des notes et de la décision finale après délibération.         \\
+        \bottomrule
+    \end{tabular}
+    \caption{Description des cas d'utilisation -- Étudiant}
+\end{table}
 
 \end{document}

@@ -25,10 +25,12 @@ rectangle "Module Coordination" {
     usecase "Valider planning" as UC3
     usecase "Planifier soutenances" as UC4
     usecase "Générer convocations" as UC5
-    usecase "Générer fiches d'évaluation" as UC6
+    usecase "Générer planning général" as UC6
     usecase "Gérer étudiants" as UC7
     usecase "Importer listes" as UC8
-    usecase "Consulter tableau de bord" as Dashboard
+    usecase "Consulter planning" as UC9
+    usecase "Rechercher / Filtrer" as UC10
+    usecase "Gérer les projets" as UC11
     usecase "Vérifier conflits" as Check
     usecase "S'authentifier" as Auth
 }
@@ -40,9 +42,11 @@ Coord --> UC4
 Coord --> UC5
 Coord --> UC6
 Coord --> UC7
-Coord --> Dashboard
+Coord --> UC9
+Coord --> UC11
 
 UC8 ..> UC7 : <<extend>>
+UC10 ..> UC9 : <<extend>>
 
 UC1 ..> Check : <<include>>
 UC3 ..> Check : <<include>>
@@ -55,5 +59,6 @@ UC4 ..> Auth : <<include>>
 UC5 ..> Auth : <<include>>
 UC6 ..> Auth : <<include>>
 UC7 ..> Auth : <<include>>
-Dashboard ..> Auth : <<include>>
+UC9 ..> Auth : <<include>>
+UC11 ..> Auth : <<include>>
 @enduml
