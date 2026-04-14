@@ -32,7 +32,6 @@ rectangle "Module Coordination" {
     usecase "Rechercher / Filtrer" as UC10
     usecase "Gérer les projets" as UC11
     usecase "Vérifier conflits" as Check
-    usecase "S'authentifier" as Auth
 }
 
 Coord --> UC1
@@ -50,15 +49,4 @@ UC10 ..> UC9 : <<extend>>
 
 UC1 ..> Check : <<include>>
 UC3 ..> Check : <<include>>
-Check ..> Auth : <<include>>
-
-UC1 ..> Auth : <<include>>
-UC2 ..> Auth : <<include>>
-UC3 ..> Auth : <<include>>
-UC4 ..> Auth : <<include>>
-UC5 ..> Auth : <<include>>
-UC6 ..> Auth : <<include>>
-UC7 ..> Auth : <<include>>
-UC9 ..> Auth : <<include>>
-UC11 ..> Auth : <<include>>
 @enduml

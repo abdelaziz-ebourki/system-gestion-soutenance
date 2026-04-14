@@ -51,6 +51,10 @@
 \section{Diagrammes de Cas d'Utilisation}
 \label{sec:cas_utilisation}
 
+\begin{projectbox}{Remarque}
+    Par souci de clarté visuelle, le cas d'utilisation « S'authentifier » est omis des diagrammes détaillés mais reste une pré-condition transversale à toutes les actions du système.
+\end{projectbox}
+
 \subsection{Hiérarchie des acteurs}
 \label{subsec:uml_acteurs}
 
@@ -66,7 +70,7 @@
 \subsubsection{Module Administration}
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{
+    \resizebox{0.7\textwidth}{!}{
         \includesvg{../../diagrams/svg/uc_admin.svg}
     }
     \caption{Cas d'utilisation : Administration du système}
@@ -83,8 +87,6 @@
         Gérer comptes utilisateurs    & Création, modification (incluant rôles et mots de passe) et suppression des comptes.            \\
         \addlinespace
         Gérer salles                  & Administration du catalogue des salles, incluant la saisie des capacités et des disponibilités. \\
-        \addlinespace
-        Gérer enseignants             & Gestion de la base de données des enseignants et de leurs informations académiques.             \\
         \addlinespace
         Configurer paramètres système & Définition des paramètres globaux de l'application et supervision du fonctionnement.            \\
         \addlinespace
@@ -203,5 +205,55 @@
     \end{tabular}
     \caption{Description des cas d'utilisation -- Étudiant}
 \end{table}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+%  3. ARCHITECTURE SYSTÈME
+% ═══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Architecture Système}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+        \includesvg{../../diagrams/svg/component_architecture.svg}
+    }
+    \caption{Architecture technique des composants}
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+%  4. CONCEPTION STATIQUE (DIAGRAMME DE CLASSES)
+% ═══════════════════════════════════════════════════════════════════════════════
+\section{Conception Statique}
+\label{sec:statique}
+
+\subsection{Gestion des utilisateurs et authentification}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+        \includesvg{../../diagrams/svg/class_users.svg}
+    }
+    \caption{Diagramme de classes : Utilisateurs}
+\end{figure}
+
+\subsection{Gestion académique et projets}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.8\textwidth}{!}{
+        \includesvg{../../diagrams/svg/class_projects.svg}
+    }
+    \caption{Diagramme de classes : Projets et Soutenances}
+\end{figure}
+
+\subsection{Planification et évaluation}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+        \includesvg{../../diagrams/svg/class_planning.svg}
+    }
+    \caption{Diagramme de classes : Planification et Évaluation}
+\end{figure}
 
 \end{document}

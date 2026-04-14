@@ -1,0 +1,118 @@
+%% Creator: Inkscape 1.4.3 (1:1.4.3+202512261035+0d15f75042), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'class_users_svg-tex.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{583.875bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.75675761)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{class_users_svg-tex.pdf}}%
+    \put(0.06756583,0.6547255){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}RoleEnum\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{class_users_svg-tex.pdf}}%
+    \put(0.00834939,0.61678858){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ADMINISTRATEUR\end{tabular}}}}%
+    \put(0.00834939,0.59229531){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+COORDINATEUR\end{tabular}}}}%
+    \put(0.00834939,0.56780218){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ENSEIGNANT\end{tabular}}}}%
+    \put(0.00834939,0.54330907){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ETUDIANT\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{class_users_svg-tex.pdf}}%
+    \put(0.28715479,0.6547255){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}JuryRole\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{class_users_svg-tex.pdf}}%
+    \put(0.2357097,0.61678858){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+PRESIDENT\end{tabular}}}}%
+    \put(0.2357097,0.59229531){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+RAPPORTEUR\end{tabular}}}}%
+    \put(0.2357097,0.56780218){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+EXAMINATEUR\end{tabular}}}}%
+    \put(0.2357097,0.54330907){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ENCADRANT\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{class_users_svg-tex.pdf}}%
+    \put(0.54560051,0.72858549){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textit{Utilisateur}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{class_users_svg-tex.pdf}}%
+    \put(0.43224149,0.69064856){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int id\end{tabular}}}}%
+    \put(0.43224149,0.66615531){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string nom\end{tabular}}}}%
+    \put(0.43224149,0.64166218){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string prenom\end{tabular}}}}%
+    \put(0.43224149,0.61716905){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string email\end{tabular}}}}%
+    \put(0.43224149,0.59267593){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string motDePasse\end{tabular}}}}%
+    \put(0.43224149,0.5681828){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+RoleEnum role\end{tabular}}}}%
+    \put(0.43224149,0.54368967){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+boolean actif\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{class_users_svg-tex.pdf}}%
+    \put(0.43224149,0.50892023){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+seConnecter(email, password)\end{tabular}}}}%
+    \put(0.43224149,0.48442712){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+seDeconnecter()\end{tabular}}}}%
+    \put(0.43224149,0.45993399){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+modifierProfil()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{class_users_svg-tex.pdf}}%
+    \put(0.1524727,0.32010764){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Administrateur\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{class_users_svg-tex.pdf}}%
+    \put(0.12010276,0.27189453){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+gererComptes()\end{tabular}}}}%
+    \put(0.12010276,0.24740128){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+configurerSalles()\end{tabular}}}}%
+    \put(0.12010276,0.22290815){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+definirPeriodes()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{class_users_svg-tex.pdf}}%
+    \put(0.398009,0.32010764){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Coordinateur\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{class_users_svg-tex.pdf}}%
+    \put(0.34232498,0.27189453){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+creerSession()\end{tabular}}}}%
+    \put(0.34232498,0.24740128){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+validerPlanning()\end{tabular}}}}%
+    \put(0.34232498,0.22290815){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+genererDocuments()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{class_users_svg-tex.pdf}}%
+    \put(0.6701991,0.34451355){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Enseignant\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{class_users_svg-tex.pdf}}%
+    \put(0.59023764,0.30657661){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string grade\end{tabular}}}}%
+    \put(0.59023764,0.28208336){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string specialite\end{tabular}}}}%
+    \put(0.59023764,0.25759023){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string departement\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{class_users_svg-tex.pdf}}%
+    \put(0.59023764,0.22282093){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+consulterConvocations()\end{tabular}}}}%
+    \put(0.59023764,0.1983278){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+getDisponibilites()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{class_users_svg-tex.pdf}}%
+    \put(0.91072575,0.32010764){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Etudiant\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{class_users_svg-tex.pdf}}%
+    \put(0.86705202,0.2821707){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string cne\end{tabular}}}}%
+    \put(0.86705202,0.25767745){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string filiere\end{tabular}}}}%
+    \put(0.86705202,0.23318432){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string niveau\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{class_users_svg-tex.pdf}}%
+    \put(0.66255618,0.08375568){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}MembreJury\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{class_users_svg-tex.pdf}}%
+    \put(0.62170841,0.04581878){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+JuryRole roleJury\end{tabular}}}}%
+    \put(0.62170841,0.02132553){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+boolean present\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=19]{class_users_svg-tex.pdf}}%
+  \end{picture}%
+\endgroup%

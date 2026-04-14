@@ -1,0 +1,58 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  class {
+    BackgroundColor #F2F4F7
+    HeaderBackgroundColor #003366
+    FontColor #000000
+    HeaderFontColor #FFFFFF
+    Padding 6
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+enum ProjetType {
+    PFE
+    MEMOIRE
+    STAGE
+}
+
+class Projet {
+    + int id
+    + string titre
+    + string description
+    + ProjetType type
+    + string statut
+}
+
+class Etudiant {
+
+}
+
+class Enseignant {
+
+}
+
+class Soutenance {
+    + int id
+    + date datePassage
+    + time heureDebut
+    + int dureeMinutes
+    + SoutenanceStatus statut
+    + planifier()
+    + annuler()
+}
+
+Etudiant --> Projet : possède
+Enseignant --> Projet : encadre
+Projet --> Soutenance : fait l'objet de
+
+@enduml

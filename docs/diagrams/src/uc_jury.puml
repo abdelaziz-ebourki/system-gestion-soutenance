@@ -24,11 +24,11 @@ rectangle "Module Jury" {
     usecase "Consulter planning" as UC1
     usecase "Consulter convocation" as UC2
     usecase "Déclarer indisponibilité" as UC3
-    usecase "Consulter informations étudiant" as UC4
-    usecase "Saisir évaluation" as UC5
+    usecase "Saisir évaluation" as UC4
+    usecase "Générer fiches d'évaluation" as UC5
+
     usecase "Valider / modifier évaluation" as UC6
-    usecase "Générer fiches d'évaluation" as UC7
-    usecase "S'authentifier" as Auth
+    usecase "Consulter informations étudiant" as UC7
 }
 
 Jury --> UC1
@@ -36,15 +36,7 @@ Jury --> UC2
 Jury --> UC3
 Jury --> UC4
 Jury --> UC5
-Jury --> UC7
 
-UC6 ..> UC5 : <<extend>>
-UC5 ..> UC4 : <<include>>
-
-UC1 ..> Auth : <<include>>
-UC2 ..> Auth : <<include>>
-UC3 ..> Auth : <<include>>
-UC4 ..> Auth : <<include>>
-UC5 ..> Auth : <<include>>
-UC7 ..> Auth : <<include>>
+UC6 ..> UC4 : <<extend>>
+UC4 ..> UC7 : <<include>>
 @enduml

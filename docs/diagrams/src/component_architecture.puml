@@ -1,0 +1,64 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  node {
+    BackgroundColor #F2F4F7
+    LineColor #003366
+  }
+  component {
+    BackgroundColor #F2F4F7
+    LineColor #003366
+    Padding 6
+  }
+  database {
+    BackgroundColor #F2F4F7
+    LineColor #003366
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+package "Couche Frontend (React)" as Frontend {
+    component "Module Auth / Login" as F1
+    component "Tableau de bord" as F2
+    component "Gestion Étudiants & Projets" as F3
+    component "Planification & Jurys" as F4
+    component "Module Évaluation" as F5
+    component "Module Documents / Exports" as F6
+}
+
+package "Couche Backend (Spring Boot / Java)" as Backend {
+    component "API REST (Controllers)" as B1
+    package "Services Métier" as Services {
+        component "Security Service" as S1
+        component "Planning Service" as S2
+        component "Conflict Detection Service" as S3
+        component "Jury Management Service" as S4
+        component "Evaluation Service" as S5
+        component "Document Service" as S6
+    }
+}
+
+database "Base de données (MySQL)" as DB {
+    [Table utilisateurs] as T1
+    [Table étudiants] as T2
+    [Table enseignants] as T3
+    [Table projets] as T4
+    [Table salles] as T5
+    [Table soutenances] as T6
+    [Table évaluations] as T7
+    [Table convocations] as T8
+}
+
+Frontend --(0-- B1 : HTTP/REST
+B1 --> Services
+Services --> DB
+
+@enduml

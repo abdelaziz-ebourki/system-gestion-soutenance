@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{715.98449707bp}%
+    \setlength{\unitlength}{513.48449707bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,66 +50,44 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.84638704)%
+  \begin{picture}(1,1.15043103)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{uc_coordination_svg-tex.pdf}}%
-    \put(0.49352956,0.82809136){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Coordination}\end{tabular}}}}%
+    \put(0.49097784,1.12492018){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\textbf{Module Coordination}\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{uc_coordination_svg-tex.pdf}}%
-    \put(0.19907873,0.77503735){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Assigner jurys\end{tabular}}}}%
+    \put(0.30533987,1.06116782){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Assigner jurys\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=3]{uc_coordination_svg-tex.pdf}}%
-    \put(0.51581405,0.36098439){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter rapports\end{tabular}}}}%
+    \put(0.2825107,0.95414318){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter rapports\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=4]{uc_coordination_svg-tex.pdf}}%
-    \put(0.19090356,0.699471){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Valider planning\end{tabular}}}}%
+    \put(0.29394069,0.84625514){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Valider planning\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=5]{uc_coordination_svg-tex.pdf}}%
-    \put(0.50654538,0.28039911){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Planifier soutenances\end{tabular}}}}%
+    \put(0.2695868,0.73515348){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Planifier soutenances\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=6]{uc_coordination_svg-tex.pdf}}%
-    \put(0.5059239,0.19860827){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Générer convocations\end{tabular}}}}%
+    \put(0.26872021,0.62110724){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Générer convocations\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=7]{uc_coordination_svg-tex.pdf}}%
-    \put(0.49028774,0.11374478){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Générer planning général\end{tabular}}}}%
+    \put(0.2469177,0.50277662){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Générer planning général\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=8]{uc_coordination_svg-tex.pdf}}%
-    \put(0.52696183,0.5181856){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer étudiants\end{tabular}}}}%
+    \put(0.76252842,0.35101611){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer étudiants\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=9]{uc_coordination_svg-tex.pdf}}%
-    \put(0.19754518,0.62397904){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Importer listes\end{tabular}}}}%
+    \put(0.30320153,0.39044569){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Importer listes\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=10]{uc_coordination_svg-tex.pdf}}%
-    \put(0.51441896,0.440874){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter planning\end{tabular}}}}%
+    \put(0.74503909,0.20377918){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Consulter planning\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=11]{uc_coordination_svg-tex.pdf}}%
-    \put(0.18131121,0.54667238){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Rechercher / Filtrer\end{tabular}}}}%
+    \put(0.28056546,0.28265206){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Rechercher / Filtrer\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=12]{uc_coordination_svg-tex.pdf}}%
-    \put(0.52401133,0.03220795){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer les projets\end{tabular}}}}%
+    \put(0.29394069,0.17291446){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Gérer les projets\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=13]{uc_coordination_svg-tex.pdf}}%
-    \put(0.52913565,0.68818054){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Vérifier conflits\end{tabular}}}}%
+    \put(0.76555947,0.95320326){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Vérifier conflits\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=14]{uc_coordination_svg-tex.pdf}}%
-    \put(0.85304799,0.40090724){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}S'authentifier\end{tabular}}}}%
+    \put(-0.00124734,0.57573124){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Coordinateur\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=15]{uc_coordination_svg-tex.pdf}}%
-    \put(-0.00089456,0.28757688){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Coordinateur\end{tabular}}}}%
+    \put(0.58518711,0.38595278){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=16]{uc_coordination_svg-tex.pdf}}%
-    \put(0.37987486,0.59247407){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
+    \put(0.58518711,0.26034042){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=17]{uc_coordination_svg-tex.pdf}}%
-    \put(0.37987486,0.51495842){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«extend»\end{tabular}}}}%
+    \put(0.58445681,1.02569941){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=18]{uc_coordination_svg-tex.pdf}}%
-    \put(0.37935111,0.75064788){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=19]{uc_coordination_svg-tex.pdf}}%
-    \put(0.37935111,0.69722494){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=20]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.66579968){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=21]{uc_coordination_svg-tex.pdf}}%
-    \put(0.55585633,0.80407083){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=22]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.37668727){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=23]{uc_coordination_svg-tex.pdf}}%
-    \put(0.55585633,0.63856445){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=24]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.34107198){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=25]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.2918391){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=26]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.23003608){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=27]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.48143814){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=28]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.43115773){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
-    \put(0,0){\includegraphics[width=\unitlength,page=29]{uc_coordination_svg-tex.pdf}}%
-    \put(0.73236154,0.15566297){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
+    \put(0.58445681,0.9249174){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}«include»\end{tabular}}}}%
   \end{picture}%
 \endgroup%

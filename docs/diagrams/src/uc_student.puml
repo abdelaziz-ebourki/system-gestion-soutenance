@@ -24,14 +24,10 @@ rectangle "Module Étudiant" {
     usecase "Télécharger convocation" as UC1
     usecase "Consulter infos de soutenance" as UC2
     usecase "Consulter résultats" as UC3
-    usecase "S'authentifier" as Auth
 }
 
 Student --> UC1
-Student --> UC2
 Student --> UC3
 
 UC1 ..> UC2 : <<include>>
-UC2 ..> Auth : <<include>>
-UC3 ..> Auth : <<include>>
 @enduml

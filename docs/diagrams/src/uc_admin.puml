@@ -25,17 +25,11 @@ rectangle "Module Administration" {
     usecase "Gérer comptes utilisateurs" as UC1
     usecase "Gérer salles" as UC2
     usecase "Configurer paramètres système" as UC4
-    usecase "Gérer enseignants" as UC5
-    usecase "S'authentifier" as Auth
+    usecase "Gérer les sessions" as UC5
 }
 
 Admin --> UC1
 Admin --> UC2
 Admin --> UC4
 Admin --> UC5
-
-UC1 ..> Auth : <<include>>
-UC2 ..> Auth : <<include>>
-UC4 ..> Auth : <<include>>
-UC5 ..> Auth : <<include>>
 @enduml

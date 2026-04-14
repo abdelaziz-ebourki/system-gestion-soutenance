@@ -1,0 +1,132 @@
+%% Creator: Inkscape 1.4.3 (1:1.4.3+202512261035+0d15f75042), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'class_planning_svg-tex.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{654.75bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.82749997)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{class_planning_svg-tex.pdf}}%
+    \put(0.03379152,0.8023774){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}SoutenanceStatus\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{class_planning_svg-tex.pdf}}%
+    \put(0.00744559,0.76854704){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+CREEE\end{tabular}}}}%
+    \put(0.00744559,0.74670512){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+PLANIFIEE\end{tabular}}}}%
+    \put(0.00744559,0.72486331){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+JURY_AFFECTE\end{tabular}}}}%
+    \put(0.00744559,0.7030215){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+CONVOQUEE\end{tabular}}}}%
+    \put(0.00744559,0.6811797){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+EN_COURS\end{tabular}}}}%
+    \put(0.00744559,0.65933789){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+TERMINEE\end{tabular}}}}%
+    \put(0.00744559,0.63749607){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+EVALUEE\end{tabular}}}}%
+    \put(0.00744559,0.61565414){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+CLOTUREE\end{tabular}}}}%
+    \put(0.00744559,0.59381235){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ANNULEE\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{class_planning_svg-tex.pdf}}%
+    \put(0.29925544,0.73651257){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}DecisionEnum\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{class_planning_svg-tex.pdf}}%
+    \put(0.22279496,0.70268222){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ADMIS\end{tabular}}}}%
+    \put(0.22279496,0.68084028){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+ADMIS_AVEC_CORRECTIONS\end{tabular}}}}%
+    \put(0.22279496,0.65899847){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+AJOURNE\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{class_planning_svg-tex.pdf}}%
+    \put(0.57474227,0.45988026){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Soutenance\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{class_planning_svg-tex.pdf}}%
+    \put(0.50286369,0.4260499){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int id\end{tabular}}}}%
+    \put(0.50286369,0.40420798){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+date datePassage\end{tabular}}}}%
+    \put(0.50286369,0.38236617){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+time heureDebut\end{tabular}}}}%
+    \put(0.50286369,0.36052436){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int dureeMinutes\end{tabular}}}}%
+    \put(0.50286369,0.33868254){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+SoutenanceStatus statut\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{class_planning_svg-tex.pdf}}%
+    \put(0.50286369,0.30767693){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+planifier()\end{tabular}}}}%
+    \put(0.50286369,0.28583512){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+annuler()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{class_planning_svg-tex.pdf}}%
+    \put(0.30040092,0.16205666){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Salle\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{class_planning_svg-tex.pdf}}%
+    \put(0.21477663,0.12822633){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int id\end{tabular}}}}%
+    \put(0.21477663,0.10638442){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string nom\end{tabular}}}}%
+    \put(0.21477663,0.08454257){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string batiment\end{tabular}}}}%
+    \put(0.21477663,0.06270079){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int capacite\end{tabular}}}}%
+    \put(0.21477663,0.04085895){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+boolean disponible\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{class_planning_svg-tex.pdf}}%
+    \put(0.21477663,0.00985337){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+verifierDisponibilite()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{class_planning_svg-tex.pdf}}%
+    \put(0.46563574,0.09676456){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}MembreJury\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{class_planning_svg-tex.pdf}}%
+    \put(0.68413517,0.15117464){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Evaluation\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{class_planning_svg-tex.pdf}}%
+    \put(0.61168385,0.11734432){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int id\end{tabular}}}}%
+    \put(0.61168385,0.0955024){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+float note\end{tabular}}}}%
+    \put(0.61168385,0.07366055){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string observations\end{tabular}}}}%
+    \put(0.61168385,0.05181878){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+DecisionEnum decision\end{tabular}}}}%
+    \put(0.61168385,0.02997693){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+boolean validee\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{class_planning_svg-tex.pdf}}%
+    \put(0.55504008,0.7582766){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}PlanningSession\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{class_planning_svg-tex.pdf}}%
+    \put(0.50286369,0.72444625){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int id\end{tabular}}}}%
+    \put(0.50286369,0.70260432){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string libelle\end{tabular}}}}%
+    \put(0.50286369,0.6807625){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+date dateDebut\end{tabular}}}}%
+    \put(0.50286369,0.65892071){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+date dateFin\end{tabular}}}}%
+    \put(0.50286369,0.6370789){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+SoutenanceStatus statut\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{class_planning_svg-tex.pdf}}%
+    \put(0.89226806,0.14029263){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Convocation\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{class_planning_svg-tex.pdf}}%
+    \put(0.85395189,0.1064623){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+int id\end{tabular}}}}%
+    \put(0.85395189,0.08462039){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+string type\end{tabular}}}}%
+    \put(0.85395189,0.06277854){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+boolean envoyee\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{class_planning_svg-tex.pdf}}%
+    \put(0.85395189,0.03177296){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+generer()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=19]{class_planning_svg-tex.pdf}}%
+    \put(0.60252005,0.52349424){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}contient\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=20]{class_planning_svg-tex.pdf}}%
+    \put(0.42955326,0.22567067){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}se déroule dans\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=21]{class_planning_svg-tex.pdf}}%
+    \put(0.55097365,0.22567067){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}composée de\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=22]{class_planning_svg-tex.pdf}}%
+    \put(0.66208477,0.22567067){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}possède\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=23]{class_planning_svg-tex.pdf}}%
+    \put(0.78579611,0.22567067){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}génère\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

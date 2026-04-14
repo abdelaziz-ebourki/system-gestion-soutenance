@@ -1,0 +1,92 @@
+@startuml
+<style>
+  root {
+    FontColor #000000
+    LineColor #003366
+    LineThickness 1
+  }
+  class {
+    BackgroundColor #F2F4F7
+    HeaderBackgroundColor #003366
+    FontColor #000000
+    HeaderFontColor #FFFFFF
+    Padding 6
+  }
+  arrow {
+    LineColor #003366
+  }
+</style>
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+enum SoutenanceStatus {
+    CREEE
+    PLANIFIEE
+    JURY_AFFECTE
+    CONVOQUEE
+    EN_COURS
+    TERMINEE
+    EVALUEE
+    CLOTUREE
+    ANNULEE
+}
+
+enum DecisionEnum {
+    ADMIS
+    ADMIS_AVEC_CORRECTIONS
+    AJOURNE
+}
+
+class Soutenance {
+    + int id
+    + date datePassage
+    + time heureDebut
+    + int dureeMinutes
+    + SoutenanceStatus statut
+    + planifier()
+    + annuler()
+}
+
+class Salle {
+    + int id
+    + string nom
+    + string batiment
+    + int capacite
+    + boolean disponible
+    + verifierDisponibilite()
+}
+
+class MembreJury {
+
+}
+
+class Evaluation {
+    + int id
+    + float note
+    + string observations
+    + DecisionEnum decision
+    + boolean validee
+}
+
+class PlanningSession {
+    + int id
+    + string libelle
+    + date dateDebut
+    + date dateFin
+    + SoutenanceStatus statut
+}
+
+class Convocation {
+    + int id
+    + string type
+    + boolean envoyee
+    + generer()
+}
+
+PlanningSession --> Soutenance : contient
+Soutenance --> Salle : se déroule dans
+Soutenance --> MembreJury : composée de
+Soutenance --> Evaluation : possède
+Soutenance --> Convocation : génère
+
+@enduml
