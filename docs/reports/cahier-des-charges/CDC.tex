@@ -316,7 +316,7 @@ de droits d'accès et de fonctionnalités spécifiques, comme le résume la Figu
 
 \begin{figure}[H]
     \centering
-    \pumlsvg[\textwidth]{uc_overview}
+    \pumlsvg[0.6\textwidth]{uc_overview}
     \caption{Acteurs du système}
     \label{fig:acteurs}
 \end{figure}
@@ -452,16 +452,7 @@ préoccupations :
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[node distance=1.8cm]
-        \node (front) [layer] {Couche Frontend\\\small Interface utilisateur};
-        \node (back)  [layer, below=of front]
-        {Couche Backend\\\small Logique métier};
-        \node (db)    [layer, below=of back]
-        {Couche Base de données\\\small Persistance};
-
-        \draw [biArrow, ultra thick] (front) -- (back);
-        \draw [biArrow, ultra thick] (back)  -- (db);
-    \end{tikzpicture}
+    \pumlsvg[0.3\textwidth]{arch_layers}
     \caption{Architecture trois couches}
     \label{fig:architecture}
 \end{figure}
