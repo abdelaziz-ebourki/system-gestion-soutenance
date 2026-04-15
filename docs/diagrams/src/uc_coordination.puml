@@ -1,21 +1,5 @@
 @startuml
-<style>
-  root {
-    FontColor #000000
-    LineColor #003366
-    LineThickness 1
-  }
-  actor {
-    BackgroundColor #F2F4F7
-  }
-  usecase {
-    BackgroundColor #F2F4F7
-  }
-  arrow {
-    LineColor #003366
-  }
-</style>
-skinparam shadowing false
+!include style.puml
 left to right direction
 actor "Coordinateur" as Coord
 

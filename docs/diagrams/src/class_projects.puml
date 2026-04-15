@@ -1,23 +1,5 @@
 @startuml
-<style>
-  root {
-    FontColor #000000
-    LineColor #003366
-    LineThickness 1
-  }
-  class {
-    BackgroundColor #F2F4F7
-    HeaderBackgroundColor #003366
-    FontColor #000000
-    HeaderFontColor #FFFFFF
-    Padding 6
-  }
-  arrow {
-    LineColor #003366
-  }
-</style>
-skinparam shadowing false
-skinparam classAttributeIconSize 0
+!include style.puml
 
 enum ProjetType {
     PFE

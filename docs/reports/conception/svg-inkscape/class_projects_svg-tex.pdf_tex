@@ -56,9 +56,9 @@
     \put(0,0){\includegraphics[width=\unitlength,page=1]{class_projects_svg-tex.pdf}}%
     \put(0.07940781,1.52501589){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}ProjetType\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{class_projects_svg-tex.pdf}}%
-    \put(0.01749664,1.44551683){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+PFE\end{tabular}}}}%
-    \put(0.01749664,1.39418979){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+MEMOIRE\end{tabular}}}}%
-    \put(0.01749664,1.342863){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}+STAGE\end{tabular}}}}%
+    \put(0.01749664,1.44551683){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}PFE\end{tabular}}}}%
+    \put(0.01749664,1.39418979){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}MEMOIRE\end{tabular}}}}%
+    \put(0.01749664,1.342863){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}STAGE\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=3]{class_projects_svg-tex.pdf}}%
     \put(0.66419919,1.0297265){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Projet\end{tabular}}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=4]{class_projects_svg-tex.pdf}}%

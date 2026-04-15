@@ -68,6 +68,11 @@
     layer/.style={base_node, rectangle, text width=7cm, minimum height=1.2cm, font=\bfseries}
 }
 
+% --- Diagrams ---
+\newcommand{\pumlsvg}[2][0.8\textwidth]{
+    \includesvg[width=#1, inkscapelatex=false]{../../diagrams/svg/#2.svg}
+}
+
 % --- Project Boxes (Modern Flat Style) ---
 \newtcolorbox{projectbox}[1]{
     enhanced,

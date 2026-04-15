@@ -1,29 +1,5 @@
 @startuml
-<style>
-  root {
-    FontColor #000000
-    LineColor #003366
-    LineThickness 1
-  }
-  node {
-    BackgroundColor #F2F4F7
-    LineColor #003366
-  }
-  component {
-    BackgroundColor #F2F4F7
-    LineColor #003366
-    Padding 6
-  }
-  database {
-    BackgroundColor #F2F4F7
-    LineColor #003366
-  }
-  arrow {
-    LineColor #003366
-  }
-</style>
-skinparam shadowing false
-skinparam packageStyle rectangle
+!include style.puml
 
 package "Couche Frontend (React)" as Frontend {
     component "Module Auth / Login" as F1

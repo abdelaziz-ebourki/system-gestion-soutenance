@@ -1,0 +1,19 @@
+@startuml
+!include style.puml
+
+start
+:Collecte des données;
+:Création du planning initial;
+repeat
+  :Envoi des disponibilités aux enseignants;
+  :Réception des réponses;
+if (Disponibilités compatibles ?) then (Oui)
+  break
+else (Non)
+  :Modification du planning;
+  :Nouvel envoi d'e-mails;
+endif
+repeat while (En attente de confirmation)
+:Affectation des jurys;
+stop
+@enduml

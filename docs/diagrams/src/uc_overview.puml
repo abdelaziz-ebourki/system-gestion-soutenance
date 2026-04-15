@@ -1,26 +1,13 @@
 @startuml
-<style>
-  root {
-    FontColor #000000
-    LineColor #003366
-    LineThickness 1
-  }
-  actor {
+!include style.puml
+
+skinparam rectangle {
+    FontSize 18
     BackgroundColor #F2F4F7
-  }
-  usecase {
-    BackgroundColor #F2F4F7
-  }
-  arrow {
-    LineColor #003366
-  }
-  rectangle {
-    BackgroundColor #F2F4F7
-  }
-</style>
-skinparam shadowing false
-skinparam actorStyle rectangle
-skinparam packageStyle rectangle
+    BorderColor #003366
+    BorderStyle dashed
+}
+
 left to right direction
 
 actor "Administrateur" as Admin
@@ -28,24 +15,12 @@ actor "Coordinateur" as Coord
 actor "Enseignant / Membre de jury" as Jury
 actor "Étudiant" as Student
 
-rectangle "Système de gestion des soutenances" {
-    rectangle "Module Administration" as M1 {
-        usecase "Gérer le système" as UC_Admin
-    }
-    rectangle "Module Coordination" as M2 {
-        usecase "Gérer les soutenances" as UC_Coord
-    }
-    rectangle "Module Jury" as M3 {
-        usecase "Évaluer les étudiants" as UC_Jury
-    }
-    rectangle "Module Étudiant" as M4 {
-        usecase "Consulter les informations" as UC_Student
-    }
+rectangle "Système de gestion des soutenances" as System {
 }
-
-Admin --> UC_Admin
-Coord --> UC_Coord
-Jury --> UC_Jury
-Student --> UC_Student
+ 
+Admin --> System
+Coord --> System
+Jury --> System
+Student --> System
 
 @enduml

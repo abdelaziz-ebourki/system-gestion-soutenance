@@ -146,26 +146,7 @@ en deux grandes phases opérationnelles.
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[node distance=1.2cm]
-        \node (A) [block] {Collecte des données};
-        \node (B) [block, below=of A] {Création du planning initial};
-        \node (C) [block, below=of B] {Envoi des disponibilités aux enseignants};
-        \node (D) [block, below=of C] {Réception des réponses};
-        \node (E) [decision, below=of D, yshift=-0.5cm]
-        {Disponibilités compatibles ?};
-        \node (G) [block, right=of E, xshift=1cm] {Modification du planning};
-        \node (H) [block, above=of G] {Nouvel envoi d'e-mails};
-        \node (F) [block, below=of E, yshift=-0.5cm] {Affectation des jurys};
-
-        \draw [arrow] (A) -- (B);
-        \draw [arrow] (B) -- (C);
-        \draw [arrow] (C) -- (D);
-        \draw [arrow] (D) -- (E);
-        \draw [arrow] (E) -- node[anchor=south] {Non} (G);
-        \draw [arrow] (G) -- (H);
-        \draw [arrow] (H) |- (C);
-        \draw [arrow] (E) -- node[anchor=east] {Oui} (F);
-    \end{tikzpicture}
+    \pumlsvg[0.6\textwidth]{process_planification}
     \caption{Processus actuel -- Phase~1 : Planification}
     \label{fig:processus_actuel_phase1}
 \end{figure}
@@ -179,33 +160,7 @@ un planning acceptable.
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[node distance=1cm]
-        \node (F)  [block] {Affectation des jurys};
-        \node (I)  [block, below=of F] {Vérification des conflits};
-        \node (J)  [decision, below=of I, yshift=-0.5cm]
-        {Conflits détectés ?};
-        \node (K)  [block, right=of J, xshift=1cm] {Correction manuelle};
-        \node (L)  [block, above=of K] {Mise à jour du planning};
-        \node (M)  [block, below=of J, yshift=-0.5cm]
-        {Validation du planning final};
-        \node (N)  [block, below=of M] {Impression et diffusion};
-        \node (O)  [block, below=of N] {Déroulement des soutenances};
-        \node (P)  [block, below=of O] {Évaluation des étudiants};
-        \node (Q)  [block, below=of P] {Collecte des notes};
-        \node (R)  [block, below=of Q] {Archivage manuel};
-
-        \draw [arrow] (F) -- (I);
-        \draw [arrow] (I) -- (J);
-        \draw [arrow] (J) -- node[anchor=south] {Oui} (K);
-        \draw [arrow] (K) -- (L);
-        \draw [arrow] (L) |- (I);
-        \draw [arrow] (J) -- node[anchor=east] {Non} (M);
-        \draw [arrow] (M) -- (N);
-        \draw [arrow] (N) -- (O);
-        \draw [arrow] (O) -- (P);
-        \draw [arrow] (P) -- (Q);
-        \draw [arrow] (Q) -- (R);
-    \end{tikzpicture}
+    \pumlsvg[0.6\textwidth]{process_execution}
     \caption{Processus actuel -- Phase~2 : Exécution}
     \label{fig:processus_actuel_phase2}
 \end{figure}
@@ -361,9 +316,7 @@ de droits d'accès et de fonctionnalités spécifiques, comme le résume la Figu
 
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{
-        \includesvg{../../diagrams/svg/uc_overview.svg}
-    }
+    \pumlsvg[\textwidth]{uc_overview}
     \caption{Acteurs du système}
     \label{fig:acteurs}
 \end{figure}
