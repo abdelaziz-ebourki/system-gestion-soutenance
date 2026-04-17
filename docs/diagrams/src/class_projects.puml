@@ -16,11 +16,17 @@ class Projet {
 }
 
 class Etudiant {
-
+    + string cne
+    + string filiere
+    + string niveau
 }
 
 class Enseignant {
-
+    + string grade
+    + string specialite
+    + string departement
+    + consulterConvocations()
+    + getDisponibilites()
 }
 
 class Soutenance {
@@ -33,8 +39,8 @@ class Soutenance {
     + annuler()
 }
 
-Etudiant --> Projet : possède
-Enseignant --> Projet : encadre
-Projet --> Soutenance : fait l'objet de
+Etudiant "1..*" -- "1" Projet : possède
+Enseignant "1..*" -- "*" Projet : encadre
+Projet "1" -- "1" Soutenance : fait l'objet de
 
 @enduml

@@ -8,10 +8,12 @@ actor "Coordinateur" as Coord
 actor "Enseignant / Membre de jury" as Jury
 actor "Étudiant" as Student
 
+usecase "S'authentifier" as auth
+
 Admin --|> User
 Coord --|> User
 Jury --|> User
 Student --|> User
 
-User -> (S'authentifier)
+User -> auth
 @enduml

@@ -39,7 +39,8 @@ class Salle {
 }
 
 class MembreJury {
-
+    + JuryRole roleJury
+    + boolean present
 }
 
 class Evaluation {
@@ -65,10 +66,10 @@ class Convocation {
     + generer()
 }
 
-PlanningSession --> Soutenance : contient
-Soutenance --> Salle : se déroule dans
-Soutenance --> MembreJury : composée de
-Soutenance --> Evaluation : possède
-Soutenance --> Convocation : génère
+PlanningSession "1" *-- "*" Soutenance : contient
+Soutenance "*" -- "1" Salle : se déroule dans
+Soutenance "1" -- "3..*" MembreJury : composée de
+Soutenance "1" -- "1" Evaluation : possède
+Soutenance "1" -- "1..*" Convocation : génère
 
 @enduml
