@@ -8,7 +8,7 @@ entity "Import Service" as Service
 database "Base de données" as DB
 
 Coord -> Front : Sélectionne fichier (CSV/Excel)
-Front -> Controller : POST /api/import/students (MultipartFile)
+Front -> Controller : POST /api/import/students (file)
 activate Controller
 
 Controller -> Service : importerEtudiants(file)
@@ -37,7 +37,8 @@ Service --> Controller : Rapport d'import (Succès/Échecs)
 deactivate Service
 
 Controller --> Front : 200 OK (Summary JSON)
-Front --> Coord : Afficher bilan de l'import
 deactivate Controller
+
+Front --> Coord : Afficher bilan de l'import
 
 @enduml

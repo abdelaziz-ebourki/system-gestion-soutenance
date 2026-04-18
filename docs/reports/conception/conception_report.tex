@@ -86,7 +86,7 @@
         \addlinespace
         Gérer salles                  & Administration du catalogue des salles, incluant la saisie des capacités et des disponibilités. \\
         \addlinespace
-        Configurer paramètres système & Définition des paramètres globaux de l'application et supervision du fonctionnement.            \\
+        Configurer le système         & Configuration des sessions de soutenance, des périodes et des paramètres globaux.               \\
         \addlinespace
         S'authentifier                & Accès sécurisé à l'application via un identifiant et un mot de passe haché.                     \\
         \bottomrule
@@ -311,7 +311,7 @@ Ce flux illustre la production automatisée des convocations, où le service ré
 
 \begin{figure}[H]
     \centering
-    \pumlsvg[0.9\textwidth]{seq_pdf_generation}
+    \pumlsvg[\textwidth]{seq_pdf_generation}
     \caption{Diagramme de séquence : Génération PDF}
 \end{figure}
 
@@ -322,24 +322,6 @@ Le système supporte l'importation de listes d'étudiants via des fichiers CSV o
     \centering
     \pumlsvg[\textwidth]{seq_import_data}
     \caption{Diagramme de séquence : Import massif de données}
-\end{figure}
-
-\subsection{Gestion des indisponibilités}
-Les enseignants peuvent déclarer leurs plages d'indisponibilité, données qui seront exploitées par le moteur de détection de conflits lors de la planification.
-
-\begin{figure}[H]
-    \centering
-    \pumlsvg[0.8\textwidth]{seq_availability}
-    \caption{Diagramme de séquence : Déclaration d'indisponibilité}
-\end{figure}
-
-\subsection{Consultation et filtrage du planning}
-L'interface de consultation permet une recherche multicritère performante utilisant des requêtes dynamiques vers le modèle de données.
-
-\begin{figure}[H]
-    \centering
-    \pumlsvg[0.9\textwidth]{seq_filter_planning}
-    \caption{Diagramme de séquence : Consultation avec filtres}
 \end{figure}
 
 \subsection{Workflow de validation finale}
@@ -356,7 +338,7 @@ Le processus de réinitialisation de mot de passe assure la sécurité via l'env
 
 \begin{figure}[H]
     \centering
-    \pumlsvg[0.9\textwidth]{seq_reset_password}
+    \pumlsvg[\textwidth]{seq_reset_password}
     \caption{Diagramme de séquence : Réinitialisation de mot de passe}
 \end{figure}
 

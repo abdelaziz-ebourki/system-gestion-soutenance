@@ -29,7 +29,8 @@ Service --> Controller : Document prêt
 deactivate Service
 
 Controller --> Front : 200 OK (Application/pdf)
-Front --> Coord : Téléchargement automatique
 deactivate Controller
+
+Front --> Coord : Téléchargement automatique
 
 @enduml

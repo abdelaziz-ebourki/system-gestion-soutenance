@@ -56,7 +56,7 @@ class PlanningSession {
     + string libelle
     + date dateDebut
     + date dateFin
-    + SoutenanceStatus statut
+    + SessionStatus statut
 }
 
 class Convocation {

@@ -36,7 +36,7 @@ Notify -> DB : Récupérer emails (Étudiants, Jurys)
 activate DB
 DB --> Notify : Liste emails
 deactivate DB
-Notify -> Notify : Envoi e-mails (SMTP)
+Notify -> Notify : Envoi e-mails 
 Notify --> Service : Notifications envoyées
 deactivate Notify
 
@@ -44,7 +44,8 @@ Service --> Controller : Session Validée
 deactivate Service
 
 Controller --> Front : 200 OK
-Front --> Coord : Afficher succès et verrouillage session
 deactivate Controller
+
+Front --> Coord : Afficher succès et verrouillage session
 
 @enduml

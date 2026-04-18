@@ -29,7 +29,8 @@ Service --> Controller : Évaluation enregistrée
 deactivate Service
 
 Controller --> Front : 201 Created
-Front --> Jury : Afficher récapitulatif et succès
 deactivate Controller
+
+Front --> Jury : Afficher récapitulatif et succès
 
 @enduml
