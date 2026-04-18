@@ -1,0 +1,35 @@
+@startuml
+!theme pfe from .
+
+actor "Coordinateur" as Coord
+boundary "Interface Documents\n(Vue)" as Front
+control "Controller" as Controller
+entity "Document Service" as Service
+entity "PDF Generator" as PDF
+database "Base de données\n(Model)" as DB
+
+Coord -> Front : Sélectionne soutenances
+Front -> Controller : GET /api/documents/convocations (ids)
+activate Controller
+
+Controller -> Service : genererConvocations(ids)
+activate Service
+
+Service -> DB : Récupérer infos (Étudiant, Jury, Salle, Date)
+activate DB
+DB --> Service : Données complètes
+deactivate DB
+
+Service -> PDF : createPDF(template, data)
+activate PDF
+PDF --> Service : Flux binaire (byte[])
+deactivate PDF
+
+Service --> Controller : Document prêt
+deactivate Service
+
+Controller --> Front : 200 OK (Application/pdf)
+Front --> Coord : Téléchargement automatique
+deactivate Controller
+
+@enduml

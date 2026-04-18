@@ -1,5 +1,5 @@
 @startuml
-!include style.puml
+!theme pfe from .
 left to right direction
 
 actor "Enseignant / Membre de jury" as Jury
@@ -11,16 +11,19 @@ rectangle "Module Jury" {
     usecase "Saisir évaluation" as UC4
     usecase "Générer fiches d'évaluation" as UC5
 
-    usecase "Valider / modifier évaluation" as UC6
     usecase "Consulter informations étudiant" as UC7
+    usecase "Valider / modifier évaluation" as UC6
+
+    UC6 -[hidden]up- UC5
+    UC6 -[hidden]left- UC4
+
+    UC6 ..> UC4 : <<extend>>
+    UC4 ..> UC7 : <<include>>
 }
 
 Jury --> UC1
 Jury --> UC2
 Jury --> UC3
-Jury --> UC4
 Jury --> UC5
-
-UC6 ..> UC4 : <<extend>>
-UC4 ..> UC7 : <<include>>
+Jury --> UC4
 @enduml

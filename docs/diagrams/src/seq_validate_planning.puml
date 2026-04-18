@@ -1,0 +1,40 @@
+@startuml
+!theme pfe from .
+
+actor "Coordinateur" as Coord
+boundary "Tableau de bord\n(Vue)" as Front
+control "Controller" as Controller
+entity "Planning Service" as Service
+entity "Notification Service" as Notify
+database "Base de données\n(Model)" as DB
+
+Coord -> Front : Clique sur "Valider Session"
+Front -> Controller : POST /api/planning/validate-session (sessionId)
+activate Controller
+
+Controller -> Service : validerSession(id)
+activate Service
+
+Service -> DB : Vérifier conformité session
+activate DB
+DB --> Service : OK
+deactivate DB
+
+Service -> DB : Mise à jour statuts (PLANIFIEE -> CONVOQUEE)
+Service -> DB : Clôturer modifications
+
+Service -> Notify : envoyerNotificationsMassives(sessionId)
+activate Notify
+Notify -> DB : Récupérer emails (Étudiants, Jurys)
+Notify -> Notify : Envoi e-mails (SMTP)
+Notify --> Service : Notifications envoyées
+deactivate Notify
+
+Service --> Controller : Session Validée
+deactivate Service
+
+Controller --> Front : 200 OK
+Front --> Coord : Afficher succès et verrouillage session
+deactivate Controller
+
+@enduml

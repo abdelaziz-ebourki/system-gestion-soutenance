@@ -1,0 +1,47 @@
+@startuml
+!theme pfe from .
+
+actor "Coordinateur" as Coord
+boundary "Interface Jury\n(Vue)" as Front
+control "Controller" as Controller
+entity "Jury Service" as Service
+entity "Conflict Service" as Conflict
+database "Base de données\n(Model)" as DB
+
+Coord -> Front : Sélectionne soutenance et enseignants
+Front -> Controller : POST /api/jury/validate-assignment
+activate Controller
+
+Controller -> Service : validerAffectation(jury)
+activate Service
+
+Service -> Service : Vérifier RG5 (Encadrant != Président)
+
+loop pour chaque enseignant sélectionné
+    Service -> Conflict : vérifierDisponibilitéEnseignant(prof, date, heure)
+    activate Conflict
+    Conflict -> DB : Consulter planning enseignant
+    DB --> Conflict : Résultats
+    Conflict --> Service : Status (Libre/Occupé)
+    deactivate Conflict
+end
+
+alt Composition valide (RG4: 2 à 5 membres)
+    Service --> Controller : Validé
+    Controller --> Front : 200 OK (Prêt)
+    Coord -> Front : Valider l'affectation
+    Front -> Controller : POST /api/jury/assign
+    Controller -> Service : affecter(jury)
+    Service -> DB : Sauvegarder composition du jury
+    Service --> Controller : 200 OK
+    Controller --> Front : 200 OK
+    Front --> Coord : Afficher confirmation
+else Conflits ou règles non respectées
+    Service --> Controller : Erreur
+    deactivate Service
+    Controller --> Front : 400 Bad Request / 409 Conflict
+    deactivate Controller
+    Front --> Coord : Afficher erreurs
+end
+
+@enduml

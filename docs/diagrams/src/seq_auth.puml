@@ -1,0 +1,37 @@
+@startuml
+!theme pfe from .
+
+actor "Utilisateur" as User
+boundary "Interface React\n(Vue)" as Front
+control "Controller" as Back
+entity "Security Service" as SecService
+database "Base de données\n(Model)" as DB
+
+User -> Front : Saisit identifiants
+Front -> Back : POST /api/auth/login (email, password)
+activate Back
+
+Back -> SecService : authentifier(email, password)
+activate SecService
+
+SecService -> DB : Rechercher utilisateur par email
+activate DB
+DB --> SecService : Informations utilisateur + Hash MDP
+deactivate DB
+
+SecService -> SecService : Vérifier mot de passe (hachage)
+alt Succès
+    SecService -> SecService : Générer Token JWT
+    SecService --> Back : Token JWT + Infos
+    Back --> Front : 200 OK (JWT, Rôle, Infos)
+    Front -> Front : Stocker Token
+    Front --> User : Afficher Tableau de bord
+else Échec
+    SecService --> Back : Error
+    deactivate SecService
+    Back --> Front : 401 Unauthorized
+    deactivate Back
+    Front --> User : Afficher message d'erreur
+end
+
+@enduml

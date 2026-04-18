@@ -1,0 +1,28 @@
+@startuml
+!theme pfe from .
+
+actor "Enseignant" as Prof
+boundary "Calendrier\n(Vue)" as Front
+control "Controller" as Controller
+entity "Availability Service" as Service
+database "Base de données\n(Model)" as DB
+
+Prof -> Front : Sélectionne plages horaires
+Front -> Controller : POST /api/availability (ranges)
+activate Controller
+
+Controller -> Service : enregistrerIndisponibilites(profId, ranges)
+activate Service
+
+Service -> DB : Supprimer anciennes plages (si existantes)
+Service -> DB : Insérer nouvelles indisponibilités
+DB --> Service : OK
+
+Service --> Controller : Mis à jour
+deactivate Service
+
+Controller --> Front : 200 OK
+Front --> Prof : Afficher confirmation
+deactivate Controller
+
+@enduml

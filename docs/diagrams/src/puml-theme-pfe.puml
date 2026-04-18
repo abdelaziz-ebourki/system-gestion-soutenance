@@ -1,0 +1,123 @@
+!$THEME = "pfe"
+
+!$PRIMARY = "#003366"
+!$SECONDARY = "#F2F4F7"
+!$TEXT = "#000000"
+!$WHITE = "#FFFFFF"
+!$NOTE_BG = "#FEFFDD"
+
+<style>
+  root {
+    FontColor $TEXT
+    LineColor $PRIMARY
+    LineThickness 1
+    Margin 5
+  }
+  node {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+    LineThickness 1
+    RoundCorner 5
+    SeparatorColor $PRIMARY
+  }
+  class {
+    BackgroundColor $SECONDARY
+    HeaderBackgroundColor $PRIMARY
+    FontColor $TEXT
+    HeaderFontColor $WHITE
+    LineThickness 1
+    SeparatorColor $PRIMARY
+  }
+  actor {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  usecase {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  component {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+    Padding 10
+  }
+  database {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  boundary {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  control {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  entity {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  participant {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+  }
+  group {
+    LineColor $PRIMARY
+    FontColor $PRIMARY
+    Header {
+      BackgroundColor $PRIMARY
+      FontColor $WHITE
+    }
+    Body {
+      BackgroundColor $SECONDARY
+    }
+  }
+  lifeLine {
+    LineColor $PRIMARY
+    BackgroundColor $SECONDARY
+  }
+  rectangle {
+    LineColor $PRIMARY
+    RoundCorner 5
+  }
+  arrow {
+    LineColor $PRIMARY
+    FontColor $PRIMARY
+  }
+  package {
+    BackgroundColor white
+    LineColor $PRIMARY
+    LineThickness 1
+  }
+  note {
+    BackgroundColor $NOTE_BG
+    LineColor $PRIMARY
+  }
+  activity {
+    BackgroundColor $SECONDARY
+  }
+  diamond {
+    BackgroundColor $PRIMARY
+    LineColor $PRIMARY
+    FontColor $WHITE
+  }
+  circle {
+    BackgroundColor $PRIMARY
+    LineColor $PRIMARY
+  }
+  stop {
+    BackgroundColor $PRIMARY
+    LineColor $PRIMARY
+  }
+</style>
+
+' Skinparams global
+skinparam shadowing false
+skinparam SequenceGroupBackgroundColor $SECONDARY
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam actorStyle rectangle
+skinparam roundcorner 5
+skinparam Padding 5
+skinparam defaultFontName "SansSerif"
+skinparam defaultFontSize 12

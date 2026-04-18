@@ -1,5 +1,6 @@
 @startuml
-!include style.puml
+!theme pfe from .
+left to right direction
 
 node "Couche Frontend\n<size:10>Interface utilisateur</size>" as front
 node "Couche Backend\n<size:10>Logique métier</size>" as back

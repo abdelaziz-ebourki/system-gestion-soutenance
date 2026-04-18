@@ -60,7 +60,7 @@
 
 \begin{figure}[H]
     \centering
-    \pumlsvg{uc_hierarchy}
+    \pumlsvg[0.6\textwidth]{uc_hierarchy}
     \caption{Hiérarchie générale des acteurs}
 \end{figure}
 
@@ -204,6 +204,27 @@
 \newpage
 \section{Architecture Système}
 
+Le système repose sur une architecture web moderne organisée en trois couches, garantissant une séparation claire des responsabilités et une maintenance facilitée.
+
+\subsection{Architecture en couches}
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.8\textwidth]{arch_layers}
+    \caption{Architecture générale en trois couches}
+\end{figure}
+
+L'application suit le pattern \textbf{MVC (Modèle-Vue-Contrôleur)} adapté au Web :
+\begin{itemize}
+    \item \textbf{Vue (View) :} Assurée par le Frontend React, elle gère l'interface utilisateur et l'expérience interactive.
+    \item \textbf{Contrôleur (Controller) :} Les contrôleurs Spring Boot reçoivent les requêtes REST et orchestrent les réponses.
+    \item \textbf{Modèle (Model) :} Comprend la logique métier (Services), l'accès aux données (Repositories) et la persistance MySQL.
+\end{itemize}
+
+\subsection{Architecture technique des composants}
+
+Le diagramme suivant détaille l'organisation interne des modules et leur communication.
+
 \begin{figure}[H]
     \centering
     \pumlsvg[\textwidth]{component_architecture}
@@ -238,6 +259,105 @@
     \centering
     \pumlsvg[\textwidth]{class_planning}
     \caption{Diagramme de classes : Planification et Évaluation}
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════════
+%  5. CONCEPTION DYNAMIQUE
+% ═══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Conception Dynamique}
+\label{sec:dynamique}
+
+Cette section détaille les interactions entre les différents composants MVC (Frontend/Vue, Controllers, Services/Modèle) lors de l'exécution des processus métier critiques.
+
+\subsection{Processus d'authentification}
+Le diagramme suivant illustre le flux de connexion sécurisée. Le \textbf{Contrôleur de sécurité} interroge le \textbf{Modèle} (Base de données) pour valider les identifiants avant de générer un token JWT.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{seq_auth}
+    \caption{Diagramme de séquence : Authentification}
+\end{figure}
+
+\subsection{Planification et détection de conflits}
+Ce diagramme montre la logique de validation. Le \textbf{PlanningService} coordonne avec le \textbf{ConflictService} pour vérifier l'intégrité des données du \textbf{Modèle} avant toute persistance.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{seq_planning}
+    \caption{Diagramme de séquence : Planification de soutenance}
+\end{figure}
+
+\subsection{Affectation et validation du jury}
+L'affectation des membres de jury illustre l'interaction entre les services métier pour appliquer les règles de gestion (RG4 et RG5) sur les entités du système.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{seq_jury_assignment}
+    \caption{Diagramme de séquence : Affectation du jury}
+\end{figure}
+
+\subsection{Saisie et validation d'une évaluation}
+Le processus d'évaluation permet aux membres du jury d'enregistrer les notes et décisions. Le système calcule automatiquement la moyenne (RG6) et met à jour l'état de la soutenance.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{seq_evaluation}
+    \caption{Diagramme de séquence : Saisie d'évaluation}
+\end{figure}
+
+\subsection{Génération de documents PDF}
+Ce flux illustre la production automatisée des convocations, où le service récupère les données consolidées du modèle pour les injecter dans un moteur de génération PDF.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.9\textwidth]{seq_pdf_generation}
+    \caption{Diagramme de séquence : Génération PDF}
+\end{figure}
+
+\subsection{Import massif de données}
+Le système supporte l'importation de listes d'étudiants via des fichiers CSV ou Excel, avec une validation d'intégrité ligne par ligne avant l'insertion en base de données.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{seq_import_data}
+    \caption{Diagramme de séquence : Import massif de données}
+\end{figure}
+
+\subsection{Gestion des indisponibilités}
+Les enseignants peuvent déclarer leurs plages d'indisponibilité, données qui seront exploitées par le moteur de détection de conflits lors de la planification.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.8\textwidth]{seq_availability}
+    \caption{Diagramme de séquence : Déclaration d'indisponibilité}
+\end{figure}
+
+\subsection{Consultation et filtrage du planning}
+L'interface de consultation permet une recherche multicritère performante utilisant des requêtes dynamiques vers le modèle de données.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.9\textwidth]{seq_filter_planning}
+    \caption{Diagramme de séquence : Consultation avec filtres}
+\end{figure}
+
+\subsection{Workflow de validation finale}
+La validation d'une session par le coordinateur déclenche le verrouillage des données et l'envoi massif de notifications aux acteurs concernés.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{seq_validate_planning}
+    \caption{Diagramme de séquence : Validation finale et notifications}
+\end{figure}
+
+\subsection{Récupération de compte}
+Le processus de réinitialisation de mot de passe assure la sécurité via l'envoi d'un token UUID unique par e-mail, conformément aux besoins non fonctionnels.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.9\textwidth]{seq_reset_password}
+    \caption{Diagramme de séquence : Réinitialisation de mot de passe}
 \end{figure}
 
 \end{document}

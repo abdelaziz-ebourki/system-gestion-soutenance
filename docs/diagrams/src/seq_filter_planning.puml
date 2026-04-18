@@ -1,0 +1,29 @@
+@startuml
+!theme pfe from .
+
+actor "Utilisateur" as User
+boundary "Interface Planning\n(Vue)" as Front
+control "Controller" as Controller
+entity "Planning Service" as Service
+database "Base de données\n(Model)" as DB
+
+User -> Front : Saisit filtres (Date, Salle, Enseignant)
+Front -> Controller : GET /api/planning?date=...&salle=...
+activate Controller
+
+Controller -> Service : rechercherPlanning(criteres)
+activate Service
+
+Service -> DB : Requête dynamique (Criteria API/Specification)
+activate DB
+DB --> Service : Liste des soutenances filtrées
+deactivate DB
+
+Service --> Controller : Résultats
+deactivate Service
+
+Controller --> Front : 200 OK (List JSON)
+Front --> User : Mettre à jour l'affichage
+deactivate Controller
+
+@enduml

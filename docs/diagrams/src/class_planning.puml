@@ -1,5 +1,5 @@
 @startuml
-!include style.puml
+!theme pfe from .
 
 enum SoutenanceStatus {
     CREEE

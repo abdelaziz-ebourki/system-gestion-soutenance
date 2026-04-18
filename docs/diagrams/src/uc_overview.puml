@@ -1,5 +1,5 @@
 @startuml
-!include style.puml
+!theme pfe from .
 
 skinparam rectangle {
     FontSize 18

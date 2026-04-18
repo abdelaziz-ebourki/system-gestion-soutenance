@@ -1,5 +1,5 @@
 @startuml
-!include style.puml
+!theme pfe from .
 
 package "Couche Frontend (React)" as Frontend {
     component "Module Auth / Login" as F1

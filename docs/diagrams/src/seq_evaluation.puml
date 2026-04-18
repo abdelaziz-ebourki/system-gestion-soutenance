@@ -1,0 +1,31 @@
+@startuml
+!theme pfe from .
+
+actor "Membre Jury" as Jury
+boundary "Interface Évaluation\n(Vue)" as Front
+control "Controller" as Controller
+entity "Evaluation Service" as Service
+database "Base de données\n(Model)" as DB
+
+Jury -> Front : Saisit note et observations
+Front -> Controller : POST /api/evaluations (note, decision, idSoutenance)
+activate Controller
+
+Controller -> Service : enregistrerEvaluation(data)
+activate Service
+
+Service -> Service : Calculer moyenne (RG6)
+Service -> DB : Sauvegarder évaluation
+DB --> Service : OK
+
+Service -> DB : Mettre à jour statut soutenance (EVALUEE)
+DB --> Service : OK
+
+Service --> Controller : Évaluation enregistrée
+deactivate Service
+
+Controller --> Front : 201 Created
+Front --> Jury : Afficher récapitulatif et succès
+deactivate Controller
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+!theme pfe from .
+
+actor "Coordinateur" as Coord
+boundary "Interface Planning\n(Vue)" as Front
+control "Controller" as Controller
+entity "Planning Service" as Service
+entity "Conflict Service" as Conflict
+database "Base de données\n(Model)" as DB
+
+Coord -> Front : Définit (Étudiant, Date, Salle, Horaire)
+Front -> Controller : POST /api/planning/validate
+activate Controller
+
+Controller -> Service : validerPlanning(details)
+activate Service
+
+Service -> Conflict : vérifierDisponibilitéSalle(salle, date, heure)
+activate Conflict
+Conflict -> DB : Rechercher occupations salle
+DB --> Conflict : Résultats
+Conflict --> Service : Status Salle (OK/KO)
+deactivate Conflict
+
+Service -> Conflict : vérifierDoublePlanification(étudiant)
+activate Conflict
+Conflict -> DB : Vérifier si étudiant déjà planifié
+DB --> Conflict : Résultats
+Conflict --> Service : Status Étudiant (OK/KO)
+deactivate Conflict
+
+alt Aucun conflit détecté
+    Service --> Controller : Validé
+    Controller --> Front : 200 OK (Prêt à enregistrer)
+    Coord -> Front : Confirme l'enregistrement
+    Front -> Controller : POST /api/planning/save
+    Controller -> Service : enregistrer(details)
+    Service -> DB : Enregistrer Soutenance
+    Service --> Controller : Confirmé
+    Controller --> Front : 201 Created
+    Front --> Coord : Afficher confirmation
+else Conflits détectés
+    Service --> Controller : Erreur conflits
+    deactivate Service
+    Controller --> Front : 409 Conflict (Détails)
+    deactivate Controller
+    Front --> Coord : Afficher alertes
+end
+
+@enduml

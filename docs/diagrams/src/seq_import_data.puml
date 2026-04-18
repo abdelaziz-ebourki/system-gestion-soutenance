@@ -1,0 +1,40 @@
+@startuml
+!theme pfe from .
+
+actor "Coordinateur" as Coord
+boundary "Interface Import\n(Vue)" as Front
+control "Controller" as Controller
+entity "Import Service" as Service
+database "Base de données\n(Model)" as DB
+
+Coord -> Front : Sélectionne fichier (CSV/Excel)
+Front -> Controller : POST /api/import/students (MultipartFile)
+activate Controller
+
+Controller -> Service : importerEtudiants(file)
+activate Service
+
+Service -> Service : Parser le fichier
+Service -> Service : Valider format et données requis
+
+loop pour chaque ligne
+    Service -> DB : Vérifier si CNE/Email existe déjà
+    activate DB
+    DB --> Service : Résultat
+    deactivate DB
+    
+    alt Donnée valide
+        Service -> DB : Sauvegarder nouvel Étudiant
+    else Erreur
+        Service -> Service : Logger erreur de ligne
+    end
+end
+
+Service --> Controller : Rapport d'import (Succès/Échecs)
+deactivate Service
+
+Controller --> Front : 200 OK (Summary JSON)
+Front --> Coord : Afficher bilan de l'import
+deactivate Controller
+
+@enduml
