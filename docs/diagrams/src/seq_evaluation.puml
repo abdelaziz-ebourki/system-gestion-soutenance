@@ -16,10 +16,14 @@ activate Service
 
 Service -> Service : Calculer moyenne (RG6)
 Service -> DB : Sauvegarder évaluation
+activate DB
 DB --> Service : OK
+deactivate DB
 
 Service -> DB : Mettre à jour statut soutenance (EVALUEE)
+activate DB
 DB --> Service : OK
+deactivate DB
 
 Service --> Controller : Évaluation enregistrée
 deactivate Service

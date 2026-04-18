@@ -21,7 +21,9 @@ loop pour chaque enseignant sélectionné
     Service -> Conflict : vérifierDisponibilitéEnseignant(prof, date, heure)
     activate Conflict
     Conflict -> DB : Consulter planning enseignant
+    activate DB
     DB --> Conflict : Résultats
+    deactivate DB
     Conflict --> Service : Status (Libre/Occupé)
     deactivate Conflict
 end
@@ -32,8 +34,13 @@ alt Composition valide (RG4: 2 à 5 membres)
     Coord -> Front : Valider l'affectation
     Front -> Controller : POST /api/jury/assign
     Controller -> Service : affecter(jury)
+    activate Service
     Service -> DB : Sauvegarder composition du jury
+    activate DB
+    DB --> Service : OK
+    deactivate DB
     Service --> Controller : 200 OK
+    deactivate Service
     Controller --> Front : 200 OK
     Front --> Coord : Afficher confirmation
 else Conflits ou règles non respectées

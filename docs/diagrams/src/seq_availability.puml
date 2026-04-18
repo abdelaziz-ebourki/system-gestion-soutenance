@@ -15,8 +15,14 @@ Controller -> Service : enregistrerIndisponibilites(profId, ranges)
 activate Service
 
 Service -> DB : Supprimer anciennes plages (si existantes)
-Service -> DB : Insérer nouvelles indisponibilités
+activate DB
 DB --> Service : OK
+deactivate DB
+
+Service -> DB : Insérer nouvelles indisponibilités
+activate DB
+DB --> Service : OK
+deactivate DB
 
 Service --> Controller : Mis à jour
 deactivate Service

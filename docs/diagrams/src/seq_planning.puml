@@ -18,14 +18,18 @@ activate Service
 Service -> Conflict : vérifierDisponibilitéSalle(salle, date, heure)
 activate Conflict
 Conflict -> DB : Rechercher occupations salle
+activate DB
 DB --> Conflict : Résultats
+deactivate DB
 Conflict --> Service : Status Salle (OK/KO)
 deactivate Conflict
 
 Service -> Conflict : vérifierDoublePlanification(étudiant)
 activate Conflict
 Conflict -> DB : Vérifier si étudiant déjà planifié
+activate DB
 DB --> Conflict : Résultats
+deactivate DB
 Conflict --> Service : Status Étudiant (OK/KO)
 deactivate Conflict
 
@@ -35,9 +39,13 @@ alt Aucun conflit détecté
     Coord -> Front : Confirme l'enregistrement
     Front -> Controller : POST /api/planning/save
     Controller -> Service : enregistrer(details)
+    activate Service
     Service -> DB : Enregistrer Soutenance
+    activate DB
+    DB --> Service : OK
+    deactivate DB
     Service --> Controller : Confirmé
-    Controller --> Front : 201 Created
+    deactivate Service    Controller --> Front : 201 Created
     Front --> Coord : Afficher confirmation
 else Conflits détectés
     Service --> Controller : Erreur conflits

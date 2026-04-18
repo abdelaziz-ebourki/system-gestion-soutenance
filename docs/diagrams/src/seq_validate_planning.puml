@@ -21,11 +21,21 @@ DB --> Service : OK
 deactivate DB
 
 Service -> DB : Mise à jour statuts (PLANIFIEE -> CONVOQUEE)
+activate DB
+DB --> Service : OK
+deactivate DB
+
 Service -> DB : Clôturer modifications
+activate DB
+DB --> Service : OK
+deactivate DB
 
 Service -> Notify : envoyerNotificationsMassives(sessionId)
 activate Notify
 Notify -> DB : Récupérer emails (Étudiants, Jurys)
+activate DB
+DB --> Notify : Liste emails
+deactivate DB
 Notify -> Notify : Envoi e-mails (SMTP)
 Notify --> Service : Notifications envoyées
 deactivate Notify

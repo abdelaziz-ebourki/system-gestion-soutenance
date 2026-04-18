@@ -25,6 +25,9 @@ loop pour chaque ligne
     
     alt Donnée valide
         Service -> DB : Sauvegarder nouvel Étudiant
+        activate DB
+        DB --> Service : OK
+        deactivate DB
     else Erreur
         Service -> Service : Logger erreur de ligne
     end
