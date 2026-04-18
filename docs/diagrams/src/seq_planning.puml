@@ -21,7 +21,7 @@ Conflict -> DB : Rechercher occupations salle
 activate DB
 DB --> Conflict : Résultats
 deactivate DB
-Conflict --> Service : Status Salle (OK/KO)
+Conflict --> Service : Status Salle
 deactivate Conflict
 
 Service -> Conflict : vérifierDoublePlanification(étudiant)
@@ -30,7 +30,7 @@ Conflict -> DB : Vérifier si étudiant déjà planifié
 activate DB
 DB --> Conflict : Résultats
 deactivate DB
-Conflict --> Service : Status Étudiant (OK/KO)
+Conflict --> Service : Status Étudiant
 deactivate Conflict
 
 alt Aucun conflit détecté

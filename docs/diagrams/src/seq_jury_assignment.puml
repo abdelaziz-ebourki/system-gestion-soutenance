@@ -28,7 +28,7 @@ loop pour chaque enseignant sélectionné
     deactivate Conflict
 end
 
-alt Composition valide (RG4: 2 à 5 membres)
+alt Composition valide (RG4: min 3 membres)
     Service --> Controller : Validé
     Controller --> Front : 200 OK (Prêt)
     Coord -> Front : Valider l'affectation

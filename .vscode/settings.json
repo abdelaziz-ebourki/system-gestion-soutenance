@@ -30,5 +30,6 @@
 	"plantuml.exportFormat": "svg",
 	"plantuml.diagramsRoot": "./docs/diagrams/src/",
 	"plantuml.exportOutDir": "./docs/diagrams/svg/",
-	"plantuml.exportSubFolder": false
+	"plantuml.exportSubFolder": false,
+	"plantuml.exportConcurrency": 8
 }

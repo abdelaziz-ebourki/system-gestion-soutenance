@@ -337,9 +337,11 @@ mémoire spécifique.
 \label{subsubsec:gestion_enseignants}
 
 Le système doit permettre l'ajout et la gestion des informations relatives aux
-enseignants, ainsi que l'identification de ceux disponibles pour les jurys. La
-composition d'un jury doit inclure la désignation d'un président, d'un
-rapporteur, d'un examinateur et, le cas échéant, de l'encadrant de l'étudiant.
+enseignants. Par défaut, tous les enseignants sont considérés comme disponibles
+pour les jurys, mais ils disposent de la possibilité de déclarer leurs plages
+d'indisponibilité. La composition d'un jury doit inclure la désignation d'un
+président, d'un rapporteur, d'un examinateur et, le cas échéant, de l'encadrant
+de l'étudiant.
 
 \subsubsection{Gestion des salles}
 \label{subsubsec:gestion_salles}
@@ -486,10 +488,11 @@ membre de jury.
               soutenances simultanées.
         \item \textbf{RG3 :} Un étudiant ne peut avoir qu'une seule soutenance
               programmée.
-        \item \textbf{RG4 :} Un jury doit comporter au minimum deux membres et
-              au maximum cinq membres.
-        \item \textbf{RG5 :} L'encadrant de l'étudiant peut faire partie du jury
-              mais ne peut en être le président.
+        \item \textbf{RG4 :} Un jury doit comporter au minimum trois membres (Président,
+              Rapporteur, Examinateur). L'encadrant de l'étudiant peut également en
+              faire partie.
+        \item \textbf{RG5 :} L'encadrant de l'étudiant ne peut en aucun cas occuper
+              le rôle de président du jury.
         \item \textbf{RG6 :} La note finale est calculée comme la moyenne des
               notes attribuées par les membres du jury.
     \end{itemize}
@@ -541,8 +544,9 @@ Sections \ref{subsubsec:planification} et \ref{subsubsec:gestion_salles}).
 \label{subsec:module_jurys}
 
 Ce module facilite l'affectation des membres de jury à chaque soutenance, la
-composition équilibrée des commissions et la consultation des affectations par
-les enseignants (voir \ref{subsubsec:affectation_jurys} et \ref{subsubsec:gestion_conflits}).
+composition équilibrée des commissions, ainsi que la gestion et la consultation
+des indisponibilités déclarées par les enseignants (voir
+\ref{subsubsec:affectation_jurys} et \ref{subsubsec:gestion_conflits}).
 
 \subsection{Module 5 : Évaluation}
 \label{subsec:module_evaluation}
