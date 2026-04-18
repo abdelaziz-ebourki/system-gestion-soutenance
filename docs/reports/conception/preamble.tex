@@ -51,31 +51,6 @@
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\arraystretch}{1.2}
 
-% --- TikZ Styles ---
-\tikzset{
-    % Base style for consistency
-    base_node/.style={
-            draw=primary,
-            fill=primary!5,
-            line width=1pt,
-            rounded corners=3pt,
-            text centered,
-            font=\small
-        },
-    % General flow blocks
-    block/.style={base_node, rectangle, text width=4.5cm, minimum height=0.8cm},
-    decision/.style={base_node, diamond, text width=2.5cm, inner sep=0pt},
-    arrow/.style={-latex, thick, color=primary},
-    % Actor/System diagrams
-    system/.style={base_node, rectangle, text width=5.5cm, minimum height=1.8cm, font=\large\bfseries\color{primary}, rounded corners=5pt},
-    actor/.style={base_node, rectangle, text width=4cm, minimum height=1.2cm, font=\small\bfseries},
-    usecase/.style={base_node, ellipse, text width=3.5cm, minimum height=1.2cm, font=\small},
-    biArrow/.style={latex-latex, thick, color=primary},
-    include/.style={-latex, dashed, thick, color=primary, font=\scriptsize\itshape},
-    % Architecture layers
-    layer/.style={base_node, rectangle, text width=7cm, minimum height=1.2cm, font=\bfseries}
-}
-
 % --- Diagrams ---
 \newcommand{\pumlsvg}[2][0.8\textwidth]{
     \includesvg[width=#1, inkscapelatex=false]{../../diagrams/svg/#2.svg}
