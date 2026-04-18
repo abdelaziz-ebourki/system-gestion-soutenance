@@ -2,11 +2,11 @@
 !theme pfe from .
 
 actor "Coordinateur" as Coord
-boundary "Interface Planning\n(Vue)" as Front
+boundary "Interface Planning" as Front
 control "Controller" as Controller
 entity "Planning Service" as Service
 entity "Conflict Service" as Conflict
-database "Base de données\n(Model)" as DB
+database "Base de données" as DB
 
 Coord -> Front : Définit (Étudiant, Date, Salle, Horaire)
 Front -> Controller : POST /api/planning/validate
@@ -45,7 +45,8 @@ alt Aucun conflit détecté
     DB --> Service : OK
     deactivate DB
     Service --> Controller : Confirmé
-    deactivate Service    Controller --> Front : 201 Created
+    deactivate Service    
+    Controller --> Front : 201 Created
     Front --> Coord : Afficher confirmation
 else Conflits détectés
     Service --> Controller : Erreur conflits

@@ -2,11 +2,11 @@
 !theme pfe from .
 
 actor "Coordinateur" as Coord
-boundary "Interface Documents\n(Vue)" as Front
+boundary "Interface Documents" as Front
 control "Controller" as Controller
 entity "Document Service" as Service
 entity "PDF Generator" as PDF
-database "Base de données\n(Model)" as DB
+database "Base de données" as DB
 
 Coord -> Front : Sélectionne soutenances
 Front -> Controller : GET /api/documents/convocations (ids)

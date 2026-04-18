@@ -2,10 +2,10 @@
 !theme pfe from .
 
 actor "Utilisateur" as User
-boundary "Interface Planning\n(Vue)" as Front
+boundary "Interface Planning" as Front
 control "Controller" as Controller
 entity "Planning Service" as Service
-database "Base de données\n(Model)" as DB
+database "Base de données" as DB
 
 User -> Front : Saisit filtres (Date, Salle, Enseignant)
 Front -> Controller : GET /api/planning?date=...&salle=...

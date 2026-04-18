@@ -2,11 +2,11 @@
 !theme pfe from .
 
 actor "Coordinateur" as Coord
-boundary "Interface Jury\n(Vue)" as Front
+boundary "Interface Jury" as Front
 control "Controller" as Controller
 entity "Jury Service" as Service
 entity "Conflict Service" as Conflict
-database "Base de données\n(Model)" as DB
+database "Base de données" as DB
 
 Coord -> Front : Sélectionne soutenance et enseignants
 Front -> Controller : POST /api/jury/validate-assignment

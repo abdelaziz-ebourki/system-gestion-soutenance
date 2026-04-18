@@ -2,10 +2,10 @@
 !theme pfe from .
 
 actor "Utilisateur" as User
-boundary "Interface React\n(Vue)" as Front
+boundary "Interface" as Front
 control "Controller" as Back
 entity "Security Service" as SecService
-database "Base de données\n(Model)" as DB
+database "Base de données" as DB
 
 User -> Front : Saisit identifiants
 Front -> Back : POST /api/auth/login (email, password)
