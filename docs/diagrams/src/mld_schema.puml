@@ -81,7 +81,7 @@ entity "soutenances" as soutenance << (T, #c2ccd7) >> {
   session_id : INT (FK)
 }
 
-entity "composition_jury" as jury << (T, #c2ccd7) >> {
+entity "membre_jury" as jury << (T, #c2ccd7) >> {
   * soutenance_id : INT (PK, FK)
   * enseignant_id : INT (PK, FK)
   --
