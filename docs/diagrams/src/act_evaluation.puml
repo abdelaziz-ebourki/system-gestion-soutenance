@@ -1,0 +1,27 @@
+@startuml
+!theme pfe from .
+
+start
+:Démarrage de la soutenance;
+:Statut -> EN_COURS;
+
+repeat
+  :Membres du jury saisissent les notes;
+  :Saisie des observations et remarques;
+backward:Modification si nécessaire;
+repeat while (Saisie terminée pour tous ?) is (Non)
+
+:Validation de l'évaluation;
+:Calcul automatique de la moyenne (RG6);
+:Détermination de la décision finale\n(Admis, Admis avec corrections, Ajourné);
+
+:Statut -> EVALUEE;
+
+if (Session terminée ?) then (Oui)
+    :Génération du Procès-Verbal (PV);
+    :Clôture officielle de la session;
+    :Statut -> CLOTUREE;
+endif
+
+stop
+@enduml

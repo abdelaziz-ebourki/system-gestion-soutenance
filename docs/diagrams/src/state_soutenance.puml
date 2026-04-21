@@ -1,0 +1,22 @@
+@startuml
+!theme pfe from .
+
+[*] --> CREEE : Création du projet
+
+CREEE --> PLANIFIEE : Affectation date/salle
+PLANIFIEE --> JURY_AFFECTE : Composition jury complète
+JURY_AFFECTE --> CONVOQUEE : Validation & Envoi notifications
+
+CONVOQUEE --> EN_COURS : Début de séance
+EN_COURS --> EVALUEE : Validation des notes (RG6)
+
+EVALUEE --> CLOTUREE : Session clôturée
+EVALUEE --> ANNULEE : Motif exceptionnel
+
+CONVOQUEE --> ANNULEE : Absence / Force majeure
+PLANIFIEE --> ANNULEE
+
+ANNULEE --> [*]
+CLOTUREE --> [*]
+
+@enduml

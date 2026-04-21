@@ -1,0 +1,30 @@
+@startuml
+!theme pfe from .
+
+start
+:Réception demande de planification;
+fork
+  :Vérifier RG1 (Enseignant);
+  if (Enseignant déjà occupé sur ce créneau ?) then (Oui)
+    :Ajouter "Erreur : Conflit Enseignant";
+  endif
+fork again
+  :Vérifier RG2 (Salle);
+  if (Salle déjà occupée sur ce créneau ?) then (Oui)
+    :Ajouter "Erreur : Conflit Salle";
+  endif
+fork again
+  :Vérifier RG3 (Étudiant);
+  if (Étudiant déjà planifié ailleurs ?) then (Oui)
+    :Ajouter "Erreur : Double Planification";
+  endif
+end fork
+
+if (Liste d'erreurs vide ?) then (Oui)
+  :Retourner "VALIDÉ";
+else (Non)
+  :Retourner "ÉCHEC" + Liste des conflits;
+endif
+
+stop
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+!theme pfe from .
+
+package "com.fsbm.pfe" {
+    package "controller" {
+        [AuthController]
+        [PlanningController]
+        [JuryController]
+        [DocumentController]
+    }
+    
+    package "service" {
+        [SecurityService]
+        [PlanningService]
+        [ConflictService]
+        [NotificationService]
+        [DocumentService]
+    }
+    
+    package "repository" {
+        [UserRepository]
+        [SoutenanceRepository]
+        [ProjetRepository]
+        [SalleRepository]
+    }
+    
+    package "entity" {
+        [Utilisateur]
+        [Soutenance]
+        [Projet]
+        [Evaluation]
+    }
+    
+    package "dto" {
+        [SoutenanceRequest]
+        [UserResponse]
+    }
+    
+    package "security" {
+        [JwtProvider]
+        [UserDetailsServiceImpl]
+    }
+}
+
+controller --> service
+service --> repository
+repository --> entity
+service ..> dto
+@enduml

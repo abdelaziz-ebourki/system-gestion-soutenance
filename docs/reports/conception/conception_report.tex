@@ -1,12 +1,10 @@
 \documentclass[12pt,a4paper]{article}
 \input{preamble}
 
-% ── Document Metadata ──────────────────────────────────────────────────────────
 \hypersetup{
     pdftitle   = {Rapport de Conception -- Système de gestion des soutenances et des jurys},
     pdfauthor  = {Zaitouni Nourelislam & Taoudi Ebourki Abdelaziz},
 }
-% ──────────────────────────────────────────────────────────────────────────────
 
 \begin{document}
 
@@ -45,9 +43,13 @@
 \tableofcontents
 \newpage
 
-% ═══════════════════════════════════════════════════════════════════════════════
-%  2. DIAGRAMMES DE CAS D'UTILISATION
-% ═══════════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:introduction}
+
+Ce rapport présente la phase de conception détaillée du système de gestion des soutenances et des jurys de la Faculté des Sciences Ben M'Sick. Suite à l'analyse des besoins formalisée dans le cahier des charges, ce document expose les choix architecturaux, les modèles de données et les processus dynamiques qui guideront le développement de la solution.
+
+L'objectif est de transformer les exigences métier en une architecture technique cohérente, garantissant la robustesse du système, la fluidité de l'expérience utilisateur et le respect strict des règles de gestion académiques.
+
 \section{Diagrammes de Cas d'Utilisation}
 \label{sec:cas_utilisation}
 
@@ -66,7 +68,6 @@
 
 \subsection{Cas d'utilisation}
 
-% --- Administrateur ---
 \subsubsection{Module Administration}
 \begin{figure}[H]
     \centering
@@ -80,19 +81,18 @@
     \begin{tabular}{lp{10cm}}
         \toprule
         \rowcolor{primary!10}
-        \textbf{Cas d'utilisation}   & \textbf{Description}                                                                            \\
+        \textbf{Cas d'utilisation}       & \textbf{Description}                                                                            \\
         \midrule
-        Gérer comptes utilisateurs   & Création, modification (incluant rôles et mots de passe) et suppression des comptes.            \\
+        Gérer comptes utilisateurs       & Création, modification (incluant rôles et mots de passe) et suppression des comptes.            \\
         \addlinespace
-        Gérer salles                 & Administration du catalogue des salles, incluant la saisie des capacités et des disponibilités. \\
+        Gérer salles                     & Administration du catalogue des salles, incluant la saisie des capacités et des disponibilités. \\
         \addlinespace
-        Gérer les sessions et paramètres & Configuration des sessions de soutenance (périodes, dates) et des paramètres globaux du système. \\
+        Gérer les sessions et paramètres & Configuration des sessions globales (périodes, dates de session) et des paramètres système.     \\
         \bottomrule
     \end{tabular}
     \caption{Description des cas d'utilisation -- Administrateur}
 \end{table}
 
-% --- Coordinateur ---
 \subsubsection{Module Coordination}
 \begin{figure}[H]
     \centering
@@ -110,7 +110,7 @@
         \midrule
         Assigner jurys             & Constitution des commissions (président, rapporteur, examinateur) avec recherche d'équilibre de la charge. \\
         \addlinespace
-        Planifier soutenances      & Création des sessions, définition des dates, horaires et affectation des salles aux étudiants.             \\
+        Planifier soutenances      & Planification individuelle des créneaux de passage, définition des horaires et affectation des salles.     \\
         \addlinespace
         Valider planning           & Confirmation finale du planning après traitement des alertes et détection des conflits.                    \\
         \addlinespace
@@ -136,7 +136,6 @@
     \caption{Description des cas d'utilisation -- Coordinateur}
 \end{table}
 
-% --- Enseignant ---
 \subsubsection{Module Jury}
 \begin{figure}[H]
     \centering
@@ -170,7 +169,6 @@
     \caption{Description des cas d'utilisation -- Enseignant}
 \end{table}
 
-% --- Étudiant ---
 \subsubsection{Module Étudiant}
 \begin{figure}[H]
     \centering
@@ -196,9 +194,6 @@
     \caption{Description des cas d'utilisation -- Étudiant}
 \end{table}
 
-% ═══════════════════════════════════════════════════════════════════════════════
-%  3. ARCHITECTURE SYSTÈME
-% ═══════════════════════════════════════════════════════════════════════════════
 \newpage
 \section{Architecture Système}
 
@@ -229,9 +224,6 @@ Le diagramme suivant détaille l'organisation interne des modules et leur commun
     \caption{Architecture technique des composants}
 \end{figure}
 
-% ═══════════════════════════════════════════════════════════════════════════════
-%  4. CONCEPTION STATIQUE (DIAGRAMME DE CLASSES)
-% ═══════════════════════════════════════════════════════════════════════════════
 \section{Conception Statique}
 \label{sec:statique}
 
@@ -259,14 +251,57 @@ Le diagramme suivant détaille l'organisation interne des modules et leur commun
     \caption{Diagramme de classes : Planification et Évaluation}
 \end{figure}
 
-% ═══════════════════════════════════════════════════════════════════════════════
-%  5. CONCEPTION DYNAMIQUE
-% ═══════════════════════════════════════════════════════════════════════════════
+\subsection{Cycle de vie d'une soutenance}
+
+Le diagramme d'états suivant illustre les transitions d'état de l'entité Soutenance, depuis sa création jusqu'à sa clôture ou annulation.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.6\textwidth]{state_soutenance}
+    \caption{Diagramme d'états : Cycle de vie d'une soutenance}
+\end{figure}
+
+\newpage
+\section{Conception Relationnelle}
+\label{sec:relationnelle}
+
+Le Modèle Logique de Données (MLD) traduit les diagrammes de classes en structures tabulaires prêtes pour la persistance dans une base de données relationnelle MySQL.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.75\textwidth]{mld_schema}
+    \caption{Modèle Logique de Données (MLD)}
+\end{figure}
+
+\newpage
+\section{Processus Métiers}
+\label{sec:processus}
+
+Cette section détaille la logique de fonctionnement des processus automatisés du système.
+
+\subsection{Workflow de planification automatisée}
+Ce processus décrit les étapes de création d'une session de soutenance, incluant les boucles de correction en cas de conflit.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.6\textwidth]{act_planning}
+    \caption{Diagramme d'activité : Planification de session}
+\end{figure}
+
+\subsection{Déroulement des évaluations}
+Ce diagramme illustre le processus allant du démarrage de la soutenance jusqu'au calcul automatique de la moyenne finale.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[0.58\textwidth]{act_evaluation}
+    \caption{Diagramme d'activité : Processus d'évaluation}
+\end{figure}
+
 \newpage
 \section{Conception Dynamique}
 \label{sec:dynamique}
 
-Cette section détaille les interactions entre les différents composants MVC (Frontend/Vue, Controllers, Services/Modèle) lors de l'exécution des processus métier critiques.
+Cette section détaille les interactions entre les différents composants MVC lors de l'exécution des processus métier critiques.
 
 \subsection{Processus d'authentification}
 Le diagramme suivant illustre le flux de connexion sécurisée. Le \textbf{Contrôleur de sécurité} interroge le \textbf{Modèle} (Base de données) pour valider les identifiants avant de générer un token JWT.
@@ -339,5 +374,27 @@ Le processus de réinitialisation de mot de passe assure la sécurité via l'env
     \pumlsvg[\textwidth]{seq_reset_password}
     \caption{Diagramme de séquence : Réinitialisation de mot de passe}
 \end{figure}
+
+\newpage
+\section{Conception de l'Interface Utilisateur}
+\label{sec:ihm}
+
+Cette section définit l'organisation de l'interface et le parcours utilisateur au sein de l'application.
+
+\subsection{Plan de navigation}
+Le diagramme suivant présente le sitemap de l'application et les points d'entrée selon les rôles utilisateurs.
+
+\begin{figure}[H]
+    \centering
+    \pumlsvg[\textwidth]{nav_sitemap}
+    \caption{Sitemap et plan de navigation}
+\end{figure}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+La phase de conception détaillée a permis de structurer l'ensemble des composants nécessaires à la réalisation du système de gestion des soutenances. En s'appuyant sur une architecture en couches et un modèle relationnel robuste, nous avons pu intégrer l'ensemble des règles de gestion académiques dans des workflows automatisés.
+
+Les modèles présentés dans ce rapport serviront de socle technique pour la phase de développement, garantissant que l'implémentation finale sera conforme aux attentes des utilisateurs de la Faculté des Sciences Ben M'Sick.
 
 \end{document}

@@ -96,6 +96,11 @@
   activity {
     BackgroundColor $SECONDARY
   }
+  state {
+    BackgroundColor $SECONDARY
+    LineColor $PRIMARY
+    FontColor $TEXT
+  }
   diamond {
     BackgroundColor $PRIMARY
     LineColor $PRIMARY

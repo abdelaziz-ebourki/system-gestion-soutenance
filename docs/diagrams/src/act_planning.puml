@@ -1,0 +1,32 @@
+@startuml
+!theme pfe from .
+
+start
+:Administrateur définit la Session globale;
+:Coordinateur accède à la session globale;
+
+repeat
+    :Planification d'une soutenance individuelle\n(Étudiant, Salle, Date, Créneau);
+    :Validation automatique des contraintes (RG1, RG2, RG3);
+    if (Conflits détectés ?) then (Oui)
+        :Afficher alertes de conflit;
+        :Ajuster les paramètres du créneau;
+    else (Non)
+        :Enregistrer la planification individuelle;
+        :Statut -> PLANIFIEE;
+    endif
+repeat while (D'autres soutenances à planifier ?) is (Oui)
+
+:Affectation des jurys par;
+:Vérification RG4 et RG5;
+
+if (Planning Complet ?) then (Oui)
+    :Validation finale et verrouillage;
+    :Génération massive des convocations;
+    :Statut -> CONVOQUEE;
+else (Non)
+    :Finaliser les affectations manquantes;
+endif
+
+stop
+@enduml

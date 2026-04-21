@@ -1,0 +1,114 @@
+@startuml
+!theme pfe from .
+
+' Configuration pour le style ERD
+skinparam Linetype ortho
+
+entity "utilisateurs" as user << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  nom : VARCHAR
+  prenom : VARCHAR
+  email : VARCHAR (U)
+  password : VARCHAR
+  role : ENUM
+  actif : BOOLEAN
+}
+
+entity "etudiants" as student << (T, #c2ccd7) >> {
+  * cne : VARCHAR (PK)
+  --
+  filiere : VARCHAR
+  niveau : VARCHAR
+  user_id : INT (FK)
+}
+
+entity "enseignants" as prof << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  grade : VARCHAR
+  specialite : VARCHAR
+  user_id : INT (FK)
+}
+
+entity "administrateurs" as admin << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  user_id : INT (FK)
+}
+
+entity "coordinateurs" as coord << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  user_id : INT (FK)
+}
+
+entity "sessions_globales" as session << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  libelle : VARCHAR
+  date_debut : DATE
+  date_fin : DATE
+  statut : ENUM
+}
+
+entity "projets" as project << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  titre : VARCHAR
+  description : TEXT
+  type : ENUM
+  encadrant_id : INT (FK)
+}
+
+entity "salles" as room << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  nom : VARCHAR
+  batiment : VARCHAR
+  capacite : INT
+}
+
+entity "soutenances" as soutenance << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  date_passage : DATE
+  heure_debut : TIME
+  duree : INT
+  statut : ENUM
+  salle_id : INT (FK)
+  projet_id : INT (FK)
+  session_id : INT (FK)
+}
+
+entity "composition_jury" as jury << (T, #c2ccd7) >> {
+  * soutenance_id : INT (PK, FK)
+  * enseignant_id : INT (PK, FK)
+  --
+  role_jury : ENUM
+  present : BOOLEAN
+}
+
+entity "evaluations" as eval << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  note : FLOAT
+  observations : TEXT
+  decision : ENUM
+  soutenance_id : INT (FK)
+}
+
+user ||--o| student
+user ||--o| prof
+user ||--o| admin
+user ||--o| coord
+
+prof ||--o{ project
+project ||--|| soutenance
+session ||--|{ soutenance
+soutenance }o--|| room
+soutenance ||--o| eval
+soutenance ||--|{ jury
+prof ||--|{ jury
+
+@enduml

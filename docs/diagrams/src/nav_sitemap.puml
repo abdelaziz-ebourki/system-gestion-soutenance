@@ -1,0 +1,34 @@
+@startuml
+!theme pfe from .
+
+rectangle "Espace Public" {
+    [Page de Connexion] as Login
+}
+
+rectangle "Tableaux de bord" {
+    [Tableau de bord Administrateur] as AdminDB
+    [Tableau de bord Coordinateur] as CoordDB
+    [Tableau de bord Enseignant] as ProfDB
+    [Tableau de bord Étudiant] as StudentDB
+}
+
+rectangle "Services" {
+    [Service de Gestion (Comptes/Salles)] as S1
+    [Service de Planification] as S2
+    [Service d'Évaluation] as S3
+    [Service de Documentation (PDF)] as S4
+}
+
+Login --> AdminDB : Administrateur
+Login --> CoordDB : Coordinateur
+Login --> ProfDB : Enseignant
+Login --> StudentDB : Étudiant
+
+AdminDB --> S1
+CoordDB --> S2
+CoordDB --> S4
+ProfDB --> S3
+ProfDB --> S4
+StudentDB --> S4
+
+@enduml
