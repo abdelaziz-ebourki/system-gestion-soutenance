@@ -1,0 +1,182 @@
+@startuml
+!theme pfe from .
+
+' --- Énumérations ---
+
+enum RoleEnum {
+    ADMINISTRATEUR
+    COORDINATEUR
+    ENSEIGNANT
+    ETUDIANT
+}
+
+enum JuryRole {
+    PRESIDENT
+    RAPPORTEUR 
+    EXAMINATEUR
+    ENCADRANT
+}
+
+enum SoutenanceStatus {
+    CREEE
+    PLANIFIEE
+    JURY_AFFECTE
+    CONVOQUEE
+    EN_COURS
+    TERMINEE
+    EVALUEE
+    CLOTUREE
+    ANNULEE
+}
+
+enum SessionStatus {
+    OUVERTE
+    VERROUILLEE
+    CLOTUREE
+}
+
+enum DecisionEnum {
+    ADMIS
+    ADMIS_AVEC_CORRECTIONS
+    AJOURNE
+}
+
+enum ProjetType {
+    PFE
+    MEMOIRE
+    STAGE
+}
+
+' --- Classes ---
+
+abstract class Utilisateur {
+    + int id
+    + string nom
+    + string prenom
+    + string email
+    + string password
+    + RoleEnum role
+    + boolean actif
+    + seConnecter(email, password)
+    + seDeconnecter()
+    + modifierProfil()
+}
+
+class Administrateur {
+    + gererComptes()
+    + configurerSalles()
+    + definirPeriodes()
+}
+
+class Coordinateur {
+    + creerSession()
+    + validerPlanning()
+    + genererDocuments()
+}
+
+class Enseignant {
+    + string grade
+    + string specialite
+    + string departement
+    + consulterConvocations()
+    + getDisponibilites()
+}
+
+class Etudiant {
+    + string cne
+    + string filiere
+    + string niveau
+}
+
+class MembreJury {
+    + JuryRole roleJury
+    + boolean present
+}
+
+class Projet {
+    + int id
+    + string titre
+    + string description
+    + ProjetType type
+    + string statut
+}
+
+class Soutenance {
+    + int id
+    + date datePassage
+    + time heureDebut
+    + int dureeMinutes
+    + SoutenanceStatus statut
+    + planifier()
+    + annuler()
+}
+
+class Salle {
+    + int id
+    + string nom
+    + string batiment
+    + int capacite
+    + boolean disponible
+    + verifierDisponibilite()
+}
+
+class Evaluation {
+    + int id
+    + float note
+    + string observations
+    + DecisionEnum decision
+    + boolean validee
+}
+
+class SessionGlobale {
+    + int id
+    + string libelle
+    + date dateDebut
+    + date dateFin
+    + SessionStatus statut
+}
+
+class Convocation {
+    + int id
+    + string type
+    + boolean envoyee
+    + generer()
+}
+
+' --- Relations ---
+
+' Héritage
+Utilisateur <|-- Administrateur
+Utilisateur <|-- Coordinateur
+Utilisateur <|-- Enseignant
+Utilisateur <|-- Etudiant
+Enseignant <|-- MembreJury
+
+' Associations
+Etudiant "1..*" -- "1" Projet : possède
+Enseignant "1..*" -- "*" Projet : encadre
+Projet "1" -- "1" Soutenance : fait l'objet de
+SessionGlobale "1" *-- "*" Soutenance : contient
+Soutenance "*" -- "1" Salle : se déroule dans
+Soutenance "1" -- "3..*" MembreJury : composée de
+Soutenance "1" -- "1" Evaluation : possède
+Soutenance "1" -- "1..*" Convocation : génère
+
+' --- Layout Hints ---
+RoleEnum -[hidden]right- JuryRole
+JuryRole -[hidden]right- SoutenanceStatus
+SoutenanceStatus -[hidden]right- SessionStatus
+SessionStatus -[hidden]right- DecisionEnum
+DecisionEnum -[hidden]right- ProjetType
+
+RoleEnum -[hidden]down- Utilisateur
+Administrateur -[hidden]right- Coordinateur
+Coordinateur -[hidden]right- Enseignant
+Enseignant -[hidden]right- Etudiant
+
+SessionGlobale -[hidden]right- Soutenance
+Soutenance -[hidden]right- Salle
+Soutenance -[hidden]down- Evaluation
+Evaluation -[hidden]right- Convocation
+
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+!theme pfe from .
+
+node "Poste Utilisateur" as client {
+    artifact "Navigateur Web\n(Chrome, Firefox, etc.)" as browser
+}
+
+node "Serveur d'Application (Cloud/On-premise)" as server {
+    artifact "Application Frontend\n(Build React.js)" as front
+    artifact "Application Backend\n(JAR Spring Boot)" as back
+}
+
+node "Serveur de Base de Données" as db_server {
+    database "Système de Gestion de\nBase de Données (MySQL)" as mysql
+}
+
+node "Serveur Mail (SMTP)" as smtp {
+}
+
+browser -- front : HTTP/HTTPS
+front -- back : REST API
+back -- mysql : JDBC/SQL
+back -- smtp : SMTP (Notifications)
+
+@enduml

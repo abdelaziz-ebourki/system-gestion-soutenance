@@ -217,31 +217,26 @@ Le diagramme suivant détaille l'organisation interne des modules et leur commun
     \caption{Architecture technique des composants}
 \end{figure}
 
+\subsection{Sécurité et Authentification JWT}
+\label{subsec:securite_jwt}
+
+Pour répondre aux exigences de sécurité et de performance définies dans le cahier des charges, le système implémente une authentification \textbf{stateless} (sans état) basée sur les \textbf{JSON Web Tokens (JWT)} :
+
+\begin{itemize}[label=\textcolor{primary}{\textbullet}]
+    \item \textbf{Génération :} Lors de la connexion, le serveur valide les identifiants et génère un token signé cryptographiquement contenant l'identité et le rôle de l'utilisateur.
+    \item \textbf{Transmission :} Ce token est renvoyé au client (React) qui le stocke localement et l'inclut dans le header \texttt{Authorization} de chaque requête API ultérieure.
+    \item \textbf{Validation :} Le backend (Spring Security) intercepte chaque requête, vérifie la signature du token et extrait les droits d'accès sans avoir à interroger la base de données pour la session, garantissant ainsi une sécurité optimale et une grande rapidité de traitement.
+\end{itemize}
+
 \section{Conception Statique}
 \label{sec:statique}
 
-\subsection{Gestion des utilisateurs et authentification}
+Le diagramme de classes suivant présente l'organisation globale des entités du système, leurs attributs, méthodes et les relations qui les unissent.
 
 \begin{figure}[H]
     \centering
-    \pumlsvg[\textwidth]{class_users}
-    \caption{Diagramme de classes : Utilisateurs}
-\end{figure}
-
-\subsection{Gestion académique et projets}
-
-\begin{figure}[H]
-    \centering
-    \pumlsvg[0.7\textwidth]{class_projects}
-    \caption{Diagramme de classes : Projets et Soutenances}
-\end{figure}
-
-\subsection{Planification et évaluation}
-
-\begin{figure}[H]
-    \centering
-    \pumlsvg[\textwidth]{class_planning}
-    \caption{Diagramme de classes : Planification et Évaluation}
+    \pumlsvg[\textwidth]{class_global}
+    \caption{Diagramme de classes global du système}
 \end{figure}
 
 \subsection{Cycle de vie d'une soutenance}
@@ -265,6 +260,195 @@ Le Modèle Logique de Données (MLD) traduit les diagrammes de classes en struct
     \pumlsvg[0.75\textwidth]{mld_schema}
     \caption{Modèle Logique de Données (MLD)}
 \end{figure}
+
+\subsection{Dictionnaire des données}
+\label{subsec:dictionnaire}
+
+Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Logique de Données, organisés par domaine fonctionnel.
+
+\subsubsection{Gestion des utilisateurs et des rôles}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant unique de l'utilisateur. \\
+        nom, prenom & VARCHAR & NOT NULL & Informations civiles. \\
+        email & VARCHAR & UNIQUE & Adresse de contact et identifiant de connexion. \\
+        password & VARCHAR & NOT NULL & Hash du mot de passe (BCrypt). \\
+        role & ENUM & NOT NULL & Rôle (ADMIN, COORDINATEUR, ENSEIGNANT, ETUDIANT). \\
+        actif & BOOLEAN & DEFAULT TRUE & État d'activation du compte. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table utilisateurs}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        cne & VARCHAR & PK & Code National de l'Étudiant (identifiant unique). \\
+        filiere & VARCHAR & NOT NULL & Nom de la filière d'attachement. \\
+        niveau & VARCHAR & NOT NULL & Niveau académique (ex: Licence, Master). \\
+        user\_id & INT & FK & Référence vers le compte utilisateur. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table etudiants}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant unique de l'enseignant. \\
+        grade & VARCHAR & - & Grade académique (ex: PES, PH). \\
+        specialite & VARCHAR & - & Domaine d'expertise. \\
+        user\_id & INT & FK & Référence vers le compte utilisateur. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table enseignants}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant unique du profil spécifique. \\
+        user\_id & INT & FK & Référence vers le compte utilisateur. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table administrateurs / coordinateurs}
+\end{table}
+
+\subsubsection{Organisation académique et logistique}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant de la session de soutenance. \\
+        libelle & VARCHAR & NOT NULL & Nom de la session (ex: Session Printemps 2026). \\
+        date\_debut & DATE & NOT NULL & Début de la période de soutenances. \\
+        date\_fin & DATE & NOT NULL & Fin de la période de soutenances. \\
+        statut & ENUM & NOT NULL & État (OUVERTE, VERROUILLEE, CLOTUREE). \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table sessions\_globales}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant unique du projet. \\
+        titre & VARCHAR & NOT NULL & Intitulé exact du sujet de PFE/Mémoire. \\
+        description & TEXT & - & Résumé ou détails du projet. \\
+        type & ENUM & NOT NULL & Type (PFE, MEMOIRE, STAGE). \\
+        encadrant\_id & INT & FK & Référence vers l'enseignant encadrant. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table projets}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant unique de la salle. \\
+        nom & VARCHAR & NOT NULL & Nom ou numéro de la salle. \\
+        batiment & VARCHAR & - & Localisation géographique. \\
+        capacite & INT & - & Nombre de places assises disponibles. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table salles}
+\end{table}
+
+\subsubsection{Soutenances et Évaluations}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant unique de la soutenance. \\
+        date\_passage & DATE & NOT NULL & Date prévue pour la séance. \\
+        heure\_debut & TIME & NOT NULL & Heure précise du début de la séance. \\
+        duree & INT & - & Durée prévue en minutes. \\
+        statut & ENUM & NOT NULL & État (PLANIFIEE, CONVOQUEE, EVALUEE, etc.). \\
+        salle\_id & INT & FK & Référence à la salle occupée. \\
+        projet\_id & INT & FK & Référence au projet présenté. \\
+        session\_id & INT & FK & Référence à la session globale. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table soutenances}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        soutenance\_id & INT & PK, FK & Référence à la soutenance concernée. \\
+        enseignant\_id & INT & PK, FK & Référence à l'enseignant membre. \\
+        role\_jury & ENUM & NOT NULL & Rôle (PRESIDENT, RAPPORTEUR, EXAMINATEUR). \\
+        present & BOOLEAN & - & Confirmation de présence effective. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table membres\_jury}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description} \\
+        \midrule
+        id & INT & PK, AI & Identifiant de l'évaluation. \\
+        note & FLOAT & NOT NULL & Note finale attribuée (calculée via RG6). \\
+        observations & TEXT & - & Remarques et commentaires du jury. \\
+        decision & ENUM & NOT NULL & Décision finale (ADMIS, AJOURNE, etc.). \\
+        soutenance\_id & INT & FK & Référence à la soutenance évaluée. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table evaluations}
+\end{table}
+
 
 \newpage
 \section{Processus Métiers}

@@ -10,5 +10,6 @@ docs/inspiration/
 tools/
 docs/archive
 temp*
-docs/reports/cahier-des-charges/svg-inkscape/
+docs/reports/cahier-des-charges/svg-inkscape
+docs/reports/conception/svg-inkscape
 GEMINI.md
