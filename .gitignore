@@ -6,10 +6,11 @@
 *.synctex.gz
 *.toc
 _markdown_CDC/
-docs/inspiration/
+inspiration/
 tools/
-docs/archive
+archive/
 temp*
-docs/reports/cahier-des-charges/svg-inkscape
-docs/reports/conception/svg-inkscape
+svg-inkscape/
 GEMINI.md
+
+.vscode/

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	contentStyleType="text/css"
+	height="800px"
+	preserveAspectRatio="xMidYMid meet"
+	style="width: 600px; height: 800px; background: #ffffff"
+	version="1.1"
+	viewBox="0 0 600 800"
+	width="600px"
+	zoomAndPan="magnify"
+>
+	<!-- Arrière-plan -->
+	<rect width="600" height="800" fill="white" />
+
+	<!-- En-tête -->
+	<line x1="30" y1="50" x2="570" y2="50" stroke="black" stroke-width="2" />
+	<text
+		x="300"
+		y="92"
+		font-family="serif"
+		font-size="28"
+		font-weight="bold"
+		text-anchor="middle"
+		letter-spacing="2"
+		fill="black"
+	>
+		CONVOCATION DE SOUTENANCE
+	</text>
+	<line x1="30" y1="115" x2="570" y2="115" stroke="black" stroke-width="2" />
+
+	<text
+		x="300"
+		y="155"
+		font-family="serif"
+		font-size="18"
+		font-style="italic"
+		text-anchor="middle"
+		fill="#333"
+	>
+		Projet de Fin d'Études (PFE)
+	</text>
+
+	<!-- Corps du texte -->
+	<text x="50" y="225" font-family="serif" font-size="16" fill="black">
+		Il est porté à la connaissance de l'étudiant(e)
+		<tspan font-weight="bold" text-decoration="underline">Mohamed Ali</tspan>
+	</text>
+	<text x="50" y="250" font-family="serif" font-size="16" fill="black">
+		inscrit(e) en
+		<tspan font-weight="bold">
+			SMI - Sciences Mathématiques et Informatique,
+		</tspan>
+	</text>
+	<text x="50" y="275" font-family="serif" font-size="16" fill="black">
+		que sa soutenance est programmée pour :
+	</text>
+
+	<!-- Détails de la planification -->
+	<rect
+		x="50"
+		y="310"
+		width="500"
+		height="150"
+		rx="4"
+		fill="whitesmoke"
+		stroke="black"
+		stroke-width="1"
+	/>
+	<text
+		x="80"
+		y="355"
+		font-family="serif"
+		font-size="16"
+		fill="black"
+		font-weight="bold"
+	>
+		Date :
+	</text>
+	<text
+		x="520"
+		y="355"
+		font-family="serif"
+		font-size="16"
+		font-weight="bold"
+		text-anchor="end"
+		fill="black"
+	>
+		15 Juin 2026
+	</text>
+
+	<text
+		x="80"
+		y="395"
+		font-family="serif"
+		font-size="16"
+		fill="black"
+		font-weight="bold"
+	>
+		Heure :
+	</text>
+	<text
+		x="520"
+		y="395"
+		font-family="serif"
+		font-size="16"
+		font-weight="bold"
+		text-anchor="end"
+		fill="black"
+	>
+		09:30 AM
+	</text>
+
+	<text
+		x="80"
+		y="435"
+		font-family="serif"
+		font-size="16"
+		fill="black"
+		font-weight="bold"
+	>
+		Lieu :
+	</text>
+	<text
+		x="520"
+		y="435"
+		font-family="serif"
+		font-size="16"
+		font-weight="bold"
+		text-anchor="end"
+		fill="black"
+	>
+		Salle TD-05
+	</text>
+
+	<!-- Sujet -->
+	<text
+		x="50"
+		y="515"
+		font-family="serif"
+		font-size="18"
+		font-weight="bold"
+		fill="black"
+	>
+		Sujet :
+	</text>
+	<rect
+		x="50"
+		y="530"
+		width="500"
+		height="50"
+		fill="none"
+		rx="2"
+		stroke="#eee"
+	/>
+	<line x1="50" y1="530" x2="50" y2="580" stroke="black" stroke-width="4" />
+	<text
+		x="70"
+		y="562"
+		font-family="serif"
+		font-size="16"
+		font-style="italic"
+		fill="black"
+	>
+		"Système Intelligente de Gestion des dépenses et des budgets"
+	</text>
+
+	<!-- Jury -->
+	<text
+		x="50"
+		y="630"
+		font-family="serif"
+		font-size="18"
+		font-weight="bold"
+		fill="black"
+	>
+		Composition du Jury :
+	</text>
+
+	<g transform="translate(0, 10)">
+		<text x="50" y="670" font-family="serif" font-size="16" fill="#333">
+			Président
+		</text>
+		<text
+			x="215"
+			y="670"
+			font-family="serif"
+			font-size="16"
+			font-weight="bold"
+			fill="black"
+		>
+			Pr. Ahmed Alami
+		</text>
+		<line x1="50" y1="688" x2="550" y2="688" stroke="#ccc" stroke-width="1" />
+
+		<text x="50" y="718" font-family="serif" font-size="16" fill="#333">
+			Rapporteur
+		</text>
+		<text
+			x="215"
+			y="718"
+			font-family="serif"
+			font-size="16"
+			font-weight="bold"
+			fill="black"
+		>
+			Dr. Sarah Mansouri
+		</text>
+		<line x1="50" y1="736" x2="550" y2="736" stroke="#ccc" stroke-width="1" />
+
+		<text x="50" y="766" font-family="serif" font-size="16" fill="#333">
+			Examinateur
+		</text>
+		<text
+			x="215"
+			y="766"
+			font-family="serif"
+			font-size="16"
+			font-weight="bold"
+			fill="black"
+		>
+			Dr. Karim Benali
+		</text>
+	</g>
+</svg>
