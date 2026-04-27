@@ -46,6 +46,8 @@
 \section{Diagrammes de Cas d'Utilisation}
 \label{sec:cas_utilisation}
 
+Cette section détaille les besoins fonctionnels du système à travers les diagrammes de cas d'utilisation. Ces représentations permettent de délimiter le périmètre du projet en identifiant les interactions entre les différents acteurs et les fonctionnalités offertes par l'application. Chaque module répond à des objectifs spécifiques, garantissant une séparation claire des responsabilités au sein de l'écosystème de gestion des soutenances.
+
 \begin{projectbox}{Remarque}
     Par souci de clarté visuelle, le cas d'utilisation « S'authentifier » est omis des diagrammes détaillés mais reste une pré-condition transversale à toutes les actions du système.
 \end{projectbox}
@@ -53,15 +55,20 @@
 \subsection{Hiérarchie des acteurs}
 \label{subsec:uml_acteurs}
 
+Le système distingue plusieurs profils d'utilisateurs, chacun possédant des droits et des responsabilités spécifiques. La hiérarchie permet d'hériter des fonctionnalités communes, notamment la consultation du planning et la gestion du profil personnel.
+
 \begin{figure}[H]
     \centering
     \pumlsvg[0.6\textwidth]{uc_hierarchy}
     \caption{Hiérarchie générale des acteurs}
 \end{figure}
 
-\subsection{Cas d'utilisation}
+\subsection{Cas d'utilisation par module}
 
 \subsubsection{Module Administration}
+
+Ce module est réservé à la gestion technique et structurelle de la plateforme. L'administrateur veille au bon fonctionnement du système en gérant les ressources de base indispensables au processus académique.
+
 \begin{figure}[H]
     \centering
     \pumlsvg[0.7\textwidth]{uc_admin}
@@ -87,6 +94,9 @@
 \end{table}
 
 \subsubsection{Module Coordination}
+
+Le coordinateur est l'acteur central du processus de planification. Ce module lui offre des outils avancés pour orchestrer les sessions de soutenances, de l'importation massive des données à la validation finale du planning après résolution des conflits.
+
 \begin{figure}[H]
     \centering
     \pumlsvg[\textwidth]{uc_coordination}
@@ -130,6 +140,9 @@
 \end{table}
 
 \subsubsection{Module Jury}
+
+Les enseignants interagissent avec le système principalement pour consulter leurs obligations de jury et évaluer les travaux des étudiants. Ce module simplifie la saisie des notes et assure la transparence des critères d'évaluation.
+
 \begin{figure}[H]
     \centering
     \pumlsvg[\textwidth]{uc_jury}
@@ -163,6 +176,9 @@
 \end{table}
 
 \subsubsection{Module Étudiant}
+
+L'interface dédiée à l'étudiant est conçue pour être simple et directe. Elle lui permet de se concentrer sur les informations essentielles liées à sa soutenance et de récupérer ses documents officiels en toute autonomie.
+
 \begin{figure}[H]
     \centering
     \pumlsvg[\textwidth]{uc_student}
@@ -190,7 +206,7 @@
 \newpage
 \section{Architecture Système}
 
-Le système repose sur une architecture web moderne organisée en trois couches, garantissant une séparation claire des responsabilités et une maintenance facilitée.
+Le système repose sur une architecture web moderne organisée en couches, garantissant une séparation claire des responsabilités, une sécurité renforcée et une maintenance facilitée à long terme.
 
 \subsection{Architecture en couches}
 
@@ -201,15 +217,15 @@ Le système repose sur une architecture web moderne organisée en trois couches,
 \end{figure}
 
 L'application suit le pattern \textbf{MVC (Modèle-Vue-Contrôleur)} adapté au Web :
-\begin{itemize}
-    \item \textbf{Vue (View) :} Assurée par le Frontend React, elle gère l'interface utilisateur et l'expérience interactive.
-    \item \textbf{Contrôleur (Controller) :} Les contrôleurs Spring Boot reçoivent les requêtes REST et orchestrent les réponses.
-    \item \textbf{Modèle (Model) :} Comprend la logique métier (Services), l'accès aux données (Repositories) et la persistance MySQL.
+\begin{itemize}[label=\textcolor{primary}{\textbullet}]
+    \item \textbf{Vue (View) :} Assurée par le Frontend React, elle gère l'interface utilisateur et l'expérience interactive de manière asynchrone.
+    \item \textbf{Contrôleur (Controller) :} Les contrôleurs Spring Boot exposent des endpoints REST, reçoivent les requêtes du client et orchestrent les réponses.
+    \item \textbf{Modèle (Model) :} Comprend la logique métier (Services), l'accès aux données (Repositories) et la structure de persistance MySQL.
 \end{itemize}
 
 \subsection{Architecture technique des composants}
 
-Le diagramme suivant détaille l'organisation interne des modules et leur communication.
+Le diagramme suivant détaille l'organisation interne des modules et leur mode de communication. On y observe la séparation nette entre le client lourd web et le serveur d'application qui encapsule la logique métier complexe et les règles de gestion du système.
 
 \begin{figure}[H]
     \centering
@@ -231,7 +247,7 @@ Pour répondre aux exigences de sécurité et de performance définies dans le c
 \section{Conception Statique}
 \label{sec:statique}
 
-Le diagramme de classes suivant présente l'organisation globale des entités du système, leurs attributs, méthodes et les relations qui les unissent.
+Le diagramme de classes constitue le pivot de la conception statique. Il définit la structure de données interne et les règles métier qui régissent les interactions entre les objets du système. Cette modélisation assure la cohérence des informations tout au long du cycle de vie d'une soutenance.
 
 \begin{figure}[H]
     \centering
@@ -239,9 +255,17 @@ Le diagramme de classes suivant présente l'organisation globale des entités du
     \caption{Diagramme de classes global du système}
 \end{figure}
 
+Les entités clés identifiées sont les suivantes :
+\begin{itemize}[label=\textcolor{primary}{\textbullet}]
+    \item \textbf{Utilisateur :} Classe de base gérant l'identité, les identifiants de connexion (email/password) et les droits d'accès (rôles).
+    \item \textbf{Soutenance :} Entité centrale du système, elle fait le lien entre un projet, un jury, une salle et un créneau temporel précis au sein d'une session.
+    \item \textbf{Projet :} Représente le travail académique (PFE, Mémoire, Stage) associé à un étudiant et supervisé par un enseignant encadrant.
+    \item \textbf{Jury :} Structure d'association complexe définissant les rôles spécifiques (Président, Rapporteur, Examinateur) et gérant la présence effective des membres.
+\end{itemize}
+
 \subsection{Cycle de vie d'une soutenance}
 
-Le diagramme d'états suivant illustre les transitions d'état de l'entité Soutenance, depuis sa création jusqu'à sa clôture ou annulation.
+Le diagramme d'états suivant illustre les transitions d'état de l'entité Soutenance. Ce cycle garantit que les actions (comme la saisie des notes ou la génération des convocations) ne sont autorisées que lorsque la soutenance est dans l'état approprié.
 
 \begin{figure}[H]
     \centering
@@ -253,7 +277,7 @@ Le diagramme d'états suivant illustre les transitions d'état de l'entité Sout
 \section{Conception Relationnelle}
 \label{sec:relationnelle}
 
-Le Modèle Logique de Données (MLD) traduit les diagrammes de classes en structures tabulaires prêtes pour la persistance dans une base de données relationnelle MySQL.
+Le Modèle Logique de Données (MLD) traduit les diagrammes de classes en structures tabulaires optimisées pour la persistance dans une base de données relationnelle MySQL, en respectant les formes normales pour éviter la redondance.
 
 \begin{figure}[H]
     \centering
@@ -264,7 +288,7 @@ Le Modèle Logique de Données (MLD) traduit les diagrammes de classes en struct
 \subsection{Dictionnaire des données}
 \label{subsec:dictionnaire}
 
-Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Logique de Données, organisés par domaine fonctionnel.
+Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Logique de Données, organisés par domaine fonctionnel pour une lecture structurée.
 
 \subsubsection{Gestion des utilisateurs et des rôles}
 
@@ -454,10 +478,10 @@ Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Lo
 \section{Processus Métiers}
 \label{sec:processus}
 
-Cette section détaille la logique de fonctionnement des processus du système.
+Cette section détaille la logique algorithmique et le flux de contrôle des processus métier critiques du système.
 
 \subsection{Workflow de planification}
-Ce processus décrit les étapes de création d'une session de soutenance, incluant les boucles de correction en cas de conflit.
+Ce processus décrit les étapes de création d'une session de soutenance. Le workflow est conçu pour être itératif, permettant au coordinateur de corriger les anomalies détectées par le système (conflits de salle, indisponibilité d'un jury) avant la validation finale.
 
 \begin{figure}[H]
     \centering
@@ -466,7 +490,7 @@ Ce processus décrit les étapes de création d'une session de soutenance, inclu
 \end{figure}
 
 \subsection{Déroulement des évaluations}
-Ce diagramme illustre le processus allant du démarrage de la soutenance jusqu'au calcul automatique de la moyenne finale.
+Ce diagramme illustre le processus métier de l'évaluation, allant du contrôle de présence au démarrage de la séance jusqu'au calcul automatique de la moyenne finale. Le système applique les règles de gestion (RG6) pour garantir l'intégrité des résultats.
 
 \begin{figure}[H]
     \centering
@@ -478,10 +502,10 @@ Ce diagramme illustre le processus allant du démarrage de la soutenance jusqu'a
 \section{Conception Dynamique}
 \label{sec:dynamique}
 
-Cette section détaille les interactions entre les différents composants MVC lors de l'exécution des processus métier critiques.
+Cette section détaille les interactions chronologiques entre les différents composants du système (Client, Contrôleur, Services, Modèle) lors de l'exécution des processus métier.
 
 \subsection{Processus d'authentification}
-Le diagramme suivant illustre le flux de connexion sécurisée. Le \textbf{Contrôleur de sécurité} interroge le \textbf{Modèle} (Base de données) pour valider les identifiants avant de générer un token JWT.
+L'authentification repose sur un échange sécurisé où le \textbf{Contrôleur de sécurité} valide les identifiants via le \textbf{Service Utilisateur} avant que le serveur ne signe et ne renvoie un token JWT.
 
 \begin{figure}[H]
     \centering
@@ -490,7 +514,7 @@ Le diagramme suivant illustre le flux de connexion sécurisée. Le \textbf{Contr
 \end{figure}
 
 \subsection{Planification et détection de conflits}
-Ce diagramme montre la logique de validation. Le \textbf{PlanningService} coordonne avec le \textbf{ConflictService} pour vérifier l'intégrité des données du \textbf{Modèle} avant toute persistance.
+Lors de la planification, le \textbf{PlanningService} sollicite le \textbf{ConflictService} pour effectuer des vérifications transversales sur la base de données (Modèle) afin d'assurer l'absence de chevauchements.
 
 \begin{figure}[H]
     \centering
@@ -499,7 +523,7 @@ Ce diagramme montre la logique de validation. Le \textbf{PlanningService} coordo
 \end{figure}
 
 \subsection{Affectation et validation du jury}
-L'affectation des membres de jury illustre l'interaction entre les services métier pour appliquer les règles de gestion (RG4 et RG5) sur les entités du système.
+L'affectation des jurys illustre la mise en œuvre des règles métier complexes (RG4 et RG5). Le service métier coordonne la sélection des enseignants en fonction de leur charge de travail et de leur spécialité.
 
 \begin{figure}[H]
     \centering
@@ -508,7 +532,7 @@ L'affectation des membres de jury illustre l'interaction entre les services mét
 \end{figure}
 
 \subsection{Saisie et validation d'une évaluation}
-Le processus d'évaluation permet aux membres du jury d'enregistrer les notes et décisions. Le système calcule automatiquement la moyenne (RG6) et met à jour l'état de la soutenance.
+Ce flux montre comment les membres du jury enregistrent les notes. Le système effectue le calcul en temps réel et met à jour l'état de la soutenance pour clôturer le processus d'évaluation.
 
 \begin{figure}[H]
     \centering
@@ -517,7 +541,7 @@ Le processus d'évaluation permet aux membres du jury d'enregistrer les notes et
 \end{figure}
 
 \subsection{Génération de documents PDF}
-Ce flux illustre la production automatisée des convocations, où le service récupère les données consolidées du modèle pour les injecter dans un moteur de génération PDF.
+Le service de documents extrait les données consolidées du modèle (noms, dates, salles) pour les injecter dans un template normalisé, garantissant la conformité administrative des convocations.
 
 \begin{figure}[H]
     \centering
@@ -526,7 +550,7 @@ Ce flux illustre la production automatisée des convocations, où le service ré
 \end{figure}
 
 \subsection{Import massif de données}
-Le système supporte l'importation de listes d'étudiants via des fichiers CSV ou Excel, avec une validation d'intégrité ligne par ligne avant l'insertion en base de données.
+Le processus d'importation gère la lecture de fichiers externes, effectue une validation syntaxique et sémantique ligne par ligne, et assure la persistance transactionnelle des données valides.
 
 \begin{figure}[H]
     \centering
@@ -535,7 +559,7 @@ Le système supporte l'importation de listes d'étudiants via des fichiers CSV o
 \end{figure}
 
 \subsection{Workflow de validation finale}
-La validation d'une session par le coordinateur déclenche le verrouillage des données et l'envoi massif de notifications aux acteurs concernés.
+La validation finale par le coordinateur est une action critique qui verrouille la session et déclenche des événements asynchrones, notamment l'envoi de notifications par e-mail à tous les acteurs.
 
 \begin{figure}[H]
     \centering
@@ -544,7 +568,7 @@ La validation d'une session par le coordinateur déclenche le verrouillage des d
 \end{figure}
 
 \subsection{Récupération de compte}
-Le processus de réinitialisation de mot de passe assure la sécurité via l'envoi d'un token UUID unique par e-mail, conformément aux besoins non fonctionnels.
+Ce flux garantit la sécurité des comptes utilisateurs. En cas d'oubli, un lien temporaire contenant un jeton unique est envoyé, permettant une réinitialisation sécurisée du mot de passe dans la base de données.
 
 \begin{figure}[H]
     \centering
@@ -568,7 +592,10 @@ Le diagramme suivant présente le sitemap de l'application et les points d'entr�
 \end{figure}
 
 \subsection{Prototypes d'interface}
-Cette sous-section présente les maquettes graphiques des principales interfaces de l'application, illustrant l'expérience utilisateur pour chaque rôle.
+Cette sous-section présente les maquettes graphiques des principales interfaces de l'application, illustrant l'expérience utilisateur pour chaque rôle. Le design privilégie la sobriété, l'efficacité et une navigation intuitive.
+
+\paragraph{Interface d'accès}
+L'écran de connexion constitue le point d'entrée unique du système. Il assure la sécurité des accès et redirige intelligemment chaque utilisateur vers son espace dédié en fonction de son rôle.
 
 \begin{figure}[H]
     \centering
@@ -576,11 +603,17 @@ Cette sous-section présente les maquettes graphiques des principales interfaces
     \caption{Interface de connexion}
 \end{figure}
 
+\paragraph{Tableau de bord Administrateur}
+Cette interface offre une vision globale sur l'infrastructure. Elle permet de gérer le cycle de vie des comptes utilisateurs et de configurer les ressources logistiques (salles et bâtiments) essentielles au bon déroulement des sessions.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{../../assets/prototype/admin-dashboard.png}
     \caption{Interface : Tableau de bord Administrateur}
 \end{figure}
+
+\paragraph{Tableau de bord Coordinateur}
+Centre névralgique de la planification, cette vue permet au coordinateur d'importer les données massives, d'orchestrer les sessions et de visualiser l'état d'avancement de la planification tout en surveillant les alertes de conflits.
 
 \begin{figure}[H]
     \centering
@@ -588,11 +621,17 @@ Cette sous-section présente les maquettes graphiques des principales interfaces
     \caption{Interface : Tableau de bord Coordinateur}
 \end{figure}
 
+\paragraph{Espace Enseignant / Jury}
+Conçue pour la mobilité, cette interface permet aux enseignants de consulter leur planning de jury en temps réel, de télécharger leurs convocations et d'accéder directement aux formulaires de notation lors des séances d'évaluation.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{../../assets/prototype/teacher-dashboard.png}
     \caption{Interface : Tableau de bord Enseignant}
 \end{figure}
+
+\paragraph{Espace Étudiant}
+L'étudiant dispose d'une interface épurée affichant les informations cruciales : date, heure, salle et composition de son jury. Elle permet également le téléchargement immédiat de la convocation officielle.
 
 \begin{figure}[H]
     \centering
