@@ -17,9 +17,9 @@ repeat while (Saisie terminée pour tous ?) is (Non)
 
 :Statut -> EVALUEE;
 
-if (Session terminée ?) then (Oui)
+if (Toutes les soutenances de la session globale sont terminées ?) then (Oui)
     :Génération du Procès-Verbal (PV);
-    :Clôture officielle de la session;
+    :Clôture officielle de la session globale;
     :Statut -> CLOTUREE;
 endif
 

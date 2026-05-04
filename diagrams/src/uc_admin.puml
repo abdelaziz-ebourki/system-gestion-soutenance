@@ -7,10 +7,12 @@ actor "Administrateur" as Admin
 rectangle "Module Administration" {
     usecase "Gérer comptes utilisateurs" as UC1
     usecase "Gérer salles" as UC2
-    usecase "Gérer les sessions et paramètres" as UC4
+    usecase "Gérer les sessions globales" as UC3
+    usecase "Gérer les  paramètres du système" as UC4
 }
 
 Admin --> UC1
 Admin --> UC2
+Admin --> UC3
 Admin --> UC4
 @enduml

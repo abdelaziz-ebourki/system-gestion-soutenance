@@ -302,9 +302,9 @@ de droits d'accès et de fonctionnalités spécifiques :
 \begin{itemize}[label=\textcolor{primary}{\textbullet}]
     \item \textbf{Administrateur :} gère les comptes utilisateurs, configure les
           paramètres généraux et supervise le bon fonctionnement du système.
-    \item \textbf{Coordinateur :} acteur central de l'organisation ; crée les
-          sessions de soutenance, affecte les jurys, valide les plannings et
-          consulte les rapports de synthèse.
+    \item \textbf{Coordinateur :} acteur central de l'organisation ; planifie
+          les soutenances dans une session globale, affecte les jurys, valide
+          les plannings et consulte les rapports de synthèse.
     \item \textbf{Enseignant / Membre de jury :} consulte ses convocations,
           prend connaissance des informations relatives aux étudiants à évaluer
           et saisit les notes et observations après chaque soutenance.
@@ -331,7 +331,8 @@ L'application doit permettre l'enregistrement des étudiants avec leurs
 informations complètes : nom, prénom, code national d'étudiant, filière, niveau,
 titre du projet et encadrant. Une fonction d'import depuis un fichier CSV ou
 Excel est prévue en option. Chaque étudiant doit être associé à un projet ou
-mémoire spécifique.
+mémoire spécifique ; cette association est portée par le dossier étudiant afin de
+retrouver directement le projet présenté lors de la planification.
 
 \subsubsection{Gestion des enseignants et jurys}
 \label{subsubsec:gestion_enseignants}
@@ -353,10 +354,10 @@ soutenance spécifique.
 \subsubsection{Planification des soutenances}
 \label{subsubsec:planification}
 
-La planification permet la création d'une session de soutenance avec la
-définition de la date, de l'heure de début, de la durée et de la salle. Chaque
-soutenance doit être associée à un étudiant ou à un groupe, et un planning
-global doit être consultable selon différents critères.
+La planification permet la création des soutenances individuelles au sein d'une
+session globale définie par l'administration, avec la date, l'heure de début, la
+durée et la salle. Chaque soutenance doit être associée à un étudiant ou à un
+groupe, et un planning global doit être consultable selon différents critères.
 
 \subsubsection{Affectation des jurys}
 \label{subsubsec:affectation_jurys}
@@ -386,9 +387,11 @@ Excel/CSV.
 \subsubsection{Saisie des évaluations}
 \label{subsubsec:saisie_evaluations}
 
-Les membres du jury ou le coordinateur doivent pouvoir saisir une note, ajouter
-des remarques, enregistrer la décision (admis, admis avec corrections, ajourné),
-et valider ou modifier l'évaluation avant la clôture de la session.
+Les membres du jury ou le coordinateur doivent pouvoir saisir les notes
+individuelles, ajouter des remarques, puis consolider le résultat final de la
+soutenance. La décision finale (admis, admis avec corrections, ajourné) est
+enregistrée après calcul de la moyenne et peut être validée ou modifiée avant la
+clôture.
 
 \subsubsection{Tableau de bord}
 \label{subsubsec:tableau_de_bord}
@@ -471,11 +474,12 @@ Le stack technique retenu repose sur des technologies modernes :
 Le modèle de données s'articule autour des entités principales identifiées.
 L'entité \textit{Utilisateur} sert de base aux rôles spécifiques
 \textit{Étudiant}, \textit{Enseignant} et \textit{Coordinateur}. Un
-\textit{Étudiant} est associé à un \textit{Projet}, lui-même relié à un
+\textit{Étudiant} référence son \textit{Projet}, lui-même relié à un
 \textit{Enseignant} encadrant. Une \textit{Soutenance} est l'entité centrale,
-liée à un étudiant, une salle, et plusieurs membres de jury via une table
-d'association. L'\textit{Évaluation} est associée à une soutenance et à un
-membre de jury.
+liée au projet présenté, à une salle et à plusieurs membres de jury via une
+table d'association. Les \textit{Évaluations} stockent les notes saisies par les
+membres du jury, tandis qu'un résultat consolidé porte la moyenne finale et la
+décision administrative.
 
 \subsection{Règles de gestion}
 \label{subsec:regles}
@@ -494,7 +498,7 @@ membre de jury.
         \item \textbf{RG5 :} L'encadrant de l'étudiant ne peut en aucun cas occuper
               le rôle de président du jury.
         \item \textbf{RG6 :} La note finale est calculée comme la moyenne des
-              notes attribuées par les membres du jury.
+              notes individuelles validées par les membres du jury.
     \end{itemize}
 \end{projectbox}
 
@@ -536,9 +540,10 @@ en Sections \ref{subsubsec:gestion_etudiants} et \ref{subsubsec:gestion_enseigna
 \subsection{Module 3 : Planification}
 \label{subsec:module_planification}
 
-Ce module permet de créer et d'organiser les sessions de soutenance : définition
-des horaires, réservation des salles et visualisation du planning global (voir
-Sections \ref{subsubsec:planification} et \ref{subsubsec:gestion_salles}).
+Ce module permet de créer et d'organiser les soutenances individuelles au sein
+d'une session globale : définition des horaires, réservation des salles et
+visualisation du planning global (voir Sections \ref{subsubsec:planification} et
+\ref{subsubsec:gestion_salles}).
 
 \subsection{Module 4 : Gestion des jurys}
 \label{subsec:module_jurys}
@@ -633,8 +638,8 @@ Bien que non incluses dans le périmètre initial, plusieurs évolutions sont
 envisagées à moyen terme en complément des modules décrits en \ref{sec:modules} :
 
 \begin{itemize}[label=\textcolor{primary}{\textbullet}]
-    \item \textbf{Notifications automatiques :} envoi d'e-mails aux acteurs lors
-          de modifications de planning ou de nouvelles affectations.
+    \item \textbf{Notifications enrichies :} modèles d'e-mails avancés, rappels
+          automatiques et suivi détaillé des envois.
     \item \textbf{Import avancé :} chargement massif de données académiques
           depuis des fichiers Excel.
     \item \textbf{Planification optimisée :} génération automatique des plannings
@@ -668,9 +673,5 @@ L'approche proposée, articulée autour des sept modules décrits en
 différents acteurs identifiés en \ref{subsec:acteurs}. Les critères de réussite
 définis en \ref{subsec:criteres_reussite} permettront d'évaluer objectivement
 la conformité de la livraison finale.
-
-Ce projet constitue une opportunité de développer une solution utile,
-techniquement intéressante et potentiellement réutilisable dans d'autres
-contextes académiques.
 
 \end{document}

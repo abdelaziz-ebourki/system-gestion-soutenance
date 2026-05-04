@@ -21,6 +21,7 @@ entity "etudiants" as student << (T, #c2ccd7) >> {
   filiere : VARCHAR
   niveau : VARCHAR
   user_id : INT (FK)
+  projet_id : INT (FK)
 }
 
 entity "enseignants" as prof << (T, #c2ccd7) >> {
@@ -94,8 +95,61 @@ entity "evaluations" as eval << (T, #c2ccd7) >> {
   --
   note : FLOAT
   observations : TEXT
-  decision : ENUM
+  validee : BOOLEAN
   soutenance_id : INT (FK)
+  enseignant_id : INT (FK)
+}
+
+entity "resultats_soutenance" as result << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  moyenne_finale : FLOAT
+  decision : ENUM
+  observations_finales : TEXT
+  validee : BOOLEAN
+  soutenance_id : INT (FK)
+}
+
+entity "convocations" as convocation << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  type : ENUM
+  chemin_fichier : VARCHAR
+  envoyee : BOOLEAN
+  date_generation : DATETIME
+  soutenance_id : INT (FK)
+  utilisateur_id : INT (FK)
+}
+
+entity "indisponibilites" as unavailability << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  date_debut : DATE
+  date_fin : DATE
+  heure_debut : TIME
+  heure_fin : TIME
+  motif : VARCHAR
+  enseignant_id : INT (FK)
+}
+
+entity "notifications" as notification << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  sujet : VARCHAR
+  contenu : TEXT
+  statut : ENUM
+  date_envoi : DATETIME
+  utilisateur_id : INT (FK)
+  soutenance_id : INT (FK)
+}
+
+entity "reset_tokens" as token << (T, #c2ccd7) >> {
+  * id : INT (PK)
+  --
+  token : VARCHAR (U)
+  expire_le : DATETIME
+  utilise : BOOLEAN
+  utilisateur_id : INT (FK)
 }
 
 user ||--o| student
@@ -104,11 +158,20 @@ user ||--o| admin
 user ||--o| coord
 
 prof ||--o{ project
+project ||--o{ student
 project ||--|| soutenance
 session ||--|{ soutenance
 soutenance }o--|| room
-soutenance ||--o| eval
+soutenance ||--o{ eval
+soutenance ||--o| result
 soutenance ||--|{ jury
 prof ||--|{ jury
+prof ||--o{ eval
+prof ||--o{ unavailability
+soutenance ||--o{ convocation
+user ||--o{ convocation
+user ||--o{ notification
+soutenance ||--o{ notification
+user ||--o{ token
 
 @enduml

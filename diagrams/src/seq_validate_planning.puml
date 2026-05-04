@@ -8,14 +8,14 @@ entity "Planning Service" as Service
 entity "Notification Service" as Notify
 database "Base de données" as DB
 
-Coord -> Front : Clique sur "Valider Session"
-Front -> Controller : POST /api/planning/validate-session (sessionId)
+Coord -> Front : Clique sur "Valider planning"
+Front -> Controller : POST /api/planning/validate-global-session (sessionGlobaleId)
 activate Controller
 
-Controller -> Service : validerSession(id)
+Controller -> Service : validerSessionGlobale(id)
 activate Service
 
-Service -> DB : Vérifier conformité session
+Service -> DB : Vérifier conformité de la session globale
 activate DB
 DB --> Service : OK
 deactivate DB
@@ -30,7 +30,7 @@ activate DB
 DB --> Service : OK
 deactivate DB
 
-Service -> Notify : envoyerNotificationsMassives(sessionId)
+Service -> Notify : envoyerNotificationsMassives(sessionGlobaleId)
 activate Notify
 Notify -> DB : Récupérer emails (Étudiants, Jurys)
 activate DB
@@ -40,12 +40,12 @@ Notify -> Notify : Envoi e-mails
 Notify --> Service : Notifications envoyées
 deactivate Notify
 
-Service --> Controller : Session Validée
+Service --> Controller : Planning de la session globale validé
 deactivate Service
 
 Controller --> Front : 200 OK
 deactivate Controller
 
-Front --> Coord : Afficher succès et verrouillage session
+Front --> Coord : Afficher succès et verrouillage de la session globale
 
 @enduml

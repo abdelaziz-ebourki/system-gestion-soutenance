@@ -5,33 +5,29 @@ left to right direction
 actor "Coordinateur" as Coord
 
 rectangle "Module Coordination" {
-    usecase "Gérer étudiants" as UC7
     usecase "Gérer les projets" as UC11
     usecase "Planifier soutenances" as UC4
     usecase "Assigner jurys" as UC1
     usecase "Valider planning" as UC3
-    usecase "Consulter planning" as UC9
     usecase "Générer convocations" as UC5
     usecase "Générer planning général" as UC6
     usecase "Consulter rapports" as UC2
 
-    usecase "Importer listes" as UC8
+    usecase "Consulter planning" as UC9
     usecase "Vérifier conflits" as Check
     usecase "Rechercher / Filtrer" as UC10
 
 
-    UC7 ..> UC8 : <<extend>>
     UC1 ..> Check : <<include>>
     UC3 ..> Check : <<include>>
-    UC9 ..> UC10 : <<extend>>
+    UC6 ..> UC9 : <<include>>
+    UC10 ..> UC9 : <<extend>>
 }
 
-Coord --> UC7
 Coord --> UC11
 Coord --> UC4
 Coord --> UC1
 Coord --> UC3
-Coord --> UC9
 Coord --> UC5
 Coord --> UC6
 Coord --> UC2

@@ -87,7 +87,9 @@ Ce module est réservé à la gestion technique et structurelle de la plateforme
         \addlinespace
         Gérer salles                     & Administration du catalogue des salles, incluant la saisie des capacités et des disponibilités. \\
         \addlinespace
-        Gérer les sessions et paramètres & Configuration des sessions globales (périodes, dates de session) et des paramètres système.     \\
+        Gérer sessions globales            & Création, modification et clôture des sessions globales (session normale, rattrapage, période universitaire). \\
+        \addlinespace
+        Gérer les paramètres du système    & Configuration des paramètres transversaux de la plateforme : durées par défaut, périodes, règles générales et options d'administration. \\
         \bottomrule
     \end{tabular}
     \caption{Description des cas d'utilisation -- Administrateur}
@@ -95,7 +97,7 @@ Ce module est réservé à la gestion technique et structurelle de la plateforme
 
 \subsubsection{Module Coordination}
 
-Le coordinateur est l'acteur central du processus de planification. Ce module lui offre des outils avancés pour orchestrer les sessions de soutenances, de l'importation massive des données à la validation finale du planning après résolution des conflits.
+Le coordinateur est l'acteur central du processus de planification. Dans ce module, le terme \textit{soutenance} désigne une séance individuelle planifiée pour un étudiant et son jury, tandis que la \textit{session globale} désigne le cadre administratif créé par l'administrateur (par exemple session normale 2025--2026 ou session de rattrapage). Le coordinateur travaille donc sur les soutenances contenues dans une session globale, de l'importation massive des données à la validation finale du planning après résolution des conflits.
 
 \begin{figure}[H]
     \centering
@@ -115,21 +117,17 @@ Le coordinateur est l'acteur central du processus de planification. Ce module lu
         \addlinespace
         Planifier soutenances      & Planification individuelle des créneaux de passage, définition des horaires et affectation des salles.     \\
         \addlinespace
-        Valider planning           & Confirmation finale du planning après traitement des alertes et détection des conflits.                    \\
-        \addlinespace
-        Gérer étudiants            & Administration des dossiers étudiants (inscription, filière, niveau académique).                           \\
+        Valider planning           & Confirmation finale du planning d'une session globale après traitement des alertes et détection des conflits.                    \\
         \addlinespace
         Gérer les projets          & Gestion des thèmes, titres de PFE et association entre étudiants, projets et encadrants.                   \\
         \addlinespace
-        Importer listes            & Chargement massif de données (CSV/Excel) pour les étudiants, enseignants et projets.                       \\
-        \addlinespace
-        Consulter planning         & Visualisation globale filtrable (par date, salle, enseignant, filière ou étudiant).                        \\
+        Consulter planning         & Visualisation globale filtrable (par date, salle, enseignant, filière ou étudiant), utilisée aussi comme base pour générer le planning général.                        \\
         \addlinespace
         Rechercher / Filtrer       & Recherche multicritère avancée pour la supervision et le suivi des dossiers.                               \\
         \addlinespace
         Générer convocations       & Production automatique des documents officiels (PDF) pour les étudiants et les membres de jury.            \\
         \addlinespace
-        Générer planning général   & Production du planning complet et de la liste de présence pour la session de soutenance.                   \\
+        Générer planning général   & Production du planning complet et de la liste de présence pour la session globale, à partir du planning consultable validé.                   \\
         \addlinespace
         Consulter rapports         & Accès aux synthèses, statistiques d'activité et procès-verbaux (PV) simplifiés.                            \\
         \addlinespace
@@ -157,7 +155,7 @@ Les enseignants interagissent avec le système principalement pour consulter leu
         \rowcolor{primary!10}
         \textbf{Cas d'utilisation}      & \textbf{Description}                                                                   \\
         \midrule
-        Consulter planning              & Accès au planning personnel des sessions où l'enseignant est mobilisé.                 \\
+        Consulter planning              & Accès au planning personnel des soutenances où l'enseignant est mobilisé.                 \\
         \addlinespace
         Consulter convocation           & Visualisation et téléchargement des convocations individuelles reçues.                 \\
         \addlinespace
@@ -258,10 +256,15 @@ Le diagramme de classes constitue le pivot de la conception statique. Il défini
 Les entités clés identifiées sont les suivantes :
 \begin{itemize}[label=\textcolor{primary}{\textbullet}]
     \item \textbf{Utilisateur :} Classe de base gérant l'identité, les identifiants de connexion (email/password) et les droits d'accès (rôles).
-    \item \textbf{Soutenance :} Entité centrale du système, elle fait le lien entre un projet, un jury, une salle et un créneau temporel précis au sein d'une session.
-    \item \textbf{Projet :} Représente le travail académique (PFE, Mémoire, Stage) associé à un étudiant et supervisé par un enseignant encadrant.
+    \item \textbf{Soutenance :} Entité centrale du système, elle fait le lien entre un projet, un jury, une salle et un créneau temporel précis au sein d'une session globale.
+    \item \textbf{Projet :} Représente le travail académique (PFE, Mémoire, Stage). Il est référencé par l'étudiant via \texttt{projet\_id} et supervisé par un enseignant encadrant.
     \item \textbf{Jury :} Structure d'association complexe définissant les rôles spécifiques (Président, Rapporteur, Examinateur) et gérant la présence effective des membres.
+    \item \textbf{Évaluation et résultat :} Chaque membre du jury saisit une note individuelle. Le résultat de soutenance consolide ces notes pour calculer la moyenne finale et porter la décision administrative.
 \end{itemize}
+
+Cette séparation évite de mélanger deux niveaux de responsabilité : les notes
+individuelles restent traçables par membre de jury, alors que le résultat final
+reste unique pour la soutenance.
 
 \subsection{Cycle de vie d'une soutenance}
 
@@ -279,9 +282,11 @@ Le diagramme d'états suivant illustre les transitions d'état de l'entité Sout
 
 Le Modèle Logique de Données (MLD) traduit les diagrammes de classes en structures tabulaires optimisées pour la persistance dans une base de données relationnelle MySQL, en respectant les formes normales pour éviter la redondance.
 
+Le modèle distingue explicitement les \textbf{sessions globales}, administrées au niveau institutionnel, et les \textbf{soutenances}, qui représentent les passages individuels planifiés par le coordinateur. Il ajoute également les tables de support nécessaires aux fonctionnalités prévues : indisponibilités des enseignants, convocations générées, notifications et jetons de réinitialisation de mot de passe.
+
 \begin{figure}[H]
     \centering
-    \pumlsvg[0.75\textwidth]{mld_schema}
+    \pumlsvg[\textwidth]{mld_schema}
     \caption{Modèle Logique de Données (MLD)}
 \end{figure}
 
@@ -323,6 +328,7 @@ Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Lo
         filiere        & VARCHAR       & NOT NULL            & Nom de la filière d'attachement.                  \\
         niveau         & VARCHAR       & NOT NULL            & Niveau académique (ex: Licence, Master).          \\
         user\_id       & INT           & FK                  & Référence vers le compte utilisateur.             \\
+        projet\_id     & INT           & FK                  & Référence vers le projet porté par l'étudiant.    \\
         \bottomrule
     \end{tabular}
     \caption{Dictionnaire des données -- Table etudiants}
@@ -370,8 +376,8 @@ Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Lo
         \rowcolor{primary!10}
         \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                            \\
         \midrule
-        id             & INT           & PK, AI              & Identifiant de la session de soutenance.        \\
-        libelle        & VARCHAR       & NOT NULL            & Nom de la session (ex: Session Printemps 2026). \\
+        id             & INT           & PK, AI              & Identifiant de la session globale.              \\
+        libelle        & VARCHAR       & NOT NULL            & Nom de la session globale (normale, rattrapage). \\
         date\_debut    & DATE          & NOT NULL            & Début de la période de soutenances.             \\
         date\_fin      & DATE          & NOT NULL            & Fin de la période de soutenances.               \\
         statut         & ENUM          & NOT NULL            & État (OUVERTE, VERROUILLEE, CLOTUREE).          \\
@@ -463,14 +469,118 @@ Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Lo
         \rowcolor{primary!10}
         \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                      \\
         \midrule
-        id             & INT           & PK, AI              & Identifiant de l'évaluation.              \\
-        note           & FLOAT         & NOT NULL            & Note finale attribuée (calculée via RG6). \\
-        observations   & TEXT          & -                   & Remarques et commentaires du jury.        \\
-        decision       & ENUM          & NOT NULL            & Décision finale (ADMIS, AJOURNE, etc.).   \\
+        id             & INT           & PK, AI              & Identifiant de la note individuelle.      \\
+        note           & FLOAT         & NOT NULL            & Note attribuée par un membre du jury.     \\
+        observations   & TEXT          & -                   & Remarques du membre évaluateur.           \\
+        validee        & BOOLEAN       & DEFAULT FALSE       & Indique si la note est confirmée.         \\
         soutenance\_id & INT           & FK                  & Référence à la soutenance évaluée.        \\
+        enseignant\_id & INT           & FK                  & Membre du jury ayant saisi la note.       \\
         \bottomrule
     \end{tabular}
     \caption{Dictionnaire des données -- Table evaluations}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                      \\
+        \midrule
+        id             & INT           & PK, AI              & Identifiant du résultat consolidé.        \\
+        moyenne\_finale & FLOAT        & NOT NULL            & Moyenne des notes validées (RG6).         \\
+        decision       & ENUM          & NOT NULL            & Décision finale (ADMIS, AJOURNE, etc.).   \\
+        observations\_finales & TEXT   & -                   & Remarques finales du jury.                \\
+        validee        & BOOLEAN       & DEFAULT FALSE       & Verrouillage du résultat final.           \\
+        soutenance\_id & INT           & FK, UNIQUE          & Soutenance concernée par le résultat.     \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table resultats\_soutenance}
+\end{table}
+
+La table \texttt{evaluations} conserve la traçabilité des notes par membre du
+jury. La table \texttt{resultats\_soutenance} porte le résultat unique affiché à
+l'étudiant et utilisé dans les procès-verbaux.
+
+\subsubsection{Documents, disponibilités et sécurité opérationnelle}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                      \\
+        \midrule
+        id             & INT           & PK, AI              & Identifiant de la convocation.            \\
+        type           & ENUM          & NOT NULL            & Type (ETUDIANT ou JURY).                  \\
+        chemin\_fichier & VARCHAR      & -                   & Emplacement du PDF généré.                \\
+        envoyee        & BOOLEAN       & DEFAULT FALSE       & Indique si la convocation a été envoyée.  \\
+        date\_generation & DATETIME    & NOT NULL            & Date de génération du document.           \\
+        soutenance\_id & INT           & FK                  & Soutenance concernée.                     \\
+        utilisateur\_id & INT          & FK                  & Destinataire du document.                 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table convocations}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                      \\
+        \midrule
+        id             & INT           & PK, AI              & Identifiant de l'indisponibilité.         \\
+        date\_debut    & DATE          & NOT NULL            & Premier jour indisponible.                \\
+        date\_fin      & DATE          & NOT NULL            & Dernier jour indisponible.                \\
+        heure\_debut   & TIME          & -                   & Début du créneau si partiel.              \\
+        heure\_fin     & TIME          & -                   & Fin du créneau si partiel.                \\
+        motif          & VARCHAR       & -                   & Motif ou commentaire.                     \\
+        enseignant\_id & INT           & FK                  & Enseignant concerné.                      \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table indisponibilites}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                      \\
+        \midrule
+        id             & INT           & PK, AI              & Identifiant de la notification.           \\
+        sujet          & VARCHAR       & NOT NULL            & Objet du message.                         \\
+        contenu        & TEXT          & NOT NULL            & Corps du message généré.                  \\
+        statut         & ENUM          & NOT NULL            & EN\_ATTENTE, ENVOYEE ou ECHEC.            \\
+        date\_envoi    & DATETIME      & -                   & Date effective d'envoi.                   \\
+        utilisateur\_id & INT          & FK                  & Destinataire.                             \\
+        soutenance\_id & INT           & FK                  & Soutenance liée, si applicable.           \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table notifications}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lp{2cm}lp{6cm}}
+        \toprule
+        \rowcolor{primary!10}
+        \textbf{Champ} & \textbf{Type} & \textbf{Contrainte} & \textbf{Description}                      \\
+        \midrule
+        id             & INT           & PK, AI              & Identifiant du jeton.                     \\
+        token          & VARCHAR       & UNIQUE, NOT NULL    & Valeur aléatoire du jeton sécurisé.       \\
+        expire\_le     & DATETIME      & NOT NULL            & Date limite d'utilisation.                \\
+        utilise        & BOOLEAN       & DEFAULT FALSE       & Empêche la réutilisation du jeton.        \\
+        utilisateur\_id & INT          & FK                  & Compte utilisateur concerné.              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Dictionnaire des données -- Table reset\_tokens}
 \end{table}
 
 
@@ -481,7 +591,11 @@ Ce dictionnaire détaille les attributs de l'ensemble des entités du Modèle Lo
 Cette section détaille la logique algorithmique et le flux de contrôle des processus métier critiques du système.
 
 \subsection{Workflow de planification}
-Ce processus décrit les étapes de création d'une session de soutenance. Le workflow est conçu pour être itératif, permettant au coordinateur de corriger les anomalies détectées par le système (conflits de salle, indisponibilité d'un jury) avant la validation finale.
+Ce processus décrit les étapes de planification des soutenances individuelles à
+l'intérieur d'une session globale déjà créée par l'administrateur. Le workflow
+est conçu pour être itératif, permettant au coordinateur de corriger les
+anomalies détectées par le système (conflits de salle, indisponibilité d'un
+membre de jury) avant la validation finale du planning global.
 
 \begin{figure}[H]
     \centering
@@ -490,7 +604,10 @@ Ce processus décrit les étapes de création d'une session de soutenance. Le wo
 \end{figure}
 
 \subsection{Déroulement des évaluations}
-Ce diagramme illustre le processus métier de l'évaluation, allant du contrôle de présence au démarrage de la séance jusqu'au calcul automatique de la moyenne finale. Le système applique les règles de gestion (RG6) pour garantir l'intégrité des résultats.
+Ce diagramme illustre le processus métier de l'évaluation, allant du contrôle de
+présence au démarrage de la soutenance jusqu'au calcul automatique de la moyenne
+finale. Chaque note reste rattachée au membre du jury qui l'a saisie ; le
+résultat final consolide ensuite ces notes conformément à la règle RG6.
 
 \begin{figure}[H]
     \centering
@@ -532,7 +649,9 @@ L'affectation des jurys illustre la mise en œuvre des règles métier complexes
 \end{figure}
 
 \subsection{Saisie et validation d'une évaluation}
-Ce flux montre comment les membres du jury enregistrent les notes. Le système effectue le calcul en temps réel et met à jour l'état de la soutenance pour clôturer le processus d'évaluation.
+Ce flux montre comment les membres du jury enregistrent leurs notes
+individuelles. Le système recalcule la moyenne provisoire à chaque saisie et ne
+met à jour le résultat final que lorsque toutes les notes requises sont validées.
 
 \begin{figure}[H]
     \centering
@@ -559,7 +678,10 @@ Le processus d'importation gère la lecture de fichiers externes, effectue une v
 \end{figure}
 
 \subsection{Workflow de validation finale}
-La validation finale par le coordinateur est une action critique qui verrouille la session et déclenche des événements asynchrones, notamment l'envoi de notifications par e-mail à tous les acteurs.
+La validation finale par le coordinateur est une action critique qui verrouille
+le planning d'une session globale. Elle déclenche ensuite des événements
+asynchrones, notamment la génération et l'envoi des notifications par e-mail aux
+acteurs concernés.
 
 \begin{figure}[H]
     \centering

@@ -8,19 +8,19 @@ entity "Evaluation Service" as Service
 database "Base de données" as DB
 
 Jury -> Front : Saisit note et observations
-Front -> Controller : POST /api/evaluations (note, decision, idSoutenance)
+Front -> Controller : POST /api/evaluations (note, observations, idSoutenance)
 activate Controller
 
 Controller -> Service : enregistrerEvaluation(data)
 activate Service
 
-Service -> Service : Calculer moyenne (RG6)
-Service -> DB : Sauvegarder évaluation
+Service -> DB : Sauvegarder note individuelle du membre
 activate DB
 DB --> Service : OK
 deactivate DB
 
-Service -> DB : Mettre à jour statut soutenance (EVALUEE)
+Service -> Service : Recalculer moyenne provisoire (RG6)
+Service -> DB : Mettre à jour résultat final si toutes les notes sont validées
 activate DB
 DB --> Service : OK
 deactivate DB

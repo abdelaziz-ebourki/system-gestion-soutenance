@@ -41,6 +41,17 @@ enum DecisionEnum {
     AJOURNE
 }
 
+enum ConvocationType {
+    ETUDIANT
+    JURY
+}
+
+enum NotificationStatus {
+    EN_ATTENTE
+    ENVOYEE
+    ECHEC
+}
+
 enum ProjetType {
     PFE
     MEMOIRE
@@ -86,6 +97,7 @@ class Etudiant {
     + string cne
     + string filiere
     + string niveau
+    + consulterSoutenance()
 }
 
 class MembreJury {
@@ -124,8 +136,26 @@ class Evaluation {
     + int id
     + float note
     + string observations
+    + boolean validee
+    + saisir()
+    + valider()
+}
+
+class ResultatSoutenance {
+    + int id
+    + float moyenneFinale
     + DecisionEnum decision
     + boolean validee
+    + calculerMoyenne()
+}
+
+class Indisponibilite {
+    + int id
+    + date dateDebut
+    + date dateFin
+    + time heureDebut
+    + time heureFin
+    + string motif
 }
 
 class SessionGlobale {
@@ -138,9 +168,25 @@ class SessionGlobale {
 
 class Convocation {
     + int id
-    + string type
+    + ConvocationType type
+    + string cheminFichier
     + boolean envoyee
     + generer()
+}
+
+class Notification {
+    + int id
+    + string sujet
+    + string contenu
+    + NotificationStatus statut
+    + datetime dateEnvoi
+}
+
+class ResetToken {
+    + int id
+    + string token
+    + datetime expireLe
+    + boolean utilise
 }
 
 ' --- Relations ---
@@ -153,21 +199,28 @@ Utilisateur <|-- Etudiant
 Enseignant <|-- MembreJury
 
 ' Associations
-Etudiant "1..*" -- "1" Projet : possède
+Etudiant "*" -- "1" Projet : travaille sur
 Enseignant "1..*" -- "*" Projet : encadre
 Projet "1" -- "1" Soutenance : fait l'objet de
 SessionGlobale "1" *-- "*" Soutenance : contient
 Soutenance "*" -- "1" Salle : se déroule dans
 Soutenance "1" -- "3..*" MembreJury : composée de
-Soutenance "1" -- "1" Evaluation : possède
+Soutenance "1" -- "0..*" Evaluation : reçoit
+MembreJury "1" -- "0..*" Evaluation : saisit
+Soutenance "1" -- "0..1" ResultatSoutenance : consolide
 Soutenance "1" -- "1..*" Convocation : génère
+Enseignant "1" -- "0..*" Indisponibilite : déclare
+Utilisateur "1" -- "0..*" Notification : reçoit
+Utilisateur "1" -- "0..*" ResetToken : possède
 
 ' --- Layout Hints ---
 RoleEnum -[hidden]right- JuryRole
 JuryRole -[hidden]right- SoutenanceStatus
 SoutenanceStatus -[hidden]right- SessionStatus
 SessionStatus -[hidden]right- DecisionEnum
-DecisionEnum -[hidden]right- ProjetType
+DecisionEnum -[hidden]right- ConvocationType
+ConvocationType -[hidden]right- NotificationStatus
+NotificationStatus -[hidden]right- ProjetType
 
 RoleEnum -[hidden]down- Utilisateur
 Administrateur -[hidden]right- Coordinateur
@@ -178,5 +231,6 @@ SessionGlobale -[hidden]right- Soutenance
 Soutenance -[hidden]right- Salle
 Soutenance -[hidden]down- Evaluation
 Evaluation -[hidden]right- Convocation
+ResultatSoutenance -[hidden]right- Notification
 
 @enduml

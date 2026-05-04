@@ -10,7 +10,7 @@ JURY_AFFECTE --> CONVOQUEE : Validation & Envoi notifications
 CONVOQUEE --> EN_COURS : Début de séance
 EN_COURS --> EVALUEE : Validation des notes (RG6)
 
-EVALUEE --> CLOTUREE : Session clôturée
+EVALUEE --> CLOTUREE : Soutenance clôturée
 EVALUEE --> ANNULEE : Motif exceptionnel
 
 CONVOQUEE --> ANNULEE : Absence / Force majeure

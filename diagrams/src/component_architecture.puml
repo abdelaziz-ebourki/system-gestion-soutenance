@@ -19,6 +19,7 @@ package "Couche Backend (Spring Boot / Java)" as Backend {
         component "Jury Management Service" as S4
         component "Evaluation Service" as S5
         component "Document Service" as S6
+        component "Notification Service" as S7
     }
 }
 
@@ -31,6 +32,9 @@ database "Base de données (MySQL)" as DB {
     [Table soutenances] as T6
     [Table évaluations] as T7
     [Table convocations] as T8
+    [Table indisponibilités] as T9
+    [Table notifications] as T10
+    [Table reset_tokens] as T11
 }
 
 Frontend --(0-- B1 : HTTP/REST
