@@ -28,10 +28,12 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,13 +49,14 @@ public class UserService {
 	private final JuryMemberRepository juryMemberRepository;
 	private final ProjectRepository projectRepository;
 	private final EmailService emailService;
+	private final PasswordEncoder passwordEncoder;
 	private final String baseUrl;
 
 	public UserService(UserRepository userRepository, StudentRepository studentRepository,
 			TeacherRepository teacherRepository, CoordinatorRepository coordinatorRepository,
 			MajorRepository majorRepository, LevelRepository levelRepository, GradeRepository gradeRepository,
 			DepartmentRepository departmentRepository, JuryMemberRepository juryMemberRepository,
-			ProjectRepository projectRepository, EmailService emailService,
+			ProjectRepository projectRepository, EmailService emailService, PasswordEncoder passwordEncoder,
 			@Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.majorRepository = majorRepository;
@@ -63,6 +66,7 @@ public class UserService {
 		this.juryMemberRepository = juryMemberRepository;
 		this.projectRepository = projectRepository;
 		this.emailService = emailService;
+		this.passwordEncoder = passwordEncoder;
 		this.baseUrl = baseUrl;
 	}
 
@@ -104,7 +108,7 @@ public class UserService {
 			default -> createBaseUser(request, role);
 		};
 
-		user.setPassword("");
+		user.setPassword(passwordEncoder.encode(generateTemporaryPassword()));
 		user.setActive(false);
 		user.setVerificationToken(UUID.randomUUID().toString());
 
@@ -133,7 +137,7 @@ public class UserService {
 						"Rôle non supporté pour l'import en masse: " + role);
 			};
 
-			user.setPassword("");
+			user.setPassword(passwordEncoder.encode(generateTemporaryPassword()));
 			user.setActive(false);
 			user.setVerificationToken(UUID.randomUUID().toString());
 
@@ -351,6 +355,16 @@ public class UserService {
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rôle invalide: " + role);
 		}
+	}
+
+	private String generateTemporaryPassword() {
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+		Random rnd = new Random();
+		StringBuilder sb = new StringBuilder(12);
+		for (int i = 0; i < 12; i++) {
+			sb.append(chars.charAt(rnd.nextInt(chars.length())));
+		}
+		return sb.toString();
 	}
 
 	private void sendVerificationEmail(User user) {

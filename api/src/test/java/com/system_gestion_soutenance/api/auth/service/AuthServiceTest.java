@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.auth.dto.*;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.util.PasswordValidator;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -34,12 +35,15 @@ class AuthServiceTest {
 	@Mock
 	private EmailService emailService;
 
+	@Mock
+	private PasswordValidator passwordValidator;
+
 	private AuthService authService;
 
 	@org.junit.jupiter.api.BeforeEach
 	void setUp() {
 		authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder, emailService,
-				"http://localhost:5173");
+				passwordValidator, "http://localhost:5173");
 	}
 
 	private User createActiveUser() {

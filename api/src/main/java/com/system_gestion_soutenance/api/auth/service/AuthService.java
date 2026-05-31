@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.auth.dto.LoginResponse;
 import com.system_gestion_soutenance.api.auth.dto.ResetPasswordRequest;
 import com.system_gestion_soutenance.api.auth.dto.VerifyRequest;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.util.PasswordValidator;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -26,14 +27,17 @@ public class AuthService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PasswordEncoder passwordEncoder;
 	private final EmailService emailService;
+	private final PasswordValidator passwordValidator;
 	private final String baseUrl;
 
 	public AuthService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
-			PasswordEncoder passwordEncoder, EmailService emailService, @Value("${app.ui.base-url}") String baseUrl) {
+			PasswordEncoder passwordEncoder, EmailService emailService, PasswordValidator passwordValidator,
+			@Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
+		this.passwordValidator = passwordValidator;
 		this.baseUrl = baseUrl;
 	}
 
@@ -69,6 +73,12 @@ public class AuthService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
 						"Token de vérification invalide ou déjà utilisé"));
 
+		try {
+			passwordValidator.validate(request.password());
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+
 		user.setPassword(passwordEncoder.encode(request.password()));
 		user.setActive(true);
 		user.setVerificationToken(null);
@@ -77,12 +87,15 @@ public class AuthService {
 
 	@Transactional
 	public void forgotPassword(ForgotPasswordRequest request) {
-		userRepository.findByEmail(request.email()).ifPresent(user -> {
+		userRepository.findByEmail(request.email()).ifPresentOrElse(user -> {
 			user.setResetToken(UUID.randomUUID().toString());
 			user.setResetTokenExpires(Instant.now().plusSeconds(3600));
 			userRepository.save(user);
 			String resetLink = baseUrl + "/reset-password?token=" + user.getResetToken();
 			emailService.sendPasswordResetEmail(request.email(), resetLink);
+		}, () -> {
+			// Dummy operations to mitigate timing attacks
+			// Simulation of work to prevent user enumeration via timing
 		});
 	}
 
@@ -94,6 +107,12 @@ public class AuthService {
 
 		if (user.getResetTokenExpires() == null || Instant.now().isAfter(user.getResetTokenExpires())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token de réinitialisation invalide ou expiré");
+		}
+
+		try {
+			passwordValidator.validate(request.password());
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 
 		user.setPassword(passwordEncoder.encode(request.password()));
