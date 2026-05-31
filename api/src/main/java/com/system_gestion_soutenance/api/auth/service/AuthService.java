@@ -12,6 +12,7 @@ import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.Instant;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,19 +26,26 @@ public class AuthService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PasswordEncoder passwordEncoder;
 	private final EmailService emailService;
+	private final String baseUrl;
 
 	public AuthService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
-			PasswordEncoder passwordEncoder, EmailService emailService) {
+			PasswordEncoder passwordEncoder, EmailService emailService, @Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
+		this.baseUrl = baseUrl;
 	}
 
 	public LoginResponse login(LoginRequest request) {
 		User user = userRepository.findByEmail(request.email())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
 						"Identifiants invalides (E-mail ou mot de passe incorrect)"));
+
+		if (user.getPassword() == null || user.getPassword().isBlank()) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+					"Identifiants invalides (E-mail ou mot de passe incorrect)");
+		}
 
 		if (!passwordEncoder.matches(request.password(), user.getPassword())) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
@@ -73,7 +81,7 @@ public class AuthService {
 			user.setResetToken(UUID.randomUUID().toString());
 			user.setResetTokenExpires(Instant.now().plusSeconds(3600));
 			userRepository.save(user);
-			String resetLink = "/reset-password?token=" + user.getResetToken();
+			String resetLink = baseUrl + "/reset-password?token=" + user.getResetToken();
 			emailService.sendPasswordResetEmail(request.email(), resetLink);
 		});
 	}

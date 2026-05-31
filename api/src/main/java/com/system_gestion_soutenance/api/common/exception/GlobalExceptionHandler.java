@@ -13,7 +13,8 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ResponseStatusException.class)
 	public ResponseEntity<Map<String, String>> handleResponseStatus(ResponseStatusException ex) {
-		return ResponseEntity.status(ex.getStatusCode()).body(Map.of("message", ex.getReason()));
+		String reason = ex.getReason();
+		return ResponseEntity.status(ex.getStatusCode()).body(Map.of("message", reason != null ? reason : "Erreur"));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

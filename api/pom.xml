@@ -127,9 +127,9 @@
 						<exclude>**/dto/**</exclude>
 						<exclude>**/entity/**</exclude>
 						<exclude>**/seed/**</exclude>
-						<exclude>**/coordinator/**</exclude>
 						<exclude>**/ApiApplication.class</exclude>
 						<exclude>**/config/OpenApiConfig.class</exclude>
+						<exclude>**/config/SecurityConfig.class</exclude>
 					</excludes>
 				</configuration>
 				<executions>

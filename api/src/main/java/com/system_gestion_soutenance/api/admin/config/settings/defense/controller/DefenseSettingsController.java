@@ -25,7 +25,7 @@ public class DefenseSettingsController {
 		return service.get();
 	}
 
-	@PostMapping
+	@PutMapping
 	@Operation(summary = "Update defense settings")
 	public DefenseSettings update(@Valid @RequestBody UpdateDefenseSettingsRequest updates) {
 		return service.update(updates);

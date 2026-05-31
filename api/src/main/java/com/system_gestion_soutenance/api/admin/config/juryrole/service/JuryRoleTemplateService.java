@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.admin.config.juryrole.entity.TemplateRo
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class JuryRoleTemplateService {
 	}
 
 	@Transactional
+	@Audited(action = "CREATE", entity = "JuryRoleTemplate")
 	public JuryRoleTemplate create(CreateJuryRoleTemplateRequest request) {
 		if (juryRoleTemplateRepository.findByName(request.name()).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un template avec ce nom existe déjà");
@@ -48,6 +50,7 @@ public class JuryRoleTemplateService {
 	}
 
 	@Transactional
+	@Audited(action = "UPDATE", entity = "JuryRoleTemplate")
 	public JuryRoleTemplate update(Long id, CreateJuryRoleTemplateRequest request) {
 		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
@@ -63,6 +66,7 @@ public class JuryRoleTemplateService {
 	}
 
 	@Transactional
+	@Audited(action = "DELETE", entity = "JuryRoleTemplate")
 	public void delete(Long id) {
 		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));

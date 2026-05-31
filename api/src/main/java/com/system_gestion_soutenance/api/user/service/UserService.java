@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -113,6 +114,7 @@ public class UserService {
 		return UserDto.from(user);
 	}
 
+	@Transactional
 	public List<UserDto> bulkCreate(BulkCreateRequest request) {
 		Role role = parseRole(request.role());
 		List<UserDto> results = new ArrayList<>();

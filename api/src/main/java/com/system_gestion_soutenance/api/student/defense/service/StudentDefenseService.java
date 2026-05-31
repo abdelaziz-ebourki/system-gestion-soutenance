@@ -20,8 +20,8 @@ public class StudentDefenseService {
 	private final JuryRepository juryRepository;
 	private final SlotAssignmentRepository slotAssignmentRepository;
 
-	public StudentDefenseService(GroupRepository groupRepository,
-			JuryRepository juryRepository, SlotAssignmentRepository slotAssignmentRepository) {
+	public StudentDefenseService(GroupRepository groupRepository, JuryRepository juryRepository,
+			SlotAssignmentRepository slotAssignmentRepository) {
 		this.groupRepository = groupRepository;
 		this.juryRepository = juryRepository;
 		this.slotAssignmentRepository = slotAssignmentRepository;

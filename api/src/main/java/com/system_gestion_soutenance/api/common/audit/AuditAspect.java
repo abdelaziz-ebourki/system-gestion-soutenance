@@ -6,40 +6,79 @@ import java.time.LocalDateTime;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Aspect
 @Component
 public class AuditAspect {
 
-	private final AuditLogRepository auditLogRepository;
+	private static final Logger log = LoggerFactory.getLogger(AuditAspect.class);
 
-	public AuditAspect(AuditLogRepository auditLogRepository) {
+	private final AuditLogRepository auditLogRepository;
+	private final TransactionTemplate transactionTemplate;
+
+	public AuditAspect(AuditLogRepository auditLogRepository, TransactionTemplate transactionTemplate) {
 		this.auditLogRepository = auditLogRepository;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	@Around("@annotation(audited)")
 	public Object audit(ProceedingJoinPoint joinPoint, Audited audited) throws Throwable {
-		Object result = joinPoint.proceed();
+		Object result;
+		String action = audited.action();
+		String entity = audited.entity();
+		boolean success = true;
+		try {
+			result = joinPoint.proceed();
+		} catch (Throwable t) {
+			success = false;
+			saveAuditLog(action, entity, joinPoint.getArgs(), "ERROR", t.getMessage());
+			throw t;
+		}
 
 		String email = extractEmail();
 		if (email == null)
 			return result;
 
 		Long entityId = extractEntityId(joinPoint.getArgs(), result);
-
-		AuditLog log = new AuditLog();
-		log.setAction(audited.action());
-		log.setEntity(audited.entity());
-		log.setEntityId(entityId);
-		log.setAdminEmail(email);
-		log.setDetails(audited.action() + " " + audited.entity() + " #" + entityId);
-		log.setTimestamp(LocalDateTime.now());
-		auditLogRepository.save(log);
+		saveAuditLog(action, entity, entityId, email, success ? "SUCCESS" : "ERROR", null);
 
 		return result;
+	}
+
+	private void saveAuditLog(String action, String entity, Object[] args, String status, String errorDetail) {
+		Long entityId = extractEntityId(args, null);
+		transactionTemplate.executeWithoutResult(statusTx -> {
+			AuditLog auditLog = new AuditLog();
+			auditLog.setAction(action);
+			auditLog.setEntity(entity);
+			auditLog.setEntityId(entityId);
+			auditLog.setAdminEmail(null);
+			auditLog.setDetails(action + " " + entity + (entityId != null ? " #" + entityId : "")
+					+ (errorDetail != null ? " — " + errorDetail : ""));
+			auditLog.setTimestamp(LocalDateTime.now());
+			auditLogRepository.save(auditLog);
+		});
+	}
+
+	private void saveAuditLog(String action, String entity, Long entityId, String email, String status,
+			String errorDetail) {
+		transactionTemplate.executeWithoutResult(statusTx -> {
+			AuditLog auditLog = new AuditLog();
+			auditLog.setAction(action);
+			auditLog.setEntity(entity);
+			auditLog.setEntityId(entityId);
+			auditLog.setAdminEmail(email);
+			auditLog.setDetails(action + " " + entity + (entityId != null ? " #" + entityId : "")
+					+ (errorDetail != null ? " — " + errorDetail : ""));
+			auditLog.setTimestamp(LocalDateTime.now());
+			auditLogRepository.save(auditLog);
+		});
 	}
 
 	private String extractEmail() {
