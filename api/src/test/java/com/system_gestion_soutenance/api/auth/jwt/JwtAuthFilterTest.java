@@ -22,87 +22,93 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @ExtendWith(MockitoExtension.class)
 class JwtAuthFilterTest {
 
-  @Mock private JwtTokenProvider jwtTokenProvider;
+	@Mock
+	private JwtTokenProvider jwtTokenProvider;
 
-  @Mock private UserRepository userRepository;
+	@Mock
+	private UserRepository userRepository;
 
-  @Mock private HttpServletRequest request;
+	@Mock
+	private HttpServletRequest request;
 
-  @Mock private HttpServletResponse response;
+	@Mock
+	private HttpServletResponse response;
 
-  @Mock private FilterChain filterChain;
+	@Mock
+	private FilterChain filterChain;
 
-  @InjectMocks private JwtAuthFilter filter;
+	@InjectMocks
+	private JwtAuthFilter filter;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.clearContext();
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void doFilter_withValidToken_setsAuthentication() throws Exception {
-    when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
-    when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
-    when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("1");
+	@Test
+	void doFilter_withValidToken_setsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
+		when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
+		when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("1");
 
-    User user = new User();
-    user.setId(1L);
-    user.setEmail("admin@test.com");
-    user.setRole(Role.ADMIN);
-    user.setActive(true);
-    when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		User user = new User();
+		user.setId(1L);
+		user.setEmail("admin@test.com");
+		user.setRole(Role.ADMIN);
+		user.setActive(true);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-    filter.doFilter(request, response, filterChain);
+		filter.doFilter(request, response, filterChain);
 
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    assertNotNull(auth);
-    assertEquals(user, auth.getPrincipal());
-    assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
-    verify(filterChain).doFilter(request, response);
-  }
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		assertNotNull(auth);
+		assertEquals(user, auth.getPrincipal());
+		assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+		verify(filterChain).doFilter(request, response);
+	}
 
-  @Test
-  void doFilter_withNoAuthHeader_skipsAuthentication() throws Exception {
-    when(request.getHeader("Authorization")).thenReturn(null);
+	@Test
+	void doFilter_withNoAuthHeader_skipsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn(null);
 
-    filter.doFilter(request, response, filterChain);
+		filter.doFilter(request, response, filterChain);
 
-    assertNull(SecurityContextHolder.getContext().getAuthentication());
-    verify(filterChain).doFilter(request, response);
-    verifyNoInteractions(jwtTokenProvider);
-  }
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+		verify(filterChain).doFilter(request, response);
+		verifyNoInteractions(jwtTokenProvider);
+	}
 
-  @Test
-  void doFilter_withInvalidToken_skipsAuthentication() throws Exception {
-    when(request.getHeader("Authorization")).thenReturn("Bearer invalid-token");
-    when(jwtTokenProvider.validateToken("invalid-token")).thenReturn(false);
+	@Test
+	void doFilter_withInvalidToken_skipsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn("Bearer invalid-token");
+		when(jwtTokenProvider.validateToken("invalid-token")).thenReturn(false);
 
-    filter.doFilter(request, response, filterChain);
+		filter.doFilter(request, response, filterChain);
 
-    assertNull(SecurityContextHolder.getContext().getAuthentication());
-    verify(filterChain).doFilter(request, response);
-  }
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+		verify(filterChain).doFilter(request, response);
+	}
 
-  @Test
-  void doFilter_withBearerPrefixOnly_skipsAuthentication() throws Exception {
-    when(request.getHeader("Authorization")).thenReturn("Bearer ");
+	@Test
+	void doFilter_withBearerPrefixOnly_skipsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn("Bearer ");
 
-    filter.doFilter(request, response, filterChain);
+		filter.doFilter(request, response, filterChain);
 
-    assertNull(SecurityContextHolder.getContext().getAuthentication());
-    verify(filterChain).doFilter(request, response);
-  }
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+		verify(filterChain).doFilter(request, response);
+	}
 
-  @Test
-  void doFilter_withUserNotFound_skipsAuthentication() throws Exception {
-    when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
-    when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
-    when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("999");
-    when(userRepository.findById(999L)).thenReturn(Optional.empty());
+	@Test
+	void doFilter_withUserNotFound_skipsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
+		when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
+		when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("999");
+		when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-    filter.doFilter(request, response, filterChain);
+		filter.doFilter(request, response, filterChain);
 
-    assertNull(SecurityContextHolder.getContext().getAuthentication());
-    verify(filterChain).doFilter(request, response);
-  }
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+		verify(filterChain).doFilter(request, response);
+	}
 }

@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Coordinator - Stats", description = "Statistiques du coordinateur")
 public class CoordinatorStatsController {
 
-  private final CoordinatorStatsService statsService;
+	private final CoordinatorStatsService statsService;
 
-  public CoordinatorStatsController(CoordinatorStatsService statsService) {
-    this.statsService = statsService;
-  }
+	public CoordinatorStatsController(CoordinatorStatsService statsService) {
+		this.statsService = statsService;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get coordinator statistics")
-  public Map<String, Object> getStats() {
-    return statsService.getStats();
-  }
+	@GetMapping
+	@Operation(summary = "Get coordinator statistics")
+	public Map<String, Object> getStats() {
+		return statsService.getStats();
+	}
 }

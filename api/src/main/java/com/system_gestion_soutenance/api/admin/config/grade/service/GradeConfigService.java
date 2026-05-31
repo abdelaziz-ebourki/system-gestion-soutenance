@@ -15,58 +15,51 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class GradeConfigService {
 
-  private final GradeRepository gradeRepository;
-  private final TeacherRepository teacherRepository;
+	private final GradeRepository gradeRepository;
+	private final TeacherRepository teacherRepository;
 
-  public GradeConfigService(GradeRepository gradeRepository, TeacherRepository teacherRepository) {
-    this.gradeRepository = gradeRepository;
-    this.teacherRepository = teacherRepository;
-  }
+	public GradeConfigService(GradeRepository gradeRepository, TeacherRepository teacherRepository) {
+		this.gradeRepository = gradeRepository;
+		this.teacherRepository = teacherRepository;
+	}
 
-  public List<Grade> findAll() {
-    return gradeRepository.findAll();
-  }
+	public List<Grade> findAll() {
+		return gradeRepository.findAll();
+	}
 
-  @Audited(action = "CREATE", entity = "Grade")
-  @Transactional
-  public Grade create(CreateGradeRequest request) {
-    if (gradeRepository.findByName(request.name()).isPresent()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un grade avec ce nom existe déjà");
-    }
+	@Audited(action = "CREATE", entity = "Grade")
+	@Transactional
+	public Grade create(CreateGradeRequest request) {
+		if (gradeRepository.findByName(request.name()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un grade avec ce nom existe déjà");
+		}
 
-    Grade grade = new Grade();
-    grade.setName(request.name());
-    return gradeRepository.save(grade);
-  }
+		Grade grade = new Grade();
+		grade.setName(request.name());
+		return gradeRepository.save(grade);
+	}
 
-  @Audited(action = "UPDATE", entity = "Grade")
-  @Transactional
-  public Grade update(Long id, CreateGradeRequest request) {
-    Grade grade =
-        gradeRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade non trouvé"));
+	@Audited(action = "UPDATE", entity = "Grade")
+	@Transactional
+	public Grade update(Long id, CreateGradeRequest request) {
+		Grade grade = gradeRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade non trouvé"));
 
-    grade.setName(request.name());
-    return gradeRepository.save(grade);
-  }
+		grade.setName(request.name());
+		return gradeRepository.save(grade);
+	}
 
-  @Audited(action = "DELETE", entity = "Grade")
-  @Transactional
-  public void delete(Long id) {
-    Grade grade =
-        gradeRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade non trouvé"));
+	@Audited(action = "DELETE", entity = "Grade")
+	@Transactional
+	public void delete(Long id) {
+		Grade grade = gradeRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Grade non trouvé"));
 
-    if (!teacherRepository.findByGradeId(id).isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Impossible de supprimer ce grade car des enseignants y sont rattachés");
-    }
+		if (!teacherRepository.findByGradeId(id).isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Impossible de supprimer ce grade car des enseignants y sont rattachés");
+		}
 
-    gradeRepository.delete(grade);
-  }
+		gradeRepository.delete(grade);
+	}
 }

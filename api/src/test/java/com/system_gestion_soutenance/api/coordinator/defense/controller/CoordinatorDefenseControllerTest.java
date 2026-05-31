@@ -18,42 +18,39 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = CoordinatorDefenseController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = CoordinatorDefenseController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class CoordinatorDefenseControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @MockitoBean private ScheduleService scheduleService;
+	@MockitoBean
+	private ScheduleService scheduleService;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void cancel_returnsOk() throws Exception {
-    doNothing().when(scheduleService).cancelDefense(1L);
+	@Test
+	void cancel_returnsOk() throws Exception {
+		doNothing().when(scheduleService).cancelDefense(1L);
 
-    mockMvc
-        .perform(post("/api/coordinator/defenses/1/cancel"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Soutenance annulée."));
-  }
+		mockMvc.perform(post("/api/coordinator/defenses/1/cancel")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value("Soutenance annulée."));
+	}
 }

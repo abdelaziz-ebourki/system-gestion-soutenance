@@ -18,90 +18,69 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class JuryRoleTemplateService {
 
-  private final JuryRoleTemplateRepository juryRoleTemplateRepository;
-  private final DefenseSessionRepository defenseSessionRepository;
+	private final JuryRoleTemplateRepository juryRoleTemplateRepository;
+	private final DefenseSessionRepository defenseSessionRepository;
 
-  public JuryRoleTemplateService(
-      JuryRoleTemplateRepository juryRoleTemplateRepository,
-      DefenseSessionRepository defenseSessionRepository) {
-    this.juryRoleTemplateRepository = juryRoleTemplateRepository;
-    this.defenseSessionRepository = defenseSessionRepository;
-  }
+	public JuryRoleTemplateService(JuryRoleTemplateRepository juryRoleTemplateRepository,
+			DefenseSessionRepository defenseSessionRepository) {
+		this.juryRoleTemplateRepository = juryRoleTemplateRepository;
+		this.defenseSessionRepository = defenseSessionRepository;
+	}
 
-  public List<JuryRoleTemplate> findAll() {
-    return juryRoleTemplateRepository.findAll();
-  }
+	public List<JuryRoleTemplate> findAll() {
+		return juryRoleTemplateRepository.findAll();
+	}
 
-  @Transactional
-  public JuryRoleTemplate create(CreateJuryRoleTemplateRequest request) {
-    if (juryRoleTemplateRepository.findByName(request.name()).isPresent()) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Un template avec ce nom existe déjà");
-    }
+	@Transactional
+	public JuryRoleTemplate create(CreateJuryRoleTemplateRequest request) {
+		if (juryRoleTemplateRepository.findByName(request.name()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un template avec ce nom existe déjà");
+		}
 
-    validateRoleNames(request.roles());
+		validateRoleNames(request.roles());
 
-    JuryRoleTemplate template = new JuryRoleTemplate();
-    template.setName(request.name());
-    template.setDefenseType(DefenseType.valueOf(request.defenseType().toUpperCase()));
-    template.setRoles(
-        request.roles().stream()
-            .map(r -> new TemplateRole(r.name(), r.count(), r.coefficient()))
-            .collect(Collectors.toList()));
-    return juryRoleTemplateRepository.save(template);
-  }
+		JuryRoleTemplate template = new JuryRoleTemplate();
+		template.setName(request.name());
+		template.setDefenseType(DefenseType.valueOf(request.defenseType().toUpperCase()));
+		template.setRoles(request.roles().stream().map(r -> new TemplateRole(r.name(), r.count(), r.coefficient()))
+				.collect(Collectors.toList()));
+		return juryRoleTemplateRepository.save(template);
+	}
 
-  @Transactional
-  public JuryRoleTemplate update(Long id, CreateJuryRoleTemplateRequest request) {
-    JuryRoleTemplate template =
-        juryRoleTemplateRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
+	@Transactional
+	public JuryRoleTemplate update(Long id, CreateJuryRoleTemplateRequest request) {
+		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
 
-    validateRoleNames(request.roles());
+		validateRoleNames(request.roles());
 
-    template.setName(request.name());
-    template.setDefenseType(DefenseType.valueOf(request.defenseType().toUpperCase()));
-    template.getRoles().clear();
-    template
-        .getRoles()
-        .addAll(
-            request.roles().stream()
-                .map(r -> new TemplateRole(r.name(), r.count(), r.coefficient()))
-                .collect(Collectors.toList()));
-    return juryRoleTemplateRepository.save(template);
-  }
+		template.setName(request.name());
+		template.setDefenseType(DefenseType.valueOf(request.defenseType().toUpperCase()));
+		template.getRoles().clear();
+		template.getRoles().addAll(request.roles().stream()
+				.map(r -> new TemplateRole(r.name(), r.count(), r.coefficient())).collect(Collectors.toList()));
+		return juryRoleTemplateRepository.save(template);
+	}
 
-  @Transactional
-  public void delete(Long id) {
-    JuryRoleTemplate template =
-        juryRoleTemplateRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
+	@Transactional
+	public void delete(Long id) {
+		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
 
-    if (!defenseSessionRepository.findByJuryRoleTemplate_Id(id).isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Impossible de supprimer ce template car des sessions de soutenance l'utilisent");
-    }
+		if (!defenseSessionRepository.findByJuryRoleTemplate_Id(id).isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Impossible de supprimer ce template car des sessions de soutenance l'utilisent");
+		}
 
-    juryRoleTemplateRepository.delete(template);
-  }
+		juryRoleTemplateRepository.delete(template);
+	}
 
-  private void validateRoleNames(List<CreateJuryRoleTemplateRequest.RoleEntry> roles) {
-    Set<String> names =
-        roles.stream()
-            .map(CreateJuryRoleTemplateRequest.RoleEntry::name)
-            .collect(Collectors.toSet());
-    if (names.size() != roles.size()) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Les noms de rôles doivent être uniques dans le template");
-    }
-  }
+	private void validateRoleNames(List<CreateJuryRoleTemplateRequest.RoleEntry> roles) {
+		Set<String> names = roles.stream().map(CreateJuryRoleTemplateRequest.RoleEntry::name)
+				.collect(Collectors.toSet());
+		if (names.size() != roles.size()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Les noms de rôles doivent être uniques dans le template");
+		}
+	}
 }

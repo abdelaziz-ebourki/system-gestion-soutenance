@@ -21,58 +21,53 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = StudentGroupController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = StudentGroupController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class StudentGroupControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private StudentGroupService studentGroupService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@MockitoBean
+	private StudentGroupService studentGroupService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    User user = new User();
-    user.setId(1L);
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		User user = new User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void getWorkspace_returns200() throws Exception {
-    when(studentGroupService.getWorkspace(1L)).thenReturn(Map.of("documents", 3));
-    mockMvc
-        .perform(get("/api/student/group"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.documents").value(3));
-  }
+	@Test
+	void getWorkspace_returns200() throws Exception {
+		when(studentGroupService.getWorkspace(1L)).thenReturn(Map.of("documents", 3));
+		mockMvc.perform(get("/api/student/group")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.documents").value(3));
+	}
 
-  @Test
-  void createGroup_returns201() throws Exception {
-    when(studentGroupService.createGroup(1L)).thenReturn(Map.of("groupName", "Groupe de Alice"));
-    mockMvc
-        .perform(post("/api/student/group"))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.groupName").value("Groupe de Alice"));
-  }
+	@Test
+	void createGroup_returns201() throws Exception {
+		when(studentGroupService.createGroup(1L)).thenReturn(Map.of("groupName", "Groupe de Alice"));
+		mockMvc.perform(post("/api/student/group")).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.groupName").value("Groupe de Alice"));
+	}
 
-  @Test
-  void joinGroup_returns200() throws Exception {
-    when(studentGroupService.joinGroup(anyLong(), eq(1L)))
-        .thenReturn(Map.of("groupName", "Groupe Test"));
-    mockMvc
-        .perform(post("/api/student/group/10/join"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.groupName").value("Groupe Test"));
-  }
+	@Test
+	void joinGroup_returns200() throws Exception {
+		when(studentGroupService.joinGroup(anyLong(), eq(1L))).thenReturn(Map.of("groupName", "Groupe Test"));
+		mockMvc.perform(post("/api/student/group/10/join")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.groupName").value("Groupe Test"));
+	}
 }

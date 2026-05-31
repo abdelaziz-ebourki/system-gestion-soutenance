@@ -21,68 +21,58 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = ConflictController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = ConflictController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class ConflictControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-  @MockitoBean private ConflictDetectionService conflictDetectionService;
+	@MockitoBean
+	private ConflictDetectionService conflictDetectionService;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void validate_returnsConflicts() throws Exception {
-    Map<String, Object> body =
-        Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+	@Test
+	void validate_returnsConflicts() throws Exception {
+		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
 
-    when(conflictDetectionService.validate(any(), eq("1")))
-        .thenReturn(List.of(Map.of("type", "project_already_scheduled", "severity", "error")));
+		when(conflictDetectionService.validate(any(), eq("1")))
+				.thenReturn(List.of(Map.of("type", "project_already_scheduled", "severity", "error")));
 
-    mockMvc
-        .perform(
-            post("/api/coordinator/schedule/validate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.conflicts.size()").value(1))
-        .andExpect(jsonPath("$.conflicts[0].type").value("project_already_scheduled"));
-  }
+		mockMvc.perform(post("/api/coordinator/schedule/validate").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.conflicts.size()").value(1))
+				.andExpect(jsonPath("$.conflicts[0].type").value("project_already_scheduled"));
+	}
 
-  @Test
-  void validate_noConflicts_returnsEmpty() throws Exception {
-    Map<String, Object> body =
-        Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+	@Test
+	void validate_noConflicts_returnsEmpty() throws Exception {
+		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
 
-    when(conflictDetectionService.validate(any(), eq("1"))).thenReturn(List.of());
+		when(conflictDetectionService.validate(any(), eq("1"))).thenReturn(List.of());
 
-    mockMvc
-        .perform(
-            post("/api/coordinator/schedule/validate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.conflicts.size()").value(0));
-  }
+		mockMvc.perform(post("/api/coordinator/schedule/validate").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.conflicts.size()").value(0));
+	}
 }

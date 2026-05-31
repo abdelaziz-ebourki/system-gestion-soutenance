@@ -17,36 +17,34 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-  private final JwtTokenProvider jwtTokenProvider;
-  private final UserRepository userRepository;
+	private final JwtTokenProvider jwtTokenProvider;
+	private final UserRepository userRepository;
 
-  public JwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
-    this.jwtTokenProvider = jwtTokenProvider;
-    this.userRepository = userRepository;
-  }
+	public JwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+		this.jwtTokenProvider = jwtTokenProvider;
+		this.userRepository = userRepository;
+	}
 
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
-    String authHeader = request.getHeader("Authorization");
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		String authHeader = request.getHeader("Authorization");
 
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-      String token = authHeader.substring(7);
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			String token = authHeader.substring(7);
 
-      if (jwtTokenProvider.validateToken(token)) {
-        String userId = jwtTokenProvider.getUserIdFromToken(token);
-        User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
+			if (jwtTokenProvider.validateToken(token)) {
+				String userId = jwtTokenProvider.getUserIdFromToken(token);
+				User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
 
-        if (user != null) {
-          var auth =
-              new UsernamePasswordAuthenticationToken(
-                  user, null, List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
-          SecurityContextHolder.getContext().setAuthentication(auth);
-        }
-      }
-    }
+				if (user != null) {
+					var auth = new UsernamePasswordAuthenticationToken(user, null,
+							List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
+					SecurityContextHolder.getContext().setAuthentication(auth);
+				}
+			}
+		}
 
-    filterChain.doFilter(request, response);
-  }
+		filterChain.doFilter(request, response);
+	}
 }

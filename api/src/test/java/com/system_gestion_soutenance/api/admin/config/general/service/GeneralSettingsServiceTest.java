@@ -17,58 +17,59 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class GeneralSettingsServiceTest {
 
-  @Mock private GeneralSettingsRepository repository;
+	@Mock
+	private GeneralSettingsRepository repository;
 
-  @InjectMocks private GeneralSettingsService service;
+	@InjectMocks
+	private GeneralSettingsService service;
 
-  @Test
-  void get_withExistingSettings_returnsThem() {
-    GeneralSettings settings = new GeneralSettings();
-    settings.setId(1L);
-    settings.setInstitutionName("Test Univ");
-    when(repository.findById(1L)).thenReturn(Optional.of(settings));
+	@Test
+	void get_withExistingSettings_returnsThem() {
+		GeneralSettings settings = new GeneralSettings();
+		settings.setId(1L);
+		settings.setInstitutionName("Test Univ");
+		when(repository.findById(1L)).thenReturn(Optional.of(settings));
 
-    GeneralSettings result = service.get();
+		GeneralSettings result = service.get();
 
-    assertEquals("Test Univ", result.getInstitutionName());
-  }
+		assertEquals("Test Univ", result.getInstitutionName());
+	}
 
-  @Test
-  void get_withoutSettings_throws404() {
-    when(repository.findById(1L)).thenReturn(Optional.empty());
+	@Test
+	void get_withoutSettings_throws404() {
+		when(repository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class, () -> service.get());
-  }
+		assertThrows(ResponseStatusException.class, () -> service.get());
+	}
 
-  @Test
-  void update_withExistingSettings_updatesFields() {
-    GeneralSettings existing = new GeneralSettings();
-    existing.setId(1L);
-    existing.setInstitutionName("Old Name");
-    when(repository.findById(1L)).thenReturn(Optional.of(existing));
-    when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void update_withExistingSettings_updatesFields() {
+		GeneralSettings existing = new GeneralSettings();
+		existing.setId(1L);
+		existing.setInstitutionName("Old Name");
+		when(repository.findById(1L)).thenReturn(Optional.of(existing));
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    UpdateGeneralSettingsRequest request =
-        new UpdateGeneralSettingsRequest("New Name", "logo.png", "UTC", "DD/MM/YYYY", true);
+		UpdateGeneralSettingsRequest request = new UpdateGeneralSettingsRequest("New Name", "logo.png", "UTC",
+				"DD/MM/YYYY", true);
 
-    GeneralSettings result = service.update(request);
+		GeneralSettings result = service.update(request);
 
-    assertEquals("New Name", result.getInstitutionName());
-    verify(repository).save(existing);
-  }
+		assertEquals("New Name", result.getInstitutionName());
+		verify(repository).save(existing);
+	}
 
-  @Test
-  void update_withoutExistingSettings_createsNew() {
-    when(repository.findById(1L)).thenReturn(Optional.empty());
-    when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void update_withoutExistingSettings_createsNew() {
+		when(repository.findById(1L)).thenReturn(Optional.empty());
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    UpdateGeneralSettingsRequest request =
-        new UpdateGeneralSettingsRequest(
-            "New Univ", null, "Africa/Casablanca", "YYYY-MM-DD", false);
+		UpdateGeneralSettingsRequest request = new UpdateGeneralSettingsRequest("New Univ", null, "Africa/Casablanca",
+				"YYYY-MM-DD", false);
 
-    GeneralSettings result = service.update(request);
+		GeneralSettings result = service.update(request);
 
-    assertEquals("New Univ", result.getInstitutionName());
-    verify(repository).save(argThat(s -> s.getId() == 1L));
-  }
+		assertEquals("New Univ", result.getInstitutionName());
+		verify(repository).save(argThat(s -> s.getId() == 1L));
+	}
 }

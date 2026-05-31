@@ -19,55 +19,49 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = UnavailabilityController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = UnavailabilityController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class UnavailabilityControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @MockitoBean private UnavailabilityRepository repository;
+	@MockitoBean
+	private UnavailabilityRepository repository;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void findAll_returnsUnavailabilityRecords() throws Exception {
-    Unavailability record = new Unavailability(1L, 10L, "2025-06-01", List.of("08:00", "10:00"));
-    when(repository.findAll()).thenReturn(List.of(record));
+	@Test
+	void findAll_returnsUnavailabilityRecords() throws Exception {
+		Unavailability record = new Unavailability(1L, 10L, "2025-06-01", List.of("08:00", "10:00"));
+		when(repository.findAll()).thenReturn(List.of(record));
 
-    mockMvc
-        .perform(get("/api/coordinator/unavailability"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()").value(1))
-        .andExpect(jsonPath("$[0].teacherId").value(10L))
-        .andExpect(jsonPath("$[0].date").value("2025-06-01"));
-  }
+		mockMvc.perform(get("/api/coordinator/unavailability")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].teacherId").value(10L))
+				.andExpect(jsonPath("$[0].date").value("2025-06-01"));
+	}
 
-  @Test
-  void findAll_noRecords_returnsEmptyList() throws Exception {
-    when(repository.findAll()).thenReturn(List.of());
+	@Test
+	void findAll_noRecords_returnsEmptyList() throws Exception {
+		when(repository.findAll()).thenReturn(List.of());
 
-    mockMvc
-        .perform(get("/api/coordinator/unavailability"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()").value(0));
-  }
+		mockMvc.perform(get("/api/coordinator/unavailability")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.size()").value(0));
+	}
 }

@@ -17,29 +17,29 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Audit Logs", description = "Journal d'audit")
 public class AuditLogController {
 
-  private final AuditLogService service;
+	private final AuditLogService service;
 
-  public AuditLogController(AuditLogService service) {
-    this.service = service;
-  }
+	public AuditLogController(AuditLogService service) {
+		this.service = service;
+	}
 
-  @GetMapping
-  @Operation(summary = "List audit logs with pagination")
-  public PaginatedResponse<AuditLog> findAll(
-      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int limit) {
-    return service.getAuditLogs(page, limit);
-  }
+	@GetMapping
+	@Operation(summary = "List audit logs with pagination")
+	public PaginatedResponse<AuditLog> findAll(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int limit) {
+		return service.getAuditLogs(page, limit);
+	}
 
-  @PostMapping
-  @Operation(summary = "Create an audit log entry")
-  public ResponseEntity<AuditLog> create(@Valid @RequestBody AuditLogRequest request) {
-    AuditLog log = new AuditLog();
-    log.setAction(request.action());
-    log.setEntity(request.entity());
-    log.setEntityId(request.entityId());
-    log.setAdminEmail(request.adminEmail());
-    log.setDetails(request.details());
-    log.setTimestamp(LocalDateTime.now());
-    return ResponseEntity.status(HttpStatus.CREATED).body(service.save(log));
-  }
+	@PostMapping
+	@Operation(summary = "Create an audit log entry")
+	public ResponseEntity<AuditLog> create(@Valid @RequestBody AuditLogRequest request) {
+		AuditLog log = new AuditLog();
+		log.setAction(request.action());
+		log.setEntity(request.entity());
+		log.setEntityId(request.entityId());
+		log.setAdminEmail(request.adminEmail());
+		log.setDetails(request.details());
+		log.setTimestamp(LocalDateTime.now());
+		return ResponseEntity.status(HttpStatus.CREATED).body(service.save(log));
+	}
 }

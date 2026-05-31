@@ -14,23 +14,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class JuryMember {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "jury_id", nullable = false)
-  @JsonIgnore
-  private Jury jury;
+	@ManyToOne
+	@JoinColumn(name = "jury_id", nullable = false)
+	@JsonIgnore
+	private Jury jury;
 
-  @Column(name = "role_name", nullable = false)
-  private String roleName;
+	@Column(name = "role_name", nullable = false)
+	private String roleName;
 
-  @ManyToOne
-  @JoinColumn(name = "teacher_id", nullable = false)
-  private Teacher teacher;
+	@ManyToOne
+	@JoinColumn(name = "teacher_id", nullable = false)
+	private Teacher teacher;
 
-  public Long getTeacherId() {
-    return teacher != null ? teacher.getId() : null;
-  }
+	public Long getTeacherId() {
+		return teacher != null ? teacher.getId() : null;
+	}
 }

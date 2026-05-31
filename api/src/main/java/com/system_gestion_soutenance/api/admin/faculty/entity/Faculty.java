@@ -12,19 +12,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Faculty {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(nullable = false)
-  private String name;
+	@Column(nullable = false)
+	private String name;
 
-  @Column(nullable = false)
-  private String code;
+	@Column(nullable = false)
+	private String code;
 
-  @Column(name = "dean_id")
-  private Long deanId;
+	@Column(name = "dean_id")
+	private Long deanId;
 
-  @Column(name = "logo_url")
-  private String logoUrl;
+	@Column(name = "logo_url")
+	private String logoUrl;
 }

@@ -19,258 +19,250 @@ import org.springframework.web.server.ResponseStatusException;
 
 class JuryServiceTest {
 
-  private final JuryRepository juryRepository = mock(JuryRepository.class);
-  private final ProjectRepository projectRepository = mock(ProjectRepository.class);
-  private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
-  private final JuryRoleTemplateRepository juryRoleTemplateRepository =
-      mock(JuryRoleTemplateRepository.class);
+	private final JuryRepository juryRepository = mock(JuryRepository.class);
+	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
+	private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
+	private final JuryRoleTemplateRepository juryRoleTemplateRepository = mock(JuryRoleTemplateRepository.class);
 
-  private final JuryService service =
-      new JuryService(
-          juryRepository, projectRepository, teacherRepository, juryRoleTemplateRepository);
+	private final JuryService service = new JuryService(juryRepository, projectRepository, teacherRepository,
+			juryRoleTemplateRepository);
 
-  @Test
-  void findAll_returnsAllJuries() {
-    Project project = mock(Project.class);
-    when(project.getId()).thenReturn(1L);
-    when(project.getTitle()).thenReturn("Projet Test");
-    when(project.getDefenseType()).thenReturn("PFE");
+	@Test
+	void findAll_returnsAllJuries() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Projet Test");
+		when(project.getDefenseType()).thenReturn("PFE");
 
-    JuryRoleTemplate template = mock(JuryRoleTemplate.class);
-    when(template.getId()).thenReturn(10L);
-    when(template.getName()).thenReturn("Template Standard");
+		JuryRoleTemplate template = mock(JuryRoleTemplate.class);
+		when(template.getId()).thenReturn(10L);
+		when(template.getName()).thenReturn("Template Standard");
 
-    Teacher teacher = mock(Teacher.class);
-    when(teacher.getId()).thenReturn(5L);
-    when(teacher.getFirstName()).thenReturn("John");
-    when(teacher.getLastName()).thenReturn("Doe");
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
+		when(teacher.getFirstName()).thenReturn("John");
+		when(teacher.getLastName()).thenReturn("Doe");
 
-    JuryMember member = mock(JuryMember.class);
-    when(member.getRoleName()).thenReturn("président");
-    when(member.getTeacher()).thenReturn(teacher);
+		JuryMember member = mock(JuryMember.class);
+		when(member.getRoleName()).thenReturn("président");
+		when(member.getTeacher()).thenReturn(teacher);
 
-    Jury jury = mock(Jury.class);
-    when(jury.getId()).thenReturn(1L);
-    when(jury.getProject()).thenReturn(project);
-    when(jury.getTemplateId()).thenReturn(10L);
-    when(jury.getTemplateName()).thenReturn("Template Standard");
-    when(jury.getMembers()).thenReturn(List.of(member));
+		Jury jury = mock(Jury.class);
+		when(jury.getId()).thenReturn(1L);
+		when(jury.getProject()).thenReturn(project);
+		when(jury.getTemplateId()).thenReturn(10L);
+		when(jury.getTemplateName()).thenReturn("Template Standard");
+		when(jury.getMembers()).thenReturn(List.of(member));
 
-    when(juryRepository.findAll()).thenReturn(List.of(jury));
+		when(juryRepository.findAll()).thenReturn(List.of(jury));
 
-    var result = service.findAll();
+		var result = service.findAll();
 
-    assertEquals(1, result.size());
-    assertEquals("Projet Test", result.get(0).get("projectTitle"));
-  }
+		assertEquals(1, result.size());
+		assertEquals("Projet Test", result.get(0).get("projectTitle"));
+	}
 
-  @Test
-  void create_withValidRequest_returnsJury() {
-    Project project = mock(Project.class);
-    when(project.getId()).thenReturn(1L);
-    when(project.getTitle()).thenReturn("Projet");
-    when(project.getDefenseType()).thenReturn("PFE");
+	@Test
+	void create_withValidRequest_returnsJury() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getDefenseType()).thenReturn("PFE");
 
-    JuryRoleTemplate template = mock(JuryRoleTemplate.class);
-    when(template.getId()).thenReturn(10L);
-    when(template.getName()).thenReturn("Template");
+		JuryRoleTemplate template = mock(JuryRoleTemplate.class);
+		when(template.getId()).thenReturn(10L);
+		when(template.getName()).thenReturn("Template");
 
-    Teacher teacher = mock(Teacher.class);
-    when(teacher.getId()).thenReturn(5L);
-    when(teacher.getFirstName()).thenReturn("John");
-    when(teacher.getLastName()).thenReturn("Doe");
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
+		when(teacher.getFirstName()).thenReturn("John");
+		when(teacher.getLastName()).thenReturn("Doe");
 
-    when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-    when(juryRoleTemplateRepository.findById(10L)).thenReturn(Optional.of(template));
-    when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(juryRoleTemplateRepository.findById(10L)).thenReturn(Optional.of(template));
+		when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
 
-    Jury savedJury = mock(Jury.class);
-    when(savedJury.getId()).thenReturn(1L);
-    when(savedJury.getProject()).thenReturn(project);
-    when(savedJury.getTemplateId()).thenReturn(10L);
-    when(savedJury.getTemplateName()).thenReturn("Template");
-    when(savedJury.getMembers()).thenReturn(List.of());
+		Jury savedJury = mock(Jury.class);
+		when(savedJury.getId()).thenReturn(1L);
+		when(savedJury.getProject()).thenReturn(project);
+		when(savedJury.getTemplateId()).thenReturn(10L);
+		when(savedJury.getTemplateName()).thenReturn("Template");
+		when(savedJury.getMembers()).thenReturn(List.of());
 
-    when(juryRepository.save(any(Jury.class))).thenReturn(savedJury);
+		when(juryRepository.save(any(Jury.class))).thenReturn(savedJury);
 
-    CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
-    CreateJuryRequest request = new CreateJuryRequest(1L, 10L, List.of(member));
-    var result = service.create(request);
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest request = new CreateJuryRequest(1L, 10L, List.of(member));
+		var result = service.create(request);
 
-    assertEquals("Projet", result.get("projectTitle"));
-  }
+		assertEquals("Projet", result.get("projectTitle"));
+	}
 
-  @Test
-  void create_projectNotFound_throwsException() {
-    when(projectRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void create_projectNotFound_throwsException() {
+		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-    CreateJuryRequest request = new CreateJuryRequest(99L, 1L, List.of());
+		CreateJuryRequest request = new CreateJuryRequest(99L, 1L, List.of());
 
-    assertThrows(ResponseStatusException.class, () -> service.create(request));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.create(request));
+	}
 
-  @Test
-  void create_templateNotFound_throwsException() {
-    when(projectRepository.findById(1L)).thenReturn(Optional.of(mock(Project.class)));
-    when(juryRoleTemplateRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void create_templateNotFound_throwsException() {
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(mock(Project.class)));
+		when(juryRoleTemplateRepository.findById(99L)).thenReturn(Optional.empty());
 
-    CreateJuryRequest request = new CreateJuryRequest(1L, 99L, List.of());
+		CreateJuryRequest request = new CreateJuryRequest(1L, 99L, List.of());
 
-    assertThrows(ResponseStatusException.class, () -> service.create(request));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.create(request));
+	}
 
-  @Test
-  void create_duplicateTeacher_throwsException() {
-    when(projectRepository.findById(1L)).thenReturn(Optional.of(mock(Project.class)));
-    when(juryRoleTemplateRepository.findById(1L))
-        .thenReturn(Optional.of(mock(JuryRoleTemplate.class)));
+	@Test
+	void create_duplicateTeacher_throwsException() {
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(mock(Project.class)));
+		when(juryRoleTemplateRepository.findById(1L)).thenReturn(Optional.of(mock(JuryRoleTemplate.class)));
 
-    CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président");
-    CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
-    CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(m1, m2));
+		CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
+		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(m1, m2));
 
-    assertThrows(ResponseStatusException.class, () -> service.create(request));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.create(request));
+	}
 
-  @Test
-  void create_teacherNotFound_throwsException() {
-    Project project = mock(Project.class);
-    when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-    when(juryRoleTemplateRepository.findById(1L))
-        .thenReturn(Optional.of(mock(JuryRoleTemplate.class)));
-    when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void create_teacherNotFound_throwsException() {
+		Project project = mock(Project.class);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(juryRoleTemplateRepository.findById(1L)).thenReturn(Optional.of(mock(JuryRoleTemplate.class)));
+		when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
 
-    CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(99L, "président");
-    CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(99L, "président");
+		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
 
-    assertThrows(ResponseStatusException.class, () -> service.create(request));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.create(request));
+	}
 
-  @Test
-  void update_withProjectId_updatesProject() {
-    Jury jury = mock(Jury.class);
-    Project newProject = mock(Project.class);
-    when(newProject.getId()).thenReturn(2L);
-    when(newProject.getTitle()).thenReturn("New Proj");
-    when(newProject.getDefenseType()).thenReturn("Stage");
+	@Test
+	void update_withProjectId_updatesProject() {
+		Jury jury = mock(Jury.class);
+		Project newProject = mock(Project.class);
+		when(newProject.getId()).thenReturn(2L);
+		when(newProject.getTitle()).thenReturn("New Proj");
+		when(newProject.getDefenseType()).thenReturn("Stage");
 
-    when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
-    when(projectRepository.findById(2L)).thenReturn(Optional.of(newProject));
+		when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(newProject));
 
-    when(juryRepository.save(jury)).thenReturn(jury);
-    when(jury.getId()).thenReturn(1L);
-    when(jury.getProject()).thenReturn(newProject);
-    when(jury.getTemplateId()).thenReturn(null);
-    when(jury.getTemplateName()).thenReturn(null);
-    when(jury.getMembers()).thenReturn(List.of());
+		when(juryRepository.save(jury)).thenReturn(jury);
+		when(jury.getId()).thenReturn(1L);
+		when(jury.getProject()).thenReturn(newProject);
+		when(jury.getTemplateId()).thenReturn(null);
+		when(jury.getTemplateName()).thenReturn(null);
+		when(jury.getMembers()).thenReturn(List.of());
 
-    var result = service.update(1L, Map.of("projectId", "2"));
+		var result = service.update(1L, Map.of("projectId", "2"));
 
-    verify(jury).setProject(newProject);
-    assertEquals("New Proj", result.get("projectTitle"));
-  }
+		verify(jury).setProject(newProject);
+		assertEquals("New Proj", result.get("projectTitle"));
+	}
 
-  @Test
-  void update_withTemplateId_updatesTemplate() {
-    Jury jury = mock(Jury.class);
-    Project project = mock(Project.class);
-    when(project.getId()).thenReturn(1L);
-    when(project.getTitle()).thenReturn("P");
-    when(project.getDefenseType()).thenReturn("PFE");
+	@Test
+	void update_withTemplateId_updatesTemplate() {
+		Jury jury = mock(Jury.class);
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("P");
+		when(project.getDefenseType()).thenReturn("PFE");
 
-    JuryRoleTemplate template = mock(JuryRoleTemplate.class);
-    when(template.getId()).thenReturn(20L);
-    when(template.getName()).thenReturn("Template B");
+		JuryRoleTemplate template = mock(JuryRoleTemplate.class);
+		when(template.getId()).thenReturn(20L);
+		when(template.getName()).thenReturn("Template B");
 
-    when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
-    when(juryRoleTemplateRepository.findById(20L)).thenReturn(Optional.of(template));
+		when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
+		when(juryRoleTemplateRepository.findById(20L)).thenReturn(Optional.of(template));
 
-    when(juryRepository.save(jury)).thenReturn(jury);
-    when(jury.getId()).thenReturn(1L);
-    when(jury.getProject()).thenReturn(project);
-    when(jury.getTemplateId()).thenReturn(20L);
-    when(jury.getTemplateName()).thenReturn("Template B");
-    when(jury.getMembers()).thenReturn(List.of());
+		when(juryRepository.save(jury)).thenReturn(jury);
+		when(jury.getId()).thenReturn(1L);
+		when(jury.getProject()).thenReturn(project);
+		when(jury.getTemplateId()).thenReturn(20L);
+		when(jury.getTemplateName()).thenReturn("Template B");
+		when(jury.getMembers()).thenReturn(List.of());
 
-    var result = service.update(1L, Map.of("templateId", "20"));
+		var result = service.update(1L, Map.of("templateId", "20"));
 
-    verify(jury).setTemplate(template);
-    assertEquals("Template B", result.get("templateName"));
-  }
+		verify(jury).setTemplate(template);
+		assertEquals("Template B", result.get("templateName"));
+	}
 
-  @Test
-  void update_withNewMembers_updatesMembers() {
-    Jury jury = mock(Jury.class);
-    Project project = mock(Project.class);
-    when(project.getId()).thenReturn(1L);
-    when(project.getTitle()).thenReturn("P");
-    when(project.getDefenseType()).thenReturn("PFE");
+	@Test
+	void update_withNewMembers_updatesMembers() {
+		Jury jury = mock(Jury.class);
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("P");
+		when(project.getDefenseType()).thenReturn("PFE");
 
-    Teacher teacher = mock(Teacher.class);
-    when(teacher.getId()).thenReturn(5L);
-    when(teacher.getFirstName()).thenReturn("John");
-    when(teacher.getLastName()).thenReturn("Doe");
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
+		when(teacher.getFirstName()).thenReturn("John");
+		when(teacher.getLastName()).thenReturn("Doe");
 
-    List<JuryMember> existingMembers = new ArrayList<>();
-    when(jury.getMembers()).thenReturn(existingMembers);
+		List<JuryMember> existingMembers = new ArrayList<>();
+		when(jury.getMembers()).thenReturn(existingMembers);
 
-    when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
-    when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
+		when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
+		when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
 
-    when(juryRepository.save(jury)).thenReturn(jury);
-    when(jury.getId()).thenReturn(1L);
-    when(jury.getProject()).thenReturn(project);
-    when(jury.getTemplateId()).thenReturn(null);
-    when(jury.getTemplateName()).thenReturn(null);
-    when(jury.getMembers()).thenReturn(existingMembers);
+		when(juryRepository.save(jury)).thenReturn(jury);
+		when(jury.getId()).thenReturn(1L);
+		when(jury.getProject()).thenReturn(project);
+		when(jury.getTemplateId()).thenReturn(null);
+		when(jury.getTemplateName()).thenReturn(null);
+		when(jury.getMembers()).thenReturn(existingMembers);
 
-    Map<String, Object> updates = new HashMap<>();
-    updates.put("members", List.of(Map.of("teacherId", "5", "roleName", "président")));
-    var result = service.update(1L, updates);
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("members", List.of(Map.of("teacherId", "5", "roleName", "président")));
+		var result = service.update(1L, updates);
 
-    assertEquals(1, existingMembers.size());
-    assertEquals("président", existingMembers.get(0).getRoleName());
-  }
+		assertEquals(1, existingMembers.size());
+		assertEquals("président", existingMembers.get(0).getRoleName());
+	}
 
-  @Test
-  void update_juryNotFound_throwsException() {
-    when(juryRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void update_juryNotFound_throwsException() {
+		when(juryRepository.findById(99L)).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResponseStatusException.class, () -> service.update(99L, Map.of("projectId", "1")));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.update(99L, Map.of("projectId", "1")));
+	}
 
-  @Test
-  void delete_existingJury_deletes() {
-    when(juryRepository.existsById(1L)).thenReturn(true);
+	@Test
+	void delete_existingJury_deletes() {
+		when(juryRepository.existsById(1L)).thenReturn(true);
 
-    service.delete(1L);
+		service.delete(1L);
 
-    verify(juryRepository).deleteById(1L);
-  }
+		verify(juryRepository).deleteById(1L);
+	}
 
-  @Test
-  void delete_juryNotFound_throwsException() {
-    when(juryRepository.existsById(99L)).thenReturn(false);
+	@Test
+	void delete_juryNotFound_throwsException() {
+		when(juryRepository.existsById(99L)).thenReturn(false);
 
-    assertThrows(ResponseStatusException.class, () -> service.delete(99L));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+	}
 
-  @Test
-  void update_duplicateMembersInUpdate_throwsException() {
-    Jury jury = mock(Jury.class);
-    when(jury.getMembers()).thenReturn(new ArrayList<>());
+	@Test
+	void update_duplicateMembersInUpdate_throwsException() {
+		Jury jury = mock(Jury.class);
+		when(jury.getMembers()).thenReturn(new ArrayList<>());
 
-    when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
-    when(teacherRepository.findById(5L)).thenReturn(Optional.of(mock(Teacher.class)));
+		when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
+		when(teacherRepository.findById(5L)).thenReturn(Optional.of(mock(Teacher.class)));
 
-    Map<String, Object> updates = new HashMap<>();
-    updates.put(
-        "members",
-        List.of(
-            Map.of("teacherId", "5", "roleName", "président"),
-            Map.of("teacherId", "5", "roleName", "examinateur")));
+		Map<String, Object> updates = new HashMap<>();
+		updates.put("members", List.of(Map.of("teacherId", "5", "roleName", "président"),
+				Map.of("teacherId", "5", "roleName", "examinateur")));
 
-    assertThrows(ResponseStatusException.class, () -> service.update(1L, updates));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.update(1L, updates));
+	}
 }

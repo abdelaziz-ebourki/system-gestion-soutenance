@@ -18,72 +18,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final JwtAuthFilter jwtAuthFilter;
-  private final ObjectMapper objectMapper;
+	private final JwtAuthFilter jwtAuthFilter;
+	private final ObjectMapper objectMapper;
 
-  public SecurityConfig(JwtAuthFilter jwtAuthFilter, ObjectMapper objectMapper) {
-    this.jwtAuthFilter = jwtAuthFilter;
-    this.objectMapper = objectMapper;
-  }
+	public SecurityConfig(JwtAuthFilter jwtAuthFilter, ObjectMapper objectMapper) {
+		this.jwtAuthFilter = jwtAuthFilter;
+		this.objectMapper = objectMapper;
+	}
 
-  @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-        .headers(headers -> headers.frameOptions(o -> o.disable()))
-        .sessionManagement(
-            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .exceptionHandling(
-            ex ->
-                ex.authenticationEntryPoint(
-                        (request, response, authException) -> {
-                          response.setContentType("application/json;charset=UTF-8");
-                          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                          objectMapper.writeValue(
-                              response.getWriter(),
-                              Map.of(
-                                  "message",
-                                  "Identifiants invalides (E-mail ou mot de passe incorrect)"));
-                        })
-                    .accessDeniedHandler(
-                        (request, response, accessDeniedException) -> {
-                          response.setContentType("application/json;charset=UTF-8");
-                          response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                          objectMapper.writeValue(
-                              response.getWriter(), Map.of("message", "Acces refuse"));
-                        }))
-        .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers("/api/login")
-                    .permitAll()
-                    .requestMatchers("/api/auth/**")
-                    .permitAll()
-                    .requestMatchers("/h2-console/**")
-                    .permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
-                    .permitAll()
-                    .requestMatchers("/actuator/health")
-                    .permitAll()
-                    .requestMatchers("/api/admin/rooms/**")
-                    .hasAnyRole("ADMIN", "COORDINATOR")
-                    .requestMatchers("/api/admin/**")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/api/coordinator/**")
-                    .hasAnyRole("ADMIN", "COORDINATOR")
-                    .requestMatchers("/api/teacher/**")
-                    .hasRole("TEACHER")
-                    .requestMatchers("/api/student/**")
-                    .hasRole("STUDENT")
-                    .requestMatchers("/api/notifications/**")
-                    .authenticated()
-                    .anyRequest()
-                    .authenticated())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.csrf(csrf -> csrf.disable()).headers(headers -> headers.frameOptions(o -> o.disable()))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+					response.setContentType("application/json;charset=UTF-8");
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					objectMapper.writeValue(response.getWriter(),
+							Map.of("message", "Identifiants invalides (E-mail ou mot de passe incorrect)"));
+				}).accessDeniedHandler((request, response, accessDeniedException) -> {
+					response.setContentType("application/json;charset=UTF-8");
+					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+					objectMapper.writeValue(response.getWriter(), Map.of("message", "Acces refuse"));
+				}))
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/login").permitAll()
+						.requestMatchers("/api/auth/**").permitAll().requestMatchers("/h2-console/**").permitAll()
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/actuator/health").permitAll().requestMatchers("/api/admin/rooms/**")
+						.hasAnyRole("ADMIN", "COORDINATOR").requestMatchers("/api/admin/**").hasRole("ADMIN")
+						.requestMatchers("/api/coordinator/**").hasAnyRole("ADMIN", "COORDINATOR")
+						.requestMatchers("/api/teacher/**").hasRole("TEACHER").requestMatchers("/api/student/**")
+						.hasRole("STUDENT").requestMatchers("/api/notifications/**").authenticated().anyRequest()
+						.authenticated())
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-  }
+		return http.build();
+	}
 
-  @Bean
-  PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

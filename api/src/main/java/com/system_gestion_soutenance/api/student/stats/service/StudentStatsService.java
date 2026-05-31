@@ -13,45 +13,41 @@ import org.springframework.stereotype.Service;
 @Service
 public class StudentStatsService {
 
-  private final StudentDocumentRepository documentRepository;
-  private final GroupRepository groupRepository;
-  private final SlotAssignmentRepository slotAssignmentRepository;
+	private final StudentDocumentRepository documentRepository;
+	private final GroupRepository groupRepository;
+	private final SlotAssignmentRepository slotAssignmentRepository;
 
-  public StudentStatsService(
-      StudentDocumentRepository documentRepository,
-      GroupRepository groupRepository,
-      SlotAssignmentRepository slotAssignmentRepository) {
-    this.documentRepository = documentRepository;
-    this.groupRepository = groupRepository;
-    this.slotAssignmentRepository = slotAssignmentRepository;
-  }
+	public StudentStatsService(StudentDocumentRepository documentRepository, GroupRepository groupRepository,
+			SlotAssignmentRepository slotAssignmentRepository) {
+		this.documentRepository = documentRepository;
+		this.groupRepository = groupRepository;
+		this.slotAssignmentRepository = slotAssignmentRepository;
+	}
 
-  public Map<String, Object> getStats(Long studentId) {
-    List<StudentDocument> docs = documentRepository.findByStudentId(studentId);
-    long missing = docs.stream().filter(d -> "missing".equals(d.getStatus())).count();
+	public Map<String, Object> getStats(Long studentId) {
+		List<StudentDocument> docs = documentRepository.findByStudentId(studentId);
+		long missing = docs.stream().filter(d -> "missing".equals(d.getStatus())).count();
 
-    Long projectId = null;
-    int groupMembers = 0;
-    for (Group g : groupRepository.findAll()) {
-      if (g.getStudents() != null
-          && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-        groupMembers = g.getStudents().size();
-        if (g.getProject() != null) projectId = g.getProject().getId();
-        break;
-      }
-    }
+		Long projectId = null;
+		int groupMembers = 0;
+		for (Group g : groupRepository.findAll()) {
+			if (g.getStudents() != null && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
+				groupMembers = g.getStudents().size();
+				if (g.getProject() != null)
+					projectId = g.getProject().getId();
+				break;
+			}
+		}
 
-    final Long pid = projectId;
-    boolean hasSchedule =
-        pid != null
-            && slotAssignmentRepository.findAll().stream()
-                .anyMatch(s -> pid.equals(s.getProjectId()));
+		final Long pid = projectId;
+		boolean hasSchedule = pid != null
+				&& slotAssignmentRepository.findAll().stream().anyMatch(s -> pid.equals(s.getProjectId()));
 
-    Map<String, Object> stats = new HashMap<>();
-    stats.put("documentCount", docs.size());
-    stats.put("missingDocuments", missing);
-    stats.put("groupMembers", groupMembers);
-    stats.put("defenseStatus", hasSchedule ? "scheduled" : "pending");
-    return stats;
-  }
+		Map<String, Object> stats = new HashMap<>();
+		stats.put("documentCount", docs.size());
+		stats.put("missingDocuments", missing);
+		stats.put("groupMembers", groupMembers);
+		stats.put("defenseStatus", hasSchedule ? "scheduled" : "pending");
+		return stats;
+	}
 }

@@ -15,20 +15,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class JuryRoleTemplate {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String name;
+	@Column(nullable = false, unique = true)
+	private String name;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "defense_type", nullable = false)
-  private DefenseType defenseType;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "defense_type", nullable = false)
+	private DefenseType defenseType;
 
-  @ElementCollection
-  @CollectionTable(
-      name = "jury_role_template_roles",
-      joinColumns = @JoinColumn(name = "jury_role_template_id"))
-  private List<TemplateRole> roles = new ArrayList<>();
+	@ElementCollection
+	@CollectionTable(name = "jury_role_template_roles", joinColumns = @JoinColumn(name = "jury_role_template_id"))
+	private List<TemplateRole> roles = new ArrayList<>();
 }

@@ -11,41 +11,39 @@ import org.junit.jupiter.api.Test;
 
 class CoordinatorStatsServiceTest {
 
-  private final ProjectRepository projectRepository = mock(ProjectRepository.class);
-  private final GroupRepository groupRepository = mock(GroupRepository.class);
-  private final JuryRepository juryRepository = mock(JuryRepository.class);
-  private final DefenseSessionRepository defenseSessionRepository =
-      mock(DefenseSessionRepository.class);
+	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
+	private final GroupRepository groupRepository = mock(GroupRepository.class);
+	private final JuryRepository juryRepository = mock(JuryRepository.class);
+	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 
-  private final CoordinatorStatsService service =
-      new CoordinatorStatsService(
-          projectRepository, groupRepository, juryRepository, defenseSessionRepository);
+	private final CoordinatorStatsService service = new CoordinatorStatsService(projectRepository, groupRepository,
+			juryRepository, defenseSessionRepository);
 
-  @Test
-  void getStats_returnsCounts() {
-    when(projectRepository.count()).thenReturn(10L);
-    when(groupRepository.count()).thenReturn(5L);
-    when(juryRepository.count()).thenReturn(8L);
-    when(defenseSessionRepository.count()).thenReturn(3L);
+	@Test
+	void getStats_returnsCounts() {
+		when(projectRepository.count()).thenReturn(10L);
+		when(groupRepository.count()).thenReturn(5L);
+		when(juryRepository.count()).thenReturn(8L);
+		when(defenseSessionRepository.count()).thenReturn(3L);
 
-    var result = service.getStats();
+		var result = service.getStats();
 
-    assertEquals(10L, result.get("totalProjects"));
-    assertEquals(5L, result.get("totalGroups"));
-    assertEquals(8L, result.get("totalJuries"));
-    assertEquals(3L, result.get("scheduledDefenses"));
-  }
+		assertEquals(10L, result.get("totalProjects"));
+		assertEquals(5L, result.get("totalGroups"));
+		assertEquals(8L, result.get("totalJuries"));
+		assertEquals(3L, result.get("scheduledDefenses"));
+	}
 
-  @Test
-  void getStats_allZero_returnsZeroCounts() {
-    when(projectRepository.count()).thenReturn(0L);
-    when(groupRepository.count()).thenReturn(0L);
-    when(juryRepository.count()).thenReturn(0L);
-    when(defenseSessionRepository.count()).thenReturn(0L);
+	@Test
+	void getStats_allZero_returnsZeroCounts() {
+		when(projectRepository.count()).thenReturn(0L);
+		when(groupRepository.count()).thenReturn(0L);
+		when(juryRepository.count()).thenReturn(0L);
+		when(defenseSessionRepository.count()).thenReturn(0L);
 
-    var result = service.getStats();
+		var result = service.getStats();
 
-    assertEquals(0L, result.get("totalProjects"));
-    assertEquals(0L, result.get("totalGroups"));
-  }
+		assertEquals(0L, result.get("totalProjects"));
+		assertEquals(0L, result.get("totalGroups"));
+	}
 }

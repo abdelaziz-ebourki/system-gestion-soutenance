@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Defense Settings", description = "Paramètres des soutenances")
 public class DefenseSettingsController {
 
-  private final DefenseSettingsService service;
+	private final DefenseSettingsService service;
 
-  public DefenseSettingsController(DefenseSettingsService service) {
-    this.service = service;
-  }
+	public DefenseSettingsController(DefenseSettingsService service) {
+		this.service = service;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get defense settings")
-  public DefenseSettings get() {
-    return service.get();
-  }
+	@GetMapping
+	@Operation(summary = "Get defense settings")
+	public DefenseSettings get() {
+		return service.get();
+	}
 
-  @PostMapping
-  @Operation(summary = "Update defense settings")
-  public DefenseSettings update(@Valid @RequestBody UpdateDefenseSettingsRequest updates) {
-    return service.update(updates);
-  }
+	@PostMapping
+	@Operation(summary = "Update defense settings")
+	public DefenseSettings update(@Valid @RequestBody UpdateDefenseSettingsRequest updates) {
+		return service.update(updates);
+	}
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TemplateRole {
-  private String name;
-  private int count;
-  private int coefficient;
+	private String name;
+	private int count;
+	private int coefficient;
 }

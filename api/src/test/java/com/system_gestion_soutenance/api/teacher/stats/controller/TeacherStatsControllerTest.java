@@ -21,39 +21,39 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = TeacherStatsController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = TeacherStatsController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class TeacherStatsControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private TeacherStatsService statsService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@MockitoBean
+	private TeacherStatsService statsService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    User user = new User();
-    user.setId(1L);
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		User user = new User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void getStats_returns200() throws Exception {
-    when(statsService.getStats(1L)).thenReturn(Map.of("upcomingDefenses", 0));
-    mockMvc
-        .perform(get("/api/teacher/stats"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.upcomingDefenses").value(0));
-  }
+	@Test
+	void getStats_returns200() throws Exception {
+		when(statsService.getStats(1L)).thenReturn(Map.of("upcomingDefenses", 0));
+		mockMvc.perform(get("/api/teacher/stats")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.upcomingDefenses").value(0));
+	}
 }

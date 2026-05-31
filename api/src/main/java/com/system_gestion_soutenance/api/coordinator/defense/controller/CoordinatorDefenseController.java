@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Coordinator - Defenses", description = "Gestion des soutenances individuelles")
 public class CoordinatorDefenseController {
 
-  private final ScheduleService scheduleService;
+	private final ScheduleService scheduleService;
 
-  public CoordinatorDefenseController(ScheduleService scheduleService) {
-    this.scheduleService = scheduleService;
-  }
+	public CoordinatorDefenseController(ScheduleService scheduleService) {
+		this.scheduleService = scheduleService;
+	}
 
-  @PostMapping("/{id}/cancel")
-  @Operation(summary = "Cancel a scheduled defense")
-  public ResponseEntity<Map<String, String>> cancel(@PathVariable Long id) {
-    scheduleService.cancelDefense(id);
-    return ResponseEntity.ok(Map.of("message", "Soutenance annulée."));
-  }
+	@PostMapping("/{id}/cancel")
+	@Operation(summary = "Cancel a scheduled defense")
+	public ResponseEntity<Map<String, String>> cancel(@PathVariable Long id) {
+		scheduleService.cancelDefense(id);
+		return ResponseEntity.ok(Map.of("message", "Soutenance annulée."));
+	}
 }

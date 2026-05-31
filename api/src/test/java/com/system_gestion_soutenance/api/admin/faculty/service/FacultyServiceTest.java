@@ -20,89 +20,91 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class FacultyServiceTest {
 
-  @Mock private FacultyRepository facultyRepository;
-  @Mock private DepartmentRepository departmentRepository;
+	@Mock
+	private FacultyRepository facultyRepository;
+	@Mock
+	private DepartmentRepository departmentRepository;
 
-  @InjectMocks private FacultyService facultyService;
+	@InjectMocks
+	private FacultyService facultyService;
 
-  @Test
-  void findAll_returnsAll() {
-    when(facultyRepository.findAll()).thenReturn(List.of(new Faculty()));
-    assertEquals(1, facultyService.findAll().size());
-  }
+	@Test
+	void findAll_returnsAll() {
+		when(facultyRepository.findAll()).thenReturn(List.of(new Faculty()));
+		assertEquals(1, facultyService.findAll().size());
+	}
 
-  @Test
-  void findById_existing_returnsFaculty() {
-    Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
-    when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
-    assertEquals(1L, facultyService.findById(1L).getId());
-  }
+	@Test
+	void findById_existing_returnsFaculty() {
+		Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
+		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
+		assertEquals(1L, facultyService.findById(1L).getId());
+	}
 
-  @Test
-  void findById_missing_throws() {
-    when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
-    assertThrows(ResponseStatusException.class, () -> facultyService.findById(99L));
-  }
+	@Test
+	void findById_missing_throws() {
+		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
+		assertThrows(ResponseStatusException.class, () -> facultyService.findById(99L));
+	}
 
-  @Test
-  void create_success() {
-    when(facultyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void create_success() {
+		when(facultyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    CreateFacultyRequest req = new CreateFacultyRequest("Faculté des Sciences", "FS", null, null);
-    Faculty result = facultyService.create(req);
+		CreateFacultyRequest req = new CreateFacultyRequest("Faculté des Sciences", "FS", null, null);
+		Faculty result = facultyService.create(req);
 
-    assertEquals("Faculté des Sciences", result.getName());
-    assertEquals("FS", result.getCode());
-  }
+		assertEquals("Faculté des Sciences", result.getName());
+		assertEquals("FS", result.getCode());
+	}
 
-  @Test
-  void update_success() {
-    Faculty existing = new Faculty(1L, "Old", "O", null, null);
-    when(facultyRepository.findById(1L)).thenReturn(Optional.of(existing));
-    when(facultyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void update_success() {
+		Faculty existing = new Faculty(1L, "Old", "O", null, null);
+		when(facultyRepository.findById(1L)).thenReturn(Optional.of(existing));
+		when(facultyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    CreateFacultyRequest req = new CreateFacultyRequest("New", "N", 2L, "logo.png");
-    Faculty result = facultyService.update(1L, req);
+		CreateFacultyRequest req = new CreateFacultyRequest("New", "N", 2L, "logo.png");
+		Faculty result = facultyService.update(1L, req);
 
-    assertEquals("New", result.getName());
-    assertEquals("N", result.getCode());
-    assertEquals(2L, result.getDeanId());
-    assertEquals("logo.png", result.getLogoUrl());
-  }
+		assertEquals("New", result.getName());
+		assertEquals("N", result.getCode());
+		assertEquals(2L, result.getDeanId());
+		assertEquals("logo.png", result.getLogoUrl());
+	}
 
-  @Test
-  void update_notFound_throws() {
-    when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
-    assertThrows(
-        ResponseStatusException.class,
-        () -> facultyService.update(99L, new CreateFacultyRequest("N", "N", null, null)));
-  }
+	@Test
+	void update_notFound_throws() {
+		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
+		assertThrows(ResponseStatusException.class,
+				() -> facultyService.update(99L, new CreateFacultyRequest("N", "N", null, null)));
+	}
 
-  @Test
-  void delete_success() {
-    Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
-    when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
-    when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of());
+	@Test
+	void delete_success() {
+		Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
+		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
+		when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of());
 
-    facultyService.delete(1L);
+		facultyService.delete(1L);
 
-    verify(facultyRepository).delete(faculty);
-  }
+		verify(facultyRepository).delete(faculty);
+	}
 
-  @Test
-  void delete_notFound_throws() {
-    when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
-    assertThrows(ResponseStatusException.class, () -> facultyService.delete(99L));
-    verify(facultyRepository, never()).delete(any());
-  }
+	@Test
+	void delete_notFound_throws() {
+		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
+		assertThrows(ResponseStatusException.class, () -> facultyService.delete(99L));
+		verify(facultyRepository, never()).delete(any());
+	}
 
-  @Test
-  void delete_withDepartments_throws() {
-    Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
-    when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
-    when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of(new Department()));
+	@Test
+	void delete_withDepartments_throws() {
+		Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
+		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
+		when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of(new Department()));
 
-    assertThrows(ResponseStatusException.class, () -> facultyService.delete(1L));
-    verify(facultyRepository, never()).delete(any());
-  }
+		assertThrows(ResponseStatusException.class, () -> facultyService.delete(1L));
+		verify(facultyRepository, never()).delete(any());
+	}
 }

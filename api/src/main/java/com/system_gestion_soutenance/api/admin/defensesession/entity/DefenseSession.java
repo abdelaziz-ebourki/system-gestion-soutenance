@@ -15,53 +15,51 @@ import lombok.*;
 @AllArgsConstructor
 public class DefenseSession {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(nullable = false)
-  private String name;
+	@Column(nullable = false)
+	private String name;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "defense_type", nullable = false)
-  private DefenseType defenseType;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "defense_type", nullable = false)
+	private DefenseType defenseType;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private DefenseSessionStatus status = DefenseSessionStatus.DRAFT;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private DefenseSessionStatus status = DefenseSessionStatus.DRAFT;
 
-  @Column(name = "max_group_size")
-  private int maxGroupSize;
+	@Column(name = "max_group_size")
+	private int maxGroupSize;
 
-  @Column(name = "defense_duration")
-  private int defenseDuration;
+	@Column(name = "defense_duration")
+	private int defenseDuration;
 
-  @Column(name = "break_duration")
-  private int breakDuration;
+	@Column(name = "break_duration")
+	private int breakDuration;
 
-  @Column(name = "submission_deadline")
-  private LocalDate submissionDeadline;
+	@Column(name = "submission_deadline")
+	private LocalDate submissionDeadline;
 
-  @ElementCollection
-  @CollectionTable(
-      name = "defense_session_coefficients",
-      joinColumns = @JoinColumn(name = "defense_session_id"))
-  @MapKeyColumn(name = "role_name")
-  @Column(name = "coefficient")
-  private Map<String, Integer> evaluationCoefficients = new HashMap<>();
+	@ElementCollection
+	@CollectionTable(name = "defense_session_coefficients", joinColumns = @JoinColumn(name = "defense_session_id"))
+	@MapKeyColumn(name = "role_name")
+	@Column(name = "coefficient")
+	private Map<String, Integer> evaluationCoefficients = new HashMap<>();
 
-  @ManyToOne
-  @JoinColumn(name = "jury_role_template_id")
-  @JsonIgnore
-  private JuryRoleTemplate juryRoleTemplate;
+	@ManyToOne
+	@JoinColumn(name = "jury_role_template_id")
+	@JsonIgnore
+	private JuryRoleTemplate juryRoleTemplate;
 
-  @Column(name = "start_date", nullable = false)
-  private LocalDate startDate;
+	@Column(name = "start_date", nullable = false)
+	private LocalDate startDate;
 
-  @Column(name = "end_date", nullable = false)
-  private LocalDate endDate;
+	@Column(name = "end_date", nullable = false)
+	private LocalDate endDate;
 
-  public Long getJuryRoleTemplateId() {
-    return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;
-  }
+	public Long getJuryRoleTemplateId() {
+		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;
+	}
 }

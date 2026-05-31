@@ -16,41 +16,45 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TeacherUnavailabilityServiceTest {
 
-  @Mock private UnavailabilityRepository repository;
+	@Mock
+	private UnavailabilityRepository repository;
 
-  @InjectMocks private TeacherUnavailabilityService service;
+	@InjectMocks
+	private TeacherUnavailabilityService service;
 
-  @Test
-  void getByTeacher_returnsSlotsByDate() {
-    Unavailability ua = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00", "09:00"));
-    when(repository.findAll()).thenReturn(List.of(ua));
+	@SuppressWarnings("unchecked")
+	@Test
+	void getByTeacher_returnsSlotsByDate() {
+		Unavailability ua = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00", "09:00"));
+		when(repository.findAll()).thenReturn(List.of(ua));
 
-    Map<String, Object> result = service.getByTeacher(1L);
+		Map<String, Object> result = service.getByTeacher(1L);
 
-    Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
-    assertEquals(1, slotsByDate.size());
-    assertEquals(2, slotsByDate.get("2026-06-01").size());
-  }
+		Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
+		assertEquals(1, slotsByDate.size());
+		assertEquals(2, slotsByDate.get("2026-06-01").size());
+	}
 
-  @Test
-  void getByTeacher_noUnavailability_returnsEmpty() {
-    when(repository.findAll()).thenReturn(List.of());
+	@SuppressWarnings("unchecked")
+	@Test
+	void getByTeacher_noUnavailability_returnsEmpty() {
+		when(repository.findAll()).thenReturn(List.of());
 
-    Map<String, Object> result = service.getByTeacher(1L);
+		Map<String, Object> result = service.getByTeacher(1L);
 
-    Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
-    assertTrue(slotsByDate.isEmpty());
-  }
+		Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
+		assertTrue(slotsByDate.isEmpty());
+	}
 
-  @Test
-  void saveForTeacher_deletesExistingAndSaves() {
-    Unavailability existing = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00"));
-    when(repository.findAll()).thenReturn(List.of(existing));
+	@Test
+	void saveForTeacher_deletesExistingAndSaves() {
+		Unavailability existing = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00"));
+		when(repository.findAll()).thenReturn(List.of(existing));
 
-    Map<String, List<String>> newSlots = Map.of("2026-06-02", List.of("10:00", "11:00"));
-    service.saveForTeacher(1L, newSlots);
+		Map<String, List<String>> newSlots = Map.of("2026-06-02", List.of("10:00", "11:00"));
+		service.saveForTeacher(1L, newSlots);
 
-    verify(repository).deleteAll(List.of(existing));
-    verify(repository, atLeastOnce()).save(any());
-  }
+		verify(repository).deleteAll(List.of(existing));
+		verify(repository, atLeastOnce()).save(any());
+	}
 }

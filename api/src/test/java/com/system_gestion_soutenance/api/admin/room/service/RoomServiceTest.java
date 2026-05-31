@@ -21,73 +21,74 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class RoomServiceTest {
 
-  @Mock private RoomRepository roomRepository;
-  @Mock private DepartmentRepository departmentRepository;
-  @InjectMocks private RoomService roomService;
+	@Mock
+	private RoomRepository roomRepository;
+	@Mock
+	private DepartmentRepository departmentRepository;
+	@InjectMocks
+	private RoomService roomService;
 
-  @Test
-  void findAll_returnsAll() {
-    when(roomRepository.findAll()).thenReturn(List.of(new Room()));
-    assertEquals(1, roomService.findAll().size());
-  }
+	@Test
+	void findAll_returnsAll() {
+		when(roomRepository.findAll()).thenReturn(List.of(new Room()));
+		assertEquals(1, roomService.findAll().size());
+	}
 
-  @Test
-  void create_success() {
-    Department dept = new Department();
-    dept.setId(1L);
-    when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-    when(roomRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void create_success() {
+		Department dept = new Department();
+		dept.setId(1L);
+		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
+		when(roomRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    Room result = roomService.create(new CreateRoomRequest("Salle 1", 30, 1L));
-    assertEquals("Salle 1", result.getName());
-    assertEquals(30, result.getCapacity());
-  }
+		Room result = roomService.create(new CreateRoomRequest("Salle 1", 30, 1L));
+		assertEquals("Salle 1", result.getName());
+		assertEquals(30, result.getCapacity());
+	}
 
-  @Test
-  void create_departmentNotFound_throws() {
-    when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
-    assertThrows(
-        ResponseStatusException.class,
-        () -> roomService.create(new CreateRoomRequest("X", 10, 99L)));
-  }
+	@Test
+	void create_departmentNotFound_throws() {
+		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
+		assertThrows(ResponseStatusException.class, () -> roomService.create(new CreateRoomRequest("X", 10, 99L)));
+	}
 
-  @Test
-  void bulkCreate_success() {
-    Department dept = new Department();
-    dept.setId(1L);
-    when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-    when(roomRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void bulkCreate_success() {
+		Department dept = new Department();
+		dept.setId(1L);
+		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
+		when(roomRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
 
-    var entry = new BulkRoomRequest.RoomEntry("S1", 20, 1L);
-    List<Room> results = roomService.bulkCreate(new BulkRoomRequest(List.of(entry)));
+		var entry = new BulkRoomRequest.RoomEntry("S1", 20, 1L);
+		List<Room> results = roomService.bulkCreate(new BulkRoomRequest(List.of(entry)));
 
-    assertEquals(1, results.size());
-  }
+		assertEquals(1, results.size());
+	}
 
-  @Test
-  void update_success() {
-    Room existing = new Room();
-    existing.setId(1L);
-    Department dept = new Department();
-    dept.setId(1L);
-    when(roomRepository.findById(1L)).thenReturn(Optional.of(existing));
-    when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-    when(roomRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+	@Test
+	void update_success() {
+		Room existing = new Room();
+		existing.setId(1L);
+		Department dept = new Department();
+		dept.setId(1L);
+		when(roomRepository.findById(1L)).thenReturn(Optional.of(existing));
+		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
+		when(roomRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    Room result = roomService.update(1L, new CreateRoomRequest("Updated", 25, 1L));
-    assertEquals("Updated", result.getName());
-  }
+		Room result = roomService.update(1L, new CreateRoomRequest("Updated", 25, 1L));
+		assertEquals("Updated", result.getName());
+	}
 
-  @Test
-  void delete_success() {
-    when(roomRepository.existsById(1L)).thenReturn(true);
-    roomService.delete(1L);
-    verify(roomRepository).deleteById(1L);
-  }
+	@Test
+	void delete_success() {
+		when(roomRepository.existsById(1L)).thenReturn(true);
+		roomService.delete(1L);
+		verify(roomRepository).deleteById(1L);
+	}
 
-  @Test
-  void delete_notFound_throws() {
-    when(roomRepository.existsById(99L)).thenReturn(false);
-    assertThrows(ResponseStatusException.class, () -> roomService.delete(99L));
-  }
+	@Test
+	void delete_notFound_throws() {
+		when(roomRepository.existsById(99L)).thenReturn(false);
+		assertThrows(ResponseStatusException.class, () -> roomService.delete(99L));
+	}
 }

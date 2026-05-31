@@ -17,28 +17,28 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Jury {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "project_id", nullable = false)
-  private Project project;
+	@ManyToOne
+	@JoinColumn(name = "project_id", nullable = false)
+	private Project project;
 
-  @ManyToOne
-  @JoinColumn(name = "jury_role_template_id", nullable = false)
-  @JsonIgnore
-  private JuryRoleTemplate template;
+	@ManyToOne
+	@JoinColumn(name = "jury_role_template_id", nullable = false)
+	@JsonIgnore
+	private JuryRoleTemplate template;
 
-  @OneToMany(mappedBy = "jury", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonIgnore
-  private List<JuryMember> members = new ArrayList<>();
+	@OneToMany(mappedBy = "jury", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	private List<JuryMember> members = new ArrayList<>();
 
-  public Long getTemplateId() {
-    return template != null ? template.getId() : null;
-  }
+	public Long getTemplateId() {
+		return template != null ? template.getId() : null;
+	}
 
-  public String getTemplateName() {
-    return template != null ? template.getName() : null;
-  }
+	public String getTemplateName() {
+		return template != null ? template.getName() : null;
+	}
 }

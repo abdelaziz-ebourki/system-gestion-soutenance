@@ -11,25 +11,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-  Optional<User> findByEmail(String email);
+	Optional<User> findByEmail(String email);
 
-  Optional<User> findByVerificationToken(String verificationToken);
+	Optional<User> findByVerificationToken(String verificationToken);
 
-  Optional<User> findByResetToken(String resetToken);
+	Optional<User> findByResetToken(String resetToken);
 
-  Page<User> findByRole(Role role, Pageable pageable);
+	Page<User> findByRole(Role role, Pageable pageable);
 
-  List<User> findByRole(Role role);
+	List<User> findByRole(Role role);
 
-  @Query(
-      """
-            SELECT u FROM User u
-            WHERE (:role IS NULL OR u.role = :role)
-            AND (:search IS NULL
-                 OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :search, '%'))
-                 OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
-                 OR LOWER(u.email)     LIKE LOWER(CONCAT('%', :search, '%')))
-            """)
-  Page<User> findByRoleAndSearch(
-      @Param("role") Role role, @Param("search") String search, Pageable pageable);
+	@Query("""
+			SELECT u FROM User u
+			WHERE (:role IS NULL OR u.role = :role)
+			AND (:search IS NULL
+			     OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :search, '%'))
+			     OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
+			     OR LOWER(u.email)     LIKE LOWER(CONCAT('%', :search, '%')))
+			""")
+	Page<User> findByRoleAndSearch(@Param("role") Role role, @Param("search") String search, Pageable pageable);
 }

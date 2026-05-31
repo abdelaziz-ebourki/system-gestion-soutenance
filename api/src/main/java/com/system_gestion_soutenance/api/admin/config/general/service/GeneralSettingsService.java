@@ -10,31 +10,28 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class GeneralSettingsService {
 
-  private final GeneralSettingsRepository repository;
+	private final GeneralSettingsRepository repository;
 
-  public GeneralSettingsService(GeneralSettingsRepository repository) {
-    this.repository = repository;
-  }
+	public GeneralSettingsService(GeneralSettingsRepository repository) {
+		this.repository = repository;
+	}
 
-  public GeneralSettings get() {
-    return repository
-        .findById(1L)
-        .orElseThrow(
-            () ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Paramètres généraux non configurés"));
-  }
+	public GeneralSettings get() {
+		return repository.findById(1L).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètres généraux non configurés"));
+	}
 
-  public GeneralSettings update(UpdateGeneralSettingsRequest updates) {
-    GeneralSettings settings = repository.findById(1L).orElse(new GeneralSettings());
+	public GeneralSettings update(UpdateGeneralSettingsRequest updates) {
+		GeneralSettings settings = repository.findById(1L).orElse(new GeneralSettings());
 
-    settings.setInstitutionName(updates.institutionName());
-    settings.setInstitutionLogoUrl(updates.institutionLogoUrl());
-    settings.setTimezone(updates.timezone());
-    settings.setDateFormat(updates.dateFormat());
-    if (updates.setupCompleted() != null) settings.setSetupCompleted(updates.setupCompleted());
+		settings.setInstitutionName(updates.institutionName());
+		settings.setInstitutionLogoUrl(updates.institutionLogoUrl());
+		settings.setTimezone(updates.timezone());
+		settings.setDateFormat(updates.dateFormat());
+		if (updates.setupCompleted() != null)
+			settings.setSetupCompleted(updates.setupCompleted());
 
-    settings.setId(1L);
-    return repository.save(settings);
-  }
+		settings.setId(1L);
+		return repository.save(settings);
+	}
 }

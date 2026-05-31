@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DefenseSessionRepository extends JpaRepository<DefenseSession, Long> {
-  List<DefenseSession> findByJuryRoleTemplate_Id(Long juryRoleTemplateId);
+	List<DefenseSession> findByJuryRoleTemplate_Id(Long juryRoleTemplateId);
 }

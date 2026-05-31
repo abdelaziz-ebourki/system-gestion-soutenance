@@ -19,45 +19,40 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = CoordinatorGradeController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = CoordinatorGradeController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class CoordinatorGradeControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @MockitoBean private CoordinatorGradeService gradeService;
+	@MockitoBean
+	private CoordinatorGradeService gradeService;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void getGrades_returnsGrades() throws Exception {
-    when(gradeService.getGrades())
-        .thenReturn(
-            List.of(Map.of("projectId", 1L, "projectTitle", "Projet Test", "status", "completed")));
+	@Test
+	void getGrades_returnsGrades() throws Exception {
+		when(gradeService.getGrades())
+				.thenReturn(List.of(Map.of("projectId", 1L, "projectTitle", "Projet Test", "status", "completed")));
 
-    mockMvc
-        .perform(get("/api/coordinator/grades"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()").value(1))
-        .andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
-  }
+		mockMvc.perform(get("/api/coordinator/grades")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
+	}
 }

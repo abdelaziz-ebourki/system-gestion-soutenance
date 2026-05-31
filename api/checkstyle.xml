@@ -7,11 +7,9 @@
     <property name="severity" value="error"/>
 
     <module name="LineLength">
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+        <property name="max" value="160"/>
+        <property name="ignorePattern" value="^package.*|^import.*"/>
     </module>
-
-    <module name="FileTabCharacter"/>
 
     <module name="TreeWalker">
         <module name="JavadocMethod">
@@ -63,6 +61,10 @@
         <module name="InnerTypeLast"/>
         <module name="MutableException"/>
 
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="tabWidth" value="4"/>
+        </module>
         <module name="UpperEll"/>
         <module name="ArrayTypeStyle"/>
     </module>

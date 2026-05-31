@@ -18,39 +18,40 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class StudentDocumentServiceTest {
 
-  @Mock private StudentDocumentRepository repository;
+	@Mock
+	private StudentDocumentRepository repository;
 
-  @InjectMocks private StudentDocumentService service;
+	@InjectMocks
+	private StudentDocumentService service;
 
-  @Test
-  void findByStudent_returnsDocuments() {
-    when(repository.findByStudentId(1L)).thenReturn(List.of(new StudentDocument()));
-    assertEquals(1, service.findByStudent(1L).size());
-  }
+	@Test
+	void findByStudent_returnsDocuments() {
+		when(repository.findByStudentId(1L)).thenReturn(List.of(new StudentDocument()));
+		assertEquals(1, service.findByStudent(1L).size());
+	}
 
-  @Test
-  void upload_success() throws Exception {
-    StudentDocument doc = new StudentDocument();
-    doc.setId(1L);
-    doc.setStatus("missing");
+	@Test
+	void upload_success() throws Exception {
+		StudentDocument doc = new StudentDocument();
+		doc.setId(1L);
+		doc.setStatus("missing");
 
-    MultipartFile file = mock(MultipartFile.class);
-    when(file.getOriginalFilename()).thenReturn("report.pdf");
+		MultipartFile file = mock(MultipartFile.class);
+		when(file.getOriginalFilename()).thenReturn("report.pdf");
 
-    when(repository.findById(1L)).thenReturn(Optional.of(doc));
-    when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(repository.findById(1L)).thenReturn(Optional.of(doc));
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    StudentDocument result = service.upload(1L, file);
+		StudentDocument result = service.upload(1L, file);
 
-    assertEquals("submitted", result.getStatus());
-    assertNotNull(result.getSubmittedAt());
-    assertTrue(result.getFilePath().endsWith("report.pdf"));
-  }
+		assertEquals("submitted", result.getStatus());
+		assertNotNull(result.getSubmittedAt());
+		assertTrue(result.getFilePath().endsWith("report.pdf"));
+	}
 
-  @Test
-  void upload_notFound_throws() {
-    when(repository.findById(99L)).thenReturn(Optional.empty());
-    assertThrows(
-        ResponseStatusException.class, () -> service.upload(99L, mock(MultipartFile.class)));
-  }
+	@Test
+	void upload_notFound_throws() {
+		when(repository.findById(99L)).thenReturn(Optional.empty());
+		assertThrows(ResponseStatusException.class, () -> service.upload(99L, mock(MultipartFile.class)));
+	}
 }

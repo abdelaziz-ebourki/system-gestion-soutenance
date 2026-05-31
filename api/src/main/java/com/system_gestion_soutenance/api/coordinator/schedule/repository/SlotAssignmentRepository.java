@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SlotAssignmentRepository extends JpaRepository<SlotAssignment, Long> {
-  List<SlotAssignment> findByProjectId(Long projectId);
+	List<SlotAssignment> findByProjectId(Long projectId);
 }

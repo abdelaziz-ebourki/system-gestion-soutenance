@@ -19,28 +19,30 @@ import org.springframework.data.domain.PageRequest;
 @ExtendWith(MockitoExtension.class)
 class AuditLogServiceTest {
 
-  @Mock private AuditLogRepository repository;
-  @InjectMocks private AuditLogService service;
+	@Mock
+	private AuditLogRepository repository;
+	@InjectMocks
+	private AuditLogService service;
 
-  @Test
-  void getAuditLogs_returnsPaginated() {
-    AuditLog log = new AuditLog();
-    Page<AuditLog> page = new PageImpl<>(List.of(log));
-    when(repository.findAllByOrderByTimestampDesc(any(PageRequest.class))).thenReturn(page);
+	@Test
+	void getAuditLogs_returnsPaginated() {
+		AuditLog log = new AuditLog();
+		Page<AuditLog> page = new PageImpl<>(List.of(log));
+		when(repository.findAllByOrderByTimestampDesc(any(PageRequest.class))).thenReturn(page);
 
-    PaginatedResponse<AuditLog> result = service.getAuditLogs(0, 20);
+		PaginatedResponse<AuditLog> result = service.getAuditLogs(0, 20);
 
-    assertEquals(1, result.items().size());
-    assertEquals(1, result.total());
-  }
+		assertEquals(1, result.items().size());
+		assertEquals(1, result.total());
+	}
 
-  @Test
-  void save_returnsSaved() {
-    AuditLog log = new AuditLog();
-    when(repository.save(any())).thenReturn(log);
+	@Test
+	void save_returnsSaved() {
+		AuditLog log = new AuditLog();
+		when(repository.save(any())).thenReturn(log);
 
-    AuditLog result = service.save(log);
-    assertNotNull(result);
-    verify(repository).save(log);
-  }
+		AuditLog result = service.save(log);
+		assertNotNull(result);
+		verify(repository).save(log);
+	}
 }

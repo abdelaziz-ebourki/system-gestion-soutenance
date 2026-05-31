@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationRepository extends JpaRepository<AppNotification, Long> {
-  List<AppNotification> findAllByOrderByTimestampDesc();
+	List<AppNotification> findAllByOrderByTimestampDesc();
 }

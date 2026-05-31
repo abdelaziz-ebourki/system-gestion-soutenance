@@ -14,26 +14,25 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = StatsController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = StatsController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class StatsControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @MockitoBean private StatsService statsService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@MockitoBean
+	private StatsService statsService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @Test
-  void getStats_returnsMap() throws Exception {
-    when(statsService.getStats()).thenReturn(Map.of("totalStudents", 100L));
+	@Test
+	void getStats_returnsMap() throws Exception {
+		when(statsService.getStats()).thenReturn(Map.of("totalStudents", 100L));
 
-    mockMvc
-        .perform(get("/api/admin/stats"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.totalStudents").value(100));
-  }
+		mockMvc.perform(get("/api/admin/stats")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.totalStudents").value(100));
+	}
 }

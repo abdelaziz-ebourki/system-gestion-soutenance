@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class Coordinator extends User {}
+public class Coordinator extends User {
+}

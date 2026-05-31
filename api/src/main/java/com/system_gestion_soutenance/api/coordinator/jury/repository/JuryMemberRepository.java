@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JuryMemberRepository extends JpaRepository<JuryMember, Long> {
-  List<JuryMember> findByTeacher_Id(Long teacherId);
+	List<JuryMember> findByTeacher_Id(Long teacherId);
 
-  List<JuryMember> findByJuryId(Long juryId);
+	List<JuryMember> findByJuryId(Long juryId);
 }

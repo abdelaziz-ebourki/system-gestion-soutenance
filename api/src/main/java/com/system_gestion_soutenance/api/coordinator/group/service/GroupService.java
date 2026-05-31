@@ -16,73 +16,63 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class GroupService {
 
-  private final GroupRepository groupRepository;
-  private final ProjectRepository projectRepository;
-  private final StudentRepository studentRepository;
+	private final GroupRepository groupRepository;
+	private final ProjectRepository projectRepository;
+	private final StudentRepository studentRepository;
 
-  public GroupService(
-      GroupRepository groupRepository,
-      ProjectRepository projectRepository,
-      StudentRepository studentRepository) {
-    this.groupRepository = groupRepository;
-    this.projectRepository = projectRepository;
-    this.studentRepository = studentRepository;
-  }
+	public GroupService(GroupRepository groupRepository, ProjectRepository projectRepository,
+			StudentRepository studentRepository) {
+		this.groupRepository = groupRepository;
+		this.projectRepository = projectRepository;
+		this.studentRepository = studentRepository;
+	}
 
-  public List<Map<String, Object>> findAll() {
-    return groupRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
-  }
+	public List<Map<String, Object>> findAll() {
+		return groupRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+	}
 
-  public Map<String, Object> create(CreateGroupRequest request) {
-    Project project =
-        projectRepository
-            .findById(request.projectId())
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
+	public Map<String, Object> create(CreateGroupRequest request) {
+		Project project = projectRepository.findById(request.projectId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
 
-    List<Student> students = Collections.emptyList();
-    if (request.studentIds() != null) {
-      students = studentRepository.findAllById(request.studentIds());
-    }
+		List<Student> students = Collections.emptyList();
+		if (request.studentIds() != null) {
+			students = studentRepository.findAllById(request.studentIds());
+		}
 
-    Group group = new Group();
-    group.setGroupName(request.groupName());
-    group.setProject(project);
-    group.setStudents(students);
-    group.setSessionId(request.sessionId());
+		Group group = new Group();
+		group.setGroupName(request.groupName());
+		group.setProject(project);
+		group.setStudents(students);
+		group.setSessionId(request.sessionId());
 
-    return toResponse(groupRepository.save(group));
-  }
+		return toResponse(groupRepository.save(group));
+	}
 
-  public void delete(Long id) {
-    if (!groupRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé");
-    }
-    groupRepository.deleteById(id);
-  }
+	public void delete(Long id) {
+		if (!groupRepository.existsById(id)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé");
+		}
+		groupRepository.deleteById(id);
+	}
 
-  private Map<String, Object> toResponse(Group group) {
-    Map<String, Object> map = new LinkedHashMap<>();
-    map.put("id", group.getId());
-    map.put("groupName", group.getGroupName());
-    map.put("projectId", group.getProject() != null ? group.getProject().getId() : null);
-    map.put("projectTitle", group.getProject() != null ? group.getProject().getTitle() : null);
+	private Map<String, Object> toResponse(Group group) {
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("id", group.getId());
+		map.put("groupName", group.getGroupName());
+		map.put("projectId", group.getProject() != null ? group.getProject().getId() : null);
+		map.put("projectTitle", group.getProject() != null ? group.getProject().getTitle() : null);
 
-    List<String> studentIds =
-        group.getStudents() != null
-            ? group.getStudents().stream()
-                .map(s -> String.valueOf(s.getId()))
-                .collect(Collectors.toList())
-            : List.of();
-    List<String> studentNames =
-        group.getStudents() != null
-            ? group.getStudents().stream()
-                .map(s -> s.getFirstName() + " " + s.getLastName())
-                .collect(Collectors.toList())
-            : List.of();
-    map.put("studentIds", studentIds);
-    map.put("studentNames", studentNames);
-    map.put("sessionId", group.getSessionId());
-    return map;
-  }
+		List<String> studentIds = group.getStudents() != null
+				? group.getStudents().stream().map(s -> String.valueOf(s.getId())).collect(Collectors.toList())
+				: List.of();
+		List<String> studentNames = group.getStudents() != null
+				? group.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
+						.collect(Collectors.toList())
+				: List.of();
+		map.put("studentIds", studentIds);
+		map.put("studentNames", studentNames);
+		map.put("sessionId", group.getSessionId());
+		return map;
+	}
 }

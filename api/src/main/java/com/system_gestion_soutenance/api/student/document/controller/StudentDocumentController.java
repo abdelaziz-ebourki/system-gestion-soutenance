@@ -16,27 +16,26 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Student - Documents", description = "Gestion des documents de soutenance")
 public class StudentDocumentController {
 
-  private final StudentDocumentService studentDocumentService;
+	private final StudentDocumentService studentDocumentService;
 
-  public StudentDocumentController(StudentDocumentService studentDocumentService) {
-    this.studentDocumentService = studentDocumentService;
-  }
+	public StudentDocumentController(StudentDocumentService studentDocumentService) {
+		this.studentDocumentService = studentDocumentService;
+	}
 
-  @GetMapping
-  @Operation(summary = "List documents for the connected student")
-  public List<StudentDocument> findByStudent() {
-    return studentDocumentService.findByStudent(getCurrentUserId());
-  }
+	@GetMapping
+	@Operation(summary = "List documents for the connected student")
+	public List<StudentDocument> findByStudent() {
+		return studentDocumentService.findByStudent(getCurrentUserId());
+	}
 
-  @PostMapping("/{id}/upload")
-  @Operation(summary = "Upload a document file")
-  public ResponseEntity<StudentDocument> upload(
-      @PathVariable Long id, @RequestParam("file") MultipartFile file) {
-    StudentDocument doc = studentDocumentService.upload(id, file);
-    return ResponseEntity.ok(doc);
-  }
+	@PostMapping("/{id}/upload")
+	@Operation(summary = "Upload a document file")
+	public ResponseEntity<StudentDocument> upload(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+		StudentDocument doc = studentDocumentService.upload(id, file);
+		return ResponseEntity.ok(doc);
+	}
 
-  private Long getCurrentUserId() {
-    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-  }
+	private Long getCurrentUserId() {
+		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+	}
 }

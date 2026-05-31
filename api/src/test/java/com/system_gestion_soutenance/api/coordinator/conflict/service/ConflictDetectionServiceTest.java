@@ -26,311 +26,303 @@ import org.junit.jupiter.api.Test;
 
 class ConflictDetectionServiceTest {
 
-  private final SlotAssignmentRepository slotAssignmentRepository =
-      mock(SlotAssignmentRepository.class);
-  private final RoomRepository roomRepository = mock(RoomRepository.class);
-  private final GroupRepository groupRepository = mock(GroupRepository.class);
-  private final ProjectRepository projectRepository = mock(ProjectRepository.class);
-  private final JuryRepository juryRepository = mock(JuryRepository.class);
-  private final UnavailabilityRepository unavailabilityRepository =
-      mock(UnavailabilityRepository.class);
-  private final DefenseSessionRepository defenseSessionRepository =
-      mock(DefenseSessionRepository.class);
-
-  private final ConflictDetectionService service =
-      new ConflictDetectionService(
-          slotAssignmentRepository,
-          roomRepository,
-          groupRepository,
-          projectRepository,
-          juryRepository,
-          unavailabilityRepository,
-          defenseSessionRepository);
-
-  private Map<String, Map<String, Object>> singleSlot(
-      String projectId, String roomId, String date, String time) {
-    Map<String, Object> data = new LinkedHashMap<>();
-    data.put("projectId", projectId);
-    data.put("roomId", roomId);
-    data.put("date", date);
-    data.put("time", time);
-    return new LinkedHashMap<>(Map.of("1", data));
-  }
-
-  @Test
-  void validate_noExistingSchedule_returnsEmptyConflicts() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
-
-    var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
+	private final SlotAssignmentRepository slotAssignmentRepository = mock(SlotAssignmentRepository.class);
+	private final RoomRepository roomRepository = mock(RoomRepository.class);
+	private final GroupRepository groupRepository = mock(GroupRepository.class);
+	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
+	private final JuryRepository juryRepository = mock(JuryRepository.class);
+	private final UnavailabilityRepository unavailabilityRepository = mock(UnavailabilityRepository.class);
+	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 
-    var result = service.validate(schedule, null);
+	private final ConflictDetectionService service = new ConflictDetectionService(slotAssignmentRepository,
+			roomRepository, groupRepository, projectRepository, juryRepository, unavailabilityRepository,
+			defenseSessionRepository);
 
-    assertTrue(result.isEmpty());
-  }
+	private Map<String, Map<String, Object>> singleSlot(String projectId, String roomId, String date, String time) {
+		Map<String, Object> data = new LinkedHashMap<>();
+		data.put("projectId", projectId);
+		data.put("roomId", roomId);
+		data.put("date", date);
+		data.put("time", time);
+		return new LinkedHashMap<>(Map.of("1", data));
+	}
 
-  @Test
-  void checkProjectAlreadyScheduled_detectsDuplicate() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+	@Test
+	void validate_noExistingSchedule_returnsEmptyConflicts() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    Map<String, Object> data1 = new LinkedHashMap<>();
-    data1.put("projectId", "1");
-    data1.put("date", "2025-06-01");
-    data1.put("time", "09:00");
+		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
 
-    Map<String, Object> data2 = new LinkedHashMap<>();
-    data2.put("projectId", "1");
-    data2.put("date", "2025-06-01");
-    data2.put("time", "10:00");
+		var result = service.validate(schedule, null);
 
-    Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-    schedule.put("1", data1);
-    schedule.put("2", data2);
+		assertTrue(result.isEmpty());
+	}
 
-    var result = service.validate(schedule, null);
+	@Test
+	void checkProjectAlreadyScheduled_detectsDuplicate() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    assertTrue(result.stream().anyMatch(c -> "project_already_scheduled".equals(c.get("type"))));
-  }
+		Map<String, Object> data1 = new LinkedHashMap<>();
+		data1.put("projectId", "1");
+		data1.put("date", "2025-06-01");
+		data1.put("time", "09:00");
 
-  @Test
-  void checkSlotOccupied_detectsOverlap() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		Map<String, Object> data2 = new LinkedHashMap<>();
+		data2.put("projectId", "1");
+		data2.put("date", "2025-06-01");
+		data2.put("time", "10:00");
 
-    Map<String, Object> data1 = new LinkedHashMap<>();
-    data1.put("projectId", "1");
-    data1.put("roomId", "10");
-    data1.put("date", "2025-06-01");
-    data1.put("time", "09:00");
+		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		schedule.put("1", data1);
+		schedule.put("2", data2);
 
-    Map<String, Object> data2 = new LinkedHashMap<>();
-    data2.put("projectId", "2");
-    data2.put("roomId", "10");
-    data2.put("date", "2025-06-01");
-    data2.put("time", "09:00");
+		var result = service.validate(schedule, null);
 
-    Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-    schedule.put("1", data1);
-    schedule.put("2", data2);
+		assertTrue(result.stream().anyMatch(c -> "project_already_scheduled".equals(c.get("type"))));
+	}
 
-    var result = service.validate(schedule, null);
+	@Test
+	void checkSlotOccupied_detectsOverlap() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    assertTrue(result.stream().anyMatch(c -> "slot_occupied".equals(c.get("type"))));
-  }
+		Map<String, Object> data1 = new LinkedHashMap<>();
+		data1.put("projectId", "1");
+		data1.put("roomId", "10");
+		data1.put("date", "2025-06-01");
+		data1.put("time", "09:00");
 
-  @Test
-  void checkRoomCapacity_detectsOverflow() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		Map<String, Object> data2 = new LinkedHashMap<>();
+		data2.put("projectId", "2");
+		data2.put("roomId", "10");
+		data2.put("date", "2025-06-01");
+		data2.put("time", "09:00");
 
-    Room room = mock(Room.class);
-    when(room.getCapacity()).thenReturn(2);
-    when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		schedule.put("1", data1);
+		schedule.put("2", data2);
 
-    Student s1 = mock(Student.class);
-    Student s2 = mock(Student.class);
-    Student s3 = mock(Student.class);
+		var result = service.validate(schedule, null);
 
-    Group group = mock(Group.class);
-    when(group.getStudents()).thenReturn(List.of(s1, s2, s3));
+		assertTrue(result.stream().anyMatch(c -> "slot_occupied".equals(c.get("type"))));
+	}
 
-    when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
+	@Test
+	void checkRoomCapacity_detectsOverflow() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    var schedule = singleSlot("1", "10", "2025-06-01", "09:00");
+		Room room = mock(Room.class);
+		when(room.getCapacity()).thenReturn(2);
+		when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
 
-    var result = service.validate(schedule, null);
+		Student s1 = mock(Student.class);
+		Student s2 = mock(Student.class);
+		Student s3 = mock(Student.class);
 
-    assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.get("type"))));
-  }
+		Group group = mock(Group.class);
+		when(group.getStudents()).thenReturn(List.of(s1, s2, s3));
 
-  @Test
-  void checkDateOutOfBounds_detectsInvalidDate() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
-    DefenseSession ds = new DefenseSession();
-    ds.setStartDate(LocalDate.of(2025, 6, 1));
-    ds.setEndDate(LocalDate.of(2025, 6, 30));
+		var schedule = singleSlot("1", "10", "2025-06-01", "09:00");
 
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		var result = service.validate(schedule, null);
 
-    var schedule = singleSlot("1", "1", "2025-07-01", "09:00");
+		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.get("type"))));
+	}
 
-    var result = service.validate(schedule, "1");
+	@Test
+	void checkDateOutOfBounds_detectsInvalidDate() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    assertTrue(result.stream().anyMatch(c -> "out_of_bounds".equals(c.get("type"))));
-  }
+		DefenseSession ds = new DefenseSession();
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 30));
 
-  @Test
-  void checkTeacherDoubleBooked_detectsConflict() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-    Teacher teacher = mock(Teacher.class);
-    when(teacher.getId()).thenReturn(5L);
+		var schedule = singleSlot("1", "1", "2025-07-01", "09:00");
 
-    JuryMember member = mock(JuryMember.class);
-    when(member.getTeacher()).thenReturn(teacher);
+		var result = service.validate(schedule, "1");
 
-    Jury jury = mock(Jury.class);
-    when(jury.getMembers()).thenReturn(List.of(member));
+		assertTrue(result.stream().anyMatch(c -> "out_of_bounds".equals(c.get("type"))));
+	}
 
-    when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
-    when(juryRepository.findByProjectId(2L)).thenReturn(List.of(jury));
+	@Test
+	void checkTeacherDoubleBooked_detectsConflict() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    Map<String, Object> data1 = new LinkedHashMap<>();
-    data1.put("projectId", "1");
-    data1.put("date", "2025-06-01");
-    data1.put("time", "09:00");
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
 
-    Map<String, Object> data2 = new LinkedHashMap<>();
-    data2.put("projectId", "2");
-    data2.put("date", "2025-06-01");
-    data2.put("time", "10:00");
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(teacher);
 
-    Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-    schedule.put("1", data1);
-    schedule.put("2", data2);
+		Jury jury = mock(Jury.class);
+		when(jury.getMembers()).thenReturn(List.of(member));
 
-    var result = service.validate(schedule, null);
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
+		when(juryRepository.findByProjectId(2L)).thenReturn(List.of(jury));
 
-    assertTrue(result.stream().anyMatch(c -> "teacher_double_booked".equals(c.get("type"))));
-  }
+		Map<String, Object> data1 = new LinkedHashMap<>();
+		data1.put("projectId", "1");
+		data1.put("date", "2025-06-01");
+		data1.put("time", "09:00");
 
-  @Test
-  void checkSupervisorConflict_detectsConflict() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		Map<String, Object> data2 = new LinkedHashMap<>();
+		data2.put("projectId", "2");
+		data2.put("date", "2025-06-01");
+		data2.put("time", "10:00");
 
-    Teacher supervisor = mock(Teacher.class);
-    when(supervisor.getId()).thenReturn(5L);
+		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		schedule.put("1", data1);
+		schedule.put("2", data2);
 
-    Project project1 = mock(Project.class);
-    when(project1.getSupervisor()).thenReturn(supervisor);
-    when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+		var result = service.validate(schedule, null);
 
-    Project project2 = mock(Project.class);
-    when(project2.getSupervisor()).thenReturn(supervisor);
-    when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+		assertTrue(result.stream().anyMatch(c -> "teacher_double_booked".equals(c.get("type"))));
+	}
 
-    Map<String, Object> data1 = new LinkedHashMap<>();
-    data1.put("projectId", "1");
-    data1.put("date", "2025-06-01");
-    data1.put("time", "09:00");
+	@Test
+	void checkSupervisorConflict_detectsConflict() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    Map<String, Object> data2 = new LinkedHashMap<>();
-    data2.put("projectId", "2");
-    data2.put("date", "2025-06-01");
-    data2.put("time", "10:00");
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getId()).thenReturn(5L);
 
-    Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-    schedule.put("1", data1);
-    schedule.put("2", data2);
+		Project project1 = mock(Project.class);
+		when(project1.getSupervisor()).thenReturn(supervisor);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
 
-    var result = service.validate(schedule, null);
+		Project project2 = mock(Project.class);
+		when(project2.getSupervisor()).thenReturn(supervisor);
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
 
-    assertTrue(result.stream().anyMatch(c -> "supervisor_conflict".equals(c.get("type"))));
-  }
+		Map<String, Object> data1 = new LinkedHashMap<>();
+		data1.put("projectId", "1");
+		data1.put("date", "2025-06-01");
+		data1.put("time", "09:00");
 
-  @Test
-  void checkBreakInterval_detectsViolation() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		Map<String, Object> data2 = new LinkedHashMap<>();
+		data2.put("projectId", "2");
+		data2.put("date", "2025-06-01");
+		data2.put("time", "10:00");
 
-    DefenseSession ds = mock(DefenseSession.class);
-    when(ds.getBreakDuration()).thenReturn(30);
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		schedule.put("1", data1);
+		schedule.put("2", data2);
 
-    Map<String, Object> data1 = new LinkedHashMap<>();
-    data1.put("projectId", "1");
-    data1.put("roomId", "10");
-    data1.put("date", "2025-06-01");
-    data1.put("time", "09:00");
+		var result = service.validate(schedule, null);
 
-    Map<String, Object> data2 = new LinkedHashMap<>();
-    data2.put("projectId", "2");
-    data2.put("roomId", "10");
-    data2.put("date", "2025-06-01");
-    data2.put("time", "09:15");
+		assertTrue(result.stream().anyMatch(c -> "supervisor_conflict".equals(c.get("type"))));
+	}
 
-    Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-    schedule.put("1", data1);
-    schedule.put("2", data2);
+	@Test
+	void checkBreakInterval_detectsViolation() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    var result = service.validate(schedule, "1");
+		DefenseSession ds = mock(DefenseSession.class);
+		when(ds.getBreakDuration()).thenReturn(30);
+		when(ds.getStartDate()).thenReturn(LocalDate.of(2025, 6, 1));
+		when(ds.getEndDate()).thenReturn(LocalDate.of(2025, 6, 30));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-    assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
-  }
+		Map<String, Object> data1 = new LinkedHashMap<>();
+		data1.put("projectId", "1");
+		data1.put("roomId", "10");
+		data1.put("date", "2025-06-01");
+		data1.put("time", "09:00");
 
-  @Test
-  void checkTeacherUnavailable_detectsConflict() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		Map<String, Object> data2 = new LinkedHashMap<>();
+		data2.put("projectId", "2");
+		data2.put("roomId", "10");
+		data2.put("date", "2025-06-01");
+		data2.put("time", "09:15");
 
-    Teacher teacher = mock(Teacher.class);
-    when(teacher.getId()).thenReturn(5L);
+		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		schedule.put("1", data1);
+		schedule.put("2", data2);
 
-    JuryMember member = mock(JuryMember.class);
-    when(member.getTeacher()).thenReturn(teacher);
+		var result = service.validate(schedule, "1");
 
-    Jury jury = mock(Jury.class);
-    when(jury.getMembers()).thenReturn(List.of(member));
-    when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
+		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
+	}
 
-    Unavailability ua = new Unavailability(1L, 5L, "2025-06-01", List.of("09:00"));
-    when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
+	@Test
+	void checkTeacherUnavailable_detectsConflict() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
 
-    var result = service.validate(schedule, null);
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(teacher);
 
-    assertTrue(result.stream().anyMatch(c -> "teacher_unavailable".equals(c.get("type"))));
-  }
+		Jury jury = mock(Jury.class);
+		when(jury.getMembers()).thenReturn(List.of(member));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 
-  @Test
-  void validate_mergesWithExistingSlots() {
-    SlotAssignment existing = mock(SlotAssignment.class);
-    when(existing.getId()).thenReturn(99L);
-    when(existing.getTitle()).thenReturn("Existing");
-    when(existing.getDate()).thenReturn("2025-06-01");
-    when(existing.getTime()).thenReturn("09:00");
-    when(existing.getProjectId()).thenReturn(99L);
-    when(existing.getRoom()).thenReturn(null);
+		Unavailability ua = new Unavailability(1L, 5L, "2025-06-01", List.of("09:00"));
+		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of(existing));
+		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
 
-    var schedule = singleSlot("1", "1", "2025-06-02", "09:00");
+		var result = service.validate(schedule, null);
 
-    var result = service.validate(schedule, null);
+		assertTrue(result.stream().anyMatch(c -> "teacher_unavailable".equals(c.get("type"))));
+	}
 
-    assertTrue(result.isEmpty());
-  }
+	@Test
+	void validate_mergesWithExistingSlots() {
+		SlotAssignment existing = mock(SlotAssignment.class);
+		when(existing.getId()).thenReturn(99L);
+		when(existing.getTitle()).thenReturn("Existing");
+		when(existing.getDate()).thenReturn("2025-06-01");
+		when(existing.getTime()).thenReturn("09:00");
+		when(existing.getProjectId()).thenReturn(99L);
+		when(existing.getRoom()).thenReturn(null);
 
-  @Test
-  void checkDateOutOfBounds_nullSessionId_skipsCheck() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(existing));
 
-    var schedule = singleSlot("1", "1", "2025-07-01", "09:00");
+		var schedule = singleSlot("1", "1", "2025-06-02", "09:00");
 
-    var result = service.validate(schedule, null);
+		var result = service.validate(schedule, null);
 
-    assertTrue(result.stream().noneMatch(c -> "out_of_bounds".equals(c.get("type"))));
-  }
+		assertTrue(result.isEmpty());
+	}
 
-  @Test
-  void checkBreakInterval_nullSessionId_usesDefaultBreak() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+	@Test
+	void checkDateOutOfBounds_nullSessionId_skipsCheck() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    Map<String, Object> data1 = new LinkedHashMap<>();
-    data1.put("projectId", "1");
-    data1.put("roomId", "10");
-    data1.put("date", "2025-06-01");
-    data1.put("time", "09:00");
+		var schedule = singleSlot("1", "1", "2025-07-01", "09:00");
 
-    Map<String, Object> data2 = new LinkedHashMap<>();
-    data2.put("projectId", "2");
-    data2.put("roomId", "10");
-    data2.put("date", "2025-06-01");
-    data2.put("time", "09:10");
+		var result = service.validate(schedule, null);
 
-    Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-    schedule.put("1", data1);
-    schedule.put("2", data2);
+		assertTrue(result.stream().noneMatch(c -> "out_of_bounds".equals(c.get("type"))));
+	}
 
-    var result = service.validate(schedule, null);
+	@Test
+	void checkBreakInterval_nullSessionId_usesDefaultBreak() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
-  }
+		Map<String, Object> data1 = new LinkedHashMap<>();
+		data1.put("projectId", "1");
+		data1.put("roomId", "10");
+		data1.put("date", "2025-06-01");
+		data1.put("time", "09:00");
+
+		Map<String, Object> data2 = new LinkedHashMap<>();
+		data2.put("projectId", "2");
+		data2.put("roomId", "10");
+		data2.put("date", "2025-06-01");
+		data2.put("time", "09:10");
+
+		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		schedule.put("1", data1);
+		schedule.put("2", data2);
+
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
+	}
 }

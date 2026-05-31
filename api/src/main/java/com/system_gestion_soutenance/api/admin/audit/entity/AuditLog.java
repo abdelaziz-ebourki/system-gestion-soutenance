@@ -13,25 +13,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuditLog {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(nullable = false)
-  private String action;
+	@Column(nullable = false)
+	private String action;
 
-  @Column(nullable = false)
-  private String entity;
+	@Column(nullable = false)
+	private String entity;
 
-  @Column(name = "entity_id")
-  private Long entityId;
+	@Column(name = "entity_id")
+	private Long entityId;
 
-  @Column(name = "admin_email")
-  private String adminEmail;
+	@Column(name = "admin_email")
+	private String adminEmail;
 
-  @Column(columnDefinition = "TEXT")
-  private String details;
+	@Column(columnDefinition = "TEXT")
+	private String details;
 
-  @Column(nullable = false)
-  private LocalDateTime timestamp;
+	@Column(nullable = false)
+	private LocalDateTime timestamp;
 }

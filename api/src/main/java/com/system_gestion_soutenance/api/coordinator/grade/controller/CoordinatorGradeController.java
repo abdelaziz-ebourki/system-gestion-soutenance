@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Coordinator - Grades", description = "Consultation des notes")
 public class CoordinatorGradeController {
 
-  private final CoordinatorGradeService gradeService;
+	private final CoordinatorGradeService gradeService;
 
-  public CoordinatorGradeController(CoordinatorGradeService gradeService) {
-    this.gradeService = gradeService;
-  }
+	public CoordinatorGradeController(CoordinatorGradeService gradeService) {
+		this.gradeService = gradeService;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get all grades with weighted averages")
-  public List<Map<String, Object>> getGrades() {
-    return gradeService.getGrades();
-  }
+	@GetMapping
+	@Operation(summary = "Get all grades with weighted averages")
+	public List<Map<String, Object>> getGrades() {
+		return gradeService.getGrades();
+	}
 }

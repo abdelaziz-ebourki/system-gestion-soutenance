@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class Student extends User {
-  private String cne;
+	private String cne;
 
-  @ManyToOne
-  @JoinColumn(name = "major_id")
-  private Major major;
+	@ManyToOne
+	@JoinColumn(name = "major_id")
+	private Major major;
 
-  @ManyToOne
-  @JoinColumn(name = "level_id")
-  private Level level;
+	@ManyToOne
+	@JoinColumn(name = "level_id")
+	private Level level;
 }

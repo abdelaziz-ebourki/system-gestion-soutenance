@@ -22,51 +22,50 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = StudentDocumentController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = StudentDocumentController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class StudentDocumentControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private StudentDocumentService studentDocumentService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@MockitoBean
+	private StudentDocumentService studentDocumentService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    User user = new User();
-    user.setId(1L);
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		User user = new User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void findByStudent_returnsList() throws Exception {
-    when(studentDocumentService.findByStudent(1L)).thenReturn(List.of());
-    mockMvc.perform(get("/api/student/documents")).andExpect(status().isOk());
-  }
+	@Test
+	void findByStudent_returnsList() throws Exception {
+		when(studentDocumentService.findByStudent(1L)).thenReturn(List.of());
+		mockMvc.perform(get("/api/student/documents")).andExpect(status().isOk());
+	}
 
-  @Test
-  void upload_returns200() throws Exception {
-    StudentDocument doc = new StudentDocument();
-    doc.setId(1L);
-    doc.setStatus("submitted");
-    when(studentDocumentService.upload(anyLong(), any())).thenReturn(doc);
+	@Test
+	void upload_returns200() throws Exception {
+		StudentDocument doc = new StudentDocument();
+		doc.setId(1L);
+		doc.setStatus("submitted");
+		when(studentDocumentService.upload(anyLong(), any())).thenReturn(doc);
 
-    MockMultipartFile file =
-        new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());
-    mockMvc
-        .perform(multipart("/api/student/documents/1/upload").file(file))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.status").value("submitted"));
-  }
+		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());
+		mockMvc.perform(multipart("/api/student/documents/1/upload").file(file)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("submitted"));
+	}
 }

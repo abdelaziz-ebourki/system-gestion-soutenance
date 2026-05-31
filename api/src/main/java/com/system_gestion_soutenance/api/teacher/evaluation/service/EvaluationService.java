@@ -17,77 +17,70 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class EvaluationService {
 
-  private final EvaluationRepository evaluationRepository;
-  private final ProjectRepository projectRepository;
-  private final GroupRepository groupRepository;
+	private final EvaluationRepository evaluationRepository;
+	private final ProjectRepository projectRepository;
+	private final GroupRepository groupRepository;
 
-  public EvaluationService(
-      EvaluationRepository evaluationRepository,
-      ProjectRepository projectRepository,
-      GroupRepository groupRepository) {
-    this.evaluationRepository = evaluationRepository;
-    this.projectRepository = projectRepository;
-    this.groupRepository = groupRepository;
-  }
+	public EvaluationService(EvaluationRepository evaluationRepository, ProjectRepository projectRepository,
+			GroupRepository groupRepository) {
+		this.evaluationRepository = evaluationRepository;
+		this.projectRepository = projectRepository;
+		this.groupRepository = groupRepository;
+	}
 
-  public List<Map<String, Object>> findByTeacher(Long teacherId) {
-    return evaluationRepository.findByTeacherId(teacherId).stream()
-        .map(this::toResponse)
-        .collect(Collectors.toList());
-  }
+	public List<Map<String, Object>> findByTeacher(Long teacherId) {
+		return evaluationRepository.findByTeacherId(teacherId).stream().map(this::toResponse)
+				.collect(Collectors.toList());
+	}
 
-  public Map<String, Object> submit(Long id, EvaluationSubmitRequest request) {
-    Evaluation evaluation =
-        evaluationRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));
+	public Map<String, Object> submit(Long id, EvaluationSubmitRequest request) {
+		Evaluation evaluation = evaluationRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));
 
-    if ("submitted".equals(evaluation.getStatus())) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Cette évaluation a déjà été soumise");
-    }
+		if ("submitted".equals(evaluation.getStatus())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette évaluation a déjà été soumise");
+		}
 
-    if (request.score() != null) evaluation.setScore(request.score());
-    if (request.comment() != null) evaluation.setComment(request.comment());
+		if (request.score() != null)
+			evaluation.setScore(request.score());
+		if (request.comment() != null)
+			evaluation.setComment(request.comment());
 
-    evaluation.setStatus("submitted");
-    evaluation.setSubmittedAt(LocalDateTime.now());
-    return toResponse(evaluationRepository.save(evaluation));
-  }
+		evaluation.setStatus("submitted");
+		evaluation.setSubmittedAt(LocalDateTime.now());
+		return toResponse(evaluationRepository.save(evaluation));
+	}
 
-  private Map<String, Object> toResponse(Evaluation evaluation) {
-    Map<String, Object> map = new LinkedHashMap<>();
-    map.put("id", evaluation.getId());
-    map.put("defenseId", evaluation.getDefenseSessionId());
-    map.put("role", evaluation.getRole());
-    map.put("score", evaluation.getScore());
-    map.put("comment", evaluation.getComment());
-    map.put("status", evaluation.getStatus());
-    map.put("submittedAt", evaluation.getSubmittedAt());
+	private Map<String, Object> toResponse(Evaluation evaluation) {
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("id", evaluation.getId());
+		map.put("defenseId", evaluation.getDefenseSessionId());
+		map.put("role", evaluation.getRole());
+		map.put("score", evaluation.getScore());
+		map.put("comment", evaluation.getComment());
+		map.put("status", evaluation.getStatus());
+		map.put("submittedAt", evaluation.getSubmittedAt());
 
-    Project project = projectRepository.findById(evaluation.getProjectId()).orElse(null);
-    map.put("projectTitle", project != null ? project.getTitle() : "");
-    map.put("studentNames", getStudentNames(evaluation.getProjectId()));
+		Project project = projectRepository.findById(evaluation.getProjectId()).orElse(null);
+		map.put("projectTitle", project != null ? project.getTitle() : "");
+		map.put("studentNames", getStudentNames(evaluation.getProjectId()));
 
-    return map;
-  }
+		return map;
+	}
 
-  private List<String> getStudentNames(Long projectId) {
-    List<Group> groups = groupRepository.findByProjectId(projectId);
-    for (Group g : groups) {
-      if (g.getStudents() != null && !g.getStudents().isEmpty()) {
-        return g.getStudents().stream()
-            .map(s -> s.getFirstName() + " " + s.getLastName())
-            .collect(Collectors.toList());
-      }
-    }
-    Project project = projectRepository.findById(projectId).orElse(null);
-    if (project != null && project.getStudents() != null) {
-      return project.getStudents().stream()
-          .map(s -> s.getFirstName() + " " + s.getLastName())
-          .collect(Collectors.toList());
-    }
-    return List.of();
-  }
+	private List<String> getStudentNames(Long projectId) {
+		List<Group> groups = groupRepository.findByProjectId(projectId);
+		for (Group g : groups) {
+			if (g.getStudents() != null && !g.getStudents().isEmpty()) {
+				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
+						.collect(Collectors.toList());
+			}
+		}
+		Project project = projectRepository.findById(projectId).orElse(null);
+		if (project != null && project.getStudents() != null) {
+			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
+					.collect(Collectors.toList());
+		}
+		return List.of();
+	}
 }

@@ -19,32 +19,36 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TeacherStatsServiceTest {
 
-  @Mock private EvaluationRepository evaluationRepository;
-  @Mock private JuryMemberRepository juryMemberRepository;
-  @Mock private UnavailabilityRepository unavailabilityRepository;
+	@Mock
+	private EvaluationRepository evaluationRepository;
+	@Mock
+	private JuryMemberRepository juryMemberRepository;
+	@Mock
+	private UnavailabilityRepository unavailabilityRepository;
 
-  @InjectMocks private TeacherStatsService service;
+	@InjectMocks
+	private TeacherStatsService service;
 
-  @Test
-  void getStats_returnsStats() {
-    Evaluation pending = new Evaluation();
-    pending.setStatus("pending");
-    Evaluation submitted = new Evaluation();
-    submitted.setStatus("submitted");
+	@Test
+	void getStats_returnsStats() {
+		Evaluation pending = new Evaluation();
+		pending.setStatus("pending");
+		Evaluation submitted = new Evaluation();
+		submitted.setStatus("submitted");
 
-    Unavailability ua = new Unavailability();
-    ua.setTeacherId(1L);
-    ua.setSlots(List.of("08:00", "09:00"));
+		Unavailability ua = new Unavailability();
+		ua.setTeacherId(1L);
+		ua.setSlots(List.of("08:00", "09:00"));
 
-    when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(pending, submitted));
-    when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
-    when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
+		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(pending, submitted));
+		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
+		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
 
-    Map<String, Object> result = service.getStats(1L);
+		Map<String, Object> result = service.getStats(1L);
 
-    assertEquals(0, result.get("upcomingDefenses"));
-    assertEquals(1L, result.get("pendingEvaluations"));
-    assertEquals(2L, result.get("declaredUnavailabilitySlots"));
-    assertEquals(0L, result.get("juryAssignments"));
-  }
+		assertEquals(0, result.get("upcomingDefenses"));
+		assertEquals(1L, result.get("pendingEvaluations"));
+		assertEquals(2L, result.get("declaredUnavailabilitySlots"));
+		assertEquals(0L, result.get("juryAssignments"));
+	}
 }

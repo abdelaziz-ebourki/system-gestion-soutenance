@@ -15,30 +15,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Project {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(nullable = false)
-  private String title;
+	@Column(nullable = false)
+	private String title;
 
-  @Column(columnDefinition = "TEXT")
-  private String description;
+	@Column(columnDefinition = "TEXT")
+	private String description;
 
-  @Column(name = "defense_type", nullable = false)
-  private String defenseType;
+	@Column(name = "defense_type", nullable = false)
+	private String defenseType;
 
-  @Column(nullable = false)
-  private String status = "pending";
+	@Column(nullable = false)
+	private String status = "pending";
 
-  @ManyToOne
-  @JoinColumn(name = "supervisor_id")
-  private Teacher supervisor;
+	@ManyToOne
+	@JoinColumn(name = "supervisor_id")
+	private Teacher supervisor;
 
-  @ManyToMany
-  @JoinTable(
-      name = "project_students",
-      joinColumns = @JoinColumn(name = "project_id"),
-      inverseJoinColumns = @JoinColumn(name = "student_id"))
-  private List<Student> students;
+	@ManyToMany
+	@JoinTable(name = "project_students", joinColumns = @JoinColumn(name = "project_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
+	private List<Student> students;
 }

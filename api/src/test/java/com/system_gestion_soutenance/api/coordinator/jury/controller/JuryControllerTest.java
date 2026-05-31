@@ -22,82 +22,70 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = JuryController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = JuryController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class JuryControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-  @MockitoBean private JuryService juryService;
+	@MockitoBean
+	private JuryService juryService;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void findAll_returnsJuries() throws Exception {
-    when(juryService.findAll())
-        .thenReturn(List.of(Map.of("id", 1L, "projectTitle", "Projet Test")));
+	@Test
+	void findAll_returnsJuries() throws Exception {
+		when(juryService.findAll()).thenReturn(List.of(Map.of("id", 1L, "projectTitle", "Projet Test")));
 
-    mockMvc
-        .perform(get("/api/coordinator/juries"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()").value(1))
-        .andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
-  }
+		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
+	}
 
-  @Test
-  void create_returnsCreated() throws Exception {
-    CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
-    CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
-    when(juryService.create(any())).thenReturn(Map.of("id", 1L, "projectId", 1L));
+	@Test
+	void create_returnsCreated() throws Exception {
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
+		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
+		when(juryService.create(any())).thenReturn(Map.of("id", 1L, "projectId", 1L));
 
-    mockMvc
-        .perform(
-            post("/api/coordinator/juries")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.projectId").value(1L));
-  }
+		mockMvc.perform(post("/api/coordinator/juries").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.projectId").value(1L));
+	}
 
-  @Test
-  void update_returnsJury() throws Exception {
-    Map<String, Object> updates = Map.of("projectId", "2");
-    when(juryService.update(eq(1L), any())).thenReturn(Map.of("id", 1L, "projectId", 2L));
+	@Test
+	void update_returnsJury() throws Exception {
+		Map<String, Object> updates = Map.of("projectId", "2");
+		when(juryService.update(eq(1L), any())).thenReturn(Map.of("id", 1L, "projectId", 2L));
 
-    mockMvc
-        .perform(
-            put("/api/coordinator/juries/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updates)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.projectId").value(2L));
-  }
+		mockMvc.perform(put("/api/coordinator/juries/1").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.projectId").value(2L));
+	}
 
-  @Test
-  void delete_returnsNoContent() throws Exception {
-    doNothing().when(juryService).delete(1L);
+	@Test
+	void delete_returnsNoContent() throws Exception {
+		doNothing().when(juryService).delete(1L);
 
-    mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isNoContent());
-  }
+		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isNoContent());
+	}
 }

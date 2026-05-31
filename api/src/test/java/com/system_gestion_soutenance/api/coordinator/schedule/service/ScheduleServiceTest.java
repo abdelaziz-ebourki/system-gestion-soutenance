@@ -26,225 +26,215 @@ import org.springframework.web.server.ResponseStatusException;
 
 class ScheduleServiceTest {
 
-  private final SlotAssignmentRepository slotAssignmentRepository =
-      mock(SlotAssignmentRepository.class);
-  private final RoomRepository roomRepository = mock(RoomRepository.class);
-  private final DefenseSessionRepository defenseSessionRepository =
-      mock(DefenseSessionRepository.class);
-  private final DefenseSettingsRepository defenseSettingsRepository =
-      mock(DefenseSettingsRepository.class);
-  private final ProjectRepository projectRepository = mock(ProjectRepository.class);
-  private final JuryRepository juryRepository = mock(JuryRepository.class);
-  private final GroupRepository groupRepository = mock(GroupRepository.class);
-  private final NotificationRepository notificationRepository = mock(NotificationRepository.class);
+	private final SlotAssignmentRepository slotAssignmentRepository = mock(SlotAssignmentRepository.class);
+	private final RoomRepository roomRepository = mock(RoomRepository.class);
+	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
+	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
+	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
+	private final JuryRepository juryRepository = mock(JuryRepository.class);
+	private final GroupRepository groupRepository = mock(GroupRepository.class);
+	private final NotificationRepository notificationRepository = mock(NotificationRepository.class);
 
-  private final ScheduleService service =
-      new ScheduleService(
-          slotAssignmentRepository,
-          roomRepository,
-          defenseSessionRepository,
-          defenseSettingsRepository,
-          projectRepository,
-          juryRepository,
-          groupRepository,
-          notificationRepository);
+	private final ScheduleService service = new ScheduleService(slotAssignmentRepository, roomRepository,
+			defenseSessionRepository, defenseSettingsRepository, projectRepository, juryRepository, groupRepository,
+			notificationRepository);
 
-  @Test
-  void getSchedule_withSlots_returnsSchedule() {
-    Room room = mock(Room.class);
-    when(room.getId()).thenReturn(10L);
+	@Test
+	void getSchedule_withSlots_returnsSchedule() {
+		Room room = mock(Room.class);
+		when(room.getId()).thenReturn(10L);
 
-    SlotAssignment slot = mock(SlotAssignment.class);
-    when(slot.getId()).thenReturn(1L);
-    when(slot.getTitle()).thenReturn("Slot 1");
-    when(slot.getDate()).thenReturn("2025-06-01");
-    when(slot.getTime()).thenReturn("09:00");
-    when(slot.getProjectId()).thenReturn(5L);
-    when(slot.getRoom()).thenReturn(room);
+		SlotAssignment slot = mock(SlotAssignment.class);
+		when(slot.getId()).thenReturn(1L);
+		when(slot.getTitle()).thenReturn("Slot 1");
+		when(slot.getDate()).thenReturn("2025-06-01");
+		when(slot.getTime()).thenReturn("09:00");
+		when(slot.getProjectId()).thenReturn(5L);
+		when(slot.getRoom()).thenReturn(room);
 
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
 
-    var result = service.getSchedule();
+		var result = service.getSchedule();
 
-    assertEquals(1, result.size());
-    assertEquals("Slot 1", result.get("1").get("title"));
-  }
+		assertEquals(1, result.size());
+		assertEquals("Slot 1", result.get("1").get("title"));
+	}
 
-  @Test
-  void getSchedule_noSlots_returnsEmpty() {
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+	@Test
+	void getSchedule_noSlots_returnsEmpty() {
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-    assertTrue(service.getSchedule().isEmpty());
-  }
+		assertTrue(service.getSchedule().isEmpty());
+	}
 
-  @Test
-  void saveSchedule_savesAndReturns() {
-    Room room = mock(Room.class);
-    when(room.getId()).thenReturn(10L);
-    when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
+	@Test
+	void saveSchedule_savesAndReturns() {
+		Room room = mock(Room.class);
+		when(room.getId()).thenReturn(10L);
+		when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
 
-    SlotAssignment savedSlot = mock(SlotAssignment.class);
-    when(savedSlot.getId()).thenReturn(1L);
-    when(savedSlot.getTitle()).thenReturn("Slot 1");
-    when(savedSlot.getDate()).thenReturn("2025-06-01");
-    when(savedSlot.getTime()).thenReturn("09:00");
-    when(savedSlot.getProjectId()).thenReturn(5L);
-    when(savedSlot.getRoom()).thenReturn(room);
+		SlotAssignment savedSlot = mock(SlotAssignment.class);
+		when(savedSlot.getId()).thenReturn(1L);
+		when(savedSlot.getTitle()).thenReturn("Slot 1");
+		when(savedSlot.getDate()).thenReturn("2025-06-01");
+		when(savedSlot.getTime()).thenReturn("09:00");
+		when(savedSlot.getProjectId()).thenReturn(5L);
+		when(savedSlot.getRoom()).thenReturn(room);
 
-    when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
 
-    Map<String, Object> slotData = new LinkedHashMap<>();
-    slotData.put("title", "Slot 1");
-    slotData.put("date", "2025-06-01");
-    slotData.put("time", "09:00");
-    slotData.put("projectId", 5);
-    slotData.put("roomId", 10);
+		Map<String, Object> slotData = new LinkedHashMap<>();
+		slotData.put("title", "Slot 1");
+		slotData.put("date", "2025-06-01");
+		slotData.put("time", "09:00");
+		slotData.put("projectId", 5);
+		slotData.put("roomId", 10);
 
-    Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
+		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
 
-    var result = service.saveSchedule(schedule);
+		var result = service.saveSchedule(schedule);
 
-    assertEquals(1, result.size());
-    verify(slotAssignmentRepository).deleteAll();
-  }
+		assertEquals(1, result.size());
+		verify(slotAssignmentRepository).deleteAll();
+	}
 
-  @Test
-  void saveSchedule_roomNotFound_throwsException() {
-    when(roomRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void saveSchedule_roomNotFound_throwsException() {
+		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
-    Map<String, Object> slotData = new LinkedHashMap<>();
-    slotData.put("title", "Slot");
-    slotData.put("date", "2025-06-01");
-    slotData.put("time", "09:00");
-    slotData.put("roomId", 99);
+		Map<String, Object> slotData = new LinkedHashMap<>();
+		slotData.put("title", "Slot");
+		slotData.put("date", "2025-06-01");
+		slotData.put("time", "09:00");
+		slotData.put("roomId", 99);
 
-    Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
+		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
 
-    assertThrows(ResponseStatusException.class, () -> service.saveSchedule(schedule));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.saveSchedule(schedule));
+	}
 
-  @Test
-  void autoGenerate_withValidData_generatesSchedule() {
-    DefenseSession ds = new DefenseSession();
-    ds.setStartDate(LocalDate.of(2025, 6, 1));
-    ds.setEndDate(LocalDate.of(2025, 6, 1));
-    ds.setDefenseDuration(30);
-    ds.setBreakDuration(15);
+	@Test
+	void autoGenerate_withValidData_generatesSchedule() {
+		DefenseSession ds = new DefenseSession();
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+		ds.setDefenseDuration(30);
+		ds.setBreakDuration(15);
 
-    DefenseSettings settings = new DefenseSettings();
-    settings.setStartTime("09:00");
-    settings.setEndTime("10:00");
+		DefenseSettings settings = new DefenseSettings();
+		settings.setStartTime("09:00");
+		settings.setEndTime("10:00");
 
-    Room room = new Room();
-    room.setId(1L);
-    room.setName("Salle A");
-    room.setCapacity(10);
+		Room room = new Room();
+		room.setId(1L);
+		room.setName("Salle A");
+		room.setCapacity(10);
 
-    Project project = mock(Project.class);
-    when(project.getId()).thenReturn(1L);
-    when(project.getTitle()).thenReturn("Projet Test");
-    when(project.getStatus()).thenReturn("approved");
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Projet Test");
+		when(project.getStatus()).thenReturn("approved");
 
-    Group group = mock(Group.class);
-    when(group.getStudents())
-        .thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
+		Group group = mock(Group.class);
+		when(group.getStudents())
+				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
 
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-    when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
-    when(roomRepository.findAll()).thenReturn(List.of(room));
-    when(projectRepository.findAll()).thenReturn(List.of(project));
-    when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
-    when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of(room));
+		when(projectRepository.findAll()).thenReturn(List.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
-    var result = service.autoGenerate(1L);
+		var result = service.autoGenerate(1L);
 
-    assertFalse(result.isEmpty());
-    assertEquals("Projet Test", result.values().iterator().next().get("title"));
-  }
+		assertFalse(result.isEmpty());
+		assertEquals("Projet Test", result.values().iterator().next().get("title"));
+	}
 
-  @Test
-  void autoGenerate_sessionNotFound_throwsException() {
-    when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void autoGenerate_sessionNotFound_throwsException() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class, () -> service.autoGenerate(99L));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(99L));
+	}
 
-  @Test
-  void autoGenerate_settingsNotFound_throwsException() {
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(new DefenseSession()));
-    when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+	@Test
+	void autoGenerate_settingsNotFound_throwsException() {
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(new DefenseSession()));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+	}
 
-  @Test
-  void autoGenerate_noRooms_throwsException() {
-    DefenseSession ds = new DefenseSession();
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-    when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(new DefenseSettings()));
-    when(roomRepository.findAll()).thenReturn(List.of());
+	@Test
+	void autoGenerate_noRooms_throwsException() {
+		DefenseSession ds = new DefenseSession();
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(new DefenseSettings()));
+		when(roomRepository.findAll()).thenReturn(List.of());
 
-    assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+	}
 
-  @Test
-  void publish_activeSession_updatesStatusAndCreatesNotification() {
-    DefenseSession ds = new DefenseSession();
-    ds.setName("Session PFE");
-    ds.setStatus(DefenseSessionStatus.ACTIVE);
+	@Test
+	void publish_activeSession_updatesStatusAndCreatesNotification() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session PFE");
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
 
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-    service.publish(1L);
+		service.publish(1L);
 
-    assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
-    verify(defenseSessionRepository).save(ds);
-    verify(notificationRepository).save(any());
-  }
+		assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
+		verify(defenseSessionRepository).save(ds);
+		verify(notificationRepository).save(any());
+	}
 
-  @Test
-  void publish_nonActiveSession_doesNotUpdateStatus() {
-    DefenseSession ds = new DefenseSession();
-    ds.setName("Session");
-    ds.setStatus(DefenseSessionStatus.DRAFT);
+	@Test
+	void publish_nonActiveSession_doesNotUpdateStatus() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session");
+		ds.setStatus(DefenseSessionStatus.DRAFT);
 
-    when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-    service.publish(1L);
+		service.publish(1L);
 
-    assertEquals(DefenseSessionStatus.DRAFT, ds.getStatus());
-    verify(defenseSessionRepository, never()).save(ds);
-    verify(notificationRepository).save(any());
-  }
+		assertEquals(DefenseSessionStatus.DRAFT, ds.getStatus());
+		verify(defenseSessionRepository, never()).save(ds);
+		verify(notificationRepository).save(any());
+	}
 
-  @Test
-  void publish_sessionNotFound_throwsException() {
-    when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void publish_sessionNotFound_throwsException() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class, () -> service.publish(99L));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.publish(99L));
+	}
 
-  @Test
-  void cancelDefense_existingSlot_deletesAndNotifies() {
-    SlotAssignment slot = mock(SlotAssignment.class);
-    when(slot.getId()).thenReturn(1L);
-    when(slot.getTitle()).thenReturn("Slot 1");
-    when(slot.getDate()).thenReturn("2025-06-01");
-    when(slot.getTime()).thenReturn("09:00");
+	@Test
+	void cancelDefense_existingSlot_deletesAndNotifies() {
+		SlotAssignment slot = mock(SlotAssignment.class);
+		when(slot.getId()).thenReturn(1L);
+		when(slot.getTitle()).thenReturn("Slot 1");
+		when(slot.getDate()).thenReturn("2025-06-01");
+		when(slot.getTime()).thenReturn("09:00");
 
-    when(slotAssignmentRepository.findById(1L)).thenReturn(Optional.of(slot));
+		when(slotAssignmentRepository.findById(1L)).thenReturn(Optional.of(slot));
 
-    service.cancelDefense(1L);
+		service.cancelDefense(1L);
 
-    verify(slotAssignmentRepository).delete(slot);
-    verify(notificationRepository).save(any());
-  }
+		verify(slotAssignmentRepository).delete(slot);
+		verify(notificationRepository).save(any());
+	}
 
-  @Test
-  void cancelDefense_slotNotFound_throwsException() {
-    when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void cancelDefense_slotNotFound_throwsException() {
+		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-    assertThrows(ResponseStatusException.class, () -> service.cancelDefense(99L));
-  }
+		assertThrows(ResponseStatusException.class, () -> service.cancelDefense(99L));
+	}
 }

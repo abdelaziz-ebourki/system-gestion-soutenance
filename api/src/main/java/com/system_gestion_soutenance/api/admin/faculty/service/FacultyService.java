@@ -15,68 +15,58 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class FacultyService {
 
-  private final FacultyRepository facultyRepository;
-  private final DepartmentRepository departmentRepository;
+	private final FacultyRepository facultyRepository;
+	private final DepartmentRepository departmentRepository;
 
-  public FacultyService(
-      FacultyRepository facultyRepository, DepartmentRepository departmentRepository) {
-    this.facultyRepository = facultyRepository;
-    this.departmentRepository = departmentRepository;
-  }
+	public FacultyService(FacultyRepository facultyRepository, DepartmentRepository departmentRepository) {
+		this.facultyRepository = facultyRepository;
+		this.departmentRepository = departmentRepository;
+	}
 
-  public List<Faculty> findAll() {
-    return facultyRepository.findAll();
-  }
+	public List<Faculty> findAll() {
+		return facultyRepository.findAll();
+	}
 
-  public Faculty findById(Long id) {
-    return facultyRepository
-        .findById(id)
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
-  }
+	public Faculty findById(Long id) {
+		return facultyRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
+	}
 
-  @Audited(action = "CREATE", entity = "Faculty")
-  @Transactional
-  public Faculty create(CreateFacultyRequest request) {
-    Faculty faculty = new Faculty();
-    faculty.setName(request.name());
-    faculty.setCode(request.code());
-    faculty.setDeanId(request.deanId());
-    faculty.setLogoUrl(request.logoUrl());
-    return facultyRepository.save(faculty);
-  }
+	@Audited(action = "CREATE", entity = "Faculty")
+	@Transactional
+	public Faculty create(CreateFacultyRequest request) {
+		Faculty faculty = new Faculty();
+		faculty.setName(request.name());
+		faculty.setCode(request.code());
+		faculty.setDeanId(request.deanId());
+		faculty.setLogoUrl(request.logoUrl());
+		return facultyRepository.save(faculty);
+	}
 
-  @Audited(action = "UPDATE", entity = "Faculty")
-  @Transactional
-  public Faculty update(Long id, CreateFacultyRequest request) {
-    Faculty faculty =
-        facultyRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
+	@Audited(action = "UPDATE", entity = "Faculty")
+	@Transactional
+	public Faculty update(Long id, CreateFacultyRequest request) {
+		Faculty faculty = facultyRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
 
-    faculty.setName(request.name());
-    faculty.setCode(request.code());
-    faculty.setDeanId(request.deanId());
-    faculty.setLogoUrl(request.logoUrl());
-    return facultyRepository.save(faculty);
-  }
+		faculty.setName(request.name());
+		faculty.setCode(request.code());
+		faculty.setDeanId(request.deanId());
+		faculty.setLogoUrl(request.logoUrl());
+		return facultyRepository.save(faculty);
+	}
 
-  @Audited(action = "DELETE", entity = "Faculty")
-  @Transactional
-  public void delete(Long id) {
-    Faculty faculty =
-        facultyRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
+	@Audited(action = "DELETE", entity = "Faculty")
+	@Transactional
+	public void delete(Long id) {
+		Faculty faculty = facultyRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
 
-    if (!departmentRepository.findByFaculty_Id(id).isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Impossible de supprimer cette faculté car des départements y sont rattachés");
-    }
+		if (!departmentRepository.findByFaculty_Id(id).isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Impossible de supprimer cette faculté car des départements y sont rattachés");
+		}
 
-    facultyRepository.delete(faculty);
-  }
+		facultyRepository.delete(faculty);
+	}
 }

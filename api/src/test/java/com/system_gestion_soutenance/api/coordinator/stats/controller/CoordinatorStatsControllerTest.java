@@ -19,53 +19,40 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = CoordinatorStatsController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = CoordinatorStatsController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class CoordinatorStatsControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @MockitoBean private CoordinatorStatsService statsService;
+	@MockitoBean
+	private CoordinatorStatsService statsService;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    SecurityContextHolder.getContext()
-        .setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void getStats_returnsStats() throws Exception {
-    when(statsService.getStats())
-        .thenReturn(
-            Map.of(
-                "totalProjects",
-                10L,
-                "totalGroups",
-                5L,
-                "totalJuries",
-                8L,
-                "scheduledDefenses",
-                3L));
+	@Test
+	void getStats_returnsStats() throws Exception {
+		when(statsService.getStats()).thenReturn(
+				Map.of("totalProjects", 10L, "totalGroups", 5L, "totalJuries", 8L, "scheduledDefenses", 3L));
 
-    mockMvc
-        .perform(get("/api/coordinator/stats"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.totalProjects").value(10))
-        .andExpect(jsonPath("$.totalGroups").value(5));
-  }
+		mockMvc.perform(get("/api/coordinator/stats")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.totalProjects").value(10)).andExpect(jsonPath("$.totalGroups").value(5));
+	}
 }

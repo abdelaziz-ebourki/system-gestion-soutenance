@@ -14,32 +14,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class StatsService {
 
-  private final StudentRepository studentRepository;
-  private final TeacherRepository teacherRepository;
-  private final DepartmentRepository departmentRepository;
-  private final RoomRepository roomRepository;
-  private final DefenseSessionRepository defenseSessionRepository;
+	private final StudentRepository studentRepository;
+	private final TeacherRepository teacherRepository;
+	private final DepartmentRepository departmentRepository;
+	private final RoomRepository roomRepository;
+	private final DefenseSessionRepository defenseSessionRepository;
 
-  public StatsService(
-      StudentRepository studentRepository,
-      TeacherRepository teacherRepository,
-      DepartmentRepository departmentRepository,
-      RoomRepository roomRepository,
-      DefenseSessionRepository defenseSessionRepository) {
-    this.studentRepository = studentRepository;
-    this.teacherRepository = teacherRepository;
-    this.departmentRepository = departmentRepository;
-    this.roomRepository = roomRepository;
-    this.defenseSessionRepository = defenseSessionRepository;
-  }
+	public StatsService(StudentRepository studentRepository, TeacherRepository teacherRepository,
+			DepartmentRepository departmentRepository, RoomRepository roomRepository,
+			DefenseSessionRepository defenseSessionRepository) {
+		this.studentRepository = studentRepository;
+		this.teacherRepository = teacherRepository;
+		this.departmentRepository = departmentRepository;
+		this.roomRepository = roomRepository;
+		this.defenseSessionRepository = defenseSessionRepository;
+	}
 
-  public Map<String, Object> getStats() {
-    Map<String, Object> stats = new HashMap<>();
-    stats.put("totalStudents", studentRepository.count());
-    stats.put("totalTeachers", teacherRepository.count());
-    stats.put("totalDepartments", departmentRepository.count());
-    stats.put("totalRooms", roomRepository.count());
-    stats.put("totalDefenseSessions", defenseSessionRepository.count());
-    return stats;
-  }
+	public Map<String, Object> getStats() {
+		Map<String, Object> stats = new HashMap<>();
+		stats.put("totalStudents", studentRepository.count());
+		stats.put("totalTeachers", teacherRepository.count());
+		stats.put("totalDepartments", departmentRepository.count());
+		stats.put("totalRooms", roomRepository.count());
+		stats.put("totalDefenseSessions", defenseSessionRepository.count());
+		return stats;
+	}
 }

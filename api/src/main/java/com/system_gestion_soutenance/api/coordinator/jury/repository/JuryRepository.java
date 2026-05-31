@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JuryRepository extends JpaRepository<Jury, Long> {
-  List<Jury> findByProjectId(Long projectId);
+	List<Jury> findByProjectId(Long projectId);
 }

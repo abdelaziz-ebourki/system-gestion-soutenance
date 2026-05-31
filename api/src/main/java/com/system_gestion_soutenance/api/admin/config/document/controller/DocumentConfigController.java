@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Document Config", description = "Configuration des documents")
 public class DocumentConfigController {
 
-  private final DocumentConfigService service;
+	private final DocumentConfigService service;
 
-  public DocumentConfigController(DocumentConfigService service) {
-    this.service = service;
-  }
+	public DocumentConfigController(DocumentConfigService service) {
+		this.service = service;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get document configuration")
-  public DocumentConfig get() {
-    return service.get();
-  }
+	@GetMapping
+	@Operation(summary = "Get document configuration")
+	public DocumentConfig get() {
+		return service.get();
+	}
 
-  @PutMapping
-  @Operation(summary = "Update document configuration")
-  public DocumentConfig update(@Valid @RequestBody UpdateDocumentConfigRequest updates) {
-    return service.update(updates);
-  }
+	@PutMapping
+	@Operation(summary = "Update document configuration")
+	public DocumentConfig update(@Valid @RequestBody UpdateDocumentConfigRequest updates) {
+		return service.update(updates);
+	}
 }

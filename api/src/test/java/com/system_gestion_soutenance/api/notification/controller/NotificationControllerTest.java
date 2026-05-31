@@ -18,76 +18,64 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = NotificationController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = NotificationController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class NotificationControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-  @MockitoBean private NotificationRepository repository;
+	@MockitoBean
+	private NotificationRepository repository;
 
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-  @MockitoBean private UserRepository userRepository;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @Test
-  void findAll_returnsList() throws Exception {
-    when(repository.findAllByOrderByTimestampDesc())
-        .thenReturn(
-            List.of(
-                new AppNotification(
-                    1L, "info", "Test", "Message", LocalDateTime.now(), false, null, null),
-                new AppNotification(
-                    2L, "warning", "Test 2", "Message 2", LocalDateTime.now(), true, null, null)));
+	@Test
+	void findAll_returnsList() throws Exception {
+		when(repository.findAllByOrderByTimestampDesc()).thenReturn(List.of(
+				new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false, null, null),
+				new AppNotification(2L, "warning", "Test 2", "Message 2", LocalDateTime.now(), true, null, null)));
 
-    mockMvc
-        .perform(get("/api/notifications"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.length()").value(2))
-        .andExpect(jsonPath("$[0].title").value("Test"))
-        .andExpect(jsonPath("$[1].title").value("Test 2"));
-  }
+		mockMvc.perform(get("/api/notifications")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+				.andExpect(jsonPath("$[0].title").value("Test")).andExpect(jsonPath("$[1].title").value("Test 2"));
+	}
 
-  @Test
-  void markRead_returns204() throws Exception {
-    AppNotification notification =
-        new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false, null, null);
-    when(repository.findById(1L)).thenReturn(Optional.of(notification));
+	@Test
+	void markRead_returns204() throws Exception {
+		AppNotification notification = new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false,
+				null, null);
+		when(repository.findById(1L)).thenReturn(Optional.of(notification));
 
-    mockMvc.perform(patch("/api/notifications/1/read")).andExpect(status().isNoContent());
+		mockMvc.perform(patch("/api/notifications/1/read")).andExpect(status().isNoContent());
 
-    verify(repository).save(argThat(n -> n.isRead()));
-  }
+		verify(repository).save(argThat(n -> n.isRead()));
+	}
 
-  @Test
-  void markRead_withUnknownId_returns204() throws Exception {
-    when(repository.findById(99L)).thenReturn(Optional.empty());
+	@Test
+	void markRead_withUnknownId_returns204() throws Exception {
+		when(repository.findById(99L)).thenReturn(Optional.empty());
 
-    mockMvc.perform(patch("/api/notifications/99/read")).andExpect(status().isNoContent());
+		mockMvc.perform(patch("/api/notifications/99/read")).andExpect(status().isNoContent());
 
-    verify(repository, never()).save(any());
-  }
+		verify(repository, never()).save(any());
+	}
 
-  @Test
-  void markAllRead_returns204() throws Exception {
-    AppNotification n1 =
-        new AppNotification(1L, "info", "A", "Msg", LocalDateTime.now(), false, null, null);
-    AppNotification n2 =
-        new AppNotification(2L, "info", "B", "Msg", LocalDateTime.now(), false, null, null);
-    when(repository.findAll()).thenReturn(List.of(n1, n2));
+	@Test
+	void markAllRead_returns204() throws Exception {
+		AppNotification n1 = new AppNotification(1L, "info", "A", "Msg", LocalDateTime.now(), false, null, null);
+		AppNotification n2 = new AppNotification(2L, "info", "B", "Msg", LocalDateTime.now(), false, null, null);
+		when(repository.findAll()).thenReturn(List.of(n1, n2));
 
-    mockMvc.perform(patch("/api/notifications/read-all")).andExpect(status().isNoContent());
+		mockMvc.perform(patch("/api/notifications/read-all")).andExpect(status().isNoContent());
 
-    verify(repository)
-        .saveAll(
-            argThat(
-                list -> {
-                  var notifications = (List<AppNotification>) list;
-                  return notifications.stream().allMatch(AppNotification::isRead);
-                }));
-  }
+		verify(repository).saveAll(argThat(list -> {
+			var notifications = (List<AppNotification>) list;
+			return notifications.stream().allMatch(AppNotification::isRead);
+		}));
+	}
 }

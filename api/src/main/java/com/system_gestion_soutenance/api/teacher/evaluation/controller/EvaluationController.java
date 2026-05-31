@@ -16,26 +16,25 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Teacher - Evaluations", description = "Gestion des évaluations")
 public class EvaluationController {
 
-  private final EvaluationService evaluationService;
+	private final EvaluationService evaluationService;
 
-  public EvaluationController(EvaluationService evaluationService) {
-    this.evaluationService = evaluationService;
-  }
+	public EvaluationController(EvaluationService evaluationService) {
+		this.evaluationService = evaluationService;
+	}
 
-  @GetMapping
-  @Operation(summary = "List evaluations assigned to the connected teacher")
-  public List<Map<String, Object>> findByTeacher() {
-    return evaluationService.findByTeacher(getCurrentUserId());
-  }
+	@GetMapping
+	@Operation(summary = "List evaluations assigned to the connected teacher")
+	public List<Map<String, Object>> findByTeacher() {
+		return evaluationService.findByTeacher(getCurrentUserId());
+	}
 
-  @PostMapping("/{id}")
-  @Operation(summary = "Submit an evaluation score and comment")
-  public Map<String, Object> submit(
-      @PathVariable Long id, @Valid @RequestBody EvaluationSubmitRequest request) {
-    return evaluationService.submit(id, request);
-  }
+	@PostMapping("/{id}")
+	@Operation(summary = "Submit an evaluation score and comment")
+	public Map<String, Object> submit(@PathVariable Long id, @Valid @RequestBody EvaluationSubmitRequest request) {
+		return evaluationService.submit(id, request);
+	}
 
-  private Long getCurrentUserId() {
-    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-  }
+	private Long getCurrentUserId() {
+		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+	}
 }

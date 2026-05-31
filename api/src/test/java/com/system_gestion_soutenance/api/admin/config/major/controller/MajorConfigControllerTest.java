@@ -17,51 +17,47 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = MajorConfigController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = MajorConfigController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class MajorConfigControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private MajorConfigService majorConfigService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@MockitoBean
+	private MajorConfigService majorConfigService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @Test
-  void findAll_returnsList() throws Exception {
-    when(majorConfigService.findAll()).thenReturn(List.of(new Major()));
-    mockMvc.perform(get("/api/admin/config/majors")).andExpect(status().isOk());
-  }
+	@Test
+	void findAll_returnsList() throws Exception {
+		when(majorConfigService.findAll()).thenReturn(List.of(new Major()));
+		mockMvc.perform(get("/api/admin/config/majors")).andExpect(status().isOk());
+	}
 
-  @Test
-  void create_returns201() throws Exception {
-    when(majorConfigService.create(any())).thenReturn(new Major());
-    mockMvc
-        .perform(
-            post("/api/admin/config/majors")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"GL\"}"))
-        .andExpect(status().isCreated());
-  }
+	@Test
+	void create_returns201() throws Exception {
+		when(majorConfigService.create(any())).thenReturn(new Major());
+		mockMvc.perform(
+				post("/api/admin/config/majors").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"GL\"}"))
+				.andExpect(status().isCreated());
+	}
 
-  @Test
-  void update_returns200() throws Exception {
-    when(majorConfigService.update(anyLong(), any())).thenReturn(new Major());
-    mockMvc
-        .perform(
-            put("/api/admin/config/majors/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"IIR\"}"))
-        .andExpect(status().isOk());
-  }
+	@Test
+	void update_returns200() throws Exception {
+		when(majorConfigService.update(anyLong(), any())).thenReturn(new Major());
+		mockMvc.perform(
+				put("/api/admin/config/majors/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"IIR\"}"))
+				.andExpect(status().isOk());
+	}
 
-  @Test
-  void delete_returns204() throws Exception {
-    doNothing().when(majorConfigService).delete(1L);
-    mockMvc.perform(delete("/api/admin/config/majors/1")).andExpect(status().isNoContent());
-  }
+	@Test
+	void delete_returns204() throws Exception {
+		doNothing().when(majorConfigService).delete(1L);
+		mockMvc.perform(delete("/api/admin/config/majors/1")).andExpect(status().isNoContent());
+	}
 }

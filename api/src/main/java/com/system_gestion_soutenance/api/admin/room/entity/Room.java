@@ -11,19 +11,19 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  private String name;
-  private int capacity;
+	private String name;
+	private int capacity;
 
-  @ManyToOne
-  @JoinColumn(name = "department_id")
-  @JsonIgnore
-  private Department department;
+	@ManyToOne
+	@JoinColumn(name = "department_id")
+	@JsonIgnore
+	private Department department;
 
-  public Long getDepartmentId() {
-    return department != null ? department.getId() : null;
-  }
+	public Long getDepartmentId() {
+		return department != null ? department.getId() : null;
+	}
 }

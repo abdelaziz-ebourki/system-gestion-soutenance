@@ -16,37 +16,34 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class StudentDocumentService {
 
-  private final StudentDocumentRepository repository;
-  private final Path uploadDir = Paths.get("uploads");
+	private final StudentDocumentRepository repository;
+	private final Path uploadDir = Paths.get("uploads");
 
-  public StudentDocumentService(StudentDocumentRepository repository) {
-    this.repository = repository;
-  }
+	public StudentDocumentService(StudentDocumentRepository repository) {
+		this.repository = repository;
+	}
 
-  public List<StudentDocument> findByStudent(Long studentId) {
-    return repository.findByStudentId(studentId);
-  }
+	public List<StudentDocument> findByStudent(Long studentId) {
+		return repository.findByStudentId(studentId);
+	}
 
-  public StudentDocument upload(Long id, MultipartFile file) {
-    StudentDocument doc =
-        repository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document non trouvé"));
+	public StudentDocument upload(Long id, MultipartFile file) {
+		StudentDocument doc = repository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document non trouvé"));
 
-    try {
-      Files.createDirectories(uploadDir);
-      String filename = id + "_" + file.getOriginalFilename();
-      Path target = uploadDir.resolve(filename);
-      file.transferTo(target.toFile());
+		try {
+			Files.createDirectories(uploadDir);
+			String filename = id + "_" + file.getOriginalFilename();
+			Path target = uploadDir.resolve(filename);
+			file.transferTo(target.toFile());
 
-      doc.setFilePath(target.toString());
-      doc.setSubmittedAt(LocalDateTime.now());
-      doc.setStatus("submitted");
-      return repository.save(doc);
-    } catch (IOException e) {
-      throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR, "Erreur lors du téléchargement du fichier");
-    }
-  }
+			doc.setFilePath(target.toString());
+			doc.setSubmittedAt(LocalDateTime.now());
+			doc.setStatus("submitted");
+			return repository.save(doc);
+		} catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+					"Erreur lors du téléchargement du fichier");
+		}
+	}
 }

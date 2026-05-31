@@ -18,44 +18,42 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Rooms", description = "Gestion des salles")
 public class RoomController {
 
-  private final RoomService roomService;
+	private final RoomService roomService;
 
-  public RoomController(RoomService roomService) {
-    this.roomService = roomService;
-  }
+	public RoomController(RoomService roomService) {
+		this.roomService = roomService;
+	}
 
-  @GetMapping
-  @Operation(summary = "List all rooms")
-  public List<RoomResponse> findAll() {
-    return roomService.findAll().stream().map(RoomResponse::from).toList();
-  }
+	@GetMapping
+	@Operation(summary = "List all rooms")
+	public List<RoomResponse> findAll() {
+		return roomService.findAll().stream().map(RoomResponse::from).toList();
+	}
 
-  @PostMapping
-  @Operation(summary = "Create a new room")
-  public ResponseEntity<RoomResponse> create(@Valid @RequestBody CreateRoomRequest request) {
-    Room room = roomService.create(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(RoomResponse.from(room));
-  }
+	@PostMapping
+	@Operation(summary = "Create a new room")
+	public ResponseEntity<RoomResponse> create(@Valid @RequestBody CreateRoomRequest request) {
+		Room room = roomService.create(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(RoomResponse.from(room));
+	}
 
-  @PostMapping("/bulk")
-  @Operation(summary = "Bulk create rooms")
-  public ResponseEntity<List<RoomResponse>> bulkCreate(
-      @Valid @RequestBody BulkRoomRequest request) {
-    List<Room> rooms = roomService.bulkCreate(request);
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(rooms.stream().map(RoomResponse::from).toList());
-  }
+	@PostMapping("/bulk")
+	@Operation(summary = "Bulk create rooms")
+	public ResponseEntity<List<RoomResponse>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
+		List<Room> rooms = roomService.bulkCreate(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(rooms.stream().map(RoomResponse::from).toList());
+	}
 
-  @PutMapping("/{id}")
-  @Operation(summary = "Update a room")
-  public RoomResponse update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
-    return RoomResponse.from(roomService.update(id, request));
-  }
+	@PutMapping("/{id}")
+	@Operation(summary = "Update a room")
+	public RoomResponse update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
+		return RoomResponse.from(roomService.update(id, request));
+	}
 
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Delete a room")
-  public ResponseEntity<Void> delete(@PathVariable Long id) {
-    roomService.delete(id);
-    return ResponseEntity.noContent().build();
-  }
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete a room")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		roomService.delete(id);
+		return ResponseEntity.noContent().build();
+	}
 }

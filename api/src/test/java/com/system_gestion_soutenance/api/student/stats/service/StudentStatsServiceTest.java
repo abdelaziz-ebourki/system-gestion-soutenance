@@ -22,57 +22,61 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class StudentStatsServiceTest {
 
-  @Mock private StudentDocumentRepository documentRepository;
-  @Mock private GroupRepository groupRepository;
-  @Mock private SlotAssignmentRepository slotAssignmentRepository;
+	@Mock
+	private StudentDocumentRepository documentRepository;
+	@Mock
+	private GroupRepository groupRepository;
+	@Mock
+	private SlotAssignmentRepository slotAssignmentRepository;
 
-  @InjectMocks private StudentStatsService service;
+	@InjectMocks
+	private StudentStatsService service;
 
-  @Test
-  void getStats_returnsStats() {
-    StudentDocument doc1 = new StudentDocument();
-    doc1.setStatus("submitted");
-    StudentDocument doc2 = new StudentDocument();
-    doc2.setStatus("missing");
+	@Test
+	void getStats_returnsStats() {
+		StudentDocument doc1 = new StudentDocument();
+		doc1.setStatus("submitted");
+		StudentDocument doc2 = new StudentDocument();
+		doc2.setStatus("missing");
 
-    Project project = new Project();
-    project.setId(10L);
+		Project project = new Project();
+		project.setId(10L);
 
-    Group group = new Group();
-    group.setProject(project);
-    group.setStudents(List.of(student(1L), student(2L)));
+		Group group = new Group();
+		group.setProject(project);
+		group.setStudents(List.of(student(1L), student(2L)));
 
-    SlotAssignment slot = new SlotAssignment();
-    slot.setProjectId(10L);
+		SlotAssignment slot = new SlotAssignment();
+		slot.setProjectId(10L);
 
-    when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc1, doc2));
-    when(groupRepository.findAll()).thenReturn(List.of(group));
-    when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc1, doc2));
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
 
-    Map<String, Object> result = service.getStats(1L);
+		Map<String, Object> result = service.getStats(1L);
 
-    assertEquals(2, result.get("documentCount"));
-    assertEquals(1L, result.get("missingDocuments"));
-    assertEquals(2, result.get("groupMembers"));
-    assertEquals("scheduled", result.get("defenseStatus"));
-  }
+		assertEquals(2, result.get("documentCount"));
+		assertEquals(1L, result.get("missingDocuments"));
+		assertEquals(2, result.get("groupMembers"));
+		assertEquals("scheduled", result.get("defenseStatus"));
+	}
 
-  @Test
-  void getStats_noGroup_returnsZeroMembers() {
-    when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-    when(groupRepository.findAll()).thenReturn(List.of());
+	@Test
+	void getStats_noGroup_returnsZeroMembers() {
+		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
+		when(groupRepository.findAll()).thenReturn(List.of());
 
-    Map<String, Object> result = service.getStats(1L);
+		Map<String, Object> result = service.getStats(1L);
 
-    assertEquals(0, result.get("documentCount"));
-    assertEquals(0L, result.get("missingDocuments"));
-    assertEquals(0, result.get("groupMembers"));
-    assertEquals("pending", result.get("defenseStatus"));
-  }
+		assertEquals(0, result.get("documentCount"));
+		assertEquals(0L, result.get("missingDocuments"));
+		assertEquals(0, result.get("groupMembers"));
+		assertEquals("pending", result.get("defenseStatus"));
+	}
 
-  private static Student student(Long id) {
-    Student s = new Student();
-    s.setId(id);
-    return s;
-  }
+	private static Student student(Long id) {
+		Student s = new Student();
+		s.setId(id);
+		return s;
+	}
 }

@@ -18,88 +18,72 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class RoomService {
 
-  private final RoomRepository roomRepository;
-  private final DepartmentRepository departmentRepository;
+	private final RoomRepository roomRepository;
+	private final DepartmentRepository departmentRepository;
 
-  public RoomService(RoomRepository roomRepository, DepartmentRepository departmentRepository) {
-    this.roomRepository = roomRepository;
-    this.departmentRepository = departmentRepository;
-  }
+	public RoomService(RoomRepository roomRepository, DepartmentRepository departmentRepository) {
+		this.roomRepository = roomRepository;
+		this.departmentRepository = departmentRepository;
+	}
 
-  public List<Room> findAll() {
-    return roomRepository.findAll();
-  }
+	public List<Room> findAll() {
+		return roomRepository.findAll();
+	}
 
-  @Audited(action = "CREATE", entity = "Room")
-  @Transactional
-  public Room create(CreateRoomRequest request) {
-    Department dept =
-        departmentRepository
-            .findById(request.departmentId())
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
+	@Audited(action = "CREATE", entity = "Room")
+	@Transactional
+	public Room create(CreateRoomRequest request) {
+		Department dept = departmentRepository.findById(request.departmentId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
 
-    Room room = new Room();
-    room.setName(request.name());
-    room.setCapacity(request.capacity());
-    room.setDepartment(dept);
-    return roomRepository.save(room);
-  }
+		Room room = new Room();
+		room.setName(request.name());
+		room.setCapacity(request.capacity());
+		room.setDepartment(dept);
+		return roomRepository.save(room);
+	}
 
-  @Audited(action = "BULK_CREATE", entity = "Room")
-  @Transactional
-  public List<Room> bulkCreate(BulkRoomRequest request) {
-    List<Room> rooms = new ArrayList<>();
+	@Audited(action = "BULK_CREATE", entity = "Room")
+	@Transactional
+	public List<Room> bulkCreate(BulkRoomRequest request) {
+		List<Room> rooms = new ArrayList<>();
 
-    for (BulkRoomRequest.RoomEntry entry : request.rooms()) {
-      Department dept =
-          departmentRepository
-              .findById(entry.departmentId())
-              .orElseThrow(
-                  () ->
-                      new ResponseStatusException(
-                          HttpStatus.BAD_REQUEST,
-                          "Département introuvable: " + entry.departmentId()));
+		for (BulkRoomRequest.RoomEntry entry : request.rooms()) {
+			Department dept = departmentRepository.findById(entry.departmentId())
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+							"Département introuvable: " + entry.departmentId()));
 
-      Room room = new Room();
-      room.setName(entry.name());
-      room.setCapacity(entry.capacity());
-      room.setDepartment(dept);
-      rooms.add(room);
-    }
+			Room room = new Room();
+			room.setName(entry.name());
+			room.setCapacity(entry.capacity());
+			room.setDepartment(dept);
+			rooms.add(room);
+		}
 
-    return roomRepository.saveAll(rooms);
-  }
+		return roomRepository.saveAll(rooms);
+	}
 
-  @Audited(action = "UPDATE", entity = "Room")
-  @Transactional
-  public Room update(Long id, CreateRoomRequest request) {
-    Room room =
-        roomRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée"));
+	@Audited(action = "UPDATE", entity = "Room")
+	@Transactional
+	public Room update(Long id, CreateRoomRequest request) {
+		Room room = roomRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée"));
 
-    Department dept =
-        departmentRepository
-            .findById(request.departmentId())
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
+		Department dept = departmentRepository.findById(request.departmentId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
 
-    room.setName(request.name());
-    room.setCapacity(request.capacity());
-    room.setDepartment(dept);
-    return roomRepository.save(room);
-  }
+		room.setName(request.name());
+		room.setCapacity(request.capacity());
+		room.setDepartment(dept);
+		return roomRepository.save(room);
+	}
 
-  @Audited(action = "DELETE", entity = "Room")
-  @Transactional
-  public void delete(Long id) {
-    if (!roomRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée");
-    }
-    roomRepository.deleteById(id);
-  }
+	@Audited(action = "DELETE", entity = "Room")
+	@Transactional
+	public void delete(Long id) {
+		if (!roomRepository.existsById(id)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée");
+		}
+		roomRepository.deleteById(id);
+	}
 }

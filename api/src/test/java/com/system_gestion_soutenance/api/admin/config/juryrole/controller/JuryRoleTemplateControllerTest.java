@@ -19,59 +19,49 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = JuryRoleTemplateController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = JuryRoleTemplateController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class JuryRoleTemplateControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private JuryRoleTemplateService juryRoleTemplateService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@MockitoBean
+	private JuryRoleTemplateService juryRoleTemplateService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @Test
-  void findAll_returnsList() throws Exception {
-    when(juryRoleTemplateService.findAll()).thenReturn(List.of());
-    mockMvc.perform(get("/api/admin/config/jury-role-templates")).andExpect(status().isOk());
-  }
+	@Test
+	void findAll_returnsList() throws Exception {
+		when(juryRoleTemplateService.findAll()).thenReturn(List.of());
+		mockMvc.perform(get("/api/admin/config/jury-role-templates")).andExpect(status().isOk());
+	}
 
-  @Test
-  void create_returns201() throws Exception {
-    when(juryRoleTemplateService.create(any()))
-        .thenReturn(new JuryRoleTemplate(1L, "Template PFE", DefenseType.PFE, new ArrayList<>()));
-    mockMvc
-        .perform(
-            post("/api/admin/config/jury-role-templates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"name\":\"Template PFE\",\"defenseType\":\"PFE\",\"roles\":[{\"name\":\"Président\",\"count\":1,\"coefficient\":2}]}"))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.name").value("Template PFE"));
-  }
+	@Test
+	void create_returns201() throws Exception {
+		when(juryRoleTemplateService.create(any()))
+				.thenReturn(new JuryRoleTemplate(1L, "Template PFE", DefenseType.PFE, new ArrayList<>()));
+		mockMvc.perform(post("/api/admin/config/jury-role-templates").contentType(MediaType.APPLICATION_JSON).content(
+				"{\"name\":\"Template PFE\",\"defenseType\":\"PFE\",\"roles\":[{\"name\":\"Président\",\"count\":1,\"coefficient\":2}]}"))
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.name").value("Template PFE"));
+	}
 
-  @Test
-  void update_returns200() throws Exception {
-    when(juryRoleTemplateService.update(anyLong(), any()))
-        .thenReturn(new JuryRoleTemplate(1L, "Updated", DefenseType.MEMOIRE, new ArrayList<>()));
-    mockMvc
-        .perform(
-            put("/api/admin/config/jury-role-templates/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"name\":\"Updated\",\"defenseType\":\"MEMOIRE\",\"roles\":[{\"name\":\"Rapporteur\",\"count\":1,\"coefficient\":1}]}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.name").value("Updated"));
-  }
+	@Test
+	void update_returns200() throws Exception {
+		when(juryRoleTemplateService.update(anyLong(), any()))
+				.thenReturn(new JuryRoleTemplate(1L, "Updated", DefenseType.MEMOIRE, new ArrayList<>()));
+		mockMvc.perform(put("/api/admin/config/jury-role-templates/1").contentType(MediaType.APPLICATION_JSON).content(
+				"{\"name\":\"Updated\",\"defenseType\":\"MEMOIRE\",\"roles\":[{\"name\":\"Rapporteur\",\"count\":1,\"coefficient\":1}]}"))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Updated"));
+	}
 
-  @Test
-  void delete_returns204() throws Exception {
-    doNothing().when(juryRoleTemplateService).delete(1L);
-    mockMvc
-        .perform(delete("/api/admin/config/jury-role-templates/1"))
-        .andExpect(status().isNoContent());
-  }
+	@Test
+	void delete_returns204() throws Exception {
+		doNothing().when(juryRoleTemplateService).delete(1L);
+		mockMvc.perform(delete("/api/admin/config/jury-role-templates/1")).andExpect(status().isNoContent());
+	}
 }

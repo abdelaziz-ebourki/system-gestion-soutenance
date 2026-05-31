@@ -11,20 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/coordinator/unavailability")
-@Tag(
-    name = "Coordinator - Unavailability",
-    description = "Consultation des indisponibilités des enseignants")
+@Tag(name = "Coordinator - Unavailability", description = "Consultation des indisponibilités des enseignants")
 public class UnavailabilityController {
 
-  private final UnavailabilityRepository repository;
+	private final UnavailabilityRepository repository;
 
-  public UnavailabilityController(UnavailabilityRepository repository) {
-    this.repository = repository;
-  }
+	public UnavailabilityController(UnavailabilityRepository repository) {
+		this.repository = repository;
+	}
 
-  @GetMapping
-  @Operation(summary = "List all unavailability records")
-  public List<Unavailability> findAll() {
-    return repository.findAll();
-  }
+	@GetMapping
+	@Operation(summary = "List all unavailability records")
+	public List<Unavailability> findAll() {
+		return repository.findAll();
+	}
 }

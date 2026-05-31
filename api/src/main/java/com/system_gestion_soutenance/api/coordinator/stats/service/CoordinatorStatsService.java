@@ -11,28 +11,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class CoordinatorStatsService {
 
-  private final ProjectRepository projectRepository;
-  private final GroupRepository groupRepository;
-  private final JuryRepository juryRepository;
-  private final DefenseSessionRepository defenseSessionRepository;
+	private final ProjectRepository projectRepository;
+	private final GroupRepository groupRepository;
+	private final JuryRepository juryRepository;
+	private final DefenseSessionRepository defenseSessionRepository;
 
-  public CoordinatorStatsService(
-      ProjectRepository projectRepository,
-      GroupRepository groupRepository,
-      JuryRepository juryRepository,
-      DefenseSessionRepository defenseSessionRepository) {
-    this.projectRepository = projectRepository;
-    this.groupRepository = groupRepository;
-    this.juryRepository = juryRepository;
-    this.defenseSessionRepository = defenseSessionRepository;
-  }
+	public CoordinatorStatsService(ProjectRepository projectRepository, GroupRepository groupRepository,
+			JuryRepository juryRepository, DefenseSessionRepository defenseSessionRepository) {
+		this.projectRepository = projectRepository;
+		this.groupRepository = groupRepository;
+		this.juryRepository = juryRepository;
+		this.defenseSessionRepository = defenseSessionRepository;
+	}
 
-  public Map<String, Object> getStats() {
-    Map<String, Object> stats = new HashMap<>();
-    stats.put("totalProjects", projectRepository.count());
-    stats.put("totalGroups", groupRepository.count());
-    stats.put("totalJuries", juryRepository.count());
-    stats.put("scheduledDefenses", defenseSessionRepository.count());
-    return stats;
-  }
+	public Map<String, Object> getStats() {
+		Map<String, Object> stats = new HashMap<>();
+		stats.put("totalProjects", projectRepository.count());
+		stats.put("totalGroups", groupRepository.count());
+		stats.put("totalJuries", juryRepository.count());
+		stats.put("scheduledDefenses", defenseSessionRepository.count());
+		return stats;
+	}
 }

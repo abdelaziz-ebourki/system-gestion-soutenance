@@ -1,5 +1,5 @@
 cd api
-./mvnw --no-transfer-progress fmt:format -q
+./mvnw --no-transfer-progress spotless:apply -q
 ./mvnw --no-transfer-progress checkstyle:check -q
 ./mvnw --no-transfer-progress spotbugs:check -q
 ./mvnw --no-transfer-progress pmd:check -q

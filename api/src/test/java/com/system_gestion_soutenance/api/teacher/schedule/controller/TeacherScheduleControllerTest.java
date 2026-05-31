@@ -20,36 +20,38 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = TeacherScheduleController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = TeacherScheduleController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class TeacherScheduleControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private TeacherScheduleService service;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
+	@MockitoBean
+	private TeacherScheduleService service;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    User user = new User();
-    user.setId(1L);
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		User user = new User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void getSchedule_returns200() throws Exception {
-    when(service.getSchedule(1L)).thenReturn(List.of());
-    mockMvc.perform(get("/api/teacher/schedule")).andExpect(status().isOk());
-  }
+	@Test
+	void getSchedule_returns200() throws Exception {
+		when(service.getSchedule(1L)).thenReturn(List.of());
+		mockMvc.perform(get("/api/teacher/schedule")).andExpect(status().isOk());
+	}
 }

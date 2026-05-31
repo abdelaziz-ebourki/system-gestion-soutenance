@@ -18,161 +18,143 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class StudentGroupService {
 
-  private final GroupRepository groupRepository;
-  private final StudentRepository studentRepository;
-  private final DefenseSettingsRepository defenseSettingsRepository;
+	private final GroupRepository groupRepository;
+	private final StudentRepository studentRepository;
+	private final DefenseSettingsRepository defenseSettingsRepository;
 
-  public StudentGroupService(
-      GroupRepository groupRepository,
-      StudentRepository studentRepository,
-      DefenseSettingsRepository defenseSettingsRepository) {
-    this.groupRepository = groupRepository;
-    this.studentRepository = studentRepository;
-    this.defenseSettingsRepository = defenseSettingsRepository;
-  }
+	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
+			DefenseSettingsRepository defenseSettingsRepository) {
+		this.groupRepository = groupRepository;
+		this.studentRepository = studentRepository;
+		this.defenseSettingsRepository = defenseSettingsRepository;
+	}
 
-  public Map<String, Object> getWorkspace(Long studentId) {
-    Group currentGroup = findGroupForStudent(studentId);
+	public Map<String, Object> getWorkspace(Long studentId) {
+		Group currentGroup = findGroupForStudent(studentId);
 
-    Map<String, Object> workspace = new LinkedHashMap<>();
-    workspace.put(
-        "currentGroup", currentGroup != null ? groupToDetails(currentGroup, studentId) : null);
+		Map<String, Object> workspace = new LinkedHashMap<>();
+		workspace.put("currentGroup", currentGroup != null ? groupToDetails(currentGroup, studentId) : null);
 
-    List<Map<String, Object>> available = new ArrayList<>();
-    for (Group g : groupRepository.findAll()) {
-      if (currentGroup == null || !g.getId().equals(currentGroup.getId())) {
-        Map<String, Object> ag = new LinkedHashMap<>();
-        ag.put("id", g.getId());
-        ag.put("groupName", g.getGroupName());
-        ag.put("memberCount", g.getStudents() != null ? g.getStudents().size() : 0);
-        available.add(ag);
-      }
-    }
-    workspace.put("availableGroups", available);
+		List<Map<String, Object>> available = new ArrayList<>();
+		for (Group g : groupRepository.findAll()) {
+			if (currentGroup == null || !g.getId().equals(currentGroup.getId())) {
+				Map<String, Object> ag = new LinkedHashMap<>();
+				ag.put("id", g.getId());
+				ag.put("groupName", g.getGroupName());
+				ag.put("memberCount", g.getStudents() != null ? g.getStudents().size() : 0);
+				available.add(ag);
+			}
+		}
+		workspace.put("availableGroups", available);
 
-    DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
-    String startDate = ds != null ? ds.getGroupCreationStartDate() : "";
-    String endDate = ds != null ? ds.getGroupCreationEndDate() : "";
-    workspace.put("groupCreationStartDate", startDate);
-    workspace.put("groupCreationEndDate", endDate);
-    workspace.put("isGroupCreationOpen", isCreationOpen(startDate, endDate));
+		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
+		String startDate = ds != null ? ds.getGroupCreationStartDate() : "";
+		String endDate = ds != null ? ds.getGroupCreationEndDate() : "";
+		workspace.put("groupCreationStartDate", startDate);
+		workspace.put("groupCreationEndDate", endDate);
+		workspace.put("isGroupCreationOpen", isCreationOpen(startDate, endDate));
 
-    return workspace;
-  }
+		return workspace;
+	}
 
-  public Map<String, Object> createGroup(Long studentId) {
-    if (findGroupForStudent(studentId) != null) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
-    }
-    if (!isCreationPeriodOpen()) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "La période de création de groupes est fermée");
-    }
+	public Map<String, Object> createGroup(Long studentId) {
+		if (findGroupForStudent(studentId) != null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
+		}
+		if (!isCreationPeriodOpen()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La période de création de groupes est fermée");
+		}
 
-    Student student =
-        studentRepository
-            .findById(studentId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Étudiant introuvable"));
+		Student student = studentRepository.findById(studentId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Étudiant introuvable"));
 
-    Group group = new Group();
-    group.setGroupName("Groupe de " + student.getFirstName() + " " + student.getLastName());
-    group.setStudents(new ArrayList<>(List.of(student)));
-    group.setSessionId(null);
-    group = groupRepository.save(group);
+		Group group = new Group();
+		group.setGroupName("Groupe de " + student.getFirstName() + " " + student.getLastName());
+		group.setStudents(new ArrayList<>(List.of(student)));
+		group.setSessionId(null);
+		group = groupRepository.save(group);
 
-    return groupToDetails(group, studentId);
-  }
+		return groupToDetails(group, studentId);
+	}
 
-  public Map<String, Object> joinGroup(Long groupId, Long studentId) {
-    if (findGroupForStudent(studentId) != null) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
-    }
-    if (!isCreationPeriodOpen()) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "La période de création de groupes est fermée");
-    }
+	public Map<String, Object> joinGroup(Long groupId, Long studentId) {
+		if (findGroupForStudent(studentId) != null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
+		}
+		if (!isCreationPeriodOpen()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La période de création de groupes est fermée");
+		}
 
-    Group group =
-        groupRepository
-            .findById(groupId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé"));
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé"));
 
-    Student student =
-        studentRepository
-            .findById(studentId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Étudiant introuvable"));
+		Student student = studentRepository.findById(studentId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Étudiant introuvable"));
 
-    if (group.getStudents() == null) {
-      group.setStudents(new ArrayList<>());
-    }
-    if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà dans ce groupe");
-    }
-    group.getStudents().add(student);
-    group = groupRepository.save(group);
+		if (group.getStudents() == null) {
+			group.setStudents(new ArrayList<>());
+		}
+		if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà dans ce groupe");
+		}
+		group.getStudents().add(student);
+		group = groupRepository.save(group);
 
-    return groupToDetails(group, studentId);
-  }
+		return groupToDetails(group, studentId);
+	}
 
-  private Group findGroupForStudent(Long studentId) {
-    for (Group g : groupRepository.findAll()) {
-      if (g.getStudents() != null
-          && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-        return g;
-      }
-    }
-    return null;
-  }
+	private Group findGroupForStudent(Long studentId) {
+		for (Group g : groupRepository.findAll()) {
+			if (g.getStudents() != null && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
+				return g;
+			}
+		}
+		return null;
+	}
 
-  private Map<String, Object> groupToDetails(Group group, Long currentStudentId) {
-    Map<String, Object> details = new LinkedHashMap<>();
-    details.put("id", group.getId());
-    details.put("groupName", group.getGroupName());
-    details.put("projectTitle", group.getProject() != null ? group.getProject().getTitle() : null);
-    details.put(
-        "supervisorName",
-        group.getProject() != null && group.getProject().getSupervisor() != null
-            ? group.getProject().getSupervisor().getFirstName()
-                + " "
-                + group.getProject().getSupervisor().getLastName()
-            : null);
+	private Map<String, Object> groupToDetails(Group group, Long currentStudentId) {
+		Map<String, Object> details = new LinkedHashMap<>();
+		details.put("id", group.getId());
+		details.put("groupName", group.getGroupName());
+		details.put("projectTitle", group.getProject() != null ? group.getProject().getTitle() : null);
+		details.put("supervisorName",
+				group.getProject() != null && group.getProject().getSupervisor() != null
+						? group.getProject().getSupervisor().getFirstName() + " "
+								+ group.getProject().getSupervisor().getLastName()
+						: null);
 
-    List<Map<String, Object>> members = new ArrayList<>();
-    if (group.getStudents() != null) {
-      boolean first = true;
-      for (Student s : group.getStudents()) {
-        Map<String, Object> m = new LinkedHashMap<>();
-        m.put("id", s.getId());
-        m.put("fullName", s.getFirstName() + " " + s.getLastName());
-        m.put("email", s.getEmail());
-        m.put("role", s.getId().equals(currentStudentId) && first ? "leader" : "member");
-        members.add(m);
-        first = false;
-      }
-    }
-    details.put("members", members);
-    return details;
-  }
+		List<Map<String, Object>> members = new ArrayList<>();
+		if (group.getStudents() != null) {
+			boolean first = true;
+			for (Student s : group.getStudents()) {
+				Map<String, Object> m = new LinkedHashMap<>();
+				m.put("id", s.getId());
+				m.put("fullName", s.getFirstName() + " " + s.getLastName());
+				m.put("email", s.getEmail());
+				m.put("role", s.getId().equals(currentStudentId) && first ? "leader" : "member");
+				members.add(m);
+				first = false;
+			}
+		}
+		details.put("members", members);
+		return details;
+	}
 
-  private boolean isCreationPeriodOpen() {
-    DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
-    if (ds == null) return false;
-    return isCreationOpen(ds.getGroupCreationStartDate(), ds.getGroupCreationEndDate());
-  }
+	private boolean isCreationPeriodOpen() {
+		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
+		if (ds == null)
+			return false;
+		return isCreationOpen(ds.getGroupCreationStartDate(), ds.getGroupCreationEndDate());
+	}
 
-  private boolean isCreationOpen(String startDate, String endDate) {
-    try {
-      LocalDate now = LocalDate.now();
-      LocalDate start = LocalDate.parse(startDate);
-      LocalDate end = LocalDate.parse(endDate);
-      return !now.isBefore(start) && !now.isAfter(end);
-    } catch (Exception e) {
-      return false;
-    }
-  }
+	private boolean isCreationOpen(String startDate, String endDate) {
+		try {
+			LocalDate now = LocalDate.now();
+			LocalDate start = LocalDate.parse(startDate);
+			LocalDate end = LocalDate.parse(endDate);
+			return !now.isBefore(start) && !now.isAfter(end);
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }

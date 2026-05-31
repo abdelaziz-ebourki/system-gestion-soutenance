@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Student - Stats", description = "Statistiques personnelles de l'étudiant")
 public class StudentStatsController {
 
-  private final StudentStatsService statsService;
+	private final StudentStatsService statsService;
 
-  public StudentStatsController(StudentStatsService statsService) {
-    this.statsService = statsService;
-  }
+	public StudentStatsController(StudentStatsService statsService) {
+		this.statsService = statsService;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get personal statistics for the connected student")
-  public Map<String, Object> getStats() {
-    return statsService.getStats(getCurrentUserId());
-  }
+	@GetMapping
+	@Operation(summary = "Get personal statistics for the connected student")
+	public Map<String, Object> getStats() {
+		return statsService.getStats(getCurrentUserId());
+	}
 
-  private Long getCurrentUserId() {
-    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-  }
+	private Long getCurrentUserId() {
+		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+	}
 }

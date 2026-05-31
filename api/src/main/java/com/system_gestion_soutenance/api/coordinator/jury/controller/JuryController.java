@@ -16,36 +16,35 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Coordinator - Juries", description = "Gestion des jurys")
 public class JuryController {
 
-  private final JuryService juryService;
+	private final JuryService juryService;
 
-  public JuryController(JuryService juryService) {
-    this.juryService = juryService;
-  }
+	public JuryController(JuryService juryService) {
+		this.juryService = juryService;
+	}
 
-  @GetMapping
-  @Operation(summary = "List all juries")
-  public List<Map<String, Object>> findAll() {
-    return juryService.findAll();
-  }
+	@GetMapping
+	@Operation(summary = "List all juries")
+	public List<Map<String, Object>> findAll() {
+		return juryService.findAll();
+	}
 
-  @PostMapping
-  @Operation(summary = "Create a new jury")
-  public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody CreateJuryRequest request) {
-    Map<String, Object> jury = juryService.create(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(jury);
-  }
+	@PostMapping
+	@Operation(summary = "Create a new jury")
+	public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody CreateJuryRequest request) {
+		Map<String, Object> jury = juryService.create(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(jury);
+	}
 
-  @PutMapping("/{id}")
-  @Operation(summary = "Update a jury")
-  public Map<String, Object> update(
-      @PathVariable Long id, @RequestBody Map<String, Object> updates) {
-    return juryService.update(id, updates);
-  }
+	@PutMapping("/{id}")
+	@Operation(summary = "Update a jury")
+	public Map<String, Object> update(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+		return juryService.update(id, updates);
+	}
 
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Delete a jury")
-  public ResponseEntity<Void> delete(@PathVariable Long id) {
-    juryService.delete(id);
-    return ResponseEntity.noContent().build();
-  }
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete a jury")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		juryService.delete(id);
+		return ResponseEntity.noContent().build();
+	}
 }

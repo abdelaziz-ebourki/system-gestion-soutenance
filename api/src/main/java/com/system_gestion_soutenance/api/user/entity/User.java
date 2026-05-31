@@ -14,31 +14,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  private String email;
-  private String password;
+	private String email;
+	private String password;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
-  @Column(name = "last_name")
-  private String lastName;
+	@Column(name = "last_name")
+	private String lastName;
 
-  @Column(name = "first_name")
-  private String firstName;
+	@Column(name = "first_name")
+	private String firstName;
 
-  @Column(name = "is_active")
-  private boolean isActive;
+	@Column(name = "is_active")
+	private boolean isActive;
 
-  @Column(name = "verification_token")
-  private String verificationToken;
+	@Column(name = "verification_token")
+	private String verificationToken;
 
-  @Column(name = "reset_token")
-  private String resetToken;
+	@Column(name = "reset_token")
+	private String resetToken;
 
-  @Column(name = "reset_token_expires")
-  private Instant resetTokenExpires;
+	@Column(name = "reset_token_expires")
+	private Instant resetTokenExpires;
 }

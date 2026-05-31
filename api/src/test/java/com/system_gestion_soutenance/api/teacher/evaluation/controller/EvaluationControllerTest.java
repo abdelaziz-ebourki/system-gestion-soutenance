@@ -4,7 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.teacher.evaluation.service.EvaluationService;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -22,48 +21,44 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(
-    controllers = EvaluationController.class,
-    excludeAutoConfiguration = {
-      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-    })
+@WebMvcTest(controllers = EvaluationController.class, excludeAutoConfiguration = {
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class EvaluationControllerTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @MockitoBean private EvaluationService evaluationService;
-  @MockitoBean private JwtTokenProvider jwtTokenProvider;
-  @MockitoBean private UserRepository userRepository;
+	@Autowired
+	private MockMvc mockMvc;
+	@MockitoBean
+	private EvaluationService evaluationService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
 
-  @BeforeEach
-  void setUp() {
-    User user = new User();
-    user.setId(1L);
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-  }
+	@BeforeEach
+	void setUp() {
+		User user = new User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+	}
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-  @Test
-  void findByTeacher_returnsList() throws Exception {
-    when(evaluationService.findByTeacher(1L)).thenReturn(List.of());
-    mockMvc.perform(get("/api/teacher/evaluations")).andExpect(status().isOk());
-  }
+	@Test
+	void findByTeacher_returnsList() throws Exception {
+		when(evaluationService.findByTeacher(1L)).thenReturn(List.of());
+		mockMvc.perform(get("/api/teacher/evaluations")).andExpect(status().isOk());
+	}
 
-  @Test
-  void submit_returns200() throws Exception {
-    when(evaluationService.submit(anyLong(), any())).thenReturn(Map.of("status", "submitted"));
-    mockMvc
-        .perform(
-            post("/api/teacher/evaluations/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"score\":15.0,\"comment\":\"Good\"}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.status").value("submitted"));
-  }
+	@Test
+	void submit_returns200() throws Exception {
+		when(evaluationService.submit(anyLong(), any())).thenReturn(Map.of("status", "submitted"));
+		mockMvc.perform(post("/api/teacher/evaluations/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"score\":15.0,\"comment\":\"Good\"}")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("submitted"));
+	}
 }

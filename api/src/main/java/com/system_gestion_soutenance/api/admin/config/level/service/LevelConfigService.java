@@ -15,59 +15,51 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class LevelConfigService {
 
-  private final LevelRepository levelRepository;
-  private final StudentRepository studentRepository;
+	private final LevelRepository levelRepository;
+	private final StudentRepository studentRepository;
 
-  public LevelConfigService(LevelRepository levelRepository, StudentRepository studentRepository) {
-    this.levelRepository = levelRepository;
-    this.studentRepository = studentRepository;
-  }
+	public LevelConfigService(LevelRepository levelRepository, StudentRepository studentRepository) {
+		this.levelRepository = levelRepository;
+		this.studentRepository = studentRepository;
+	}
 
-  public List<Level> findAll() {
-    return levelRepository.findAll();
-  }
+	public List<Level> findAll() {
+		return levelRepository.findAll();
+	}
 
-  @Audited(action = "CREATE", entity = "Level")
-  @Transactional
-  public Level create(CreateLevelRequest request) {
-    if (levelRepository.findByName(request.name()).isPresent()) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Un niveau avec ce nom existe déjà");
-    }
+	@Audited(action = "CREATE", entity = "Level")
+	@Transactional
+	public Level create(CreateLevelRequest request) {
+		if (levelRepository.findByName(request.name()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un niveau avec ce nom existe déjà");
+		}
 
-    Level level = new Level();
-    level.setName(request.name());
-    return levelRepository.save(level);
-  }
+		Level level = new Level();
+		level.setName(request.name());
+		return levelRepository.save(level);
+	}
 
-  @Audited(action = "UPDATE", entity = "Level")
-  @Transactional
-  public Level update(Long id, CreateLevelRequest request) {
-    Level level =
-        levelRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Niveau non trouvé"));
+	@Audited(action = "UPDATE", entity = "Level")
+	@Transactional
+	public Level update(Long id, CreateLevelRequest request) {
+		Level level = levelRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Niveau non trouvé"));
 
-    level.setName(request.name());
-    return levelRepository.save(level);
-  }
+		level.setName(request.name());
+		return levelRepository.save(level);
+	}
 
-  @Audited(action = "DELETE", entity = "Level")
-  @Transactional
-  public void delete(Long id) {
-    Level level =
-        levelRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Niveau non trouvé"));
+	@Audited(action = "DELETE", entity = "Level")
+	@Transactional
+	public void delete(Long id) {
+		Level level = levelRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Niveau non trouvé"));
 
-    if (!studentRepository.findByLevelId(id).isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "Impossible de supprimer ce niveau car des étudiants y sont inscrits");
-    }
+		if (!studentRepository.findByLevelId(id).isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"Impossible de supprimer ce niveau car des étudiants y sont inscrits");
+		}
 
-    levelRepository.delete(level);
-  }
+		levelRepository.delete(level);
+	}
 }

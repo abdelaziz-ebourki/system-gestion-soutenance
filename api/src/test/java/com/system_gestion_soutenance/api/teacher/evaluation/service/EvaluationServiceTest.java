@@ -23,73 +23,73 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(MockitoExtension.class)
 class EvaluationServiceTest {
 
-  @Mock private EvaluationRepository evaluationRepository;
-  @Mock private ProjectRepository projectRepository;
-  @Mock private GroupRepository groupRepository;
+	@Mock
+	private EvaluationRepository evaluationRepository;
+	@Mock
+	private ProjectRepository projectRepository;
+	@Mock
+	private GroupRepository groupRepository;
 
-  @InjectMocks private EvaluationService service;
+	@InjectMocks
+	private EvaluationService service;
 
-  @Test
-  void findByTeacher_returnsList() {
-    Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
-    when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-    when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
+	@Test
+	void findByTeacher_returnsList() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
+		when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
 
-    assertEquals(1, service.findByTeacher(1L).size());
-  }
+		assertEquals(1, service.findByTeacher(1L).size());
+	}
 
-  @Test
-  void submit_success() {
-    Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
-    when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
-    when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-    when(projectRepository.findById(10L)).thenReturn(Optional.empty());
+	@Test
+	void submit_success() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
 
-    EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
-    Map<String, Object> result = service.submit(1L, req);
+		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
+		Map<String, Object> result = service.submit(1L, req);
 
-    assertEquals("submitted", result.get("status"));
-    assertEquals(15.0, result.get("score"));
-    assertEquals("Good", result.get("comment"));
-    assertNotNull(result.get("submittedAt"));
-  }
+		assertEquals("submitted", result.get("status"));
+		assertEquals(15.0, result.get("score"));
+		assertEquals("Good", result.get("comment"));
+		assertNotNull(result.get("submittedAt"));
+	}
 
-  @Test
-  void submit_notFound_throws() {
-    when(evaluationRepository.findById(99L)).thenReturn(Optional.empty());
-    assertThrows(
-        ResponseStatusException.class,
-        () -> service.submit(99L, new EvaluationSubmitRequest(10.0, "")));
-  }
+	@Test
+	void submit_notFound_throws() {
+		when(evaluationRepository.findById(99L)).thenReturn(Optional.empty());
+		assertThrows(ResponseStatusException.class, () -> service.submit(99L, new EvaluationSubmitRequest(10.0, "")));
+	}
 
-  @Test
-  void submit_alreadySubmitted_throws() {
-    Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", 12.0, null, "submitted", null);
-    when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+	@Test
+	void submit_alreadySubmitted_throws() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", 12.0, null, "submitted", null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
-    assertThrows(
-        ResponseStatusException.class,
-        () -> service.submit(1L, new EvaluationSubmitRequest(15.0, "Update")));
-    verify(evaluationRepository, never()).save(any());
-  }
+		assertThrows(ResponseStatusException.class,
+				() -> service.submit(1L, new EvaluationSubmitRequest(15.0, "Update")));
+		verify(evaluationRepository, never()).save(any());
+	}
 
-  @Test
-  void toResponse_includesStudentNames() {
-    Student student = new Student();
-    student.setFirstName("Alice");
-    student.setLastName("Test");
+	@Test
+	void toResponse_includesStudentNames() {
+		Student student = new Student();
+		student.setFirstName("Alice");
+		student.setLastName("Test");
 
-    com.system_gestion_soutenance.api.coordinator.group.entity.Group group =
-        new com.system_gestion_soutenance.api.coordinator.group.entity.Group();
-    group.setStudents(List.of(student));
+		com.system_gestion_soutenance.api.coordinator.group.entity.Group group = new com.system_gestion_soutenance.api.coordinator.group.entity.Group();
+		group.setStudents(List.of(student));
 
-    Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
-    when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-    when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
-    when(groupRepository.findByProjectId(10L)).thenReturn(List.of(group));
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
+		when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
+		when(groupRepository.findByProjectId(10L)).thenReturn(List.of(group));
 
-    List<Map<String, Object>> result = service.findByTeacher(1L);
+		List<Map<String, Object>> result = service.findByTeacher(1L);
 
-    assertEquals("Alice Test", ((List<?>) result.get(0).get("studentNames")).get(0));
-  }
+		assertEquals("Alice Test", ((List<?>) result.get(0).get("studentNames")).get(0));
+	}
 }

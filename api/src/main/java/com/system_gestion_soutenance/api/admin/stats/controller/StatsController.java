@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Admin - Stats", description = "Statistiques globales")
 public class StatsController {
 
-  private final StatsService statsService;
+	private final StatsService statsService;
 
-  public StatsController(StatsService statsService) {
-    this.statsService = statsService;
-  }
+	public StatsController(StatsService statsService) {
+		this.statsService = statsService;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get global statistics")
-  public Map<String, Object> getStats() {
-    return statsService.getStats();
-  }
+	@GetMapping
+	@Operation(summary = "Get global statistics")
+	public Map<String, Object> getStats() {
+		return statsService.getStats();
+	}
 }

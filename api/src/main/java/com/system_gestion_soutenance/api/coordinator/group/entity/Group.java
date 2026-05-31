@@ -15,24 +15,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Group {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(name = "group_name")
-  private String groupName;
+	@Column(name = "group_name")
+	private String groupName;
 
-  @ManyToOne
-  @JoinColumn(name = "project_id")
-  private Project project;
+	@ManyToOne
+	@JoinColumn(name = "project_id")
+	private Project project;
 
-  @ManyToMany
-  @JoinTable(
-      name = "group_members",
-      joinColumns = @JoinColumn(name = "group_id"),
-      inverseJoinColumns = @JoinColumn(name = "student_id"))
-  private List<Student> students;
+	@ManyToMany
+	@JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
+	private List<Student> students;
 
-  @Column(name = "session_id")
-  private Long sessionId;
+	@Column(name = "session_id")
+	private Long sessionId;
 }

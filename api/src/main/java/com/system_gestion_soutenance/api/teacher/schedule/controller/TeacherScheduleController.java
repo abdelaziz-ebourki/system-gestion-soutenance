@@ -14,19 +14,19 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Teacher - Schedule", description = "Consultation du planning")
 public class TeacherScheduleController {
 
-  private final TeacherScheduleService service;
+	private final TeacherScheduleService service;
 
-  public TeacherScheduleController(TeacherScheduleService service) {
-    this.service = service;
-  }
+	public TeacherScheduleController(TeacherScheduleService service) {
+		this.service = service;
+	}
 
-  @GetMapping
-  @Operation(summary = "Get the schedule for the connected teacher")
-  public List<Map<String, Object>> getSchedule() {
-    return service.getSchedule(getCurrentUserId());
-  }
+	@GetMapping
+	@Operation(summary = "Get the schedule for the connected teacher")
+	public List<Map<String, Object>> getSchedule() {
+		return service.getSchedule(getCurrentUserId());
+	}
 
-  private Long getCurrentUserId() {
-    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-  }
+	private Long getCurrentUserId() {
+		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+	}
 }

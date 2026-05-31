@@ -16,35 +16,35 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Levels", description = "Gestion des niveaux")
 public class LevelConfigController {
 
-  private final LevelConfigService levelConfigService;
+	private final LevelConfigService levelConfigService;
 
-  public LevelConfigController(LevelConfigService levelConfigService) {
-    this.levelConfigService = levelConfigService;
-  }
+	public LevelConfigController(LevelConfigService levelConfigService) {
+		this.levelConfigService = levelConfigService;
+	}
 
-  @GetMapping
-  @Operation(summary = "List all levels")
-  public List<Level> findAll() {
-    return levelConfigService.findAll();
-  }
+	@GetMapping
+	@Operation(summary = "List all levels")
+	public List<Level> findAll() {
+		return levelConfigService.findAll();
+	}
 
-  @PostMapping
-  @Operation(summary = "Create a new level")
-  public ResponseEntity<Level> create(@Valid @RequestBody CreateLevelRequest request) {
-    Level level = levelConfigService.create(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(level);
-  }
+	@PostMapping
+	@Operation(summary = "Create a new level")
+	public ResponseEntity<Level> create(@Valid @RequestBody CreateLevelRequest request) {
+		Level level = levelConfigService.create(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(level);
+	}
 
-  @PutMapping("/{id}")
-  @Operation(summary = "Update a level")
-  public Level update(@PathVariable Long id, @Valid @RequestBody CreateLevelRequest request) {
-    return levelConfigService.update(id, request);
-  }
+	@PutMapping("/{id}")
+	@Operation(summary = "Update a level")
+	public Level update(@PathVariable Long id, @Valid @RequestBody CreateLevelRequest request) {
+		return levelConfigService.update(id, request);
+	}
 
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Delete a level")
-  public ResponseEntity<Void> delete(@PathVariable Long id) {
-    levelConfigService.delete(id);
-    return ResponseEntity.noContent().build();
-  }
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete a level")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		levelConfigService.delete(id);
+		return ResponseEntity.noContent().build();
+	}
 }
