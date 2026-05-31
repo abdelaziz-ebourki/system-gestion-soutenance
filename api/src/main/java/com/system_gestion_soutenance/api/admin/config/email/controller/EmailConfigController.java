@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Email Config", description = "Configuration email")
 public class EmailConfigController {
 
-    private final EmailConfigService service;
+  private final EmailConfigService service;
 
-    public EmailConfigController(EmailConfigService service) {
-        this.service = service;
-    }
+  public EmailConfigController(EmailConfigService service) {
+    this.service = service;
+  }
 
-    @GetMapping
-    @Operation(summary = "Get email configuration")
-    public EmailConfig get() {
-        return service.get();
-    }
+  @GetMapping
+  @Operation(summary = "Get email configuration")
+  public EmailConfig get() {
+    return service.get();
+  }
 
-    @PutMapping
-    @Operation(summary = "Update email configuration")
-    public EmailConfig update(@Valid @RequestBody UpdateEmailConfigRequest updates) {
-        return service.update(updates);
-    }
+  @PutMapping
+  @Operation(summary = "Update email configuration")
+  public EmailConfig update(@Valid @RequestBody UpdateEmailConfigRequest updates) {
+    return service.update(updates);
+  }
 }

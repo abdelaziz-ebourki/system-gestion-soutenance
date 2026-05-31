@@ -13,23 +13,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SlotAssignment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String title;
+  @Column(nullable = false)
+  private String title;
 
-    @Column(nullable = false)
-    private String date;
+  @Column(nullable = false)
+  private String date;
 
-    @Column(nullable = false)
-    private String time;
+  @Column(nullable = false)
+  private String time;
 
-    @Column(name = "project_id")
-    private Long projectId;
+  @Column(name = "project_id")
+  private Long projectId;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id")
-    private Room room;
+  @ManyToOne
+  @JoinColumn(name = "room_id")
+  private Room room;
 }

@@ -1,3 +1,6 @@
 cd api
+./mvnw --no-transfer-progress fmt:format -q
+./mvnw --no-transfer-progress checkstyle:check -q
+./mvnw --no-transfer-progress spotbugs:check -q
+./mvnw --no-transfer-progress pmd:check -q
 ./mvnw --no-transfer-progress compile -q
-./mvnw --no-transfer-progress package -DskipTests -q

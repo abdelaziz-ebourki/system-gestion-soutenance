@@ -1,10 +1,15 @@
 package com.system_gestion_soutenance.api.admin.room.controller;
 
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.service.RoomService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -12,61 +17,62 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(controllers = RoomController.class,
+@WebMvcTest(
+    controllers = RoomController.class,
     excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
+      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
     })
 class RoomControllerTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @MockitoBean private RoomService roomService;
-    @MockitoBean private JwtTokenProvider jwtTokenProvider;
-    @MockitoBean private UserRepository userRepository;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
+  @MockitoBean private RoomService roomService;
+  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+  @MockitoBean private UserRepository userRepository;
 
-    @Test
-    void findAll_returnsList() throws Exception {
-        when(roomService.findAll()).thenReturn(List.of(new Room()));
-        mockMvc.perform(get("/api/admin/rooms")).andExpect(status().isOk());
-    }
+  @Test
+  void findAll_returnsList() throws Exception {
+    when(roomService.findAll()).thenReturn(List.of(new Room()));
+    mockMvc.perform(get("/api/admin/rooms")).andExpect(status().isOk());
+  }
 
-    @Test
-    void create_returns201() throws Exception {
-        when(roomService.create(any())).thenReturn(new Room());
-        mockMvc.perform(post("/api/admin/rooms")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Salle 1\",\"capacity\":30,\"departmentId\":1}"))
-                .andExpect(status().isCreated());
-    }
+  @Test
+  void create_returns201() throws Exception {
+    when(roomService.create(any())).thenReturn(new Room());
+    mockMvc
+        .perform(
+            post("/api/admin/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Salle 1\",\"capacity\":30,\"departmentId\":1}"))
+        .andExpect(status().isCreated());
+  }
 
-    @Test
-    void bulkCreate_returns201() throws Exception {
-        when(roomService.bulkCreate(any())).thenReturn(List.of());
-        mockMvc.perform(post("/api/admin/rooms/bulk")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"rooms\":[{\"name\":\"S1\",\"capacity\":20,\"departmentId\":1}]}"))
-                .andExpect(status().isCreated());
-    }
+  @Test
+  void bulkCreate_returns201() throws Exception {
+    when(roomService.bulkCreate(any())).thenReturn(List.of());
+    mockMvc
+        .perform(
+            post("/api/admin/rooms/bulk")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"rooms\":[{\"name\":\"S1\",\"capacity\":20,\"departmentId\":1}]}"))
+        .andExpect(status().isCreated());
+  }
 
-    @Test
-    void update_returns200() throws Exception {
-        when(roomService.update(anyLong(), any())).thenReturn(new Room());
-        mockMvc.perform(put("/api/admin/rooms/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Upd\",\"capacity\":25,\"departmentId\":1}"))
-                .andExpect(status().isOk());
-    }
+  @Test
+  void update_returns200() throws Exception {
+    when(roomService.update(anyLong(), any())).thenReturn(new Room());
+    mockMvc
+        .perform(
+            put("/api/admin/rooms/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Upd\",\"capacity\":25,\"departmentId\":1}"))
+        .andExpect(status().isOk());
+  }
 
-    @Test
-    void delete_returns204() throws Exception {
-        doNothing().when(roomService).delete(1L);
-        mockMvc.perform(delete("/api/admin/rooms/1")).andExpect(status().isNoContent());
-    }
+  @Test
+  void delete_returns204() throws Exception {
+    doNothing().when(roomService).delete(1L);
+    mockMvc.perform(delete("/api/admin/rooms/1")).andExpect(status().isNoContent());
+  }
 }

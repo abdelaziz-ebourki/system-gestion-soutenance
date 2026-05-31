@@ -15,24 +15,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DefenseSettings {
 
-    @Id
-    private Long id = 1L;
+  @Id private Long id = 1L;
 
-    @Column(name = "start_time")
-    private String startTime;
+  @Column(name = "start_time")
+  private String startTime;
 
-    @Column(name = "end_time")
-    private String endTime;
+  @Column(name = "end_time")
+  private String endTime;
 
-    @Column(name = "defense_duration")
-    private int defenseDuration;
+  @Column(name = "defense_duration")
+  private int defenseDuration;
 
-    @Column(name = "break_duration")
-    private int breakDuration;
+  @Column(name = "break_duration")
+  private int breakDuration;
 
-    @Column(name = "group_creation_start_date")
-    private String groupCreationStartDate;
+  @Column(name = "group_creation_start_date")
+  private String groupCreationStartDate;
 
-    @Column(name = "group_creation_end_date")
-    private String groupCreationEndDate;
+  @Column(name = "group_creation_end_date")
+  private String groupCreationEndDate;
 }

@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - General Settings", description = "Paramètres généraux")
 public class GeneralSettingsController {
 
-    private final GeneralSettingsService service;
+  private final GeneralSettingsService service;
 
-    public GeneralSettingsController(GeneralSettingsService service) {
-        this.service = service;
-    }
+  public GeneralSettingsController(GeneralSettingsService service) {
+    this.service = service;
+  }
 
-    @GetMapping
-    @Operation(summary = "Get general settings")
-    public GeneralSettings get() {
-        return service.get();
-    }
+  @GetMapping
+  @Operation(summary = "Get general settings")
+  public GeneralSettings get() {
+    return service.get();
+  }
 
-    @PutMapping
-    @Operation(summary = "Update general settings")
-    public GeneralSettings update(@Valid @RequestBody UpdateGeneralSettingsRequest updates) {
-        return service.update(updates);
-    }
+  @PutMapping
+  @Operation(summary = "Update general settings")
+  public GeneralSettings update(@Valid @RequestBody UpdateGeneralSettingsRequest updates) {
+    return service.update(updates);
+  }
 }

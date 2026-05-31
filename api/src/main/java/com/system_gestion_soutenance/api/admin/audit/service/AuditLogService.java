@@ -12,25 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuditLogService {
 
-    private final AuditLogRepository repository;
+  private final AuditLogRepository repository;
 
-    public AuditLogService(AuditLogRepository repository) {
-        this.repository = repository;
-    }
+  public AuditLogService(AuditLogRepository repository) {
+    this.repository = repository;
+  }
 
-    public PaginatedResponse<AuditLog> getAuditLogs(int page, int limit) {
-        PageRequest pageable = PageRequest.of(page, limit);
-        Page<AuditLog> auditLogPage = repository.findAllByOrderByTimestampDesc(pageable);
+  public PaginatedResponse<AuditLog> getAuditLogs(int page, int limit) {
+    PageRequest pageable = PageRequest.of(page, limit);
+    Page<AuditLog> auditLogPage = repository.findAllByOrderByTimestampDesc(pageable);
 
-        return new PaginatedResponse<>(
-                auditLogPage.getContent(),
-                auditLogPage.getTotalElements(),
-                auditLogPage.getTotalPages()
-        );
-    }
+    return new PaginatedResponse<>(
+        auditLogPage.getContent(), auditLogPage.getTotalElements(), auditLogPage.getTotalPages());
+  }
 
-    @Transactional
-    public AuditLog save(AuditLog log) {
-        return repository.save(log);
-    }
+  @Transactional
+  public AuditLog save(AuditLog log) {
+    return repository.save(log);
+  }
 }

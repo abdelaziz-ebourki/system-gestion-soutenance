@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "jury")
@@ -18,28 +17,28 @@ import java.util.List;
 @AllArgsConstructor
 public class Jury {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+  @ManyToOne
+  @JoinColumn(name = "project_id", nullable = false)
+  private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "jury_role_template_id", nullable = false)
-    @JsonIgnore
-    private JuryRoleTemplate template;
+  @ManyToOne
+  @JoinColumn(name = "jury_role_template_id", nullable = false)
+  @JsonIgnore
+  private JuryRoleTemplate template;
 
-    @OneToMany(mappedBy = "jury", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<JuryMember> members = new ArrayList<>();
+  @OneToMany(mappedBy = "jury", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private List<JuryMember> members = new ArrayList<>();
 
-    public Long getTemplateId() {
-        return template != null ? template.getId() : null;
-    }
+  public Long getTemplateId() {
+    return template != null ? template.getId() : null;
+  }
 
-    public String getTemplateName() {
-        return template != null ? template.getName() : null;
-    }
+  public String getTemplateName() {
+    return template != null ? template.getName() : null;
+  }
 }

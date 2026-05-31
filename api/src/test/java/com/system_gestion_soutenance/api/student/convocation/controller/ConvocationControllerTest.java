@@ -1,10 +1,16 @@
 package com.system_gestion_soutenance.api.student.convocation.controller;
 
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,58 +23,52 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(controllers = ConvocationController.class,
+@WebMvcTest(
+    controllers = ConvocationController.class,
     excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
+      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
     })
 class ConvocationControllerTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
-    @MockitoBean private StudentDefenseService studentDefenseService;
-    @MockitoBean private JwtTokenProvider jwtTokenProvider;
-    @MockitoBean private UserRepository userRepository;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
+  @MockitoBean private StudentDefenseService studentDefenseService;
+  @MockitoBean private JwtTokenProvider jwtTokenProvider;
+  @MockitoBean private UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
-        User user = new User();
-        user.setId(1L);
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user, null, List.of()));
-    }
+  @BeforeEach
+  void setUp() {
+    User user = new User();
+    user.setId(1L);
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+  }
 
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
+  @AfterEach
+  void tearDown() {
+    SecurityContextHolder.clearContext();
+  }
 
-    @Test
-    void getConvocation_scheduled_returnsPdf() throws Exception {
-        when(studentDefenseService.getDefense(1L)).thenReturn(Map.of("status", "scheduled"));
-        mockMvc.perform(get("/api/student/convocation"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/pdf"));
-    }
+  @Test
+  void getConvocation_scheduled_returnsPdf() throws Exception {
+    when(studentDefenseService.getDefense(1L)).thenReturn(Map.of("status", "scheduled"));
+    mockMvc
+        .perform(get("/api/student/convocation"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("application/pdf"));
+  }
 
-    @Test
-    void getConvocation_defenseNotFound_returns404() throws Exception {
-        when(studentDefenseService.getDefense(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
-        mockMvc.perform(get("/api/student/convocation"))
-                .andExpect(status().isNotFound());
-    }
+  @Test
+  void getConvocation_defenseNotFound_returns404() throws Exception {
+    when(studentDefenseService.getDefense(1L))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    mockMvc.perform(get("/api/student/convocation")).andExpect(status().isNotFound());
+  }
 
-    @Test
-    void getConvocation_notScheduled_returns404() throws Exception {
-        when(studentDefenseService.getDefense(1L)).thenReturn(Map.of("status", "pending"));
-        mockMvc.perform(get("/api/student/convocation"))
-                .andExpect(status().isNotFound());
-    }
+  @Test
+  void getConvocation_notScheduled_returns404() throws Exception {
+    when(studentDefenseService.getDefense(1L)).thenReturn(Map.of("status", "pending"));
+    mockMvc.perform(get("/api/student/convocation")).andExpect(status().isNotFound());
+  }
 }

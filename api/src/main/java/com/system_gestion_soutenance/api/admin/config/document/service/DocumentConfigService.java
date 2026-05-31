@@ -10,27 +10,29 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class DocumentConfigService {
 
-    private final DocumentConfigRepository repository;
+  private final DocumentConfigRepository repository;
 
-    public DocumentConfigService(DocumentConfigRepository repository) {
-        this.repository = repository;
-    }
+  public DocumentConfigService(DocumentConfigRepository repository) {
+    this.repository = repository;
+  }
 
-    public DocumentConfig get() {
-        return repository.findById(1L)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Configuration des documents non trouvée"));
-    }
+  public DocumentConfig get() {
+    return repository
+        .findById(1L)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Configuration des documents non trouvée"));
+  }
 
-    public DocumentConfig update(UpdateDocumentConfigRequest updates) {
-        DocumentConfig config = repository.findById(1L)
-                .orElse(new DocumentConfig());
+  public DocumentConfig update(UpdateDocumentConfigRequest updates) {
+    DocumentConfig config = repository.findById(1L).orElse(new DocumentConfig());
 
-        config.setMaxFileSizeMb(updates.maxFileSizeMb());
-        config.setAllowedExtensions(updates.allowedExtensions());
-        config.setVersionLimit(updates.versionLimit());
+    config.setMaxFileSizeMb(updates.maxFileSizeMb());
+    config.setAllowedExtensions(updates.allowedExtensions());
+    config.setVersionLimit(updates.versionLimit());
 
-        config.setId(1L);
-        return repository.save(config);
-    }
+    config.setId(1L);
+    return repository.save(config);
+  }
 }

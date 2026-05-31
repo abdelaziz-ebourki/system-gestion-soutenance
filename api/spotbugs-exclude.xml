@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Method name="&lt;init&gt;"/>
+        <Or>
+            <Class name="~.*\.controller\..*"/>
+            <Class name="~.*\.dto\..*"/>
+            <Class name="~.*\.config\..*"/>
+        </Or>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Class name="~.*\.dto\..*"/>
+    </Match>
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+    <Match>
+        <Bug pattern="SS_SHOULD_BE_STATIC"/>
+    </Match>
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+    </Match>
+    <Match>
+        <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+    </Match>
+</FindBugsFilter>

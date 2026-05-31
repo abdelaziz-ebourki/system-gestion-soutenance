@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+    <suppress files=".*[\\/]seed[\\/].*" checks=".*"/>
+    <suppress files=".*" checks="ConstantName" message="Name 'log' must match pattern"/>
+    <suppress files=".*[\\/]repository[\\/].*" checks="MethodName"/>
+    <suppress files=".*[\\/]dto[\\/].*" checks="JavadocMethod"/>
+    <suppress files=".*[\\/]entity[\\/].*" checks="JavadocMethod"/>
+    <suppress files=".*EmailService\.java" checks="LineLength"/>
+    <suppress files=".*AuditAspect\.java" checks="EmptyCatchBlock"/>
+</suppressions>

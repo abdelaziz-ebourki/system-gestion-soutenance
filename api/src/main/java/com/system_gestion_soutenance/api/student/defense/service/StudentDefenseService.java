@@ -9,90 +9,92 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
-
 @Service
 public class StudentDefenseService {
 
-    private final GroupRepository groupRepository;
-    private final ProjectRepository projectRepository;
-    private final JuryRepository juryRepository;
-    private final SlotAssignmentRepository slotAssignmentRepository;
+  private final GroupRepository groupRepository;
+  private final ProjectRepository projectRepository;
+  private final JuryRepository juryRepository;
+  private final SlotAssignmentRepository slotAssignmentRepository;
 
-    public StudentDefenseService(GroupRepository groupRepository,
-                                  ProjectRepository projectRepository,
-                                  JuryRepository juryRepository,
-                                  SlotAssignmentRepository slotAssignmentRepository) {
-        this.groupRepository = groupRepository;
-        this.projectRepository = projectRepository;
-        this.juryRepository = juryRepository;
-        this.slotAssignmentRepository = slotAssignmentRepository;
+  public StudentDefenseService(
+      GroupRepository groupRepository,
+      ProjectRepository projectRepository,
+      JuryRepository juryRepository,
+      SlotAssignmentRepository slotAssignmentRepository) {
+    this.groupRepository = groupRepository;
+    this.projectRepository = projectRepository;
+    this.juryRepository = juryRepository;
+    this.slotAssignmentRepository = slotAssignmentRepository;
+  }
+
+  public Map<String, Object> getDefense(Long studentId) {
+    Group group = findGroupForStudent(studentId);
+    if (group == null || group.getProject() == null) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Aucune soutenance trouvée pour cet étudiant");
     }
 
-    public Map<String, Object> getDefense(Long studentId) {
-        Group group = findGroupForStudent(studentId);
-        if (group == null || group.getProject() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Aucune soutenance trouvée pour cet étudiant");
+    Project project = group.getProject();
+    Map<String, Object> defense = new LinkedHashMap<>();
+    defense.put("projectTitle", project.getTitle());
+    defense.put("projectDescription", project.getDescription());
+
+    defense.put(
+        "supervisorName",
+        project.getSupervisor() != null
+            ? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
+            : null);
+
+    List<Map<String, String>> juryMembers = new ArrayList<>();
+    for (Jury jury : juryRepository.findByProjectId(project.getId())) {
+      for (JuryMember member : jury.getMembers()) {
+        if (member.getTeacher() != null) {
+          Map<String, String> m = new LinkedHashMap<>();
+          m.put(
+              "name", member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
+          m.put("role", member.getRoleName());
+          juryMembers.add(m);
         }
+      }
+    }
+    defense.put("juryMembers", juryMembers);
 
-        Project project = group.getProject();
-        Map<String, Object> defense = new LinkedHashMap<>();
-        defense.put("projectTitle", project.getTitle());
-        defense.put("projectDescription", project.getDescription());
-
-        defense.put("supervisorName", project.getSupervisor() != null
-                ? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
-                : null);
-
-        List<Map<String, String>> juryMembers = new ArrayList<>();
-        for (Jury jury : juryRepository.findByProjectId(project.getId())) {
-            for (JuryMember member : jury.getMembers()) {
-                if (member.getTeacher() != null) {
-                    Map<String, String> m = new LinkedHashMap<>();
-                    m.put("name", member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
-                    m.put("role", member.getRoleName());
-                    juryMembers.add(m);
-                }
-            }
-        }
-        defense.put("juryMembers", juryMembers);
-
-        List<SlotAssignment> slots = new ArrayList<>();
-        for (SlotAssignment s : slotAssignmentRepository.findAll()) {
-            if (project.getId().equals(s.getProjectId())) {
-                slots.add(s);
-            }
-        }
-        if (!slots.isEmpty()) {
-            SlotAssignment slot = slots.get(0);
-            defense.put("date", slot.getDate());
-            defense.put("startTime", slot.getTime());
-            defense.put("endTime", "");
-            defense.put("roomName", slot.getRoom() != null ? slot.getRoom().getName() : "");
-            defense.put("status", "scheduled");
-        } else {
-            defense.put("status", "pending");
-        }
-
-        defense.put("convocationUrl", null);
-        defense.put("result", null);
-
-        return defense;
+    List<SlotAssignment> slots = new ArrayList<>();
+    for (SlotAssignment s : slotAssignmentRepository.findAll()) {
+      if (project.getId().equals(s.getProjectId())) {
+        slots.add(s);
+      }
+    }
+    if (!slots.isEmpty()) {
+      SlotAssignment slot = slots.get(0);
+      defense.put("date", slot.getDate());
+      defense.put("startTime", slot.getTime());
+      defense.put("endTime", "");
+      defense.put("roomName", slot.getRoom() != null ? slot.getRoom().getName() : "");
+      defense.put("status", "scheduled");
+    } else {
+      defense.put("status", "pending");
     }
 
-    private Group findGroupForStudent(Long studentId) {
-        for (Group g : groupRepository.findAll()) {
-            if (g.getStudents() != null &&
-                    g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-                return g;
-            }
-        }
-        return null;
-    }
+    defense.put("convocationUrl", null);
+    defense.put("result", null);
 
+    return defense;
+  }
+
+  private Group findGroupForStudent(Long studentId) {
+    for (Group g : groupRepository.findAll()) {
+      if (g.getStudents() != null
+          && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
+        return g;
+      }
+    }
+    return null;
+  }
 }

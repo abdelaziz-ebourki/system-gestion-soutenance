@@ -3,11 +3,10 @@ package com.system_gestion_soutenance.api.coordinator.group.entity;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Table(name = "coordinator_group")
@@ -16,23 +15,24 @@ import java.util.List;
 @AllArgsConstructor
 public class Group {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "group_name")
-    private String groupName;
+  @Column(name = "group_name")
+  private String groupName;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
+  @ManyToOne
+  @JoinColumn(name = "project_id")
+  private Project project;
 
-    @ManyToMany
-    @JoinTable(name = "group_members",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id"))
-    private List<Student> students;
+  @ManyToMany
+  @JoinTable(
+      name = "group_members",
+      joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "student_id"))
+  private List<Student> students;
 
-    @Column(name = "session_id")
-    private Long sessionId;
+  @Column(name = "session_id")
+  private Long sessionId;
 }

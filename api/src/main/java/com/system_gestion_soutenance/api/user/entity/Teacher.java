@@ -15,11 +15,12 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class Teacher extends User {
-    @ManyToOne
-    @JoinColumn(name = "grade_id")
-    private Grade grade;
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    @JsonIgnoreProperties("head")
-    private Department department;
+  @ManyToOne
+  @JoinColumn(name = "grade_id")
+  private Grade grade;
+
+  @ManyToOne
+  @JoinColumn(name = "department_id")
+  @JsonIgnoreProperties("head")
+  private Department department;
 }

@@ -5,7 +5,4 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record CreateRoomRequest(
-        @NotBlank String name,
-        @Positive int capacity,
-        @NotNull Long departmentId
-) {}
+    @NotBlank String name, @Positive int capacity, @NotNull Long departmentId) {}

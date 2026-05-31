@@ -4,29 +4,28 @@ import com.system_gestion_soutenance.api.teacher.stats.service.TeacherStatsServi
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/teacher/stats")
 @Tag(name = "Teacher - Stats", description = "Statistiques personnelles de l'enseignant")
 public class TeacherStatsController {
 
-    private final TeacherStatsService statsService;
+  private final TeacherStatsService statsService;
 
-    public TeacherStatsController(TeacherStatsService statsService) {
-        this.statsService = statsService;
-    }
+  public TeacherStatsController(TeacherStatsService statsService) {
+    this.statsService = statsService;
+  }
 
-    @GetMapping
-    @Operation(summary = "Get personal statistics for the connected teacher")
-    public Map<String, Object> getStats() {
-        return statsService.getStats(getCurrentUserId());
-    }
+  @GetMapping
+  @Operation(summary = "Get personal statistics for the connected teacher")
+  public Map<String, Object> getStats() {
+    return statsService.getStats(getCurrentUserId());
+  }
 
-    private Long getCurrentUserId() {
-        return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-    }
+  private Long getCurrentUserId() {
+    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+  }
 }

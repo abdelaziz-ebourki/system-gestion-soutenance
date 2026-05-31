@@ -4,29 +4,28 @@ import com.system_gestion_soutenance.api.student.stats.service.StudentStatsServi
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/student/stats")
 @Tag(name = "Student - Stats", description = "Statistiques personnelles de l'étudiant")
 public class StudentStatsController {
 
-    private final StudentStatsService statsService;
+  private final StudentStatsService statsService;
 
-    public StudentStatsController(StudentStatsService statsService) {
-        this.statsService = statsService;
-    }
+  public StudentStatsController(StudentStatsService statsService) {
+    this.statsService = statsService;
+  }
 
-    @GetMapping
-    @Operation(summary = "Get personal statistics for the connected student")
-    public Map<String, Object> getStats() {
-        return statsService.getStats(getCurrentUserId());
-    }
+  @GetMapping
+  @Operation(summary = "Get personal statistics for the connected student")
+  public Map<String, Object> getStats() {
+    return statsService.getStats(getCurrentUserId());
+  }
 
-    private Long getCurrentUserId() {
-        return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-    }
+  private Long getCurrentUserId() {
+    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+  }
 }

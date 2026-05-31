@@ -1,11 +1,10 @@
 package com.system_gestion_soutenance.api.coordinator.unavailability.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Table(name = "unavailability")
@@ -14,18 +13,20 @@ import java.util.List;
 @AllArgsConstructor
 public class Unavailability {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "teacher_id", nullable = false)
-    private Long teacherId;
+  @Column(name = "teacher_id", nullable = false)
+  private Long teacherId;
 
-    @Column(nullable = false)
-    private String date;
+  @Column(nullable = false)
+  private String date;
 
-    @ElementCollection
-    @CollectionTable(name = "unavailability_slots", joinColumns = @JoinColumn(name = "unavailability_id"))
-    @Column(name = "slot")
-    private List<String> slots;
+  @ElementCollection
+  @CollectionTable(
+      name = "unavailability_slots",
+      joinColumns = @JoinColumn(name = "unavailability_id"))
+  @Column(name = "slot")
+  private List<String> slots;
 }

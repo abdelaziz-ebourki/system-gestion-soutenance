@@ -26,8 +26,14 @@ jobs:
           distribution: temurin
           cache: maven
 
+      - run: ./mvnw --no-transfer-progress fmt:check -q
+
+      - run: ./mvnw --no-transfer-progress checkstyle:check -q
+
+      - run: ./mvnw --no-transfer-progress spotbugs:check -q
+
+      - run: ./mvnw --no-transfer-progress pmd:check -q
+
       - run: ./mvnw --no-transfer-progress compile -q
 
       - run: ./mvnw --no-transfer-progress test
-
-      - run: ./mvnw --no-transfer-progress package -DskipTests -q

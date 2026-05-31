@@ -10,30 +10,32 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class DefenseSettingsService {
 
-    private final DefenseSettingsRepository repository;
+  private final DefenseSettingsRepository repository;
 
-    public DefenseSettingsService(DefenseSettingsRepository repository) {
-        this.repository = repository;
-    }
+  public DefenseSettingsService(DefenseSettingsRepository repository) {
+    this.repository = repository;
+  }
 
-    public DefenseSettings get() {
-        return repository.findById(1L)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Paramètres de soutenance non configurés"));
-    }
+  public DefenseSettings get() {
+    return repository
+        .findById(1L)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Paramètres de soutenance non configurés"));
+  }
 
-    public DefenseSettings update(UpdateDefenseSettingsRequest updates) {
-        DefenseSettings settings = repository.findById(1L)
-                .orElse(new DefenseSettings());
+  public DefenseSettings update(UpdateDefenseSettingsRequest updates) {
+    DefenseSettings settings = repository.findById(1L).orElse(new DefenseSettings());
 
-        settings.setStartTime(updates.startTime());
-        settings.setEndTime(updates.endTime());
-        settings.setDefenseDuration(updates.defenseDuration());
-        settings.setBreakDuration(updates.breakDuration());
-        settings.setGroupCreationStartDate(updates.groupCreationStartDate());
-        settings.setGroupCreationEndDate(updates.groupCreationEndDate());
+    settings.setStartTime(updates.startTime());
+    settings.setEndTime(updates.endTime());
+    settings.setDefenseDuration(updates.defenseDuration());
+    settings.setBreakDuration(updates.breakDuration());
+    settings.setGroupCreationStartDate(updates.groupCreationStartDate());
+    settings.setGroupCreationEndDate(updates.groupCreationEndDate());
 
-        settings.setId(1L);
-        return repository.save(settings);
-    }
+    settings.setId(1L);
+    return repository.save(settings);
+  }
 }
