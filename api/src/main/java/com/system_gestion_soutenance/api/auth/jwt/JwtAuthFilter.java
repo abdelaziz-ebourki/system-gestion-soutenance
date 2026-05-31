@@ -38,6 +38,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
 
 				if (user != null) {
+					if (!user.isActive()) {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN, "Compte désactivé");
+						return;
+					}
 					var auth = new UsernamePasswordAuthenticationToken(user, null,
 							List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
 					SecurityContextHolder.getContext().setAuthentication(auth);

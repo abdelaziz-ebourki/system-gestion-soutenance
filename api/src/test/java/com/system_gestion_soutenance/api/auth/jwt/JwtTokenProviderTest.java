@@ -11,7 +11,7 @@ class JwtTokenProviderTest {
 
 	@BeforeEach
 	void setUp() {
-		tokenProvider = new JwtTokenProvider();
+		tokenProvider = new JwtTokenProvider("s3cr3t-k3y-f0r-d3f3ns3-m4n4g3m3nt-syst3m-2026");
 	}
 
 	@Test
