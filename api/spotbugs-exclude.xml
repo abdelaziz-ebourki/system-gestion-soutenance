@@ -25,4 +25,8 @@
     <Match>
         <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
     </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="com.system_gestion_soutenance.api.common.audit.AuditAspect"/>
+    </Match>
 </FindBugsFilter>

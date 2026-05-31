@@ -32,12 +32,10 @@ public class AuditAspect {
 		Object result;
 		String action = audited.action();
 		String entity = audited.entity();
-		boolean success = true;
 		try {
 			result = joinPoint.proceed();
 		} catch (Throwable t) {
-			success = false;
-			saveAuditLog(action, entity, joinPoint.getArgs(), "ERROR", t.getMessage());
+			saveAuditLog(action, entity, joinPoint.getArgs(), t.getMessage());
 			throw t;
 		}
 
@@ -46,12 +44,12 @@ public class AuditAspect {
 			return result;
 
 		Long entityId = extractEntityId(joinPoint.getArgs(), result);
-		saveAuditLog(action, entity, entityId, email, success ? "SUCCESS" : "ERROR", null);
+		saveAuditLog(action, entity, entityId, email, null);
 
 		return result;
 	}
 
-	private void saveAuditLog(String action, String entity, Object[] args, String status, String errorDetail) {
+	private void saveAuditLog(String action, String entity, Object[] args, String errorDetail) {
 		Long entityId = extractEntityId(args, null);
 		transactionTemplate.executeWithoutResult(statusTx -> {
 			AuditLog auditLog = new AuditLog();
@@ -66,8 +64,7 @@ public class AuditAspect {
 		});
 	}
 
-	private void saveAuditLog(String action, String entity, Long entityId, String email, String status,
-			String errorDetail) {
+	private void saveAuditLog(String action, String entity, Long entityId, String email, String errorDetail) {
 		transactionTemplate.executeWithoutResult(statusTx -> {
 			AuditLog auditLog = new AuditLog();
 			auditLog.setAction(action);
