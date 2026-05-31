@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
- 
+
 	private final SecretKey key;
 	private final long expirationMs = 2 * 60 * 60 * 1000L;
- 
+
 	public JwtTokenProvider(@Value("${app.jwt.secret}") String secret) {
 		this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
- 
+
 	public String generateToken(String userId, String role) {
 
 		Date now = new Date();

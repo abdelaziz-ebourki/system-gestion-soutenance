@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +36,14 @@ public class AuthController {
 	@Operation(summary = "Authenticate a user", description = "Validates credentials and returns a JWT token with user info.")
 	@ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
 	@ApiResponse(responseCode = "401", description = "Invalid email or password", content = @Content(examples = @ExampleObject("{\"message\": \"Identifiants invalides (E-mail ou mot de passe incorrect)\"}")))
-	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-		LoginResponse response = authService.login(request);
-		return ResponseEntity.ok(response);
+	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+		LoginResponse loginResponse = authService.login(request);
+
+		String cookieValue = String.format("jwt_token=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax",
+				loginResponse.token(), 7200);
+		response.addHeader("Set-Cookie", cookieValue);
+
+		return ResponseEntity.ok(loginResponse);
 	}
 
 	@PostMapping("/auth/forgot-password")

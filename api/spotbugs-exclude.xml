@@ -26,6 +26,13 @@
         <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
     </Match>
     <Match>
+        <Bug pattern="UUF_UNUSED_FIELD"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.auth.controller.AuthController"/>
+            <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+        </Or>
+    </Match>
+    <Match>
         <Bug pattern="EI_EXPOSE_REP2"/>
         <Class name="com.system_gestion_soutenance.api.common.audit.AuditAspect"/>
     </Match>
