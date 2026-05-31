@@ -30,6 +30,24 @@ class TeacherStatsServiceTest {
 	private TeacherStatsService service;
 
 	@Test
+	void getStats_withNullSlots_countsZero() {
+		Evaluation pending = new Evaluation();
+		pending.setStatus("pending");
+
+		Unavailability ua = new Unavailability();
+		ua.setTeacherId(1L);
+		ua.setSlots(null);
+
+		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(pending));
+		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
+		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
+
+		Map<String, Object> result = service.getStats(1L);
+
+		assertEquals(0L, result.get("declaredUnavailabilitySlots"));
+	}
+
+	@Test
 	void getStats_returnsStats() {
 		Evaluation pending = new Evaluation();
 		pending.setStatus("pending");

@@ -100,6 +100,151 @@ class ScheduleServiceTest {
 	}
 
 	@Test
+	void saveSchedule_withProjectIdWithoutRoomId() {
+		SlotAssignment savedSlot = mock(SlotAssignment.class);
+		when(savedSlot.getId()).thenReturn(1L);
+		when(savedSlot.getTitle()).thenReturn("Slot 1");
+		when(savedSlot.getDate()).thenReturn("2025-06-01");
+		when(savedSlot.getTime()).thenReturn("09:00");
+		when(savedSlot.getProjectId()).thenReturn(5L);
+		when(savedSlot.getRoom()).thenReturn(null);
+
+		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+
+		Map<String, Object> slotData = new LinkedHashMap<>();
+		slotData.put("title", "Slot 1");
+		slotData.put("date", "2025-06-01");
+		slotData.put("time", "09:00");
+		slotData.put("projectId", 5);
+
+		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
+		var result = service.saveSchedule(schedule);
+
+		assertEquals(1, result.size());
+	}
+
+	@Test
+	void saveSchedule_withNullRoomIdField_skipsRoomLookup() {
+		SlotAssignment savedSlot = mock(SlotAssignment.class);
+		when(savedSlot.getId()).thenReturn(1L);
+		when(savedSlot.getTitle()).thenReturn("Slot 1");
+		when(savedSlot.getDate()).thenReturn("2025-06-01");
+		when(savedSlot.getTime()).thenReturn("09:00");
+		when(savedSlot.getProjectId()).thenReturn(null);
+		when(savedSlot.getRoom()).thenReturn(null);
+
+		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+
+		Map<String, Object> slotData = new LinkedHashMap<>();
+		slotData.put("title", "Slot 1");
+		slotData.put("date", "2025-06-01");
+		slotData.put("time", "09:00");
+		slotData.put("projectId", 5);
+		slotData.put("roomId", null);
+
+		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
+		var result = service.saveSchedule(schedule);
+
+		assertEquals(1, result.size());
+	}
+
+	@Test
+	void getStudentCountForProject_withNullRoom_skipsCapacityCheck() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getStatus()).thenReturn("approved");
+		when(project.getStudents())
+				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
+
+		Group group = mock(Group.class);
+		when(group.getStudents())
+				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
+
+		DefenseSession ds = new DefenseSession();
+		ds.setDefenseDuration(20);
+		ds.setBreakDuration(10);
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+
+		DefenseSettings settings = new DefenseSettings();
+		settings.setStartTime("09:00");
+		settings.setEndTime("10:00");
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of());
+		when(projectRepository.findAll()).thenReturn(List.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
+
+		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+	}
+
+	@Test
+	void getStudentCountForProject_withEmptyGroupAndProjectStudents_usesProject() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getStatus()).thenReturn("approved");
+		when(project.getStudents())
+				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
+
+		Group emptyGroup = mock(Group.class);
+		when(emptyGroup.getStudents()).thenReturn(List.of());
+
+		Room room = mock(Room.class);
+		when(room.getCapacity()).thenReturn(1);
+
+		DefenseSession ds = new DefenseSession();
+		ds.setDefenseDuration(20);
+		ds.setBreakDuration(10);
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+
+		DefenseSettings settings = new DefenseSettings();
+		settings.setStartTime("09:00");
+		settings.setEndTime("10:00");
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of(room));
+		when(projectRepository.findAll()).thenReturn(List.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(emptyGroup));
+
+		var result = service.autoGenerate(1L);
+
+		assertFalse(result.isEmpty());
+	}
+
+	@Test
+	void toLong_withString_parsesCorrectly() {
+		SlotAssignment saved = mock(SlotAssignment.class);
+		when(saved.getId()).thenReturn(1L);
+		when(saved.getTitle()).thenReturn("S");
+		when(saved.getDate()).thenReturn("2025-06-01");
+		when(saved.getTime()).thenReturn("09:00");
+		when(saved.getProjectId()).thenReturn(null);
+		when(saved.getRoom()).thenReturn(null);
+		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(saved);
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(saved));
+
+		Map<String, Object> slotData = new LinkedHashMap<>();
+		slotData.put("title", "S");
+		slotData.put("date", "2025-06-01");
+		slotData.put("time", "09:00");
+		slotData.put("projectId", "5");
+
+		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
+		service.saveSchedule(schedule);
+
+		verify(slotAssignmentRepository).save(argThat(s -> s.getProjectId() == 5L));
+	}
+
+	@Test
 	void saveSchedule_roomNotFound_throwsException() {
 		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -166,6 +311,48 @@ class ScheduleServiceTest {
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
 		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+	}
+
+	@Test
+	void autoGenerate_noApprovedProjects_throwsException() {
+		var ds = new DefenseSession();
+		ds.setDefenseDuration(20);
+		ds.setBreakDuration(10);
+		var settings = new DefenseSettings();
+		settings.setStartTime("08:00");
+		settings.setEndTime("18:00");
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of(new Room()));
+		when(projectRepository.findAll()).thenReturn(List.of());
+
+		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+	}
+
+	@Test
+	void saveSchedule_withoutOptionalFields_savesCorrectly() {
+		SlotAssignment savedSlot = mock(SlotAssignment.class);
+		when(savedSlot.getId()).thenReturn(1L);
+		when(savedSlot.getTitle()).thenReturn("Slot 1");
+		when(savedSlot.getDate()).thenReturn("2025-06-01");
+		when(savedSlot.getTime()).thenReturn("09:00");
+		when(savedSlot.getProjectId()).thenReturn(null);
+		when(savedSlot.getRoom()).thenReturn(null);
+
+		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+
+		Map<String, Object> slotData = new LinkedHashMap<>();
+		slotData.put("title", "Slot 1");
+		slotData.put("date", "2025-06-01");
+		slotData.put("time", "09:00");
+
+		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
+
+		var result = service.saveSchedule(schedule);
+
+		assertEquals(1, result.size());
+		verify(slotAssignmentRepository).deleteAll();
 	}
 
 	@Test

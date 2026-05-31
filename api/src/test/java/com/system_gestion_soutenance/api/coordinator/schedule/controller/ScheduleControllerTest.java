@@ -100,12 +100,24 @@ class ScheduleControllerTest {
 	}
 
 	@Test
+	void autoGenerate_missingDefenseSessionId_throwsBadRequest() throws Exception {
+		mockMvc.perform(post("/api/coordinator/schedule/auto-generate").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(Map.of()))).andExpect(status().isBadRequest());
+	}
+
+	@Test
 	void autoGenerate_withDefenseSessionId_returnsSchedule() throws Exception {
 		when(scheduleService.autoGenerate(1L)).thenReturn(Map.of("1", Map.of("title", "Generated Slot")));
 
 		mockMvc.perform(post("/api/coordinator/schedule/auto-generate").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1")))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.schedule['1'].title").value("Generated Slot"));
+	}
+
+	@Test
+	void publish_missingDefenseSessionId_throwsBadRequest() throws Exception {
+		mockMvc.perform(post("/api/coordinator/schedule/publish").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(Map.of()))).andExpect(status().isBadRequest());
 	}
 
 	@Test

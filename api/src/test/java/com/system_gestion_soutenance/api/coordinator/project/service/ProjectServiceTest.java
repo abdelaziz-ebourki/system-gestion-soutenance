@@ -232,6 +232,50 @@ class ProjectServiceTest {
 	}
 
 	@Test
+	void update_withStudentIdsAsNumbers_parsesCorrectly() {
+		Project project = mock(Project.class);
+		Student student = mock(Student.class);
+		when(student.getId()).thenReturn(5L);
+		when(student.getFirstName()).thenReturn("Jane");
+		when(student.getLastName()).thenReturn("Smith");
+
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(studentRepository.findAllById(List.of(5L))).thenReturn(List.of(student));
+		when(projectRepository.save(project)).thenReturn(project);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Title");
+		when(project.getDescription()).thenReturn("Desc");
+		when(project.getDefenseType()).thenReturn("PFE");
+		when(project.getStatus()).thenReturn("pending");
+		when(project.getStudents()).thenReturn(List.of(student));
+		when(project.getSupervisor()).thenReturn(null);
+
+		Map<String, Object> updates = new LinkedHashMap<>();
+		updates.put("studentIds", List.of(5));
+		service.update(1L, updates);
+
+		verify(project).setStudents(List.of(student));
+	}
+
+	@Test
+	void update_withStatus_updatesStatus() {
+		Project project = mock(Project.class);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(projectRepository.save(project)).thenReturn(project);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Title");
+		when(project.getDescription()).thenReturn("Desc");
+		when(project.getDefenseType()).thenReturn("PFE");
+		when(project.getStatus()).thenReturn("approved");
+		when(project.getStudents()).thenReturn(List.of());
+		when(project.getSupervisor()).thenReturn(null);
+
+		service.update(1L, Map.of("status", "approved"));
+
+		verify(project).setStatus("approved");
+	}
+
+	@Test
 	void delete_withSlotAssigned_throwsException() {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);

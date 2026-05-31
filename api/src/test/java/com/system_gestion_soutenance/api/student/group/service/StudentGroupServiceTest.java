@@ -34,6 +34,30 @@ class StudentGroupServiceTest {
 	private StudentGroupService service;
 
 	@Test
+	void getWorkspace_withNullDefenseSettings_usesDefaults() {
+		when(groupRepository.findAll()).thenReturn(List.of());
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+
+		Map<String, Object> result = service.getWorkspace(1L);
+
+		assertEquals("", result.get("groupCreationStartDate"));
+		assertEquals("", result.get("groupCreationEndDate"));
+		assertFalse((Boolean) result.get("isGroupCreationOpen"));
+	}
+
+	@Test
+	void getWorkspace_withDefenseSettings_returnsDates() {
+		when(groupRepository.findAll()).thenReturn(List.of());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2025-01-01", "2025-12-31")));
+
+		Map<String, Object> result = service.getWorkspace(1L);
+
+		assertEquals("2025-01-01", result.get("groupCreationStartDate"));
+		assertEquals("2025-12-31", result.get("groupCreationEndDate"));
+	}
+
+	@Test
 	void getWorkspace_noGroup_returnsAvailable() {
 		when(groupRepository.findAll()).thenReturn(List.of());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
@@ -60,6 +84,67 @@ class StudentGroupServiceTest {
 
 		assertNotNull(result.get("currentGroup"));
 		assertEquals("Groupe Test", ((Map<String, Object>) result.get("currentGroup")).get("groupName"));
+	}
+
+	@Test
+	void createGroup_studentNotFound_throws() {
+		when(groupRepository.findAll()).thenReturn(List.of());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+	}
+
+	@Test
+	void joinGroup_studentNotFound_throws() {
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>());
+
+		when(groupRepository.findAll()).thenReturn(List.of());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+	}
+
+	@Test
+	void joinGroup_withNullStudentList_initializesList() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setGroupName("Groupe Test");
+		group.setStudents(null);
+
+		when(groupRepository.findAll()).thenReturn(List.of());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Map<String, Object> result = service.joinGroup(10L, 1L);
+
+		assertEquals(1, ((List<?>) result.get("members")).size());
+	}
+
+	@Test
+	void joinGroup_alreadyInSpecificGroup_throws() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>(List.of(student)));
+
+		when(groupRepository.findAll()).thenReturn(List.of());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+
+		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -120,6 +205,26 @@ class StudentGroupServiceTest {
 		when(groupRepository.findAll()).thenReturn(List.of(group));
 
 		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+	}
+
+	@Test
+	void getWorkspace_groupWithNullProject_returnsNullProjectTitle() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setGroupName("Groupe Test");
+		group.setStudents(List.of(student));
+		group.setProject(null);
+
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+
+		Map<String, Object> result = service.getWorkspace(1L);
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> current = (Map<String, Object>) result.get("currentGroup");
+		assertNull(current.get("projectTitle"));
+		assertNull(current.get("supervisorName"));
 	}
 
 	@Test

@@ -151,6 +151,114 @@ class CoordinatorDefenseSessionServiceTest {
 	}
 
 	@Test
+	void create_withNullStatusAndSubmissionDeadline_setsDefaults() {
+		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "PFE", null, 3, 30, 15, null,
+				null, null, "2025-06-01", "2025-06-30");
+
+		DefenseSession saved = new DefenseSession();
+		saved.setId(1L);
+		when(defenseSessionRepository.save(any(DefenseSession.class))).thenReturn(saved);
+
+		var result = service.create(request);
+
+		verify(defenseSessionRepository).save(
+				argThat(ds -> ds.getStatus() == DefenseSessionStatus.DRAFT && ds.getSubmissionDeadline() == null));
+		assertEquals(1L, result.getId());
+	}
+
+	@Test
+	void update_withNullStatus_keepsExistingStatus() {
+		DefenseSession existing = new DefenseSession();
+		existing.setId(1L);
+		existing.setName("Old");
+		existing.setStatus(DefenseSessionStatus.DRAFT);
+		existing.setDefenseType(DefenseType.PFE);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
+				null, null, null, "2025-07-01", "2025-07-31");
+
+		when(defenseSessionRepository.save(existing)).thenReturn(existing);
+
+		service.update(1L, request);
+
+		assertEquals(DefenseSessionStatus.DRAFT, existing.getStatus());
+	}
+
+	@Test
+	void update_withTemplate_updatesTemplate() {
+		DefenseSession existing = new DefenseSession();
+		existing.setId(1L);
+		existing.setName("Old");
+		existing.setStatus(DefenseSessionStatus.DRAFT);
+		existing.setDefenseType(DefenseType.PFE);
+
+		TemplateRole role = new TemplateRole();
+		role.setName("président");
+		role.setCoefficient(2);
+
+		JuryRoleTemplate template = new JuryRoleTemplate();
+		template.setId(10L);
+		template.setRoles(List.of(role));
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(existing));
+		when(juryRoleTemplateRepository.findById(10L)).thenReturn(Optional.of(template));
+		when(defenseSessionRepository.save(existing)).thenReturn(existing);
+
+		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
+				null, null, 10L, "2025-07-01", "2025-07-31");
+
+		service.update(1L, request);
+
+		assertEquals(template, existing.getJuryRoleTemplate());
+	}
+
+	@Test
+	void update_withTemplateAndNoCoefficients_usesTemplateDefaults() {
+		DefenseSession existing = new DefenseSession();
+		existing.setId(1L);
+		existing.setName("Old");
+		existing.setStatus(DefenseSessionStatus.DRAFT);
+		existing.setDefenseType(DefenseType.PFE);
+
+		TemplateRole role = mock(TemplateRole.class);
+		when(role.getName()).thenReturn("président");
+		when(role.getCoefficient()).thenReturn(2);
+
+		JuryRoleTemplate template = mock(JuryRoleTemplate.class);
+		when(template.getId()).thenReturn(10L);
+		when(template.getRoles()).thenReturn(List.of(role));
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(existing));
+		when(juryRoleTemplateRepository.findById(10L)).thenReturn(Optional.of(template));
+		when(defenseSessionRepository.save(existing)).thenReturn(existing);
+
+		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
+				null, null, 10L, "2025-07-01", "2025-07-31");
+
+		service.update(1L, request);
+
+		verify(defenseSessionRepository).save(argThat(ds -> ds.getEvaluationCoefficients() != null
+				&& ds.getEvaluationCoefficients().containsKey("président")));
+	}
+
+	@Test
+	void validateTransition_sameToStatus_returnsEarly() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setStatus(DefenseSessionStatus.DRAFT);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.transition(1L, "DRAFT");
+		assertEquals(DefenseSessionStatus.DRAFT, result.getStatus());
+
+		verify(defenseSessionRepository).save(ds);
+	}
+
+	@Test
 	void delete_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.existsById(99L)).thenReturn(false);
 
@@ -169,6 +277,48 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.transition(1L, "ACTIVE");
 
 		assertEquals(DefenseSessionStatus.ACTIVE, result.getStatus());
+	}
+
+	@Test
+	void transition_activeToScheduled_success() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.transition(1L, "SCHEDULED");
+
+		assertEquals(DefenseSessionStatus.SCHEDULED, result.getStatus());
+	}
+
+	@Test
+	void transition_scheduledToCompleted_success() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setStatus(DefenseSessionStatus.SCHEDULED);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.transition(1L, "COMPLETED");
+
+		assertEquals(DefenseSessionStatus.COMPLETED, result.getStatus());
+	}
+
+	@Test
+	void transition_completedToArchived_success() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setStatus(DefenseSessionStatus.COMPLETED);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.transition(1L, "ARCHIVED");
+
+		assertEquals(DefenseSessionStatus.ARCHIVED, result.getStatus());
 	}
 
 	@Test

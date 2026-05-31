@@ -62,6 +62,42 @@ class StudentStatsServiceTest {
 	}
 
 	@Test
+	void getStats_withGroupButNoProject_returnsPending() {
+		StudentDocument doc = new StudentDocument();
+		doc.setStatus("submitted");
+
+		Group group = new Group();
+		group.setProject(null);
+		group.setStudents(List.of(student(1L)));
+
+		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc));
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+
+		Map<String, Object> result = service.getStats(1L);
+
+		assertEquals("pending", result.get("defenseStatus"));
+		assertEquals(0L, result.get("missingDocuments"));
+	}
+
+	@Test
+	void getStats_withGroupAndProjectButNoSchedule_returnsPending() {
+		Project project = new Project();
+		project.setId(10L);
+
+		Group group = new Group();
+		group.setProject(project);
+		group.setStudents(List.of(student(1L)));
+
+		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+
+		Map<String, Object> result = service.getStats(1L);
+
+		assertEquals("pending", result.get("defenseStatus"));
+	}
+
+	@Test
 	void getStats_noGroup_returnsZeroMembers() {
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
 		when(groupRepository.findAll()).thenReturn(List.of());

@@ -108,6 +108,103 @@ class UserServiceTest {
 	}
 
 	@Test
+	void listUsers_withBlankRole_treatsAsNull() {
+		when(userRepository.findAll(any(PageRequest.class))).thenReturn(Page.empty());
+
+		PaginatedResponse<UserDto> result = userService.listUsers(" ", 0, 10, null);
+
+		assertEquals(0, result.items().size());
+		verify(userRepository).findAll(PageRequest.of(0, 10));
+	}
+
+	@Test
+	void createUser_otherRole_createsBaseUser() {
+		when(userRepository.findByEmail("base@t.com")).thenReturn(Optional.empty());
+		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		UserDto result = userService
+				.createUser(new CreateUserRequest("Base", "User", "base@t.com", "ADMIN", null, null, null, null, null));
+
+		assertEquals("base@t.com", result.email());
+	}
+
+	@Test
+	void updateUser_roleChange_updatesRole() {
+		User user = new User(1L, "old@t.com", "", Role.STUDENT, "Old", "User", true, null, null, null);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, "teacher", null, null, null, null, null);
+		UserDto result = userService.updateUser(1L, req);
+
+		assertEquals("teacher", result.role());
+	}
+
+	@Test
+	void updateUser_studentMajorNotFound_throws() {
+		Student student = new Student();
+		student.setId(1L);
+		student.setEmail("s@t.com");
+		student.setRole(Role.STUDENT);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(majorRepository.findById(99L)).thenReturn(Optional.empty());
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, 99L, null, null, null);
+		assertThrows(ResponseStatusException.class, () -> userService.updateUser(1L, req));
+	}
+
+	@Test
+	void updateUser_teacherGradeNotFound_throws() {
+		Teacher teacher = new Teacher();
+		teacher.setId(1L);
+		teacher.setEmail("t@t.com");
+		teacher.setRole(Role.TEACHER);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(teacher));
+		when(gradeRepository.findById(99L)).thenReturn(Optional.empty());
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, null, 99L, null);
+		assertThrows(ResponseStatusException.class, () -> userService.updateUser(1L, req));
+	}
+
+	@Test
+	void updateUser_teacherDepartmentNotFound_throws() {
+		Teacher teacher = new Teacher();
+		teacher.setId(1L);
+		teacher.setEmail("t@t.com");
+		teacher.setRole(Role.TEACHER);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(teacher));
+		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, null, null, 99L);
+		assertThrows(ResponseStatusException.class, () -> userService.updateUser(1L, req));
+	}
+
+	@Test
+	void bulkCreate_teachers_success() {
+		var entry = new BulkCreateRequest.BulkUserEntry("Doe", "John", "j@t.com", null, null, null, null,
+				"Informatique");
+		var request = new BulkCreateRequest(List.of(entry), "teacher");
+
+		when(userRepository.findByEmail("j@t.com")).thenReturn(Optional.empty());
+		when(departmentRepository.findByName("Informatique")).thenReturn(Optional.of(department));
+		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		List<UserDto> results = userService.bulkCreate(request);
+
+		assertEquals(1, results.size());
+	}
+
+	@Test
+	void bulkCreate_unsupportedRole_throws() {
+		var entry = new BulkCreateRequest.BulkUserEntry("Doe", "John", "j@t.com", null, null, null, null, null);
+		var request = new BulkCreateRequest(List.of(entry), "ADMIN");
+
+		when(userRepository.findByEmail("j@t.com")).thenReturn(Optional.empty());
+
+		assertThrows(ResponseStatusException.class, () -> userService.bulkCreate(request));
+	}
+
+	@Test
 	void listUsers_withSearch_callsSearchMethod() {
 		when(userRepository.findByRoleAndSearch(any(), anyString(), any())).thenReturn(Page.empty());
 
@@ -201,6 +298,76 @@ class UserServiceTest {
 	}
 
 	@Test
+	void updateUser_sameEmail_noConflict() {
+		User user = new User(1L, "same@t.com", "", Role.STUDENT, "Old", "User", true, null, null, null);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, "same@t.com", null, null, null, null, null, null);
+		UserDto result = userService.updateUser(1L, req);
+
+		assertEquals("same@t.com", result.email());
+	}
+
+	@Test
+	void updateUser_studentUpdatesMajorAndLevel_success() {
+		Student student = new Student();
+		student.setId(1L);
+		student.setEmail("s@t.com");
+		student.setRole(Role.STUDENT);
+		student.setLastName("Old");
+		student.setFirstName("User");
+
+		Major newMajor = new Major();
+		newMajor.setId(2L);
+		newMajor.setName("IIR");
+
+		Level newLevel = new Level();
+		newLevel.setId(2L);
+		newLevel.setName("S5");
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(majorRepository.findById(2L)).thenReturn(Optional.of(newMajor));
+		when(levelRepository.findById(2L)).thenReturn(Optional.of(newLevel));
+		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, 2L, 2L, null, null);
+		UserDto result = userService.updateUser(1L, req);
+
+		assertEquals("IIR", result.majorName());
+		assertEquals("S5", result.levelName());
+	}
+
+	@Test
+	void updateUser_teacherUpdatesGradeAndDepartment_success() {
+		Teacher teacher = new Teacher();
+		teacher.setId(1L);
+		teacher.setEmail("t@t.com");
+		teacher.setRole(Role.TEACHER);
+		teacher.setLastName("Old");
+		teacher.setFirstName("User");
+
+		Grade newGrade = new Grade();
+		newGrade.setId(2L);
+		newGrade.setName("PA");
+
+		Department newDept = new Department();
+		newDept.setId(2L);
+		newDept.setName("Maths");
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(teacher));
+		when(gradeRepository.findById(2L)).thenReturn(Optional.of(newGrade));
+		when(departmentRepository.findById(2L)).thenReturn(Optional.of(newDept));
+		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, null, 2L, 2L);
+		UserDto result = userService.updateUser(1L, req);
+
+		assertEquals("PA", result.gradeName());
+		assertEquals("Maths", result.departmentName());
+	}
+
+	@Test
 	void updateUser_updatesBasicFields() {
 		User user = new User(1L, "old@t.com", "", Role.STUDENT, "Old", "User", true, null, null, null);
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -256,6 +423,49 @@ class UserServiceTest {
 		userService.deleteUser(1L);
 
 		verify(userRepository).delete(teacher);
+	}
+
+	@Test
+	void deleteUser_teacher_hasJuryConstraint_throws() {
+		Teacher teacher = new Teacher();
+		teacher.setId(1L);
+		teacher.setRole(Role.TEACHER);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(teacher));
+		when(departmentRepository.findByHead_Id(1L)).thenReturn(List.of());
+		when(juryMemberRepository.findByTeacher_Id(1L))
+				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember()));
+
+		assertThrows(ResponseStatusException.class, () -> userService.deleteUser(1L));
+		verify(userRepository, never()).delete(any());
+	}
+
+	@Test
+	void deleteUser_teacher_hasSupervisorConstraint_throws() {
+		Teacher teacher = new Teacher();
+		teacher.setId(1L);
+		teacher.setRole(Role.TEACHER);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(teacher));
+		when(departmentRepository.findByHead_Id(1L)).thenReturn(List.of());
+		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
+		when(projectRepository.findBySupervisorId(1L))
+				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.project.entity.Project()));
+
+		assertThrows(ResponseStatusException.class, () -> userService.deleteUser(1L));
+		verify(userRepository, never()).delete(any());
+	}
+
+	@Test
+	void deleteUser_studentNoProjects_success() {
+		Student student = new Student();
+		student.setId(1L);
+		student.setRole(Role.STUDENT);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(projectRepository.findByStudentsId(1L)).thenReturn(List.of());
+		doNothing().when(userRepository).delete(student);
+
+		userService.deleteUser(1L);
+
+		verify(userRepository).delete(student);
 	}
 
 	@Test

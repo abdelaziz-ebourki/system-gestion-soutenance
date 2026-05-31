@@ -35,8 +35,13 @@ class AuthServiceTest {
 	@Mock
 	private EmailService emailService;
 
-	@InjectMocks
 	private AuthService authService;
+
+	@org.junit.jupiter.api.BeforeEach
+	void setUp() {
+		authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder, emailService,
+				"http://localhost:5173");
+	}
 
 	private User createActiveUser() {
 		User user = new User();

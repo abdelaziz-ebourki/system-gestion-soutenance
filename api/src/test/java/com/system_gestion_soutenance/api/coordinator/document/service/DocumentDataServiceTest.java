@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
@@ -17,6 +18,7 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,109 @@ class DocumentDataServiceTest {
 
 		assertEquals(1, result.size());
 		assertEquals("Projet Test", result.get(0).get("projectTitle"));
+	}
+
+	@Test
+	void buildDefenseData_withNullSupervisor_returnsNullSupervisorName() {
+		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Project project = mockProject(1L, "Projet", null);
+
+		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+
+		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		var result = service.evaluationSheets(request);
+
+		assertNull(result.get(0).get("supervisorName"));
+	}
+
+	@Test
+	void juryConvocations_withRoomNonEmpty_includesRoomName() {
+		Room room = new Room();
+		room.setName("Salle B");
+
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getFirstName()).thenReturn("John");
+		when(supervisor.getLastName()).thenReturn("Doe");
+
+		Project project = mockProject(1L, "Projet", supervisor);
+		SlotAssignment slot = mockSlot(10L, 1L, room, "2025-06-01", "09:00");
+
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(supervisor);
+		when(member.getRoleName()).thenReturn("président");
+
+		Jury jury = mock(Jury.class);
+		when(jury.getMembers()).thenReturn(List.of(member));
+
+		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+
+		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
+		var result = service.juryConvocations(request);
+
+		assertEquals("Salle B", result.get(0).get("roomName"));
+	}
+
+	@Test
+	void getStudentNames_usesProjectFallback() {
+		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Project project = mockProject(1L, "Projet", null);
+
+		Student student = mock(Student.class);
+		when(student.getFirstName()).thenReturn("Alice");
+		when(student.getLastName()).thenReturn("Test");
+
+		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(project.getStudents()).thenReturn(List.of(student));
+
+		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		var result = service.evaluationSheets(request);
+
+		assertEquals(1, ((List<?>) result.get(0).get("studentNames")).size());
+	}
+
+	@Test
+	void findDefenseSession_withNoGroupMatch_returnsNull() {
+		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Project project = mockProject(1L, "Projet", null);
+
+		Group group = mock(Group.class);
+		when(group.getSessionId()).thenReturn(null);
+
+		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
+
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getFirstName()).thenReturn("John");
+		when(supervisor.getLastName()).thenReturn("Doe");
+
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(supervisor);
+		when(member.getRoleName()).thenReturn("président");
+
+		Jury jury = mock(Jury.class);
+		when(jury.getMembers()).thenReturn(List.of(member));
+
+		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
+
+		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		var result = service.juryConvocations(request);
+
+		assertNotNull(result);
+		assertEquals(1, result.size());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -164,6 +269,28 @@ class DocumentDataServiceTest {
 		assertEquals("Session PFE", result.get("defenseSessionName"));
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	void attendanceList_withRoom_includesRoomName() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session PFE");
+
+		Room room = new Room();
+		room.setName("Salle A");
+
+		Project project = mockProject(1L, "Projet", null);
+		SlotAssignment slot = mockSlot(10L, 1L, room, "2025-06-01", "09:00");
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+
+		var result = service.attendanceList(1L);
+
+		assertEquals("Salle A", ((List<Map<String, Object>>) result.get("slots")).get(0).get("roomName"));
+	}
+
 	@Test
 	void attendanceList_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
@@ -198,6 +325,21 @@ class DocumentDataServiceTest {
 
 		assertEquals(1, result.size());
 		assertEquals("Jane Smith", result.get(0).get("teacherName"));
+	}
+
+	@Test
+	void juryConvocations_withProjectNotFound_skipsSlot() {
+		SlotAssignment slot = mockSlot(10L, 99L, null, "2025-06-01", "09:00");
+
+		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
+		when(groupRepository.findByProjectId(99L)).thenReturn(List.of());
+
+		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		var result = service.juryConvocations(request);
+
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

@@ -139,6 +139,95 @@ class CoordinatorGradeServiceTest {
 	}
 
 	@Test
+	void computeStatus_partialEvaluations_returnsPending() {
+		Teacher teacher = mockTeacher(10L);
+		Teacher teacher2 = mockTeacher(20L);
+		Project project = mockProject(1L);
+
+		JuryMember member1 = mock(JuryMember.class);
+		when(member1.getTeacher()).thenReturn(teacher);
+		when(member1.getRoleName()).thenReturn("président");
+
+		JuryMember member2 = mock(JuryMember.class);
+		when(member2.getTeacher()).thenReturn(teacher2);
+		when(member2.getRoleName()).thenReturn("examinateur");
+
+		Jury jury = mock(Jury.class);
+		when(jury.getProject()).thenReturn(project);
+		when(jury.getMembers()).thenReturn(List.of(member1, member2));
+
+		Evaluation eval = mock(Evaluation.class);
+		when(eval.getTeacherId()).thenReturn(10L);
+		when(eval.getScore()).thenReturn(15.0);
+		when(eval.getStatus()).thenReturn("submitted");
+
+		when(juryRepository.findAll()).thenReturn(List.of(jury));
+		when(evaluationRepository.findByProjectId(1L)).thenReturn(List.of(eval));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+
+		var result = service.getGrades();
+
+		assertEquals("pending", result.get(0).get("status"));
+	}
+
+	@Test
+	void findDefenseDate_noMatchingSlot_returnsNull() {
+		Teacher teacher = mockTeacher(10L);
+		Project project = mockProject(1L);
+
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(teacher);
+		when(member.getRoleName()).thenReturn("président");
+
+		Jury jury = mock(Jury.class);
+		when(jury.getProject()).thenReturn(project);
+		when(jury.getMembers()).thenReturn(List.of(member));
+
+		SlotAssignment slot = mock(SlotAssignment.class);
+		when(slot.getProjectId()).thenReturn(99L);
+
+		when(juryRepository.findAll()).thenReturn(List.of(jury));
+		when(evaluationRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+
+		var result = service.getGrades();
+
+		assertNull(result.get(0).get("defenseDate"));
+	}
+
+	@Test
+	void computeWeightedScore_withNullCoefficient_usesZero() {
+		Teacher teacher = mockTeacher(10L);
+		Project project = mockProject(1L);
+
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(teacher);
+		when(member.getRoleName()).thenReturn("unknown_role");
+
+		Jury jury = mock(Jury.class);
+		when(jury.getProject()).thenReturn(project);
+		when(jury.getMembers()).thenReturn(List.of(member));
+
+		Evaluation eval = mock(Evaluation.class);
+		when(eval.getTeacherId()).thenReturn(10L);
+		when(eval.getScore()).thenReturn(15.0);
+		when(eval.getStatus()).thenReturn("submitted");
+		when(eval.getDefenseSessionId()).thenReturn(1L);
+
+		DefenseSession ds = new DefenseSession();
+		ds.setEvaluationCoefficients(Map.of());
+
+		when(juryRepository.findAll()).thenReturn(List.of(jury));
+		when(evaluationRepository.findByProjectId(1L)).thenReturn(List.of(eval));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+
+		var result = service.getGrades();
+
+		assertNull(result.get(0).get("finalScore"));
+	}
+
+	@Test
 	void getGrades_resolvesSessionIdFromGroupWhenNoEvaluations() {
 		Teacher teacher = mockTeacher(10L);
 		Project project = mockProject(1L);

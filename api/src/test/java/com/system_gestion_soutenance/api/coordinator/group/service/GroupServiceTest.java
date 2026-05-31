@@ -100,6 +100,22 @@ class GroupServiceTest {
 	}
 
 	@Test
+	void findAll_withNullStudents_returnsEmptyStudentLists() {
+		Group group = mock(Group.class);
+		when(group.getId()).thenReturn(1L);
+		when(group.getGroupName()).thenReturn("Groupe A");
+		when(group.getProject()).thenReturn(null);
+		when(group.getStudents()).thenReturn(null);
+		when(group.getSessionId()).thenReturn(null);
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+
+		var result = service.findAll();
+
+		assertEquals(0, ((List<?>) result.get(0).get("studentIds")).size());
+		assertEquals(0, ((List<?>) result.get(0).get("studentNames")).size());
+	}
+
+	@Test
 	void delete_existingGroup_deletes() {
 		when(groupRepository.existsById(1L)).thenReturn(true);
 

@@ -107,6 +107,28 @@ class UserAdminControllerTest {
 	}
 
 	@Test
+	void createStudent_withBlankRole_setsDefaultRole() throws Exception {
+		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
+
+		mockMvc.perform(post("/api/admin/students").contentType(MediaType.APPLICATION_JSON).content("""
+				{"lastName":"D","firstName":"J","email":"j@t.com","role":" "}
+				""")).andExpect(status().isCreated());
+
+		verify(userService).createUser(argThat(req -> "student".equals(req.role())));
+	}
+
+	@Test
+	void createStudent_withRole_keepsRole() throws Exception {
+		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
+
+		mockMvc.perform(post("/api/admin/students").contentType(MediaType.APPLICATION_JSON).content("""
+				{"lastName":"D","firstName":"J","email":"j@t.com","role":"student"}
+				""")).andExpect(status().isCreated());
+
+		verify(userService).createUser(argThat(req -> "student".equals(req.role())));
+	}
+
+	@Test
 	void createStudent_setsDefaultRole() throws Exception {
 		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
 
@@ -118,6 +140,28 @@ class UserAdminControllerTest {
 	}
 
 	@Test
+	void createTeacher_withBlankRole_setsDefaultRole() throws Exception {
+		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
+
+		mockMvc.perform(post("/api/admin/teachers").contentType(MediaType.APPLICATION_JSON).content("""
+				{"lastName":"S","firstName":"T","email":"t@t.com","departmentId":1,"role":" "}
+				""")).andExpect(status().isCreated());
+
+		verify(userService).createUser(argThat(req -> "teacher".equals(req.role())));
+	}
+
+	@Test
+	void createTeacher_withRole_keepsRole() throws Exception {
+		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
+
+		mockMvc.perform(post("/api/admin/teachers").contentType(MediaType.APPLICATION_JSON).content("""
+				{"lastName":"S","firstName":"T","email":"t@t.com","departmentId":1,"role":"teacher"}
+				""")).andExpect(status().isCreated());
+
+		verify(userService).createUser(argThat(req -> "teacher".equals(req.role())));
+	}
+
+	@Test
 	void createTeacher_setsDefaultRole() throws Exception {
 		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
 
@@ -126,6 +170,28 @@ class UserAdminControllerTest {
 				""")).andExpect(status().isCreated());
 
 		verify(userService).createUser(argThat(req -> "teacher".equals(req.role())));
+	}
+
+	@Test
+	void createCoordinator_withBlankRole_setsDefaultRole() throws Exception {
+		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
+
+		mockMvc.perform(post("/api/admin/coordinators").contentType(MediaType.APPLICATION_JSON).content("""
+				{"lastName":"C","firstName":"C","email":"c@t.com","role":" "}
+				""")).andExpect(status().isCreated());
+
+		verify(userService).createUser(argThat(req -> "coordinator".equals(req.role())));
+	}
+
+	@Test
+	void createCoordinator_withRole_keepsRole() throws Exception {
+		when(userService.createUser(any())).thenReturn(mock(UserDto.class));
+
+		mockMvc.perform(post("/api/admin/coordinators").contentType(MediaType.APPLICATION_JSON).content("""
+				{"lastName":"C","firstName":"C","email":"c@t.com","role":"coordinator"}
+				""")).andExpect(status().isCreated());
+
+		verify(userService).createUser(argThat(req -> "coordinator".equals(req.role())));
 	}
 
 	@Test

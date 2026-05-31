@@ -5,6 +5,8 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
+import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
@@ -82,6 +84,84 @@ class StudentDefenseServiceTest {
 		assertEquals("2026-06-15", result.get("date"));
 		assertEquals("09:00", result.get("startTime"));
 		assertEquals("scheduled", result.get("status"));
+	}
+
+	@Test
+	void getDefense_withNullSupervisor_returnsNullSupervisorName() {
+		Project project = new Project();
+		project.setId(10L);
+		project.setTitle("Projet Test");
+		project.setSupervisor(null);
+
+		Group group = new Group();
+		group.setProject(project);
+		group.setStudents(List.of(student(1L)));
+
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+
+		Map<String, Object> result = service.getDefense(1L);
+
+		assertNull(result.get("supervisorName"));
+	}
+
+	@Test
+	void getDefense_withNullJuryTeacher_skipsMember() {
+		Project project = new Project();
+		project.setId(10L);
+		project.setTitle("Projet Test");
+
+		JuryMember member = new JuryMember();
+		member.setTeacher(null);
+
+		Jury jury = new Jury();
+		jury.setMembers(List.of(member));
+
+		Group group = new Group();
+		group.setProject(project);
+		group.setStudents(List.of(student(1L)));
+
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+
+		Map<String, Object> result = service.getDefense(1L);
+
+		assertTrue(((List<?>) result.get("juryMembers")).isEmpty());
+	}
+
+	@Test
+	void getDefense_withNullRoom_returnsEmptyRoomName() {
+		Project project = new Project();
+		project.setId(10L);
+		project.setTitle("Projet Test");
+
+		Group group = new Group();
+		group.setProject(project);
+		group.setStudents(List.of(student(1L)));
+
+		SlotAssignment slot = new SlotAssignment();
+		slot.setProjectId(10L);
+		slot.setRoom(null);
+
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
+		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+
+		Map<String, Object> result = service.getDefense(1L);
+
+		assertEquals("", result.get("roomName"));
+	}
+
+	@Test
+	void findGroupForStudent_withNullStudents_returnsNull() {
+		Group group = new Group();
+		group.setStudents(null);
+
+		when(groupRepository.findAll()).thenReturn(List.of(group));
+
+		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
 	}
 
 	@Test

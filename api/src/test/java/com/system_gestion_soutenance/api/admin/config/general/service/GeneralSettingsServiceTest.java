@@ -60,6 +60,22 @@ class GeneralSettingsServiceTest {
 	}
 
 	@Test
+	void update_withNullSetupCompleted_keepsExistingValue() {
+		GeneralSettings existing = new GeneralSettings();
+		existing.setId(1L);
+		existing.setSetupCompleted(true);
+		when(repository.findById(1L)).thenReturn(Optional.of(existing));
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		UpdateGeneralSettingsRequest request = new UpdateGeneralSettingsRequest("Name", null, "UTC", "DD/MM/YYYY",
+				null);
+
+		GeneralSettings result = service.update(request);
+
+		assertTrue(result.isSetupCompleted());
+	}
+
+	@Test
 	void update_withoutExistingSettings_createsNew() {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
 		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
