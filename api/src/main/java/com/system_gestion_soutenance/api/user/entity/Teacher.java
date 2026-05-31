@@ -4,14 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
 @DiscriminatorValue("TEACHER")
 @PrimaryKeyJoinColumn(name = "id")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class Teacher extends User {

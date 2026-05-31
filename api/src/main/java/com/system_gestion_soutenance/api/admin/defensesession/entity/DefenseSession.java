@@ -10,7 +10,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "defense_session")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class DefenseSession {

@@ -5,12 +5,14 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "coordinator_group")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Group {

@@ -7,7 +7,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "room")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
