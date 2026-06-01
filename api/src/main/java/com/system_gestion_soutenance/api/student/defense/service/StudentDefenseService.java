@@ -11,6 +11,7 @@ import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAss
 import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -27,10 +28,13 @@ public class StudentDefenseService {
 		this.slotAssignmentRepository = slotAssignmentRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public Map<String, Object> getDefense(Long studentId) {
-		Group group = findGroupForStudent(studentId);
-		if (group == null || group.getProject() == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucune soutenance trouvée pour cet étudiant");
+		Group group = groupRepository.findByStudentId(studentId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucune soutenance trouvée pour cet étudiant"));
+
+		if (group.getProject() == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucun projet associé à ce groupe");
 		}
 
 		Project project = group.getProject();
@@ -56,12 +60,7 @@ public class StudentDefenseService {
 		}
 		defense.put("juryMembers", juryMembers);
 
-		List<SlotAssignment> slots = new ArrayList<>();
-		for (SlotAssignment s : slotAssignmentRepository.findAll()) {
-			if (project.getId().equals(s.getProjectId())) {
-				slots.add(s);
-			}
-		}
+		List<SlotAssignment> slots = slotAssignmentRepository.findByProjectId(project.getId());
 		if (!slots.isEmpty()) {
 			SlotAssignment slot = slots.get(0);
 			defense.put("date", slot.getDate());
@@ -77,14 +76,5 @@ public class StudentDefenseService {
 		defense.put("result", null);
 
 		return defense;
-	}
-
-	private Group findGroupForStudent(Long studentId) {
-		for (Group g : groupRepository.findAll()) {
-			if (g.getStudents() != null && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-				return g;
-			}
-		}
-		return null;
 	}
 }

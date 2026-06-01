@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -29,14 +30,15 @@ public class StudentGroupService {
 		this.defenseSettingsRepository = defenseSettingsRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public Map<String, Object> getWorkspace(Long studentId) {
-		Group currentGroup = findGroupForStudent(studentId);
+		Group currentGroup = groupRepository.findByStudentId(studentId).orElse(null);
 
 		Map<String, Object> workspace = new LinkedHashMap<>();
 		workspace.put("currentGroup", currentGroup != null ? groupToDetails(currentGroup, studentId) : null);
 
 		List<Map<String, Object>> available = new ArrayList<>();
-		for (Group g : groupRepository.findAll()) {
+		for (Group g : groupRepository.findAllWithDetails()) {
 			if (currentGroup == null || !g.getId().equals(currentGroup.getId())) {
 				Map<String, Object> ag = new LinkedHashMap<>();
 				ag.put("id", g.getId());
@@ -57,8 +59,9 @@ public class StudentGroupService {
 		return workspace;
 	}
 
+	@Transactional
 	public Map<String, Object> createGroup(Long studentId) {
-		if (findGroupForStudent(studentId) != null) {
+		if (groupRepository.findByStudentId(studentId).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
 		}
 		if (!isCreationPeriodOpen()) {
@@ -77,8 +80,9 @@ public class StudentGroupService {
 		return groupToDetails(group, studentId);
 	}
 
+	@Transactional
 	public Map<String, Object> joinGroup(Long groupId, Long studentId) {
-		if (findGroupForStudent(studentId) != null) {
+		if (groupRepository.findByStudentId(studentId).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
 		}
 		if (!isCreationPeriodOpen()) {
@@ -101,15 +105,6 @@ public class StudentGroupService {
 		group = groupRepository.save(group);
 
 		return groupToDetails(group, studentId);
-	}
-
-	private Group findGroupForStudent(Long studentId) {
-		for (Group g : groupRepository.findAll()) {
-			if (g.getStudents() != null && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-				return g;
-			}
-		}
-		return null;
 	}
 
 	private Map<String, Object> groupToDetails(Group group, Long currentStudentId) {

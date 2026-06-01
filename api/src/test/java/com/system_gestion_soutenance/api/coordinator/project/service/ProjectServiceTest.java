@@ -42,7 +42,7 @@ class ProjectServiceTest {
 		when(project.getStatus()).thenReturn("pending");
 		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
-		when(projectRepository.findAll()).thenReturn(List.of(project));
+		when(projectRepository.findAllWithDetails()).thenReturn(List.of(project));
 
 		var result = service.findAll();
 
@@ -282,9 +282,7 @@ class ProjectServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
-		SlotAssignment slot = mock(SlotAssignment.class);
-		when(slot.getProjectId()).thenReturn(1L);
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.existsByProjectId(1L)).thenReturn(true);
 
 		assertThrows(ResponseStatusException.class, () -> service.delete(1L));
 	}

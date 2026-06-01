@@ -50,8 +50,9 @@ public class ScheduleService {
 		this.notificationRepository = notificationRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public Map<String, Map<String, Object>> getSchedule() {
-		List<SlotAssignment> slots = slotAssignmentRepository.findAll();
+		List<SlotAssignment> slots = slotAssignmentRepository.findAllWithRoom();
 		Map<String, Map<String, Object>> result = new LinkedHashMap<>();
 		for (SlotAssignment slot : slots) {
 			result.put(slot.getId().toString(), toResponse(slot));
@@ -87,11 +88,12 @@ public class ScheduleService {
 		return getSchedule();
 	}
 
+	@Transactional(readOnly = true)
 	public Map<String, Map<String, Object>> autoGenerate(Long defenseSessionId) {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
 
-		DefenseSettings settings = defenseSettingsRepository.findById(1L).orElseThrow(
+		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc().orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètres de soutenance non trouvés"));
 
 		List<Room> rooms = roomRepository.findAll();
@@ -104,9 +106,27 @@ public class ScheduleService {
 		int slotDuration = ds.getDefenseDuration();
 		int breakMinutes = ds.getBreakDuration();
 
-		List<Project> approvedProjects = projectRepository.findAll().stream()
-				.filter(p -> "approved".equals(p.getStatus()))
-				.filter(p -> !juryRepository.findByProjectId(p.getId()).isEmpty()).collect(Collectors.toList());
+		List<Project> allProjects = projectRepository.findAll();
+		Set<Long> projectsWithJuries = juryRepository.findAll().stream().map(jury -> jury.getProject().getId())
+				.collect(Collectors.toSet());
+
+		Map<Long, Integer> projectStudentCounts = new HashMap<>();
+		List<com.system_gestion_soutenance.api.coordinator.group.entity.Group> allGroups = groupRepository.findAll();
+
+		for (Project p : allProjects) {
+			int count = 0;
+			var projectGroups = allGroups.stream()
+					.filter(g -> g.getProject() != null && g.getProject().getId().equals(p.getId())).toList();
+			if (!projectGroups.isEmpty()) {
+				count = projectGroups.get(0).getStudents() != null ? projectGroups.get(0).getStudents().size() : 0;
+			} else if (p.getStudents() != null) {
+				count = p.getStudents().size();
+			}
+			projectStudentCounts.put(p.getId(), count);
+		}
+
+		List<Project> approvedProjects = allProjects.stream().filter(p -> "approved".equals(p.getStatus()))
+				.filter(p -> projectsWithJuries.contains(p.getId())).collect(Collectors.toList());
 
 		if (approvedProjects.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun projet approuvé avec jury");
@@ -125,8 +145,8 @@ public class ScheduleService {
 					LocalDate currentDate = current;
 					LocalTime currentTime = time;
 					approvedProjects.stream().filter(p -> !assignedProjects.contains(p.getId()))
-							.filter(p -> getStudentCountForProject(p.getId()) <= room.getCapacity()).findFirst()
-							.ifPresent(project -> {
+							.filter(p -> projectStudentCounts.getOrDefault(p.getId(), 0) <= room.getCapacity())
+							.findFirst().ifPresent(project -> {
 								String slotId = UUID.randomUUID().toString();
 								Map<String, Object> entry = new LinkedHashMap<>();
 								entry.put("id", slotId);
@@ -182,18 +202,6 @@ public class ScheduleService {
 		notification.setRead(false);
 		notification.setActionLink(actionLink);
 		notificationRepository.save(notification);
-	}
-
-	private int getStudentCountForProject(Long projectId) {
-		var groups = groupRepository.findByProjectId(projectId);
-		for (var g : groups) {
-			if (g.getStudents() != null && !g.getStudents().isEmpty())
-				return g.getStudents().size();
-		}
-		Project project = projectRepository.findById(projectId).orElse(null);
-		if (project != null && project.getStudents() != null)
-			return project.getStudents().size();
-		return 0;
 	}
 
 	private Long toLong(Object value) {

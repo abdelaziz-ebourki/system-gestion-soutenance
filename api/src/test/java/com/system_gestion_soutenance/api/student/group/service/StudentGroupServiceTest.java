@@ -35,7 +35,8 @@ class StudentGroupServiceTest {
 
 	@Test
 	void getWorkspace_withNullDefenseSettings_usesDefaults() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
 		Map<String, Object> result = service.getWorkspace(1L);
@@ -47,7 +48,8 @@ class StudentGroupServiceTest {
 
 	@Test
 	void getWorkspace_withDefenseSettings_returnsDates() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2025-01-01", "2025-12-31")));
 
@@ -59,7 +61,8 @@ class StudentGroupServiceTest {
 
 	@Test
 	void getWorkspace_noGroup_returnsAvailable() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
 		Map<String, Object> result = service.getWorkspace(1L);
@@ -77,7 +80,8 @@ class StudentGroupServiceTest {
 		group.setGroupName("Groupe Test");
 		group.setStudents(List.of(student));
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
 		Map<String, Object> result = service.getWorkspace(1L);
@@ -88,7 +92,7 @@ class StudentGroupServiceTest {
 
 	@Test
 	void createGroup_studentNotFound_throws() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
@@ -102,7 +106,7 @@ class StudentGroupServiceTest {
 		group.setId(10L);
 		group.setStudents(new ArrayList<>());
 
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
@@ -119,7 +123,7 @@ class StudentGroupServiceTest {
 		group.setGroupName("Groupe Test");
 		group.setStudents(null);
 
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
@@ -138,11 +142,7 @@ class StudentGroupServiceTest {
 		group.setId(10L);
 		group.setStudents(new ArrayList<>(List.of(student)));
 
-		when(groupRepository.findAll()).thenReturn(List.of());
-		when(defenseSettingsRepository.findById(1L))
-				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
-		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
 		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
 	}
@@ -150,7 +150,7 @@ class StudentGroupServiceTest {
 	@Test
 	void createGroup_success() {
 		Student student = student(1L, "Alice", "Test");
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
@@ -165,14 +165,14 @@ class StudentGroupServiceTest {
 	void createGroup_alreadyInGroup_throws() {
 		Group group = new Group();
 		group.setStudents(List.of(student(1L, "A", "B")));
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
 		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
 	void createGroup_creationClosed_throws() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
 		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
@@ -186,7 +186,7 @@ class StudentGroupServiceTest {
 		group.setGroupName("Groupe Test");
 		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "Test"))));
 
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
@@ -202,7 +202,7 @@ class StudentGroupServiceTest {
 	void joinGroup_alreadyInGroup_throws() {
 		Group group = new Group();
 		group.setStudents(List.of(student(1L, "A", "B")));
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
 		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
 	}
@@ -216,7 +216,8 @@ class StudentGroupServiceTest {
 		group.setStudents(List.of(student));
 		group.setProject(null);
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
 		Map<String, Object> result = service.getWorkspace(1L);
@@ -229,7 +230,7 @@ class StudentGroupServiceTest {
 
 	@Test
 	void joinGroup_groupNotFound_throws() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(groupRepository.findById(99L)).thenReturn(Optional.empty());

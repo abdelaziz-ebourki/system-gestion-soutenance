@@ -8,4 +8,6 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
 	List<Evaluation> findByTeacherId(Long teacherId);
 
 	List<Evaluation> findByProjectId(Long projectId);
+
+	List<Evaluation> findByProjectIdIn(List<Long> projectIds);
 }

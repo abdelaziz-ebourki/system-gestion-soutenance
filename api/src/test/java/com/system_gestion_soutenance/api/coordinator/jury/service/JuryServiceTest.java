@@ -54,7 +54,7 @@ class JuryServiceTest {
 		when(jury.getTemplateName()).thenReturn("Template Standard");
 		when(jury.getMembers()).thenReturn(List.of(member));
 
-		when(juryRepository.findAll()).thenReturn(List.of(jury));
+		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
 
 		var result = service.findAll();
 

@@ -16,6 +16,7 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +41,7 @@ class StudentDefenseServiceTest {
 
 	@Test
 	void getDefense_noGroup_throws() {
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
 	}
 
@@ -48,7 +49,7 @@ class StudentDefenseServiceTest {
 	void getDefense_noProject_throws() {
 		Group group = new Group();
 		group.setStudents(List.of(student(1L)));
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
 	}
 
@@ -73,9 +74,9 @@ class StudentDefenseServiceTest {
 		slot.setDate("2026-06-15");
 		slot.setTime("09:00");
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of(slot));
 
 		Map<String, Object> result = service.getDefense(1L);
 
@@ -97,9 +98,9 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
 		Map<String, Object> result = service.getDefense(1L);
 
@@ -122,9 +123,9 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
 		Map<String, Object> result = service.getDefense(1L);
 
@@ -145,9 +146,9 @@ class StudentDefenseServiceTest {
 		slot.setProjectId(10L);
 		slot.setRoom(null);
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of(slot));
 
 		Map<String, Object> result = service.getDefense(1L);
 
@@ -159,7 +160,7 @@ class StudentDefenseServiceTest {
 		Group group = new Group();
 		group.setStudents(null);
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
 		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
 	}
@@ -175,9 +176,9 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
 		Map<String, Object> result = service.getDefense(1L);
 

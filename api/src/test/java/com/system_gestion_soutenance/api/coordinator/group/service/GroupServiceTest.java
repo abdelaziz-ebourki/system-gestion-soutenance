@@ -31,7 +31,7 @@ class GroupServiceTest {
 		when(group.getProject()).thenReturn(null);
 		when(group.getStudents()).thenReturn(List.of());
 		when(group.getSessionId()).thenReturn(null);
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 
 		var result = service.findAll();
 
@@ -107,7 +107,7 @@ class GroupServiceTest {
 		when(group.getProject()).thenReturn(null);
 		when(group.getStudents()).thenReturn(null);
 		when(group.getSessionId()).thenReturn(null);
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 
 		var result = service.findAll();
 

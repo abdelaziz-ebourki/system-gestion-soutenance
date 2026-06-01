@@ -12,7 +12,9 @@ import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAss
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CoordinatorGradeService {
@@ -33,17 +35,52 @@ public class CoordinatorGradeService {
 		this.slotAssignmentRepository = slotAssignmentRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public List<Map<String, Object>> getGrades() {
+		List<Jury> juries = juryRepository.findAllWithDetails();
+		if (juries.isEmpty())
+			return List.of();
+
+		List<Long> projectIds = juries.stream().map(j -> j.getProject().getId()).collect(Collectors.toList());
+
+		List<Evaluation> allEvaluations = evaluationRepository.findByProjectIdIn(projectIds);
+		Map<Long, List<Evaluation>> evaluationsByProject = allEvaluations != null
+				? allEvaluations.stream().collect(Collectors.groupingBy(Evaluation::getProjectId))
+				: Map.of();
+
+		List<SlotAssignment> allSlots = slotAssignmentRepository.findByProjectIdIn(projectIds);
+		Map<Long, String> datesByProject = allSlots != null
+				? allSlots.stream()
+						.collect(Collectors.toMap(SlotAssignment::getProjectId, SlotAssignment::getDate, (a, b) -> a))
+				: Map.of();
+
+		Map<Long, Long> sessionIdsByProject = new HashMap<>();
+		Set<Long> sessionIdsToFetch = new HashSet<>();
+
+		for (Jury jury : juries) {
+			Long pid = jury.getProject().getId();
+			List<Evaluation> evals = evaluationsByProject.getOrDefault(pid, List.of());
+			Long sid = resolveDefenseSessionId(pid, evals);
+			if (sid != null) {
+				sessionIdsByProject.put(pid, sid);
+				sessionIdsToFetch.add(sid);
+			}
+		}
+
+		Map<Long, Map<String, Integer>> coefficientsBySession = defenseSessionRepository.findAllById(sessionIdsToFetch)
+				.stream().collect(Collectors.toMap(DefenseSession::getId, DefenseSession::getEvaluationCoefficients));
+
 		List<Map<String, Object>> grades = new ArrayList<>();
-
-		for (Jury jury : juryRepository.findAll()) {
+		for (Jury jury : juries) {
 			Long projectId = jury.getProject().getId();
-			List<Evaluation> evaluations = evaluationRepository.findByProjectId(projectId);
+			List<Evaluation> evaluations = evaluationsByProject.getOrDefault(projectId, List.of());
+			System.out.println("Project: " + projectId + ", Evaluations: " + evaluations.size());
 
-			Long defenseSessionId = resolveDefenseSessionId(projectId, evaluations);
-			Map<String, Integer> coefficients = resolveCoefficients(defenseSessionId);
+			Long defenseSessionId = sessionIdsByProject.get(projectId);
+			Map<String, Integer> coefficients = coefficientsBySession.getOrDefault(defenseSessionId, Map.of());
+			System.out.println("Session: " + defenseSessionId + ", Coefficients: " + coefficients);
 
-			String defenseDate = findDefenseDate(projectId);
+			String defenseDate = datesByProject.get(projectId);
 
 			List<Map<String, Object>> individualScores = buildIndividualScores(jury.getMembers(), evaluations);
 
@@ -51,6 +88,7 @@ public class CoordinatorGradeService {
 			Double finalScore = status.equals("completed")
 					? computeWeightedScore(jury.getMembers(), evaluations, coefficients)
 					: null;
+			System.out.println("Status: " + status + ", Final Score: " + finalScore);
 
 			Map<String, Object> entry = new LinkedHashMap<>();
 			entry.put("projectId", projectId);
@@ -72,22 +110,6 @@ public class CoordinatorGradeService {
 		}
 		return groupRepository.findByProjectId(projectId).stream().map(Group::getSessionId).filter(Objects::nonNull)
 				.findFirst().orElse(null);
-	}
-
-	private Map<String, Integer> resolveCoefficients(Long defenseSessionId) {
-		if (defenseSessionId == null)
-			return Map.of();
-		return defenseSessionRepository.findById(defenseSessionId).map(DefenseSession::getEvaluationCoefficients)
-				.orElse(Map.of());
-	}
-
-	private String findDefenseDate(Long projectId) {
-		for (SlotAssignment slot : slotAssignmentRepository.findAll()) {
-			if (projectId.equals(slot.getProjectId())) {
-				return slot.getDate();
-			}
-		}
-		return null;
 	}
 
 	private List<Map<String, Object>> buildIndividualScores(List<JuryMember> members, List<Evaluation> evaluations) {

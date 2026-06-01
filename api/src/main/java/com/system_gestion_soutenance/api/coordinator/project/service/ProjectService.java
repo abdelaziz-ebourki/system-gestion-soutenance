@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -37,10 +38,12 @@ public class ProjectService {
 		this.slotAssignmentRepository = slotAssignmentRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public List<Map<String, Object>> findAll() {
-		return projectRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+		return projectRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
 	}
 
+	@Transactional
 	public Map<String, Object> create(CreateProjectRequest request) {
 		Teacher supervisor = teacherRepository.findById(request.supervisorId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Encadrant introuvable"));
@@ -61,6 +64,7 @@ public class ProjectService {
 		return toResponse(projectRepository.save(project));
 	}
 
+	@Transactional
 	public Map<String, Object> update(Long id, Map<String, Object> updates) {
 		Project project = projectRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé"));
@@ -90,6 +94,7 @@ public class ProjectService {
 		return toResponse(projectRepository.save(project));
 	}
 
+	@Transactional
 	public void delete(Long id) {
 		Project project = projectRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé"));
@@ -102,7 +107,7 @@ public class ProjectService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"Impossible de supprimer ce projet car des groupes y sont rattachés");
 		}
-		if (slotAssignmentRepository.findAll().stream().anyMatch(s -> project.getId().equals(s.getProjectId()))) {
+		if (slotAssignmentRepository.existsByProjectId(id)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"Impossible de supprimer ce projet car des soutenances sont planifiées");
 		}

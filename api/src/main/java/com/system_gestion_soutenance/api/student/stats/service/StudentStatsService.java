@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StudentStatsService {
@@ -24,24 +25,16 @@ public class StudentStatsService {
 		this.slotAssignmentRepository = slotAssignmentRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public Map<String, Object> getStats(Long studentId) {
 		List<StudentDocument> docs = documentRepository.findByStudentId(studentId);
 		long missing = docs.stream().filter(d -> "missing".equals(d.getStatus())).count();
 
-		Long projectId = null;
-		int groupMembers = 0;
-		for (Group g : groupRepository.findAll()) {
-			if (g.getStudents() != null && g.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-				groupMembers = g.getStudents().size();
-				if (g.getProject() != null)
-					projectId = g.getProject().getId();
-				break;
-			}
-		}
+		Group group = groupRepository.findByStudentId(studentId).orElse(null);
+		int groupMembers = group != null ? group.getStudents().size() : 0;
+		Long projectId = (group != null && group.getProject() != null) ? group.getProject().getId() : null;
 
-		final Long pid = projectId;
-		boolean hasSchedule = pid != null
-				&& slotAssignmentRepository.findAll().stream().anyMatch(s -> pid.equals(s.getProjectId()));
+		boolean hasSchedule = projectId != null && slotAssignmentRepository.existsByProjectId(projectId);
 
 		Map<String, Object> stats = new HashMap<>();
 		stats.put("documentCount", docs.size());

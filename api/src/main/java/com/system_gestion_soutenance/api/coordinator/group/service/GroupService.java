@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -27,10 +28,12 @@ public class GroupService {
 		this.studentRepository = studentRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public List<Map<String, Object>> findAll() {
-		return groupRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+		return groupRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
 	}
 
+	@Transactional
 	public Map<String, Object> create(CreateGroupRequest request) {
 		Project project = projectRepository.findById(request.projectId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
@@ -49,6 +52,7 @@ public class GroupService {
 		return toResponse(groupRepository.save(group));
 	}
 
+	@Transactional
 	public void delete(Long id) {
 		if (!groupRepository.existsById(id)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé");

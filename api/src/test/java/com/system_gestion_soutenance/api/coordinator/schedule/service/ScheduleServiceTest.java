@@ -52,7 +52,7 @@ class ScheduleServiceTest {
 		when(slot.getProjectId()).thenReturn(5L);
 		when(slot.getRoom()).thenReturn(room);
 
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(slot));
 
 		var result = service.getSchedule();
 
@@ -62,7 +62,7 @@ class ScheduleServiceTest {
 
 	@Test
 	void getSchedule_noSlots_returnsEmpty() {
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of());
 
 		assertTrue(service.getSchedule().isEmpty());
 	}
@@ -82,7 +82,7 @@ class ScheduleServiceTest {
 		when(savedSlot.getRoom()).thenReturn(room);
 
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
 		Map<String, Object> slotData = new LinkedHashMap<>();
 		slotData.put("title", "Slot 1");
@@ -110,7 +110,7 @@ class ScheduleServiceTest {
 		when(savedSlot.getRoom()).thenReturn(null);
 
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
 		Map<String, Object> slotData = new LinkedHashMap<>();
 		slotData.put("title", "Slot 1");
@@ -135,7 +135,7 @@ class ScheduleServiceTest {
 		when(savedSlot.getRoom()).thenReturn(null);
 
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
 		Map<String, Object> slotData = new LinkedHashMap<>();
 		slotData.put("title", "Slot 1");
@@ -208,11 +208,14 @@ class ScheduleServiceTest {
 		settings.setStartTime("09:00");
 		settings.setEndTime("10:00");
 
+		Jury jury = mock(Jury.class);
+		when(jury.getProject()).thenReturn(project);
+
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(room));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
+		when(juryRepository.findAll()).thenReturn(List.of(jury));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(emptyGroup));
 
 		var result = service.autoGenerate(1L);
@@ -285,11 +288,14 @@ class ScheduleServiceTest {
 		when(group.getStudents())
 				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
 
+		Jury jury = mock(Jury.class);
+		when(jury.getProject()).thenReturn(project);
+
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(room));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
+		when(juryRepository.findAll()).thenReturn(List.of(jury));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
 		var result = service.autoGenerate(1L);
@@ -340,7 +346,7 @@ class ScheduleServiceTest {
 		when(savedSlot.getRoom()).thenReturn(null);
 
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(savedSlot));
+		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
 		Map<String, Object> slotData = new LinkedHashMap<>();
 		slotData.put("title", "Slot 1");

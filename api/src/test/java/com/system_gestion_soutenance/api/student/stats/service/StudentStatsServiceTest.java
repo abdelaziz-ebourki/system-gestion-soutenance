@@ -13,6 +13,7 @@ import com.system_gestion_soutenance.api.student.document.repository.StudentDocu
 import com.system_gestion_soutenance.api.user.entity.Student;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,12 +47,9 @@ class StudentStatsServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L), student(2L)));
 
-		SlotAssignment slot = new SlotAssignment();
-		slot.setProjectId(10L);
-
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc1, doc2));
-		when(groupRepository.findAll()).thenReturn(List.of(group));
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(slotAssignmentRepository.existsByProjectId(10L)).thenReturn(true);
 
 		Map<String, Object> result = service.getStats(1L);
 
@@ -71,7 +69,7 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc));
-		when(groupRepository.findAll()).thenReturn(List.of(group));
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
 		Map<String, Object> result = service.getStats(1L);
 
@@ -89,8 +87,8 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-		when(groupRepository.findAll()).thenReturn(List.of(group));
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(slotAssignmentRepository.existsByProjectId(10L)).thenReturn(false);
 
 		Map<String, Object> result = service.getStats(1L);
 
@@ -100,7 +98,7 @@ class StudentStatsServiceTest {
 	@Test
 	void getStats_noGroup_returnsZeroMembers() {
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-		when(groupRepository.findAll()).thenReturn(List.of());
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 
 		Map<String, Object> result = service.getStats(1L);
 

@@ -33,8 +33,9 @@ public class JuryService {
 		this.juryRoleTemplateRepository = juryRoleTemplateRepository;
 	}
 
+	@Transactional(readOnly = true)
 	public List<Map<String, Object>> findAll() {
-		return juryRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+		return juryRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
 	}
 
 	@Transactional
@@ -104,6 +105,7 @@ public class JuryService {
 		return toResponse(juryRepository.save(jury));
 	}
 
+	@Transactional
 	public void delete(Long id) {
 		if (!juryRepository.existsById(id)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jury non trouvé");
