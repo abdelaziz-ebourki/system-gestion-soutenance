@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.notification.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
@@ -34,6 +35,8 @@ class NotificationControllerTest {
 
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.notification.service.NotificationService notificationService;
 	@MockitoBean
 	private com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper appNotificationMapper;
 
@@ -86,5 +89,12 @@ class NotificationControllerTest {
 			var notifications = (List<AppNotification>) list;
 			return notifications.stream().allMatch(AppNotification::isRead);
 		}));
+	}
+
+	@Test
+	void sendEmail_returns204() throws Exception {
+		mockMvc.perform(post("/api/notifications/1/send-email")).andExpect(status().isNoContent());
+
+		verify(notificationService).sendNotificationEmail(1L);
 	}
 }

@@ -3,9 +3,12 @@ package com.system_gestion_soutenance.api.notification.controller;
 import com.system_gestion_soutenance.api.notification.dto.AppNotificationDto;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
+import com.system_gestion_soutenance.api.notification.service.NotificationService;
 import com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +20,12 @@ public class NotificationController {
 
 	private final NotificationRepository repository;
 	private final AppNotificationMapper mapper;
+	private final NotificationService notificationService;
 
-	public NotificationController(NotificationRepository repository, AppNotificationMapper mapper) {
+	public NotificationController(NotificationRepository repository, AppNotificationMapper mapper, NotificationService notificationService) {
 		this.repository = repository;
 		this.mapper = mapper;
+		this.notificationService = notificationService;
 	}
 
 	@GetMapping
@@ -47,6 +52,14 @@ public class NotificationController {
 			n.setRead(true);
 		}
 		repository.saveAll(all);
+		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/{id}/send-email")
+	@PreAuthorize("hasAnyRole('ADMIN', 'COORDINATOR')")
+	@Operation(summary = "Manually trigger email delivery for a notification")
+	public ResponseEntity<Void> sendEmail(@PathVariable Long id) {
+		notificationService.sendNotificationEmail(id);
 		return ResponseEntity.noContent().build();
 	}
 }
