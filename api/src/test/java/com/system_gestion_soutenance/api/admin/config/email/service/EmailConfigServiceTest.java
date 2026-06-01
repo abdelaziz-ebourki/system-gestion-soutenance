@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import com.system_gestion_soutenance.api.admin.config.email.dto.UpdateEmailConfigRequest;
 import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
 import com.system_gestion_soutenance.api.admin.config.email.repository.EmailConfigRepository;
+import com.system_gestion_soutenance.api.common.util.EncryptionUtil;
+import com.system_gestion_soutenance.api.notification.service.EmailService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,10 @@ class EmailConfigServiceTest {
 
 	@Mock
 	private EmailConfigRepository repository;
+	@Mock
+	private EncryptionUtil encryptionUtil;
+	@Mock
+	private EmailService emailService;
 	@InjectMocks
 	private EmailConfigService service;
 
@@ -37,17 +43,20 @@ class EmailConfigServiceTest {
 	}
 
 	@Test
-	void update_existing_updatesFields() {
+	void update_existing_updatesFieldsAndEncryptsPassword() {
 		EmailConfig existing = new EmailConfig();
 		existing.setId(1L);
 		when(repository.findById(1L)).thenReturn(Optional.of(existing));
 		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(encryptionUtil.encrypt("new-pass")).thenReturn("encrypted-new-pass");
 
 		UpdateEmailConfigRequest req = new UpdateEmailConfigRequest("new.host.com", 587, "user", "new-pass", "Sender",
 				"s@s.com", "tls");
 		EmailConfig result = service.update(req);
 
 		assertEquals("new.host.com", result.getHost());
+		assertEquals("encrypted-new-pass", result.getPassword());
+		verify(emailService).reconfigure();
 	}
 
 	@Test
@@ -62,5 +71,22 @@ class EmailConfigServiceTest {
 		EmailConfig result = service.update(req);
 
 		assertEquals("old-pass", result.getPassword());
+		verifyNoInteractions(encryptionUtil);
+		verify(emailService).reconfigure();
+	}
+
+	@Test
+	void update_createsNewWhenMissing() {
+		when(repository.findById(1L)).thenReturn(Optional.empty());
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(encryptionUtil.encrypt("secret")).thenReturn("encrypted-secret");
+
+		UpdateEmailConfigRequest req = new UpdateEmailConfigRequest("smtp.example.com", 587, "", "secret", "Sender",
+				"s@s.com", "none");
+		EmailConfig result = service.update(req);
+
+		assertEquals("smtp.example.com", result.getHost());
+		assertEquals("encrypted-secret", result.getPassword());
+		verify(emailService).reconfigure();
 	}
 }

@@ -3,17 +3,25 @@ package com.system_gestion_soutenance.api.admin.config.email.service;
 import com.system_gestion_soutenance.api.admin.config.email.dto.UpdateEmailConfigRequest;
 import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
 import com.system_gestion_soutenance.api.admin.config.email.repository.EmailConfigRepository;
+import com.system_gestion_soutenance.api.common.util.EncryptionUtil;
+import com.system_gestion_soutenance.api.notification.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EmailConfigService {
 
 	private final EmailConfigRepository repository;
+	private final EncryptionUtil encryptionUtil;
+	private final EmailService emailService;
 
-	public EmailConfigService(EmailConfigRepository repository) {
+	public EmailConfigService(EmailConfigRepository repository, EncryptionUtil encryptionUtil,
+			EmailService emailService) {
 		this.repository = repository;
+		this.encryptionUtil = encryptionUtil;
+		this.emailService = emailService;
 	}
 
 	public EmailConfig get() {
@@ -21,6 +29,7 @@ public class EmailConfigService {
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Configuration email non trouvée"));
 	}
 
+	@Transactional
 	public EmailConfig update(UpdateEmailConfigRequest updates) {
 		EmailConfig config = repository.findById(1L).orElse(new EmailConfig());
 
@@ -28,12 +37,14 @@ public class EmailConfigService {
 		config.setPort(updates.port());
 		config.setUsername(updates.username());
 		if (updates.password() != null)
-			config.setPassword(updates.password());
+			config.setPassword(encryptionUtil.encrypt(updates.password()));
 		config.setSenderName(updates.senderName());
 		config.setSenderEmail(updates.senderEmail());
 		config.setEncryption(updates.encryption());
 
 		config.setId(1L);
-		return repository.save(config);
+		EmailConfig saved = repository.save(config);
+		emailService.reconfigure();
+		return saved;
 	}
 }
