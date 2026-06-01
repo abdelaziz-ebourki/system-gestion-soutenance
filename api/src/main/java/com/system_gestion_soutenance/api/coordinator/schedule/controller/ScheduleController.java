@@ -36,7 +36,7 @@ public class ScheduleController {
 	public ResponseEntity<?> save(@RequestBody Map<String, Object> body) {
 		Object raw = body.get("schedule");
 		if (raw == null) {
-			throw new IllegalArgumentException("Le champ 'schedule' est requis");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le champ 'schedule' est requis");
 		}
 		String defenseSessionId = (String) body.get("defenseSessionId");
 		Map<String, Map<String, Object>> schedule = (Map<String, Map<String, Object>>) raw;

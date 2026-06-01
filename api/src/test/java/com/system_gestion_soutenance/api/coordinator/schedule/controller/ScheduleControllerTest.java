@@ -130,9 +130,9 @@ class ScheduleControllerTest {
 	}
 
 	@Test
-	void save_missingSchedule_throwsBadRequest() {
-		org.junit.jupiter.api.Assertions.assertThrows(Exception.class,
-				() -> mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1")))));
+	void save_missingSchedule_throwsBadRequest() throws Exception {
+		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1"))))
+				.andExpect(status().isBadRequest());
 	}
 }
