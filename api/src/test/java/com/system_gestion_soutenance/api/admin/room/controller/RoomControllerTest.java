@@ -36,10 +36,8 @@ class RoomControllerTest {
 
 	@Test
 	void findAll_returnsPaginated() throws Exception {
-		when(roomService.findAll(0, 10))
-				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
-		mockMvc.perform(get("/api/admin/rooms")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.items").isArray());
+		when(roomService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
+		mockMvc.perform(get("/api/admin/rooms")).andExpect(status().isOk()).andExpect(jsonPath("$.items").isArray());
 	}
 
 	@Test

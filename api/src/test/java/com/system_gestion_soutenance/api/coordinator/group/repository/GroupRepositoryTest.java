@@ -23,140 +23,140 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 @DataJpaTest
 class GroupRepositoryTest {
 
-    @Autowired
-    private GroupRepository repository;
+	@Autowired
+	private GroupRepository repository;
 
-    @Autowired
-    private TestEntityManager em;
+	@Autowired
+	private TestEntityManager em;
 
-    private Teacher savedTeacher;
-    private Student savedStudent;
+	private Teacher savedTeacher;
+	private Student savedStudent;
 
-    @BeforeEach
-    void setUp() {
-        Faculty faculty = new Faculty();
-        faculty.setName("FS");
-        faculty.setCode("FS");
-        em.persist(faculty);
+	@BeforeEach
+	void setUp() {
+		Faculty faculty = new Faculty();
+		faculty.setName("FS");
+		faculty.setCode("FS");
+		em.persist(faculty);
 
-        Department department = new Department();
-        department.setName("Informatique");
-        department.setCode("INFO");
-        department.setFaculty(faculty);
-        em.persist(department);
+		Department department = new Department();
+		department.setName("Informatique");
+		department.setCode("INFO");
+		department.setFaculty(faculty);
+		em.persist(department);
 
-        Grade grade = new Grade();
-        grade.setName("Professeur");
-        em.persist(grade);
+		Grade grade = new Grade();
+		grade.setName("Professeur");
+		em.persist(grade);
 
-        Major major = new Major();
-        major.setName("Génie Info");
-        em.persist(major);
+		Major major = new Major();
+		major.setName("Génie Info");
+		em.persist(major);
 
-        Level level = new Level();
-        level.setName("Master 2");
-        em.persist(level);
+		Level level = new Level();
+		level.setName("Master 2");
+		em.persist(level);
 
-        Teacher teacher = new Teacher();
-        teacher.setEmail("teacher@test.com");
-        teacher.setPassword("pass");
-        teacher.setRole(Role.TEACHER);
-        teacher.setLastName("Martin");
-        teacher.setFirstName("Jean");
-        teacher.setActive(true);
-        teacher.setGrade(grade);
-        teacher.setDepartment(department);
-        savedTeacher = em.persist(teacher);
+		Teacher teacher = new Teacher();
+		teacher.setEmail("teacher@test.com");
+		teacher.setPassword("pass");
+		teacher.setRole(Role.TEACHER);
+		teacher.setLastName("Martin");
+		teacher.setFirstName("Jean");
+		teacher.setActive(true);
+		teacher.setGrade(grade);
+		teacher.setDepartment(department);
+		savedTeacher = em.persist(teacher);
 
-        Student student = new Student();
-        student.setEmail("student@test.com");
-        student.setPassword("pass");
-        student.setRole(Role.STUDENT);
-        student.setLastName("Dupont");
-        student.setFirstName("Marie");
-        student.setActive(true);
-        student.setCne("CNE123");
-        student.setMajor(major);
-        student.setLevel(level);
-        savedStudent = em.persist(student);
-    }
+		Student student = new Student();
+		student.setEmail("student@test.com");
+		student.setPassword("pass");
+		student.setRole(Role.STUDENT);
+		student.setLastName("Dupont");
+		student.setFirstName("Marie");
+		student.setActive(true);
+		student.setCne("CNE123");
+		student.setMajor(major);
+		student.setLevel(level);
+		savedStudent = em.persist(student);
+	}
 
-    @Test
-    void findAllWithDetails_returnsGroupsWithProjectAndStudents() {
-        Project project = createProject("Projet A");
-        em.persist(project);
+	@Test
+	void findAllWithDetails_returnsGroupsWithProjectAndStudents() {
+		Project project = createProject("Projet A");
+		em.persist(project);
 
-        Group group = new Group();
-        group.setGroupName("Groupe 1");
-        group.setProject(project);
-        group.setStudents(List.of(savedStudent));
-        em.persist(group);
+		Group group = new Group();
+		group.setGroupName("Groupe 1");
+		group.setProject(project);
+		group.setStudents(List.of(savedStudent));
+		em.persist(group);
 
-        em.flush();
-        em.clear();
+		em.flush();
+		em.clear();
 
-        List<Group> result = repository.findAllWithDetails();
+		List<Group> result = repository.findAllWithDetails();
 
-        assertEquals(1, result.size());
-        assertNotNull(result.get(0).getProject());
-        assertEquals("Projet A", result.get(0).getProject().getTitle());
-        assertEquals(1, result.get(0).getStudents().size());
-    }
+		assertEquals(1, result.size());
+		assertNotNull(result.get(0).getProject());
+		assertEquals("Projet A", result.get(0).getProject().getTitle());
+		assertEquals(1, result.get(0).getStudents().size());
+	}
 
-    @Test
-    void findByStudentId_returnsGroup() {
-        Project project = createProject("Projet B");
-        em.persist(project);
+	@Test
+	void findByStudentId_returnsGroup() {
+		Project project = createProject("Projet B");
+		em.persist(project);
 
-        Group group = new Group();
-        group.setGroupName("Groupe 2");
-        group.setProject(project);
-        group.setStudents(List.of(savedStudent));
-        em.persist(group);
+		Group group = new Group();
+		group.setGroupName("Groupe 2");
+		group.setProject(project);
+		group.setStudents(List.of(savedStudent));
+		em.persist(group);
 
-        em.flush();
-        em.clear();
+		em.flush();
+		em.clear();
 
-        Optional<Group> result = repository.findByStudentId(savedStudent.getId());
+		Optional<Group> result = repository.findByStudentId(savedStudent.getId());
 
-        assertTrue(result.isPresent());
-        assertEquals("Groupe 2", result.get().getGroupName());
-    }
+		assertTrue(result.isPresent());
+		assertEquals("Groupe 2", result.get().getGroupName());
+	}
 
-    @Test
-    void findByStudentId_noMatch_returnsEmpty() {
-        Optional<Group> result = repository.findByStudentId(999L);
-        assertFalse(result.isPresent());
-    }
+	@Test
+	void findByStudentId_noMatch_returnsEmpty() {
+		Optional<Group> result = repository.findByStudentId(999L);
+		assertFalse(result.isPresent());
+	}
 
-    @Test
-    void findByProjectId_returnsGroups() {
-        Project project = createProject("Projet C");
-        em.persist(project);
+	@Test
+	void findByProjectId_returnsGroups() {
+		Project project = createProject("Projet C");
+		em.persist(project);
 
-        Group group = new Group();
-        group.setGroupName("Groupe 3");
-        group.setProject(project);
-        group.setStudents(List.of(savedStudent));
-        em.persist(group);
+		Group group = new Group();
+		group.setGroupName("Groupe 3");
+		group.setProject(project);
+		group.setStudents(List.of(savedStudent));
+		em.persist(group);
 
-        em.flush();
-        em.clear();
+		em.flush();
+		em.clear();
 
-        List<Group> result = repository.findByProjectId(project.getId());
+		List<Group> result = repository.findByProjectId(project.getId());
 
-        assertEquals(1, result.size());
-        assertEquals("Groupe 3", result.get(0).getGroupName());
-    }
+		assertEquals(1, result.size());
+		assertEquals("Groupe 3", result.get(0).getGroupName());
+	}
 
-    private Project createProject(String title) {
-        Project project = new Project();
-        project.setTitle(title);
-        project.setDescription("Description");
-        project.setDefenseType("PFE");
-        project.setStatus("pending");
-        project.setSupervisor(savedTeacher);
-        project.setStudents(List.of(savedStudent));
-        return project;
-    }
+	private Project createProject(String title) {
+		Project project = new Project();
+		project.setTitle(title);
+		project.setDescription("Description");
+		project.setDefenseType("PFE");
+		project.setStatus("pending");
+		project.setSupervisor(savedTeacher);
+		project.setStudents(List.of(savedStudent));
+		return project;
+	}
 }

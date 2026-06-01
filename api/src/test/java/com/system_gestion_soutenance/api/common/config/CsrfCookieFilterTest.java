@@ -14,33 +14,33 @@ import org.springframework.security.web.csrf.CsrfToken;
 @ExtendWith(MockitoExtension.class)
 class CsrfCookieFilterTest {
 
-    @Mock
-    private HttpServletRequest request;
-    @Mock
-    private HttpServletResponse response;
-    @Mock
-    private FilterChain filterChain;
-    @Mock
-    private CsrfToken csrfToken;
+	@Mock
+	private HttpServletRequest request;
+	@Mock
+	private HttpServletResponse response;
+	@Mock
+	private FilterChain filterChain;
+	@Mock
+	private CsrfToken csrfToken;
 
-    private final CsrfCookieFilter filter = new CsrfCookieFilter();
+	private final CsrfCookieFilter filter = new CsrfCookieFilter();
 
-    @Test
-    void whenTokenPresent_forcesTokenGenerationAndProceeds() throws Exception {
-        when(request.getAttribute(CsrfToken.class.getName())).thenReturn(csrfToken);
+	@Test
+	void whenTokenPresent_forcesTokenGenerationAndProceeds() throws Exception {
+		when(request.getAttribute(CsrfToken.class.getName())).thenReturn(csrfToken);
 
-        filter.doFilterInternal(request, response, filterChain);
+		filter.doFilterInternal(request, response, filterChain);
 
-        verify(csrfToken).getToken();
-        verify(filterChain).doFilter(request, response);
-    }
+		verify(csrfToken).getToken();
+		verify(filterChain).doFilter(request, response);
+	}
 
-    @Test
-    void whenTokenNull_proceedsWithoutError() throws Exception {
-        when(request.getAttribute(CsrfToken.class.getName())).thenReturn(null);
+	@Test
+	void whenTokenNull_proceedsWithoutError() throws Exception {
+		when(request.getAttribute(CsrfToken.class.getName())).thenReturn(null);
 
-        filter.doFilterInternal(request, response, filterChain);
+		filter.doFilterInternal(request, response, filterChain);
 
-        verify(filterChain).doFilter(request, response);
-    }
+		verify(filterChain).doFilter(request, response);
+	}
 }
