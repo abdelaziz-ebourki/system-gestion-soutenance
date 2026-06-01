@@ -3,11 +3,8 @@ package com.system_gestion_soutenance.api.admin.stats.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
-import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
-import com.system_gestion_soutenance.api.user.repository.StudentRepository;
-import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,25 +16,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class StatsServiceTest {
 
 	@Mock
-	private StudentRepository studentRepository;
+	private EntityManager entityManager;
 	@Mock
-	private TeacherRepository teacherRepository;
-	@Mock
-	private DepartmentRepository departmentRepository;
-	@Mock
-	private RoomRepository roomRepository;
-	@Mock
-	private DefenseSessionRepository defenseSessionRepository;
+	private Query query;
 	@InjectMocks
 	private StatsService statsService;
 
 	@Test
 	void getStats_returnsAllCounts() {
-		when(studentRepository.count()).thenReturn(100L);
-		when(teacherRepository.count()).thenReturn(20L);
-		when(departmentRepository.count()).thenReturn(5L);
-		when(roomRepository.count()).thenReturn(15L);
-		when(defenseSessionRepository.count()).thenReturn(3L);
+		when(entityManager.createNativeQuery(anyString())).thenReturn(query);
+		when(query.getSingleResult()).thenReturn(new Object[]{100L, 20L, 5L, 15L, 3L});
 
 		Map<String, Object> stats = statsService.getStats();
 

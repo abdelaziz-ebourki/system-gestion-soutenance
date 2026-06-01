@@ -1,10 +1,7 @@
 package com.system_gestion_soutenance.api.admin.stats.service;
 
-import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
-import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
-import com.system_gestion_soutenance.api.user.repository.StudentRepository;
-import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -14,29 +11,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class StatsService {
 
-	private final StudentRepository studentRepository;
-	private final TeacherRepository teacherRepository;
-	private final DepartmentRepository departmentRepository;
-	private final RoomRepository roomRepository;
-	private final DefenseSessionRepository defenseSessionRepository;
+	private final EntityManager entityManager;
 
-	public StatsService(StudentRepository studentRepository, TeacherRepository teacherRepository,
-			DepartmentRepository departmentRepository, RoomRepository roomRepository,
-			DefenseSessionRepository defenseSessionRepository) {
-		this.studentRepository = studentRepository;
-		this.teacherRepository = teacherRepository;
-		this.departmentRepository = departmentRepository;
-		this.roomRepository = roomRepository;
-		this.defenseSessionRepository = defenseSessionRepository;
+	public StatsService(EntityManager entityManager) {
+		this.entityManager = entityManager;
 	}
 
 	public Map<String, Object> getStats() {
+		Query query = entityManager.createNativeQuery("""
+				SELECT
+				  (SELECT COUNT(*) FROM users WHERE dtype = 'STUDENT') AS total_students,
+				  (SELECT COUNT(*) FROM users WHERE dtype = 'TEACHER') AS total_teachers,
+				  (SELECT COUNT(*) FROM department) AS total_departments,
+				  (SELECT COUNT(*) FROM room) AS total_rooms,
+				  (SELECT COUNT(*) FROM defense_session) AS total_defense_sessions
+				""");
+
+		Object[] row = (Object[]) query.getSingleResult();
+
 		Map<String, Object> stats = new HashMap<>();
-		stats.put("totalStudents", studentRepository.count());
-		stats.put("totalTeachers", teacherRepository.count());
-		stats.put("totalDepartments", departmentRepository.count());
-		stats.put("totalRooms", roomRepository.count());
-		stats.put("totalDefenseSessions", defenseSessionRepository.count());
+		stats.put("totalStudents", row[0]);
+		stats.put("totalTeachers", row[1]);
+		stats.put("totalDepartments", row[2]);
+		stats.put("totalRooms", row[3]);
+		stats.put("totalDefenseSessions", row[4]);
 		return stats;
 	}
 }

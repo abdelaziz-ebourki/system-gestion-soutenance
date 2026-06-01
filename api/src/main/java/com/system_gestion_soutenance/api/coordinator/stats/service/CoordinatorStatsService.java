@@ -1,9 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.stats.service;
 
-import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
-import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -11,25 +9,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class CoordinatorStatsService {
 
-	private final ProjectRepository projectRepository;
-	private final GroupRepository groupRepository;
-	private final JuryRepository juryRepository;
-	private final DefenseSessionRepository defenseSessionRepository;
+	private final EntityManager entityManager;
 
-	public CoordinatorStatsService(ProjectRepository projectRepository, GroupRepository groupRepository,
-			JuryRepository juryRepository, DefenseSessionRepository defenseSessionRepository) {
-		this.projectRepository = projectRepository;
-		this.groupRepository = groupRepository;
-		this.juryRepository = juryRepository;
-		this.defenseSessionRepository = defenseSessionRepository;
+	public CoordinatorStatsService(EntityManager entityManager) {
+		this.entityManager = entityManager;
 	}
 
 	public Map<String, Object> getStats() {
+		Query query = entityManager.createNativeQuery("""
+				SELECT
+				  (SELECT COUNT(*) FROM project) AS total_projects,
+				  (SELECT COUNT(*) FROM coordinator_group) AS total_groups,
+				  (SELECT COUNT(*) FROM jury) AS total_juries,
+				  (SELECT COUNT(*) FROM defense_session) AS scheduled_defenses
+				""");
+
+		Object[] row = (Object[]) query.getSingleResult();
+
 		Map<String, Object> stats = new HashMap<>();
-		stats.put("totalProjects", projectRepository.count());
-		stats.put("totalGroups", groupRepository.count());
-		stats.put("totalJuries", juryRepository.count());
-		stats.put("scheduledDefenses", defenseSessionRepository.count());
+		stats.put("totalProjects", row[0]);
+		stats.put("totalGroups", row[1]);
+		stats.put("totalJuries", row[2]);
+		stats.put("scheduledDefenses", row[3]);
 		return stats;
 	}
 }

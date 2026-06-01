@@ -36,4 +36,11 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
         <Class name="com.system_gestion_soutenance.api.common.audit.AuditAspect"/>
     </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.admin.stats.service.StatsService"/>
+            <Class name="com.system_gestion_soutenance.api.coordinator.stats.service.CoordinatorStatsService"/>
+        </Or>
+    </Match>
 </FindBugsFilter>

@@ -5,8 +5,10 @@ import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
+@BatchSize(size = 20)
 @Table(name = "department")
 @Getter
 @Setter

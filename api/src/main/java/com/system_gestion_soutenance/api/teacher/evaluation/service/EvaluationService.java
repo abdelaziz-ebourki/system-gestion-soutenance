@@ -47,9 +47,8 @@ public class EvaluationService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette évaluation a déjà été soumise");
 		}
 
-		DefenseSession ds = defenseSessionRepository.findById(evaluation.getDefenseSessionId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-						"Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(evaluation.getDefenseSessionId()).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
 
 		if (ds.getSubmissionDeadline() != null && LocalDate.now().isAfter(ds.getSubmissionDeadline())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
