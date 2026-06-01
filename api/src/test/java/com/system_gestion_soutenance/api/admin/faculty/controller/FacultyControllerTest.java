@@ -32,6 +32,8 @@ class FacultyControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.ConfigMapper configMapper;
 
 	private static Faculty createFaculty(Long id, String name, String code) {
 		Faculty f = new Faculty();
@@ -43,21 +45,30 @@ class FacultyControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(facultyService.findAll()).thenReturn(List.of(createFaculty(1L, "FS", "FS")));
+		Faculty faculty = createFaculty(1L, "FS", "FS");
+		when(facultyService.findAll()).thenReturn(List.of(faculty));
+		when(configMapper.toFacultyDto(faculty)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(get("/api/admin/faculties")).andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].name").value("FS"));
 	}
 
 	@Test
 	void findById_returns200() throws Exception {
-		when(facultyService.findById(1L)).thenReturn(createFaculty(1L, "FS", "FS"));
+		Faculty faculty = createFaculty(1L, "FS", "FS");
+		when(facultyService.findById(1L)).thenReturn(faculty);
+		when(configMapper.toFacultyDto(faculty)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(get("/api/admin/faculties/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value("FS"));
 	}
 
 	@Test
 	void create_returns201() throws Exception {
-		when(facultyService.create(any())).thenReturn(createFaculty(1L, "FS", "FS"));
+		Faculty faculty = createFaculty(1L, "FS", "FS");
+		when(facultyService.create(any())).thenReturn(faculty);
+		when(configMapper.toFacultyDto(faculty)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(post("/api/admin/faculties").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"FS\",\"code\":\"FS\"}")).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.name").value("FS"));
@@ -65,7 +76,10 @@ class FacultyControllerTest {
 
 	@Test
 	void update_returns200() throws Exception {
-		when(facultyService.update(anyLong(), any())).thenReturn(createFaculty(1L, "New", "N"));
+		Faculty faculty = createFaculty(1L, "New", "N");
+		when(facultyService.update(anyLong(), any())).thenReturn(faculty);
+		when(configMapper.toFacultyDto(faculty)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "New", "N", null, null));
 		mockMvc.perform(put("/api/admin/faculties/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"New\",\"code\":\"N\"}")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value("New"));

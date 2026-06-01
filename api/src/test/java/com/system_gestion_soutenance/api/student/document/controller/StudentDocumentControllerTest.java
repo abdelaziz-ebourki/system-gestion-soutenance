@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
+import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -37,6 +38,8 @@ class StudentDocumentControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper studentDocumentMapper;
 
 	@BeforeEach
 	void setUp() {
@@ -63,6 +66,10 @@ class StudentDocumentControllerTest {
 		doc.setId(1L);
 		doc.setStatus("submitted");
 		when(studentDocumentService.upload(anyLong(), any())).thenReturn(doc);
+
+		StudentDocumentDto dto = new StudentDocumentDto(1L, 1L, "test.pdf", "pdf", "2026-06-01", "submitted", null,
+				"/path/to/file");
+		when(studentDocumentMapper.toDto(doc)).thenReturn(dto);
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());
 		mockMvc.perform(multipart("/api/student/documents/1/upload").file(file)).andExpect(status().isOk())

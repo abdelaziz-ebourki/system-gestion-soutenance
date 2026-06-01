@@ -35,6 +35,8 @@ class UnavailabilityControllerTest {
 
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.UnavailabilityMapper unavailabilityMapper;
 
 	@BeforeEach
 	void setUp() {
@@ -51,6 +53,9 @@ class UnavailabilityControllerTest {
 	void findAll_returnsUnavailabilityRecords() throws Exception {
 		Unavailability record = new Unavailability(1L, 10L, "2025-06-01", List.of("08:00", "10:00"));
 		when(repository.findAll()).thenReturn(List.of(record));
+		when(unavailabilityMapper.toDto(record))
+				.thenReturn(new com.system_gestion_soutenance.api.coordinator.unavailability.dto.UnavailabilityDto(1L,
+						10L, "2025-06-01", List.of("08:00", "10:00")));
 
 		mockMvc.perform(get("/api/coordinator/unavailability")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].teacherId").value(10L))

@@ -32,6 +32,8 @@ class AuditLogControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.AuditLogMapper auditLogMapper;
 
 	@Test
 	void findAll_returnsPaginated() throws Exception {

@@ -43,6 +43,8 @@ class CoordinatorDefenseSessionControllerTest {
 
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.DefenseSessionMapper defenseSessionMapper;
 
 	@BeforeEach
 	void setUp() {
@@ -61,6 +63,9 @@ class CoordinatorDefenseSessionControllerTest {
 		ds.setId(1L);
 		ds.setName("Session 1");
 		when(service.findAll()).thenReturn(List.of(ds));
+		when(defenseSessionMapper.toDto(ds))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
+						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null));
 
 		mockMvc.perform(get("/api/coordinator/defense-sessions")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].name").value("Session 1"));
@@ -74,6 +79,9 @@ class CoordinatorDefenseSessionControllerTest {
 		ds.setId(1L);
 		ds.setName("Session PFE");
 		when(service.create(any())).thenReturn(ds);
+		when(defenseSessionMapper.toDto(ds))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
+						"Session PFE", "PFE", "CREATED", 3, 30, 15, null, null, null, null, null));
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -88,6 +96,9 @@ class CoordinatorDefenseSessionControllerTest {
 		ds.setId(1L);
 		ds.setName("Updated Session");
 		when(service.update(eq(1L), any())).thenReturn(ds);
+		when(defenseSessionMapper.toDto(ds))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
+						"Updated Session", "MEMOIRE", "ACTIVE", 4, 20, 10, null, null, null, null, null));
 
 		mockMvc.perform(put("/api/coordinator/defense-sessions/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isOk())
@@ -107,6 +118,9 @@ class CoordinatorDefenseSessionControllerTest {
 		ds.setId(1L);
 		ds.setStatus(DefenseSessionStatus.ACTIVE);
 		when(service.transition(1L, "ACTIVE")).thenReturn(ds);
+		when(defenseSessionMapper.toDto(ds))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
+						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null));
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions/1/transition").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("toStatus", "ACTIVE")))).andExpect(status().isOk())

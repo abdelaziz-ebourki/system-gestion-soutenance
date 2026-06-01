@@ -34,6 +34,8 @@ class JuryRoleTemplateControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.ConfigMapper configMapper;
 
 	@Test
 	void findAll_returnsList() throws Exception {
@@ -43,8 +45,11 @@ class JuryRoleTemplateControllerTest {
 
 	@Test
 	void create_returns201() throws Exception {
-		when(juryRoleTemplateService.create(any()))
-				.thenReturn(new JuryRoleTemplate(1L, "Template PFE", DefenseType.PFE, new ArrayList<>()));
+		JuryRoleTemplate template = new JuryRoleTemplate(1L, "Template PFE", DefenseType.PFE, new ArrayList<>());
+		when(juryRoleTemplateService.create(any())).thenReturn(template);
+		when(configMapper.toJuryRoleTemplateDto(template))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.config.juryrole.dto.JuryRoleTemplateDto(1L,
+						"Template PFE", "PFE", List.of()));
 		mockMvc.perform(post("/api/admin/config/jury-role-templates").contentType(MediaType.APPLICATION_JSON).content(
 				"{\"name\":\"Template PFE\",\"defenseType\":\"PFE\",\"roles\":[{\"name\":\"Président\",\"count\":1,\"coefficient\":2}]}"))
 				.andExpect(status().isCreated()).andExpect(jsonPath("$.name").value("Template PFE"));
@@ -52,8 +57,11 @@ class JuryRoleTemplateControllerTest {
 
 	@Test
 	void update_returns200() throws Exception {
-		when(juryRoleTemplateService.update(anyLong(), any()))
-				.thenReturn(new JuryRoleTemplate(1L, "Updated", DefenseType.MEMOIRE, new ArrayList<>()));
+		JuryRoleTemplate template = new JuryRoleTemplate(1L, "Updated", DefenseType.MEMOIRE, new ArrayList<>());
+		when(juryRoleTemplateService.update(anyLong(), any())).thenReturn(template);
+		when(configMapper.toJuryRoleTemplateDto(template))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.config.juryrole.dto.JuryRoleTemplateDto(1L,
+						"Updated", "MEMOIRE", List.of()));
 		mockMvc.perform(put("/api/admin/config/jury-role-templates/1").contentType(MediaType.APPLICATION_JSON).content(
 				"{\"name\":\"Updated\",\"defenseType\":\"MEMOIRE\",\"roles\":[{\"name\":\"Rapporteur\",\"count\":1,\"coefficient\":1}]}"))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Updated"));

@@ -34,12 +34,21 @@ class NotificationControllerTest {
 
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper appNotificationMapper;
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(repository.findAllByOrderByTimestampDesc()).thenReturn(List.of(
-				new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false, null, null),
-				new AppNotification(2L, "warning", "Test 2", "Message 2", LocalDateTime.now(), true, null, null)));
+		AppNotification n1 = new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false, null, null);
+		AppNotification n2 = new AppNotification(2L, "warning", "Test 2", "Message 2", LocalDateTime.now(), true, null,
+				null);
+		when(repository.findAllByOrderByTimestampDesc()).thenReturn(List.of(n1, n2));
+		when(appNotificationMapper.toDto(n1))
+				.thenReturn(new com.system_gestion_soutenance.api.notification.dto.AppNotificationDto(1L, "info",
+						"Test", "Message", n1.getTimestamp(), false, null, null));
+		when(appNotificationMapper.toDto(n2))
+				.thenReturn(new com.system_gestion_soutenance.api.notification.dto.AppNotificationDto(2L, "warning",
+						"Test 2", "Message 2", n2.getTimestamp(), true, null, null));
 
 		mockMvc.perform(get("/api/notifications")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
 				.andExpect(jsonPath("$[0].title").value("Test")).andExpect(jsonPath("$[1].title").value("Test 2"));

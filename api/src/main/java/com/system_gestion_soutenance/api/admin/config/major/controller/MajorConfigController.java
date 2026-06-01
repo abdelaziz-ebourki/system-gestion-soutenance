@@ -1,8 +1,10 @@
 package com.system_gestion_soutenance.api.admin.config.major.controller;
 
 import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorRequest;
+import com.system_gestion_soutenance.api.admin.config.major.dto.MajorDto;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.service.MajorConfigService;
+import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,28 +19,30 @@ import org.springframework.web.bind.annotation.*;
 public class MajorConfigController {
 
 	private final MajorConfigService majorConfigService;
+	private final ConfigMapper configMapper;
 
-	public MajorConfigController(MajorConfigService majorConfigService) {
+	public MajorConfigController(MajorConfigService majorConfigService, ConfigMapper configMapper) {
 		this.majorConfigService = majorConfigService;
+		this.configMapper = configMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List all majors")
-	public List<Major> findAll() {
-		return majorConfigService.findAll();
+	public List<MajorDto> findAll() {
+		return majorConfigService.findAll().stream().map(configMapper::toMajorDto).toList();
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new major")
-	public ResponseEntity<Major> create(@Valid @RequestBody CreateMajorRequest request) {
+	public ResponseEntity<MajorDto> create(@Valid @RequestBody CreateMajorRequest request) {
 		Major major = majorConfigService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(major);
+		return ResponseEntity.status(HttpStatus.CREATED).body(configMapper.toMajorDto(major));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a major")
-	public Major update(@PathVariable Long id, @Valid @RequestBody CreateMajorRequest request) {
-		return majorConfigService.update(id, request);
+	public MajorDto update(@PathVariable Long id, @Valid @RequestBody CreateMajorRequest request) {
+		return configMapper.toMajorDto(majorConfigService.update(id, request));
 	}
 
 	@DeleteMapping("/{id}")

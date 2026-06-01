@@ -1,7 +1,9 @@
 package com.system_gestion_soutenance.api.notification.controller;
 
+import com.system_gestion_soutenance.api.notification.dto.AppNotificationDto;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
+import com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -14,15 +16,17 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
 
 	private final NotificationRepository repository;
+	private final AppNotificationMapper mapper;
 
-	public NotificationController(NotificationRepository repository) {
+	public NotificationController(NotificationRepository repository, AppNotificationMapper mapper) {
 		this.repository = repository;
+		this.mapper = mapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List all notifications")
-	public List<AppNotification> findAll() {
-		return repository.findAllByOrderByTimestampDesc();
+	public List<AppNotificationDto> findAll() {
+		return repository.findAllByOrderByTimestampDesc().stream().map(mapper::toDto).toList();
 	}
 
 	@PatchMapping("/{id}/read")

@@ -1,8 +1,10 @@
 package com.system_gestion_soutenance.api.admin.config.grade.controller;
 
 import com.system_gestion_soutenance.api.admin.config.grade.dto.CreateGradeRequest;
+import com.system_gestion_soutenance.api.admin.config.grade.dto.GradeDto;
 import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
 import com.system_gestion_soutenance.api.admin.config.grade.service.GradeConfigService;
+import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,28 +19,30 @@ import org.springframework.web.bind.annotation.*;
 public class GradeConfigController {
 
 	private final GradeConfigService gradeConfigService;
+	private final ConfigMapper configMapper;
 
-	public GradeConfigController(GradeConfigService gradeConfigService) {
+	public GradeConfigController(GradeConfigService gradeConfigService, ConfigMapper configMapper) {
 		this.gradeConfigService = gradeConfigService;
+		this.configMapper = configMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List all grades")
-	public List<Grade> findAll() {
-		return gradeConfigService.findAll();
+	public List<GradeDto> findAll() {
+		return gradeConfigService.findAll().stream().map(configMapper::toGradeDto).toList();
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new grade")
-	public ResponseEntity<Grade> create(@Valid @RequestBody CreateGradeRequest request) {
+	public ResponseEntity<GradeDto> create(@Valid @RequestBody CreateGradeRequest request) {
 		Grade grade = gradeConfigService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(grade);
+		return ResponseEntity.status(HttpStatus.CREATED).body(configMapper.toGradeDto(grade));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a grade")
-	public Grade update(@PathVariable Long id, @Valid @RequestBody CreateGradeRequest request) {
-		return gradeConfigService.update(id, request);
+	public GradeDto update(@PathVariable Long id, @Valid @RequestBody CreateGradeRequest request) {
+		return configMapper.toGradeDto(gradeConfigService.update(id, request));
 	}
 
 	@DeleteMapping("/{id}")
