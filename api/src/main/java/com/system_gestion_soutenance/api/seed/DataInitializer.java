@@ -165,7 +165,10 @@ public class DataInitializer implements CommandLineRunner {
 		List<Grade> grades = List.of(g1, g2, g3);
 
 		// Phase 4: Faculty
-		Faculty f1 = facultyRepo.save(new Faculty(null, "Faculté des Sciences Ben M'Sik", "FSBM", null, null));
+		Faculty f1 = new Faculty();
+		f1.setName("Faculté des Sciences Ben M'Sik");
+		f1.setCode("FSBM");
+		f1 = facultyRepo.save(f1);
 
 		// Phase 5: Departments (no head yet)
 		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
@@ -175,8 +178,14 @@ public class DataInitializer implements CommandLineRunner {
 		List<Department> depts = List.of(dInfo, dMath, dPhys, dBio);
 
 		// Phase 6: Users
-		User admin = saveUser(
-				new User(null, "admin@univh2c.ma", PASSWORD, Role.ADMIN, "Ahmadi", "Mohamed", true, null, null, null));
+		User admin = new User();
+		admin.setEmail("admin@univh2c.ma");
+		admin.setPassword(PASSWORD);
+		admin.setRole(Role.ADMIN);
+		admin.setLastName("Ahmadi");
+		admin.setFirstName("Mohamed");
+		admin.setActive(true);
+		admin = saveUser(admin);
 
 		Coordinator coord = new Coordinator();
 		coord.setLastName("Ouchen");

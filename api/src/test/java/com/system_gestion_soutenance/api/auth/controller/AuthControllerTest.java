@@ -90,6 +90,6 @@ class AuthControllerTest {
 		mockMvc.perform(post("/api/auth/verify-account").contentType(MediaType.APPLICATION_JSON).content("""
 				{"token":"valid-token","password":"secure-pass"}
 				""")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("Account verified successfully"));
+				.andExpect(jsonPath("$.message").value("Compte vérifié avec succès."));
 	}
 }

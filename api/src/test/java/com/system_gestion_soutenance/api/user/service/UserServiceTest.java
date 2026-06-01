@@ -75,6 +75,18 @@ class UserServiceTest {
 	private Grade grade;
 	private Department department;
 
+	private static User createUser(Long id, String email, Role role, String lastName, String firstName) {
+		User u = new User();
+		u.setId(id);
+		u.setEmail(email);
+		u.setPassword("");
+		u.setRole(role);
+		u.setLastName(lastName);
+		u.setFirstName(firstName);
+		u.setActive(true);
+		return u;
+	}
+
 	@BeforeEach
 	void setUp() {
 		major = new Major();
@@ -101,7 +113,7 @@ class UserServiceTest {
 
 	@Test
 	void listUsers_withRoleOnly_returnsFiltered() {
-		User user = new User(1L, "a@t.com", "", Role.STUDENT, "A", "B", true, null, null, null);
+		User user = createUser(1L, "a@t.com", Role.STUDENT, "A", "B");
 		Page<User> page = new PageImpl<>(List.of(user));
 		when(userRepository.findByRole(eq(Role.STUDENT), any(PageRequest.class))).thenReturn(page);
 
@@ -134,7 +146,7 @@ class UserServiceTest {
 
 	@Test
 	void updateUser_roleChange_updatesRole() {
-		User user = new User(1L, "old@t.com", "", Role.STUDENT, "Old", "User", true, null, null, null);
+		User user = createUser(1L, "old@t.com", Role.STUDENT, "Old", "User");
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -230,7 +242,7 @@ class UserServiceTest {
 
 	@Test
 	void listAllByRole_returnsUsers() {
-		User user = new User(1L, "a@t.com", "", Role.TEACHER, "A", "B", true, null, null, null);
+		User user = createUser(1L, "a@t.com", Role.TEACHER, "A", "B");
 		when(userRepository.findByRole(Role.TEACHER)).thenReturn(List.of(user));
 
 		List<UserDto> result = userService.listAllByRole("teacher");
@@ -303,7 +315,7 @@ class UserServiceTest {
 
 	@Test
 	void updateUser_sameEmail_noConflict() {
-		User user = new User(1L, "same@t.com", "", Role.STUDENT, "Old", "User", true, null, null, null);
+		User user = createUser(1L, "same@t.com", Role.STUDENT, "Old", "User");
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -373,7 +385,7 @@ class UserServiceTest {
 
 	@Test
 	void updateUser_updatesBasicFields() {
-		User user = new User(1L, "old@t.com", "", Role.STUDENT, "Old", "User", true, null, null, null);
+		User user = createUser(1L, "old@t.com", Role.STUDENT, "Old", "User");
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -386,8 +398,8 @@ class UserServiceTest {
 
 	@Test
 	void updateUser_duplicateEmail_throws() {
-		User existing = new User(1L, "current@t.com", "", Role.STUDENT, "A", "B", true, null, null, null);
-		User other = new User(2L, "new@t.com", "", Role.STUDENT, "C", "D", true, null, null, null);
+		User existing = createUser(1L, "current@t.com", Role.STUDENT, "A", "B");
+		User other = createUser(2L, "new@t.com", Role.STUDENT, "C", "D");
 		when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
 		when(userRepository.findByEmail("new@t.com")).thenReturn(Optional.of(other));
 
@@ -405,7 +417,7 @@ class UserServiceTest {
 
 	@Test
 	void deleteUser_simpleUser_success() {
-		User user = new User(1L, "a@t.com", "", Role.ADMIN, "A", "B", true, null, null, null);
+		User user = createUser(1L, "a@t.com", Role.ADMIN, "A", "B");
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		doNothing().when(userRepository).delete(user);
 

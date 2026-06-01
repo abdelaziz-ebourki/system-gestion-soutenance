@@ -1,17 +1,16 @@
 package com.system_gestion_soutenance.api.admin.faculty.entity;
 
+import com.system_gestion_soutenance.api.user.entity.Teacher;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "faculty")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Faculty {
 
 	@Id
@@ -24,9 +23,14 @@ public class Faculty {
 	@Column(nullable = false)
 	private String code;
 
-	@Column(name = "dean_id")
-	private Long deanId;
+	@ManyToOne
+	@JoinColumn(name = "dean_id")
+	private Teacher dean;
 
 	@Column(name = "logo_url")
 	private String logoUrl;
+
+	public Long getDeanId() {
+		return dean != null ? dean.getId() : null;
+	}
 }

@@ -5,6 +5,8 @@ import com.system_gestion_soutenance.api.admin.faculty.dto.CreateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.repository.FacultyRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.user.entity.Teacher;
+import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,13 @@ public class FacultyService {
 
 	private final FacultyRepository facultyRepository;
 	private final DepartmentRepository departmentRepository;
+	private final TeacherRepository teacherRepository;
 
-	public FacultyService(FacultyRepository facultyRepository, DepartmentRepository departmentRepository) {
+	public FacultyService(FacultyRepository facultyRepository, DepartmentRepository departmentRepository,
+			TeacherRepository teacherRepository) {
 		this.facultyRepository = facultyRepository;
 		this.departmentRepository = departmentRepository;
+		this.teacherRepository = teacherRepository;
 	}
 
 	public List<Faculty> findAll() {
@@ -38,7 +43,7 @@ public class FacultyService {
 		Faculty faculty = new Faculty();
 		faculty.setName(request.name());
 		faculty.setCode(request.code());
-		faculty.setDeanId(request.deanId());
+		faculty.setDean(resolveDean(request.deanId()));
 		faculty.setLogoUrl(request.logoUrl());
 		return facultyRepository.save(faculty);
 	}
@@ -51,9 +56,15 @@ public class FacultyService {
 
 		faculty.setName(request.name());
 		faculty.setCode(request.code());
-		faculty.setDeanId(request.deanId());
+		faculty.setDean(resolveDean(request.deanId()));
 		faculty.setLogoUrl(request.logoUrl());
 		return facultyRepository.save(faculty);
+	}
+
+	private Teacher resolveDean(Long deanId) {
+		if (deanId == null) return null;
+		return teacherRepository.findById(deanId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant (doyen) non trouvé"));
 	}
 
 	@Audited(action = "DELETE", entity = "Faculty")

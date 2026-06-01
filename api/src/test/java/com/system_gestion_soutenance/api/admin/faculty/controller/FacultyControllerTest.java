@@ -33,23 +33,31 @@ class FacultyControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 
+	private static Faculty createFaculty(Long id, String name, String code) {
+		Faculty f = new Faculty();
+		f.setId(id);
+		f.setName(name);
+		f.setCode(code);
+		return f;
+	}
+
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(facultyService.findAll()).thenReturn(List.of(new Faculty(1L, "FS", "FS", null, null)));
+		when(facultyService.findAll()).thenReturn(List.of(createFaculty(1L, "FS", "FS")));
 		mockMvc.perform(get("/api/admin/faculties")).andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].name").value("FS"));
 	}
 
 	@Test
 	void findById_returns200() throws Exception {
-		when(facultyService.findById(1L)).thenReturn(new Faculty(1L, "FS", "FS", null, null));
+		when(facultyService.findById(1L)).thenReturn(createFaculty(1L, "FS", "FS"));
 		mockMvc.perform(get("/api/admin/faculties/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value("FS"));
 	}
 
 	@Test
 	void create_returns201() throws Exception {
-		when(facultyService.create(any())).thenReturn(new Faculty(1L, "FS", "FS", null, null));
+		when(facultyService.create(any())).thenReturn(createFaculty(1L, "FS", "FS"));
 		mockMvc.perform(post("/api/admin/faculties").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"FS\",\"code\":\"FS\"}")).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.name").value("FS"));
@@ -57,7 +65,7 @@ class FacultyControllerTest {
 
 	@Test
 	void update_returns200() throws Exception {
-		when(facultyService.update(anyLong(), any())).thenReturn(new Faculty(1L, "New", "N", null, null));
+		when(facultyService.update(anyLong(), any())).thenReturn(createFaculty(1L, "New", "N"));
 		mockMvc.perform(put("/api/admin/faculties/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"New\",\"code\":\"N\"}")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value("New"));

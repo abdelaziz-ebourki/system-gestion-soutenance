@@ -67,6 +67,6 @@ public class AuthController {
 	@ApiResponse(responseCode = "404", description = "User not found")
 	public ResponseEntity<Map<String, String>> verifyAccount(@Valid @RequestBody VerifyRequest request) {
 		authService.verifyAccount(request);
-		return ResponseEntity.ok(Map.of("message", "Account verified successfully"));
+		return ResponseEntity.ok(Map.of("message", "Compte vérifié avec succès."));
 	}
 }

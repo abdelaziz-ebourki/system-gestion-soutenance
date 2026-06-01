@@ -115,7 +115,7 @@ public class UserAdminController {
 
 	@PutMapping("/users/{id}")
 	@Operation(summary = "Update a user")
-	public UserDto updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+	public UserDto updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
 		return userService.updateUser(id, request);
 	}
 

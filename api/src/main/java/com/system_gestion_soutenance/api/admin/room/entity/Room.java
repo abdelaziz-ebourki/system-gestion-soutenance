@@ -23,8 +23,4 @@ public class Room {
 	@JoinColumn(name = "department_id")
 	@JsonIgnore
 	private Department department;
-
-	public Long getDepartmentId() {
-		return department != null ? department.getId() : null;
-	}
 }

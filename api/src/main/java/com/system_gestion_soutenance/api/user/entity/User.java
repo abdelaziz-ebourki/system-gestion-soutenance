@@ -2,7 +2,6 @@ package com.system_gestion_soutenance.api.user.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -14,23 +13,23 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true)
+	@Column(nullable = false, unique = true)
 	private String email;
 	private String password;
 
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private Role role;
 
-	@Column(name = "last_name")
+	@Column(name = "last_name", nullable = false)
 	private String lastName;
 
-	@Column(name = "first_name")
+	@Column(name = "first_name", nullable = false)
 	private String firstName;
 
 	@Column(name = "is_active")

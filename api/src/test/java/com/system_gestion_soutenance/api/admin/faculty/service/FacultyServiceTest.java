@@ -8,6 +8,8 @@ import com.system_gestion_soutenance.api.admin.department.repository.DepartmentR
 import com.system_gestion_soutenance.api.admin.faculty.dto.CreateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.repository.FacultyRepository;
+import com.system_gestion_soutenance.api.user.entity.Teacher;
+import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -24,9 +26,21 @@ class FacultyServiceTest {
 	private FacultyRepository facultyRepository;
 	@Mock
 	private DepartmentRepository departmentRepository;
+	@Mock
+	private TeacherRepository teacherRepository;
 
 	@InjectMocks
 	private FacultyService facultyService;
+
+	private static Faculty createFaculty(Long id, String name, String code, Teacher dean, String logoUrl) {
+		Faculty f = new Faculty();
+		f.setId(id);
+		f.setName(name);
+		f.setCode(code);
+		f.setDean(dean);
+		f.setLogoUrl(logoUrl);
+		return f;
+	}
 
 	@Test
 	void findAll_returnsAll() {
@@ -36,7 +50,7 @@ class FacultyServiceTest {
 
 	@Test
 	void findById_existing_returnsFaculty() {
-		Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
+		Faculty faculty = createFaculty(1L, "FS", "FS", null, null);
 		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
 		assertEquals(1L, facultyService.findById(1L).getId());
 	}
@@ -60,7 +74,11 @@ class FacultyServiceTest {
 
 	@Test
 	void update_success() {
-		Faculty existing = new Faculty(1L, "Old", "O", null, null);
+		Teacher dean = new Teacher();
+		dean.setId(2L);
+		when(teacherRepository.findById(2L)).thenReturn(Optional.of(dean));
+
+		Faculty existing = createFaculty(1L, "Old", "O", null, null);
 		when(facultyRepository.findById(1L)).thenReturn(Optional.of(existing));
 		when(facultyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -82,7 +100,7 @@ class FacultyServiceTest {
 
 	@Test
 	void delete_success() {
-		Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
+		Faculty faculty = createFaculty(1L, "FS", "FS", null, null);
 		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
 		when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of());
 
@@ -100,7 +118,7 @@ class FacultyServiceTest {
 
 	@Test
 	void delete_withDepartments_throws() {
-		Faculty faculty = new Faculty(1L, "FS", "FS", null, null);
+		Faculty faculty = createFaculty(1L, "FS", "FS", null, null);
 		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
 		when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of(new Department()));
 
