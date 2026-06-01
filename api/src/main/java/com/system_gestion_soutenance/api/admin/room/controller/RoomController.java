@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.admin.room.dto.CreateRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.dto.RoomResponse;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.service.RoomService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,9 +26,10 @@ public class RoomController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List all rooms")
-	public List<RoomResponse> findAll() {
-		return roomService.findAll().stream().map(RoomResponse::from).toList();
+	@Operation(summary = "List all rooms with pagination")
+	public PaginatedResponse<RoomResponse> findAll(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int limit) {
+		return roomService.findAll(page, limit);
 	}
 
 	@PostMapping

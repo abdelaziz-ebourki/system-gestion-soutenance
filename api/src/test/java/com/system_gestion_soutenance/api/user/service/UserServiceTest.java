@@ -243,7 +243,8 @@ class UserServiceTest {
 	@Test
 	void listAllByRole_returnsUsers() {
 		User user = createUser(1L, "a@t.com", Role.TEACHER, "A", "B");
-		when(userRepository.findByRole(Role.TEACHER)).thenReturn(List.of(user));
+		when(userRepository.findByRole(eq(Role.TEACHER), any(PageRequest.class)))
+				.thenReturn(new PageImpl<>(List.of(user)));
 
 		List<UserDto> result = userService.listAllByRole("teacher");
 

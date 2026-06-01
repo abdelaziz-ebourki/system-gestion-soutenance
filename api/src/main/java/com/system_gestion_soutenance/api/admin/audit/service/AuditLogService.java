@@ -23,7 +23,7 @@ public class AuditLogService {
 		Page<AuditLog> auditLogPage = repository.findAllByOrderByTimestampDesc(pageable);
 
 		return new PaginatedResponse<>(auditLogPage.getContent(), auditLogPage.getTotalElements(),
-				auditLogPage.getTotalPages());
+				auditLogPage.getTotalPages(), auditLogPage.getNumber(), auditLogPage.getSize());
 	}
 
 	@Transactional

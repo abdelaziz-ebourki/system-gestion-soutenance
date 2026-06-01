@@ -38,7 +38,7 @@ class UserAdminControllerTest {
 	@Test
 	void listUsers_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(any(), anyInt(), anyInt(), any()))
-				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0));
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 
 		mockMvc.perform(get("/api/admin/users")).andExpect(status().isOk()).andExpect(jsonPath("$.items").isArray());
 	}
@@ -46,7 +46,7 @@ class UserAdminControllerTest {
 	@Test
 	void listUsers_withRoleParam() throws Exception {
 		when(userService.listUsers(eq("student"), anyInt(), anyInt(), any()))
-				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0));
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 
 		mockMvc.perform(get("/api/admin/users").param("role", "student")).andExpect(status().isOk());
 
@@ -70,7 +70,7 @@ class UserAdminControllerTest {
 	@Test
 	void listStudents_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(eq("student"), anyInt(), anyInt(), any()))
-				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0));
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 
 		mockMvc.perform(get("/api/admin/students")).andExpect(status().isOk());
 	}
@@ -78,7 +78,7 @@ class UserAdminControllerTest {
 	@Test
 	void listTeachers_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(eq("teacher"), anyInt(), anyInt(), any()))
-				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0));
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 
 		mockMvc.perform(get("/api/admin/teachers")).andExpect(status().isOk());
 	}
@@ -86,7 +86,7 @@ class UserAdminControllerTest {
 	@Test
 	void listCoordinators_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(eq("coordinator"), anyInt(), anyInt(), any()))
-				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0));
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 
 		mockMvc.perform(get("/api/admin/coordinators")).andExpect(status().isOk());
 	}

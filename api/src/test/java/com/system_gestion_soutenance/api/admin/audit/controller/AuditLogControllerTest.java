@@ -35,7 +35,7 @@ class AuditLogControllerTest {
 
 	@Test
 	void findAll_returnsPaginated() throws Exception {
-		when(service.getAuditLogs(0, 20)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0));
+		when(service.getAuditLogs(0, 20)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 20));
 
 		mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isArray());

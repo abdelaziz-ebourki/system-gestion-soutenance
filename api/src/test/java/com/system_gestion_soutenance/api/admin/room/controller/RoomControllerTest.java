@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.service.RoomService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,11 @@ class RoomControllerTest {
 	private UserRepository userRepository;
 
 	@Test
-	void findAll_returnsList() throws Exception {
-		when(roomService.findAll()).thenReturn(List.of(new Room()));
-		mockMvc.perform(get("/api/admin/rooms")).andExpect(status().isOk());
+	void findAll_returnsPaginated() throws Exception {
+		when(roomService.findAll(0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
+		mockMvc.perform(get("/api/admin/rooms")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isArray());
 	}
 
 	@Test

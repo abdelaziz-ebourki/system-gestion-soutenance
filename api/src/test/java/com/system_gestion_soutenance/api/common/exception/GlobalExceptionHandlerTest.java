@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
 	void handleValidationException() throws Exception {
 		mockMvc.perform(post("/test/validate").contentType(MediaType.APPLICATION_JSON).content("{\"email\": \"\"}"))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("email")));
+				.andExpect(jsonPath("$.email").value("must not be blank"));
 	}
 
 	@RestController

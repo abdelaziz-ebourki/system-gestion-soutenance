@@ -86,12 +86,12 @@ public class UserService {
 
 		List<UserDto> items = userPage.getContent().stream().map(UserDto::from).toList();
 
-		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages());
+		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
 	public List<UserDto> listAllByRole(String role) {
 		Role roleEnum = parseRole(role);
-		return userRepository.findByRole(roleEnum).stream().map(UserDto::from).toList();
+		return userRepository.findByRole(roleEnum, PageRequest.of(0, 1000)).stream().map(UserDto::from).toList();
 	}
 
 	public UserDto createUser(CreateUserRequest request) {

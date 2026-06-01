@@ -16,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,9 +32,10 @@ class RoomServiceTest {
 	private RoomService roomService;
 
 	@Test
-	void findAll_returnsAll() {
-		when(roomRepository.findAll()).thenReturn(List.of(new Room()));
-		assertEquals(1, roomService.findAll().size());
+	void findAll_returnsPaginated() {
+		Page<Room> page = new PageImpl<>(List.of(new Room()));
+		when(roomRepository.findAll((Pageable) any())).thenReturn(page);
+		assertEquals(1, roomService.findAll(0, 10).items().size());
 	}
 
 	@Test

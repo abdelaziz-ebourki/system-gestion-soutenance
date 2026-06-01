@@ -62,9 +62,10 @@ public class FacultyService {
 	}
 
 	private Teacher resolveDean(Long deanId) {
-		if (deanId == null) return null;
-		return teacherRepository.findById(deanId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant (doyen) non trouvé"));
+		if (deanId == null)
+			return null;
+		return teacherRepository.findById(deanId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant (doyen) non trouvé"));
 	}
 
 	@Audited(action = "DELETE", entity = "Faculty")
