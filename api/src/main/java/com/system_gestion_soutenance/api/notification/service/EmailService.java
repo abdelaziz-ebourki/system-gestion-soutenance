@@ -9,10 +9,12 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.system_gestion_soutenance.api.common.service.MessageService;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,15 +25,18 @@ public class EmailService {
 
 	private final EmailConfigRepository configRepository;
 	private final EncryptionUtil encryptionUtil;
+	private final MessageService messageService;
 
 	@Autowired(required = false)
 	private JavaMailSender autoConfiguredMailSender;
 
 	private volatile JavaMailSender currentMailSender;
 
-	public EmailService(EmailConfigRepository configRepository, EncryptionUtil encryptionUtil) {
+	public EmailService(EmailConfigRepository configRepository, EncryptionUtil encryptionUtil,
+			MessageService messageService) {
 		this.configRepository = configRepository;
 		this.encryptionUtil = encryptionUtil;
+		this.messageService = messageService;
 	}
 
 	public void reconfigure() {
@@ -91,6 +96,7 @@ public class EmailService {
 		return sender;
 	}
 
+	@Async
 	public void sendEmail(String to, String subject, String body) {
 		JavaMailSender sender = getMailSender();
 		if (sender == null) {
@@ -111,34 +117,41 @@ public class EmailService {
 		}
 	}
 
+	@Async
 	public void sendVerificationEmail(String to, String firstName, String verificationLink) {
-		String subject = "Activez votre compte";
+		String subject = messageService.getMessage("email.verify.subject");
 		String body = """
-				<h2>Bienvenue sur le syst\u00e8me de gestion de soutenances</h2>
-				<p>Bonjour %s,</p>
-				<p>Un administrateur a cr\u00e9\u00e9 votre compte. Cliquez sur le lien ci-dessous pour d\u00e9finir votre mot de passe et activer votre compte :</p>
+				<h2>%s</h2>
+				<p>%s</p>
+				<p>%s</p>
 				<p><a href="%s">%s</a></p>
-				<p>Ce lien expire dans <strong>72 heures</strong>.</p>
+				<p>%s</p>
 				<hr>
 				<p style="color: #666; font-size: 0.9em;">Syst\u00e8me de Gestion de Soutenances</p>
-				"""
-				.formatted(firstName, verificationLink, verificationLink);
+				""".formatted(messageService.getMessage("email.verify.title"),
+				messageService.getMessage("email.generic.greeting", firstName),
+				messageService.getMessage("email.verify.body"), verificationLink, verificationLink,
+				messageService.getMessage("email.verify.expiry"));
 		sendEmail(to, subject, body);
 	}
 
+	@Async
 	public void sendPasswordResetEmail(String to, String resetLink) {
-		String subject = "R\u00e9initialisation de mot de passe";
+		String subject = messageService.getMessage("email.reset.subject");
 		String body = """
-				<h2>R\u00e9initialisation de mot de passe</h2>
+				<h2>%s</h2>
 				<p>Bonjour,</p>
-				<p>Vous avez demand\u00e9 la r\u00e9initialisation de votre mot de passe.</p>
-				<p>Cliquez sur le lien ci-dessous pour d\u00e9finir un nouveau mot de passe :</p>
+				<p>%s</p>
+				<p>%s</p>
 				<p><a href="%s">%s</a></p>
-				<p>Ce lien expire dans <strong>1 heure</strong>.</p>
-				<p>Si vous n'\u00eates pas \u00e0 l'origine de cette demande, ignorez cet email.</p>
+				<p>%s</p>
+				<p>%s</p>
 				<hr>
 				<p style="color: #666; font-size: 0.9em;">Systeme de Gestion de Soutenances</p>
-				""".formatted(resetLink, resetLink);
+				""".formatted(messageService.getMessage("email.reset.subject"),
+				messageService.getMessage("email.reset.body1"), messageService.getMessage("email.reset.body2"),
+				resetLink, resetLink, messageService.getMessage("email.reset.expiry"),
+				messageService.getMessage("email.reset.ignore"));
 		sendEmail(to, subject, body);
 	}
 }
