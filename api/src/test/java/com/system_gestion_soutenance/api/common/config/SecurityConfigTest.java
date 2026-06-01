@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigTest {
 
-	private final PasswordEncoder passwordEncoder = new SecurityConfig(null, null).passwordEncoder();
+	private final PasswordEncoder passwordEncoder = new SecurityConfig(null).passwordEncoder();
 
 	@Test
 	void passwordEncoder_isBCrypt() {

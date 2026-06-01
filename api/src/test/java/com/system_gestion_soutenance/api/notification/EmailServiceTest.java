@@ -1,10 +1,10 @@
 package com.system_gestion_soutenance.api.notification;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
 import com.system_gestion_soutenance.api.admin.config.email.repository.EmailConfigRepository;
+import com.system_gestion_soutenance.api.common.service.MessageService;
 import com.system_gestion_soutenance.api.common.util.EncryptionUtil;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import java.util.Optional;
@@ -21,13 +21,15 @@ class EmailServiceTest {
 	private EmailConfigRepository configRepository;
 	@Mock
 	private EncryptionUtil encryptionUtil;
+	@Mock
+	private MessageService messageService;
 
 	@Test
 	void sendEmail_mockMode_logsWithoutSending() {
 		when(configRepository.findById(1L)).thenReturn(Optional.empty());
 		JavaMailSender mailSender = mock(JavaMailSender.class);
 
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 
 		service.sendEmail("test@test.com", "Subject", "Body");
 		verifyNoInteractions(mailSender);
@@ -39,7 +41,7 @@ class EmailServiceTest {
 		JavaMailSender autoSender = mock(JavaMailSender.class);
 		when(autoSender.createMimeMessage()).thenReturn(mock(jakarta.mail.internet.MimeMessage.class));
 
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 		setAutoConfiguredMailSender(service, autoSender);
 
 		service.sendEmail("test@test.com", "Subject", "Body");
@@ -57,7 +59,7 @@ class EmailServiceTest {
 		when(configRepository.findById(1L)).thenReturn(Optional.of(config));
 		when(encryptionUtil.decrypt("encrypted-pass")).thenReturn("decrypted-pass");
 
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 
 		service.sendEmail("test@test.com", "Subject", "Body");
 		verify(encryptionUtil).decrypt("encrypted-pass");
@@ -74,7 +76,7 @@ class EmailServiceTest {
 		when(configRepository.findById(1L)).thenReturn(Optional.of(config));
 		when(encryptionUtil.decrypt("encrypted-pass")).thenReturn("decrypted-pass");
 
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 
 		service.sendEmail("test@test.com", "Subject", "Body");
 		verify(encryptionUtil).decrypt("encrypted-pass");
@@ -91,7 +93,7 @@ class EmailServiceTest {
 
 		when(encryptionUtil.decrypt("encrypted-pass")).thenReturn("decrypted-pass");
 
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 
 		service.sendEmail("test@test.com", "Subject", "Body");
 
@@ -103,7 +105,7 @@ class EmailServiceTest {
 	@Test
 	void sendVerificationEmail_callsSendEmail() {
 		when(configRepository.findById(1L)).thenReturn(Optional.empty());
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 
 		service.sendVerificationEmail("test@test.com", "John", "http://link");
 	}
@@ -111,7 +113,7 @@ class EmailServiceTest {
 	@Test
 	void sendPasswordResetEmail_callsSendEmail() {
 		when(configRepository.findById(1L)).thenReturn(Optional.empty());
-		EmailService service = new EmailService(configRepository, encryptionUtil);
+		EmailService service = new EmailService(configRepository, encryptionUtil, messageService);
 
 		service.sendPasswordResetEmail("test@test.com", "http://link");
 	}

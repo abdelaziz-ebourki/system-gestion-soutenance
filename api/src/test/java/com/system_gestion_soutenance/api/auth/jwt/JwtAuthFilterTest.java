@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.User;
-import com.system_gestion_soutenance.api.user.repository.UserRepository;
+import com.system_gestion_soutenance.api.user.service.UserCacheService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,7 +26,7 @@ class JwtAuthFilterTest {
 	private JwtTokenProvider jwtTokenProvider;
 
 	@Mock
-	private UserRepository userRepository;
+	private UserCacheService userCacheService;
 
 	@Mock
 	private HttpServletRequest request;
@@ -56,7 +56,7 @@ class JwtAuthFilterTest {
 		user.setEmail("admin@test.com");
 		user.setRole(Role.ADMIN);
 		user.setActive(true);
-		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userCacheService.getUserById(1L)).thenReturn(Optional.of(user));
 
 		filter.doFilter(request, response, filterChain);
 
@@ -104,7 +104,7 @@ class JwtAuthFilterTest {
 		when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
 		when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
 		when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("999");
-		when(userRepository.findById(999L)).thenReturn(Optional.empty());
+		when(userCacheService.getUserById(999L)).thenReturn(Optional.empty());
 
 		filter.doFilter(request, response, filterChain);
 

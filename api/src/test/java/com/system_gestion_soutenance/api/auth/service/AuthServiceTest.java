@@ -39,12 +39,14 @@ class AuthServiceTest {
 	private PasswordValidator passwordValidator;
 	@Mock
 	private com.system_gestion_soutenance.api.common.mapper.UserMapper userMapper;
+	@Mock
+	private com.system_gestion_soutenance.api.common.service.MessageService messageService;
 	private AuthService authService;
 
 	@org.junit.jupiter.api.BeforeEach
 	void setUp() {
 		authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder, emailService,
-				passwordValidator, userMapper, "http://localhost:5173");
+				passwordValidator, userMapper, messageService, "http://localhost:5173");
 	}
 
 	private User createActiveUser() {

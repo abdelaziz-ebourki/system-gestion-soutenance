@@ -35,6 +35,9 @@ class UserAdminControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 
+	@MockitoBean
+	private com.system_gestion_soutenance.api.user.service.UserCacheService userCacheService;
+
 	@Test
 	void listUsers_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(any(), anyInt(), anyInt(), any()))

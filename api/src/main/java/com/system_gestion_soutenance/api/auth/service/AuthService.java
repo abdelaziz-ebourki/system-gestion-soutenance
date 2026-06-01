@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.auth.dto.LoginResponse;
 import com.system_gestion_soutenance.api.auth.dto.ResetPasswordRequest;
 import com.system_gestion_soutenance.api.auth.dto.VerifyRequest;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.service.MessageService;
 import com.system_gestion_soutenance.api.common.util.PasswordValidator;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.common.mapper.UserMapper;
@@ -29,38 +30,40 @@ public class AuthService {
 	private final EmailService emailService;
 	private final PasswordValidator passwordValidator;
 	private final UserMapper userMapper;
+	private final MessageService messageService;
 	private final String baseUrl;
 
 	public AuthService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
 			PasswordEncoder passwordEncoder, EmailService emailService, PasswordValidator passwordValidator,
-			UserMapper userMapper, @Value("${app.ui.base-url}") String baseUrl) {
+			UserMapper userMapper, MessageService messageService, @Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
 		this.passwordValidator = passwordValidator;
 		this.userMapper = userMapper;
+		this.messageService = messageService;
 		this.baseUrl = baseUrl;
 	}
 
 	public LoginResponse login(LoginRequest request) {
 		User user = userRepository.findByEmail(request.email())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-						"Identifiants invalides (E-mail ou mot de passe incorrect)"));
+						messageService.getMessage("auth.login.invalid_credentials")));
 
 		if (user.getPassword() == null || user.getPassword().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-					"Identifiants invalides (E-mail ou mot de passe incorrect)");
+					messageService.getMessage("auth.login.invalid_credentials"));
 		}
 
 		if (!passwordEncoder.matches(request.password(), user.getPassword())) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-					"Identifiants invalides (E-mail ou mot de passe incorrect)");
+					messageService.getMessage("auth.login.invalid_credentials"));
 		}
 
 		if (!user.isActive()) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-					"Veuillez activer votre compte via le lien de vérification envoyé à votre adresse email.");
+					messageService.getMessage("auth.login.account_inactive"));
 		}
 
 		String token = jwtTokenProvider.generateToken(String.valueOf(user.getId()), user.getRole().name());
@@ -73,7 +76,7 @@ public class AuthService {
 	public void verifyAccount(VerifyRequest request) {
 		User user = userRepository.findByVerificationToken(request.token())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-						"Token de vérification invalide ou déjà utilisé"));
+						messageService.getMessage("auth.verify.invalid_token")));
 
 		try {
 			passwordValidator.validate(request.password());
@@ -105,10 +108,11 @@ public class AuthService {
 	public void resetPassword(ResetPasswordRequest request) {
 		User user = userRepository.findByResetToken(request.token())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						"Token de réinitialisation invalide ou expiré"));
+						messageService.getMessage("auth.reset.invalid_token")));
 
 		if (user.getResetTokenExpires() == null || Instant.now().isAfter(user.getResetTokenExpires())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token de réinitialisation invalide ou expiré");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					messageService.getMessage("auth.reset.invalid_token"));
 		}
 
 		try {
