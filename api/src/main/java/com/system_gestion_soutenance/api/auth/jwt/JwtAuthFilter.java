@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.auth.jwt;
 
 import com.system_gestion_soutenance.api.user.entity.User;
-import com.system_gestion_soutenance.api.user.repository.UserRepository;
+import com.system_gestion_soutenance.api.user.service.UserCacheService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,18 +11,16 @@ import java.util.List;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
-	private final UserRepository userRepository;
+	private final UserCacheService userCacheService;
 
-	public JwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+	public JwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserCacheService userCacheService) {
 		this.jwtTokenProvider = jwtTokenProvider;
-		this.userRepository = userRepository;
+		this.userCacheService = userCacheService;
 	}
 
 	@Override
@@ -44,7 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 		if (token != null && jwtTokenProvider.validateToken(token)) {
 			String userId = jwtTokenProvider.getUserIdFromToken(token);
-			User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
+			User user = userCacheService.getUserById(Long.parseLong(userId)).orElse(null);
 
 			if (user != null) {
 				if (!user.isActive()) {

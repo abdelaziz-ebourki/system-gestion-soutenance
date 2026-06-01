@@ -2,6 +2,8 @@ package com.system_gestion_soutenance.api.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter;
+import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.user.service.UserCacheService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +28,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final JwtAuthFilter jwtAuthFilter;
 	private final ObjectMapper objectMapper;
 
-	public SecurityConfig(JwtAuthFilter jwtAuthFilter, ObjectMapper objectMapper) {
-		this.jwtAuthFilter = jwtAuthFilter;
+	public SecurityConfig(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+	}
+
+	@Bean
+	JwtAuthFilter jwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserCacheService userCacheService) {
+		return new JwtAuthFilter(jwtTokenProvider, userCacheService);
 	}
 
 	@Bean
@@ -48,7 +53,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 						.csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler())
