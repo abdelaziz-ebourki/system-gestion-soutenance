@@ -73,6 +73,6 @@ class MajorConfigServiceTest {
 		when(majorRepository.findById(1L)).thenReturn(Optional.of(major));
 		when(studentRepository.findByMajorId(1L)).thenReturn(List.of());
 		majorConfigService.delete(1L);
-		verify(majorRepository).delete(major);
+		verify(majorRepository).deleteById(1L);
 	}
 }

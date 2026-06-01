@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepo
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryMemberRepository;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
@@ -50,6 +51,7 @@ public class UserService {
 	private final ProjectRepository projectRepository;
 	private final EmailService emailService;
 	private final PasswordEncoder passwordEncoder;
+	private final UserMapper userMapper;
 	private final String baseUrl;
 
 	public UserService(UserRepository userRepository, StudentRepository studentRepository,
@@ -57,7 +59,7 @@ public class UserService {
 			MajorRepository majorRepository, LevelRepository levelRepository, GradeRepository gradeRepository,
 			DepartmentRepository departmentRepository, JuryMemberRepository juryMemberRepository,
 			ProjectRepository projectRepository, EmailService emailService, PasswordEncoder passwordEncoder,
-			@Value("${app.ui.base-url}") String baseUrl) {
+			UserMapper userMapper, @Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;
@@ -67,6 +69,7 @@ public class UserService {
 		this.projectRepository = projectRepository;
 		this.emailService = emailService;
 		this.passwordEncoder = passwordEncoder;
+		this.userMapper = userMapper;
 		this.baseUrl = baseUrl;
 	}
 
@@ -84,14 +87,14 @@ public class UserService {
 			userPage = userRepository.findAll(pageable);
 		}
 
-		List<UserDto> items = userPage.getContent().stream().map(UserDto::from).toList();
+		List<UserDto> items = userPage.getContent().stream().map(userMapper::toDto).toList();
 
 		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
 	public List<UserDto> listAllByRole(String role) {
 		Role roleEnum = parseRole(role);
-		return userRepository.findByRole(roleEnum, PageRequest.of(0, 1000)).stream().map(UserDto::from).toList();
+		return userRepository.findByRole(roleEnum, PageRequest.of(0, 1000)).stream().map(userMapper::toDto).toList();
 	}
 
 	public UserDto createUser(CreateUserRequest request) {
@@ -115,7 +118,7 @@ public class UserService {
 		userRepository.save(user);
 		sendVerificationEmail(user);
 
-		return UserDto.from(user);
+		return userMapper.toDto(user);
 	}
 
 	@Transactional
@@ -143,7 +146,7 @@ public class UserService {
 
 			userRepository.save(user);
 			sendVerificationEmail(user);
-			results.add(UserDto.from(user));
+			results.add(userMapper.toDto(user));
 		}
 
 		return results;
@@ -196,7 +199,7 @@ public class UserService {
 		}
 
 		userRepository.save(user);
-		return UserDto.from(user);
+		return userMapper.toDto(user);
 	}
 
 	public void deleteUser(Long id) {

@@ -194,7 +194,7 @@ class DepartmentServiceTest {
 
 		departmentService.delete(1L);
 
-		verify(departmentRepository).delete(dept);
+		verify(departmentRepository).deleteById(1L);
 	}
 
 	@Test
@@ -213,7 +213,7 @@ class DepartmentServiceTest {
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.admin.room.entity.Room()));
 
 		assertThrows(ResponseStatusException.class, () -> departmentService.delete(1L));
-		verify(departmentRepository, never()).delete(any());
+		verify(departmentRepository, never()).deleteById(anyLong());
 	}
 
 	@Test
@@ -224,6 +224,6 @@ class DepartmentServiceTest {
 		when(teacherRepository.findByDepartmentId(1L)).thenReturn(List.of(new Teacher()));
 
 		assertThrows(ResponseStatusException.class, () -> departmentService.delete(1L));
-		verify(departmentRepository, never()).delete(any());
+		verify(departmentRepository, never()).deleteById(anyLong());
 	}
 }

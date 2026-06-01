@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.admin.department.dto.CreateDepartmentRe
 import com.system_gestion_soutenance.api.admin.department.dto.DepartmentResponse;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.service.DepartmentService;
+import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -18,34 +19,36 @@ import org.springframework.web.bind.annotation.*;
 public class DepartmentController {
 
 	private final DepartmentService departmentService;
+	private final ConfigMapper configMapper;
 
-	public DepartmentController(DepartmentService departmentService) {
+	public DepartmentController(DepartmentService departmentService, ConfigMapper configMapper) {
 		this.departmentService = departmentService;
+		this.configMapper = configMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List all departments")
 	public List<DepartmentResponse> findAll() {
-		return departmentService.findAll().stream().map(DepartmentResponse::from).toList();
+		return departmentService.findAll().stream().map(configMapper::toDepartmentResponse).toList();
 	}
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Get a department by ID")
 	public DepartmentResponse findById(@PathVariable Long id) {
-		return DepartmentResponse.from(departmentService.findById(id));
+		return configMapper.toDepartmentResponse(departmentService.findById(id));
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new department")
 	public ResponseEntity<DepartmentResponse> create(@Valid @RequestBody CreateDepartmentRequest request) {
 		Department department = departmentService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(DepartmentResponse.from(department));
+		return ResponseEntity.status(HttpStatus.CREATED).body(configMapper.toDepartmentResponse(department));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a department")
 	public DepartmentResponse update(@PathVariable Long id, @Valid @RequestBody CreateDepartmentRequest request) {
-		return DepartmentResponse.from(departmentService.update(id, request));
+		return configMapper.toDepartmentResponse(departmentService.update(id, request));
 	}
 
 	@DeleteMapping("/{id}")

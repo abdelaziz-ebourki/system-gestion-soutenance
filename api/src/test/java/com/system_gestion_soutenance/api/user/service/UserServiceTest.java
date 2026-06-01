@@ -63,6 +63,8 @@ class UserServiceTest {
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
+	@Mock
+	private com.system_gestion_soutenance.api.common.mapper.UserMapper userMapper;
 
 	@InjectMocks
 	private UserService userService;
@@ -109,6 +111,23 @@ class UserServiceTest {
 		teacherRequest = new CreateUserRequest("Smith", "Jane", "jane@test.com", "teacher", null, null, null, 1L, 1L);
 		coordinatorRequest = new CreateUserRequest("Coord", "Bob", "bob@test.com", "coordinator", null, null, null,
 				null, null);
+
+		lenient().when(userMapper.toDto(any(User.class))).thenAnswer(invocation -> {
+			User user = invocation.getArgument(0);
+			if (user == null)
+				return null;
+			return new UserDto(user.getId(), user.getEmail(),
+					user.getRole() == null ? null : user.getRole().name().toLowerCase(), user.getLastName(),
+					user.getFirstName(), user.isActive(), (user instanceof Student s) ? s.getCne() : null,
+					(user instanceof Student s && s.getMajor() != null) ? s.getMajor().getId() : null,
+					(user instanceof Student s && s.getMajor() != null) ? s.getMajor().getName() : null,
+					(user instanceof Student s && s.getLevel() != null) ? s.getLevel().getId() : null,
+					(user instanceof Student s && s.getLevel() != null) ? s.getLevel().getName() : null,
+					(user instanceof Teacher t && t.getGrade() != null) ? t.getGrade().getId() : null,
+					(user instanceof Teacher t && t.getGrade() != null) ? t.getGrade().getName() : null,
+					(user instanceof Teacher t && t.getDepartment() != null) ? t.getDepartment().getId() : null,
+					(user instanceof Teacher t && t.getDepartment() != null) ? t.getDepartment().getName() : null);
+		});
 	}
 
 	@Test

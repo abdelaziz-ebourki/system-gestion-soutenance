@@ -32,6 +32,8 @@ class DepartmentControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private com.system_gestion_soutenance.api.common.mapper.ConfigMapper configMapper;
 
 	@Test
 	void findAll_returnsList() throws Exception {

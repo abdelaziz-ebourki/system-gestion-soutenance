@@ -37,13 +37,14 @@ class AuthServiceTest {
 
 	@Mock
 	private PasswordValidator passwordValidator;
-
+	@Mock
+	private com.system_gestion_soutenance.api.common.mapper.UserMapper userMapper;
 	private AuthService authService;
 
 	@org.junit.jupiter.api.BeforeEach
 	void setUp() {
 		authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder, emailService,
-				passwordValidator, "http://localhost:5173");
+				passwordValidator, userMapper, "http://localhost:5173");
 	}
 
 	private User createActiveUser() {
@@ -63,6 +64,9 @@ class AuthServiceTest {
 		when(passwordEncoder.matches("password", "encoded-pass")).thenReturn(true);
 		when(jwtTokenProvider.generateToken("1", "ADMIN")).thenReturn("jwt-token");
 		when(jwtTokenProvider.getExpirationMs()).thenReturn(7200000L);
+		when(userMapper.toDto(user)).thenReturn(new com.system_gestion_soutenance.api.user.dto.UserDto(user.getId(),
+				user.getEmail(), user.getRole().name().toLowerCase(), user.getLastName(), user.getFirstName(),
+				user.isActive(), null, null, null, null, null, null, null, null, null));
 
 		LoginResponse response = authService.login(new LoginRequest("admin@test.com", "password"));
 

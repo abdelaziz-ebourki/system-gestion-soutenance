@@ -8,7 +8,7 @@ import com.system_gestion_soutenance.api.auth.dto.VerifyRequest;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.common.util.PasswordValidator;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
-import com.system_gestion_soutenance.api.user.dto.UserDto;
+import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.Instant;
@@ -28,16 +28,18 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final EmailService emailService;
 	private final PasswordValidator passwordValidator;
+	private final UserMapper userMapper;
 	private final String baseUrl;
 
 	public AuthService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
 			PasswordEncoder passwordEncoder, EmailService emailService, PasswordValidator passwordValidator,
-			@Value("${app.ui.base-url}") String baseUrl) {
+			UserMapper userMapper, @Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
 		this.passwordValidator = passwordValidator;
+		this.userMapper = userMapper;
 		this.baseUrl = baseUrl;
 	}
 
@@ -64,7 +66,7 @@ public class AuthService {
 		String token = jwtTokenProvider.generateToken(String.valueOf(user.getId()), user.getRole().name());
 		long expiresAt = System.currentTimeMillis() + jwtTokenProvider.getExpirationMs();
 
-		return new LoginResponse(UserDto.from(user), token, expiresAt);
+		return new LoginResponse(userMapper.toDto(user), token, expiresAt);
 	}
 
 	@Transactional

@@ -77,6 +77,6 @@ class LevelConfigServiceTest {
 		when(studentRepository.findByLevelId(1L)).thenReturn(List.of());
 
 		levelConfigService.delete(1L);
-		verify(levelRepository).delete(level);
+		verify(levelRepository).deleteById(1L);
 	}
 }

@@ -75,8 +75,7 @@ class GradeConfigServiceTest {
 		when(teacherRepository.findByGradeId(1L)).thenReturn(List.of());
 
 		gradeConfigService.delete(1L);
-
-		verify(gradeRepository).delete(grade);
+		verify(gradeRepository).deleteById(1L);
 	}
 
 	@Test
