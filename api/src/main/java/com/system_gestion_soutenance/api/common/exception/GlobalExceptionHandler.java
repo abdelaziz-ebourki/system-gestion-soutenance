@@ -24,4 +24,10 @@ public class GlobalExceptionHandler {
 				.orElse("Erreur de validation");
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", message));
 	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(Map.of("message", "Une erreur interne est survenue."));
+	}
 }
