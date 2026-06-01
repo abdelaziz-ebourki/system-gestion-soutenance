@@ -3,6 +3,8 @@ package com.system_gestion_soutenance.api.teacher.evaluation.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
+import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
@@ -10,6 +12,7 @@ import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmit
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +28,8 @@ class EvaluationServiceTest {
 
 	@Mock
 	private EvaluationRepository evaluationRepository;
+	@Mock
+	private DefenseSessionRepository defenseSessionRepository;
 	@Mock
 	private ProjectRepository projectRepository;
 	@Mock
@@ -49,6 +54,10 @@ class EvaluationServiceTest {
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
 
+		DefenseSession ds = new DefenseSession();
+		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
 		Map<String, Object> result = service.submit(1L, req);
 
@@ -65,6 +74,10 @@ class EvaluationServiceTest {
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
 
+		DefenseSession ds = new DefenseSession();
+		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(null, "Good");
 		Map<String, Object> result = service.submit(1L, req);
 
@@ -78,6 +91,10 @@ class EvaluationServiceTest {
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
+
+		DefenseSession ds = new DefenseSession();
+		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, null);
 		Map<String, Object> result = service.submit(1L, req);
