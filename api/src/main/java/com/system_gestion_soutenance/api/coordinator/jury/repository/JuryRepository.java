@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface JuryRepository extends JpaRepository<Jury, Long> {
 	List<Jury> findByProjectId(Long projectId);
 
-	@Query("SELECT DISTINCT j FROM Jury j JOIN FETCH j.project JOIN FETCH j.members m JOIN FETCH m.teacher")
+	@Query("SELECT DISTINCT j FROM Jury j LEFT JOIN FETCH j.project LEFT JOIN FETCH j.members m LEFT JOIN FETCH m.teacher")
 	List<Jury> findAllWithDetails();
 }

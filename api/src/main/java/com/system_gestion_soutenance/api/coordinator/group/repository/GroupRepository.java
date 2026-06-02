@@ -12,6 +12,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 	@Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :studentId")
 	Optional<Group> findByStudentId(Long studentId);
 
-	@Query("SELECT DISTINCT g FROM Group g JOIN FETCH g.project JOIN FETCH g.students")
+	@Query("SELECT DISTINCT g FROM Group g LEFT JOIN FETCH g.project LEFT JOIN FETCH g.students")
 	List<Group> findAllWithDetails();
 }
