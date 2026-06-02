@@ -1,0 +1,5382 @@
+{
+  "info": {
+    "name": "Système Gestion Soutenance",
+    "description": "Complete API collection for the Système Gestion Soutenance project. Covers 100+ endpoints with happy path, validation error, 404, and RBAC scenarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "opencode"
+  },
+  "item": [
+    {
+      "name": "1 - Setup & Login",
+      "description": "Login with each role to populate token environment variables",
+      "item": [
+        {
+          "name": "Login as Admin",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"admin_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@univh2c.ma\", \"password\": \"1234\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login as Coordinator",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"coord_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"coord@univh2c.ma\", \"password\": \"1234\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login as Teacher",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"teacher_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"teacher@univh2c.ma\", \"password\": \"1234\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login as Student",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"student_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"student@univh2c.ma\", \"password\": \"1234\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Admin",
+      "description": "Admin endpoints (requires ADMIN role)",
+      "item": [
+        {
+          "name": "List all users",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List users by role",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users?role=student&page=0&limit=5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List students (paginated)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "students"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List teachers (paginated)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/teachers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "teachers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List coordinators (paginated)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/coordinators",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "coordinators"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List all teachers (simple)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/teachers-list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "teachers-list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List all students (simple)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/students-list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "students-list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create user",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lastName\": \"Test\", \"firstName\": \"User\", \"email\": \"testuser@test.com\", \"role\": \"STUDENT\", \"cne\": \"CNE12345\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create student",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "students"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lastName\": \"New\", \"firstName\": \"Student\", \"email\": \"newstudent@test.com\", \"cne\": \"CNE99999\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create teacher",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/teachers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "teachers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lastName\": \"New\", \"firstName\": \"Teacher\", \"email\": \"newteacher@test.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create coordinator",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/coordinators",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "coordinators"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lastName\": \"New\", \"firstName\": \"Coord\", \"email\": \"newcoord@test.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bulk create users",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/bulk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "bulk"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"users\": [{\"lastName\": \"Bulk\", \"firstName\": \"User1\", \"email\": \"bulk1@test.com\"}], \"role\": \"STUDENT\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update user",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lastName\": \"Updated\", \"firstName\": \"Name\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete user (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List faculties",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get faculty by ID",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create faculty",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"New Faculty\", \"code\": \"NF\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update faculty",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Faculty\", \"code\": \"UF\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete faculty (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List departments",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "departments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get department by ID",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/departments/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "departments",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create department",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "departments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"New Dept\", \"code\": \"ND\", \"facultyId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update department",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/departments/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "departments",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Dept\", \"code\": \"UD\", \"facultyId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete department (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/departments/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "departments",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List rooms (paginated)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create room",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Room A\", \"capacity\": 30, \"departmentId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bulk create rooms",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms/bulk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms",
+                "bulk"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rooms\": [{\"name\": \"Room B\", \"capacity\": 25, \"departmentId\": 1}, {\"name\": \"Room C\", \"capacity\": 40, \"departmentId\": 1}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update room",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Room\", \"capacity\": 30, \"departmentId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete room (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List levels",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/levels",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "levels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create level",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/levels",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "levels"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Master 3\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update level",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/levels/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "levels",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Level\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete level (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/levels/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "levels",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List majors",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/majors",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "majors"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create major",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/majors",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "majors"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"New Major\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update major",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/majors/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "majors",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Major\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete major (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/majors/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "majors",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List grades",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/grades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "grades"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create grade",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/grades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "grades"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"New Grade\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update grade",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/grades/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "grades",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Grade\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete grade (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/grades/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "grades",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List jury role templates",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/jury-role-templates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "jury-role-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create jury role template",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/jury-role-templates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "jury-role-templates"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"New Template\", \"defenseType\": \"PFE\", \"roles\": [{\"name\": \"President\", \"count\": 1, \"coefficient\": 2}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update template",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/jury-role-templates/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "jury-role-templates",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Template\", \"defenseType\": \"PFE\", \"roles\": [{\"name\": \"President\", \"count\": 1, \"coefficient\": 3}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete template (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/jury-role-templates/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "jury-role-templates",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get general settings",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/general",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "general"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update general settings",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/general",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "general"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"institutionName\": \"Test Univ\", \"timezone\": \"Africa/Casablanca\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get document config",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "documents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update document config",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "documents"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"maxFileSizeMb\": 10, \"allowedExtensions\": \".pdf,.doc,.docx\", \"versionLimit\": 3}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get email config",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/email",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "email"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update email config",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/email",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "email"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"host\": \"localhost\", \"port\": 1025, \"senderName\": \"Test\", \"senderEmail\": \"test@test.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get defense settings",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update defense settings",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/config/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "settings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startTime\": \"08:00\", \"endTime\": \"18:00\", \"defenseDuration\": 30, \"breakDuration\": 10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List audit logs",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/audit-logs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "audit-logs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get admin stats",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create faculty - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\", \"code\": \"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create room - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\", \"capacity\": -1, \"departmentId\": null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create user - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lastName\": \"\", \"firstName\": \"\", \"email\": \"invalid\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete faculty - not found",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404\", function() { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties/99999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties",
+                "99999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get faculty - not found",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404\", function() { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties/99999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties",
+                "99999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update faculty - not found",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404\", function() { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/faculties/99999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "faculties",
+                "99999"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Nope\", \"code\": \"NP\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List rooms - invalid pagination",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms?page=-1&limit=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk create - empty list",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/bulk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "bulk"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"users\": [], \"role\": \"STUDENT\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Coordinator",
+      "description": "Coordinator endpoints (requires ADMIN or COORDINATOR role)",
+      "item": [
+        {
+          "name": "List teachers (coord)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/teachers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "teachers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search teachers (coord)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/teachers?search=prof",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "teachers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List students (coord)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "students"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search students (coord)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/students?search=student",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "students"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List groups",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create group",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"groupName\": \"Test Group\", \"projectId\": 1, \"studentIds\": [1], \"sessionId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete group (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List projects",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "projects"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create project",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "projects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"New Project\", \"description\": \"Test\", \"supervisorId\": 3, \"defenseType\": \"PFE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update project",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/projects/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "projects",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Updated Project\", \"description\": \"Updated\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete project (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/projects/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "projects",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List juries",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/juries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "juries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create jury",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/juries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "juries"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"projectId\": 1, \"templateId\": 1, \"members\": [{\"teacherId\": 3, \"roleName\": \"President\"}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update jury",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/juries/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "juries",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"members\": [{\"teacherId\": 4, \"roleName\": \"Rapporteur\"}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete jury (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/juries/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "juries",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List defense sessions",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create defense session",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Session Test\", \"defenseType\": \"PFE\", \"startDate\": \"2026-06-15\", \"endDate\": \"2026-06-30\", \"maxGroupSize\": 3, \"defenseDuration\": 30, \"breakDuration\": 10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update defense session",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Session\", \"defenseType\": \"PFE\", \"startDate\": \"2026-06-15\", \"endDate\": \"2026-07-05\", \"maxGroupSize\": 3, \"defenseDuration\": 30, \"breakDuration\": 10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete defense session (not found)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions",
+                "999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Transition session status",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions/1/transition",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions",
+                "1",
+                "transition"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"toStatus\": \"ACTIVE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cancel defense",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defenses/1/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defenses",
+                "1",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get schedule",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/schedule",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "schedule"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save schedule",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/schedule",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "schedule"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"schedule\": {}, \"defenseSessionId\": \"1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Auto-generate schedule",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/schedule/auto-generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "schedule",
+                "auto-generate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"defenseSessionId\": \"1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publish schedule",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/schedule/publish",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "schedule",
+                "publish"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"defenseSessionId\": \"1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Validate schedule",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/schedule/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "schedule",
+                "validate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"schedule\": {}, \"defenseSessionId\": \"1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List grades (coord)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/grades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "grades"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get coordinator stats",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate evaluation sheets",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/documents/evaluation-sheets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "documents",
+                "evaluation-sheets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"projectId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Generate attendance lists",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/documents/attendance-lists",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "documents",
+                "attendance-lists"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sessionId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Generate jury convocations",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/documents/jury-convocations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "documents",
+                "jury-convocations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"projectId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Generate schedule doc",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/documents/schedule",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "documents",
+                "schedule"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sessionId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Generate proces verbal",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/documents/proces-verbal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "documents",
+                "proces-verbal"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"projectId\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List unavailability",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/unavailability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "unavailability"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create group - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"groupName\": \"\", \"projectId\": null, \"studentIds\": [], \"sessionId\": null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create project - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "projects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"\", \"supervisorId\": null, \"defenseType\": \"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create session - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\", \"defenseType\": \"\", \"startDate\": \"\", \"endDate\": \"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create jury - validation error",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/juries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "juries"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"projectId\": null, \"templateId\": null, \"members\": []}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Student",
+      "description": "Student endpoints (requires STUDENT role)",
+      "item": [
+        {
+          "name": "Get my group",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/group",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "group"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create my group",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/group",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "group"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Join group",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/group/1/join",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "group",
+                "1",
+                "join"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my defense info",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/defense",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "defense"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download my convocation (PDF)",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/convocation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "convocation"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List my documents",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "documents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my stats",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 - Teacher",
+      "description": "Teacher endpoints (requires TEACHER role)",
+      "item": [
+        {
+          "name": "List my evaluations",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/evaluations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "evaluations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit evaluation",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/evaluations/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "evaluations",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"score\": 15.5, \"comment\": \"Good work\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get my schedule",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/schedule",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "schedule"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my stats",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my unavailability",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/unavailability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "unavailability"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Set unavailability",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/unavailability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "unavailability"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"slotsByDate\": {\"2026-06-15\": [\"08:00-10:00\", \"14:00-16:00\"]}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 - Notifications",
+      "description": "Notification endpoints (requires any authenticated user)",
+      "item": [
+        {
+          "name": "List notifications",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark notification read",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/1/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "1",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark all notifications read",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/read-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "read-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send notification email",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/1/send-email",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "1",
+                "send-email"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark not found - 404",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404\", function() { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/999/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "999",
+                "read"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 - Auth",
+      "description": "Authentication endpoints (public)",
+      "item": [
+        {
+          "name": "Forgot password",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"student@univh2c.ma\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reset password",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"invalid-token\", \"newPassword\": \"NewPass123!\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Verify account",
+          "description": "",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-account",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-account"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"invalid-token\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login - wrong password",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", function() { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@univh2c.ma\", \"password\": \"wrongpass\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login - invalid email",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"notanemail\", \"password\": \"1234\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 - RBAC & Error Scenarios",
+      "description": "Role-based access control tests and error scenarios",
+      "item": [
+        {
+          "name": "No token - admin",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", function() { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "No token - coordinator",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", function() { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "No token - student",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", function() { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/group",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "group"
+              ]
+            }
+          }
+        },
+        {
+          "name": "No token - teacher",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", function() { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/evaluations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "evaluations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student -> admin",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student -> coordinator",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Student -> teacher",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/evaluations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "evaluations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Teacher -> student",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/group",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "group"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Coordinator -> admin",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Coordinator -> teacher",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/evaluations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "evaluations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Coordinator -> student",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403\", function() { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/group",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "group"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin -> coordinator (allowed)",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin -> rooms (allowed)",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Coordinator -> rooms (allowed)",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rooms"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
