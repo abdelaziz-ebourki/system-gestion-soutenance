@@ -38,21 +38,21 @@ class AuthControllerTest {
 		LoginResponse response = new LoginResponse(mock(UserDto.class), "jwt-token", 9999999999L);
 		when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
-		mockMvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content("""
+		mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("""
 				{"email":"admin@test.com","password":"password"}
 				""")).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("jwt-token"));
 	}
 
 	@Test
 	void login_withMissingEmail_returns400() throws Exception {
-		mockMvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content("""
+		mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("""
 				{"password":"password"}
 				""")).andExpect(status().isBadRequest());
 	}
 
 	@Test
 	void login_withInvalidEmail_returns400() throws Exception {
-		mockMvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content("""
+		mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("""
 				{"email":"not-an-email","password":"password"}
 				""")).andExpect(status().isBadRequest());
 	}

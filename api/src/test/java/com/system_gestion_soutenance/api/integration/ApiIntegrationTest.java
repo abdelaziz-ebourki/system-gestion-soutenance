@@ -21,7 +21,7 @@ class ApiIntegrationTest {
 		// 1. Login
 		Map<String, String> loginRequest = Map.of("email", "admin@univh2c.ma", "password", "1234");
 
-		ResponseEntity<Map<String, Object>> loginResponse = restTemplate.exchange("/api/login", HttpMethod.POST,
+		ResponseEntity<Map<String, Object>> loginResponse = restTemplate.exchange("/api/auth/login", HttpMethod.POST,
 				new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, Object>>() {
 				});
 

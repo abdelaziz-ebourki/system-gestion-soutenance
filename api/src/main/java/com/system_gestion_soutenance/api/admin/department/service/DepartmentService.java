@@ -48,9 +48,11 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 		department.setName(request.name());
 		department.setCode(request.code());
 
-		Faculty faculty = facultyRepository.findById(request.facultyId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faculté introuvable"));
-		department.setFaculty(faculty);
+		if (request.facultyId() != null) {
+			Faculty faculty = facultyRepository.findById(request.facultyId())
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faculté introuvable"));
+			department.setFaculty(faculty);
+		}
 
 		if (request.headId() != null) {
 			Teacher head = teacherRepository.findById(request.headId()).orElseThrow(
@@ -69,9 +71,13 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 		department.setName(request.name());
 		department.setCode(request.code());
 
-		Faculty faculty = facultyRepository.findById(request.facultyId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faculté introuvable"));
-		department.setFaculty(faculty);
+		if (request.facultyId() != null) {
+			Faculty faculty = facultyRepository.findById(request.facultyId())
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faculté introuvable"));
+			department.setFaculty(faculty);
+		} else {
+			department.setFaculty(null);
+		}
 
 		if (request.headId() != null) {
 			Teacher head = teacherRepository.findById(request.headId()).orElseThrow(

@@ -126,7 +126,7 @@ class GroupRepositoryTest {
 	@Test
 	void findByStudentId_noMatch_returnsEmpty() {
 		Optional<Group> result = repository.findByStudentId(999L);
-		assertFalse(result.isPresent());
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

@@ -16,9 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -55,9 +52,7 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-						.csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler())
-						.ignoringRequestMatchers("/api/login", "/api/auth/**"))
+				.csrf(csrf -> csrf.disable())
 				.headers(headers -> headers.frameOptions(o -> o.disable()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
@@ -79,7 +74,6 @@ public class SecurityConfig {
 						.requestMatchers("/api/teacher/**").hasRole("TEACHER").requestMatchers("/api/student/**")
 						.hasRole("STUDENT").requestMatchers("/api/notifications/**").authenticated().anyRequest()
 						.authenticated())
-				.addFilterBefore(new CsrfCookieFilter(), CsrfFilter.class)
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
