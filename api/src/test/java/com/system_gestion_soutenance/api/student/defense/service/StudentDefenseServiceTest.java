@@ -166,6 +166,40 @@ class StudentDefenseServiceTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	void getDefense_withJuryTeacher_putsMemberInResult() {
+		Project project = new Project();
+		project.setId(10L);
+		project.setTitle("Projet Test");
+
+		Teacher teacher = new Teacher();
+		teacher.setFirstName("Jane");
+		teacher.setLastName("Smith");
+
+		JuryMember member = new JuryMember();
+		member.setTeacher(teacher);
+		member.setRoleName("Président");
+
+		Jury jury = new Jury();
+		jury.setMembers(List.of(member));
+
+		Group group = new Group();
+		group.setProject(project);
+		group.setStudents(List.of(student(1L)));
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
+		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
+
+		Map<String, Object> result = service.getDefense(1L);
+
+		List<Map<String, String>> juryMembers = (List<Map<String, String>>) result.get("juryMembers");
+		assertEquals(1, juryMembers.size());
+		assertEquals("Jane Smith", juryMembers.get(0).get("name"));
+		assertEquals("Président", juryMembers.get(0).get("role"));
+	}
+
+	@Test
 	void getDefense_withoutSchedule_returnsPending() {
 		Project project = new Project();
 		project.setId(10L);

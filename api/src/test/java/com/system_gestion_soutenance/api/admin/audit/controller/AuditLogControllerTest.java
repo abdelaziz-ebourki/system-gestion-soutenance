@@ -69,8 +69,7 @@ class AuditLogControllerTest {
 
 		mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isArray()).andExpect(jsonPath("$.items.length()").value(1))
-				.andExpect(jsonPath("$.items[0].id").value(1))
-				.andExpect(jsonPath("$.items[0].action").value("CREATE"))
+				.andExpect(jsonPath("$.items[0].id").value(1)).andExpect(jsonPath("$.items[0].action").value("CREATE"))
 				.andExpect(jsonPath("$.items[0].entity").value("User")).andExpect(jsonPath("$.total").value(1))
 				.andExpect(jsonPath("$.currentPage").value(0)).andExpect(jsonPath("$.size").value(20));
 	}
@@ -96,9 +95,8 @@ class AuditLogControllerTest {
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
 				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"a@a.com"}
 				""")).andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(1))
-				.andExpect(jsonPath("$.action").value("DELETE"))
-				.andExpect(jsonPath("$.entity").value("User")).andExpect(jsonPath("$.entityId").value(1))
-				.andExpect(jsonPath("$.adminEmail").value("a@a.com"));
+				.andExpect(jsonPath("$.action").value("DELETE")).andExpect(jsonPath("$.entity").value("User"))
+				.andExpect(jsonPath("$.entityId").value(1)).andExpect(jsonPath("$.adminEmail").value("a@a.com"));
 	}
 
 	@Test
