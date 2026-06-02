@@ -392,4 +392,47 @@ class AuditAspectTest {
 
 		verify(auditLogRepository).save(argThat(log -> 1L == log.getEntityId()));
 	}
+
+	@Test
+	void audit_proceedThrows_savesErrorLogAndRethrows() throws Throwable {
+		when(joinPoint.proceed()).thenThrow(new RuntimeException("error detail"));
+		when(joinPoint.getArgs()).thenReturn(new Object[]{42L});
+
+		Audited audited = mock(Audited.class);
+		when(audited.action()).thenReturn("CREATE");
+		when(audited.entity()).thenReturn("Test");
+
+		assertThrows(RuntimeException.class, () -> aspect.audit(joinPoint, audited));
+
+		verify(auditLogRepository).save(argThat(log ->
+				"CREATE".equals(log.getAction())
+				&& "Test".equals(log.getEntity())
+				&& log.getAdminEmail() == null
+				&& log.getDetails().contains("error detail")
+				&& log.getDetails().contains("#42")
+		));
+	}
+
+	@Test
+	void audit_entityIdNull_whenNoIdInResultOrArgs() throws Throwable {
+		when(joinPoint.proceed()).thenReturn(new Object());
+		when(joinPoint.getArgs()).thenReturn(new Object[]{"string", new Object()});
+
+		Authentication auth = mock(Authentication.class);
+		when(auth.isAuthenticated()).thenReturn(true);
+		when(auth.getPrincipal()).thenReturn("admin@test.com");
+		SecurityContextHolder.getContext().setAuthentication(auth);
+
+		Audited audited = mock(Audited.class);
+		when(audited.action()).thenReturn("UPDATE");
+		when(audited.entity()).thenReturn("E");
+
+		aspect.audit(joinPoint, audited);
+
+		verify(auditLogRepository).save(argThat(log ->
+				"admin@test.com".equals(log.getAdminEmail())
+				&& log.getEntityId() == null
+				&& "UPDATE E".equals(log.getDetails())
+		));
+	}
 }
