@@ -12,6 +12,6 @@ public interface SlotAssignmentRepository extends JpaRepository<SlotAssignment, 
 
 	List<SlotAssignment> findByProjectIdIn(List<Long> projectIds);
 
-	@Query("SELECT s FROM SlotAssignment s JOIN FETCH s.room")
+	@Query("SELECT s FROM SlotAssignment s LEFT JOIN FETCH s.room")
 	List<SlotAssignment> findAllWithRoom();
 }
