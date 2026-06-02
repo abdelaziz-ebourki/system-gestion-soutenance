@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.service.UserCacheService;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
@@ -110,5 +111,59 @@ class JwtAuthFilterTest {
 
 		assertNull(SecurityContextHolder.getContext().getAuthentication());
 		verify(filterChain).doFilter(request, response);
+	}
+
+	@Test
+	void doFilter_withValidTokenInCookie_setsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn(null);
+		when(request.getCookies()).thenReturn(new Cookie[]{new Cookie("jwt_token", "valid-token")});
+		when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
+		when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("1");
+
+		User user = new User();
+		user.setId(1L);
+		user.setEmail("admin@test.com");
+		user.setRole(Role.ADMIN);
+		user.setActive(true);
+		when(userCacheService.getUserById(1L)).thenReturn(Optional.of(user));
+
+		filter.doFilter(request, response, filterChain);
+
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		assertNotNull(auth);
+		assertEquals(user, auth.getPrincipal());
+		assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+		verify(filterChain).doFilter(request, response);
+	}
+
+	@Test
+	void doFilter_withValidTokenButInactiveUser_returns403() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
+		when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
+		when(jwtTokenProvider.getUserIdFromToken("valid-token")).thenReturn("1");
+
+		User user = new User();
+		user.setId(1L);
+		user.setEmail("inactive@test.com");
+		user.setRole(Role.ADMIN);
+		user.setActive(false);
+		when(userCacheService.getUserById(1L)).thenReturn(Optional.of(user));
+
+		filter.doFilter(request, response, filterChain);
+
+		verify(response).sendError(HttpServletResponse.SC_FORBIDDEN, "Compte désactivé");
+		verify(filterChain, never()).doFilter(any(), any());
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+	}
+
+	@Test
+	void doFilter_withNonBearerHeader_skipsAuthentication() throws Exception {
+		when(request.getHeader("Authorization")).thenReturn("Basic xxx");
+
+		filter.doFilter(request, response, filterChain);
+
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+		verify(filterChain).doFilter(request, response);
+		verifyNoInteractions(jwtTokenProvider);
 	}
 }
