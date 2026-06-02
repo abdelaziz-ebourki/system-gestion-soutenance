@@ -147,6 +147,7 @@
 						<exclude>**/ApiApplication.class</exclude>
 						<exclude>**/config/OpenApiConfig.class</exclude>
 						<exclude>**/config/SecurityConfig.class</exclude>
+						<exclude>**/common/mapper/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>

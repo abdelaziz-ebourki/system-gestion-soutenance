@@ -41,11 +41,11 @@ class NotificationServiceTest {
 	@BeforeEach
 	void setUp() {
 		notification = new AppNotification(1L, "info", "Title", "Message", LocalDateTime.now(), false, null, null);
-		
+
 		activeUser = new User();
 		activeUser.setEmail("active@test.com");
 		activeUser.setActive(true);
-		
+
 		inactiveUser = new User();
 		inactiveUser.setEmail("inactive@test.com");
 		inactiveUser.setActive(false);

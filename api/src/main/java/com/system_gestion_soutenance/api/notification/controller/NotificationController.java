@@ -22,7 +22,8 @@ public class NotificationController {
 	private final AppNotificationMapper mapper;
 	private final NotificationService notificationService;
 
-	public NotificationController(NotificationRepository repository, AppNotificationMapper mapper, NotificationService notificationService) {
+	public NotificationController(NotificationRepository repository, AppNotificationMapper mapper,
+			NotificationService notificationService) {
 		this.repository = repository;
 		this.mapper = mapper;
 		this.notificationService = notificationService;

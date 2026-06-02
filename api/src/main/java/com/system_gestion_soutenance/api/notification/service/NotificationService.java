@@ -17,7 +17,8 @@ public class NotificationService {
 	private final UserRepository userRepository;
 	private final EmailService emailService;
 
-	public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository, EmailService emailService) {
+	public NotificationService(NotificationRepository notificationRepository, UserRepository userRepository,
+			EmailService emailService) {
 		this.notificationRepository = notificationRepository;
 		this.userRepository = userRepository;
 		this.emailService = emailService;
@@ -29,7 +30,7 @@ public class NotificationService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification non trouvée"));
 
 		List<User> users = userRepository.findAll();
-		
+
 		for (User user : users) {
 			if (user.isActive()) {
 				emailService.sendEmail(user.getEmail(), notification.getTitle(), notification.getMessage());
