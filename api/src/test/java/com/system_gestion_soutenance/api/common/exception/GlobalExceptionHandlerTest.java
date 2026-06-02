@@ -46,6 +46,18 @@ class GlobalExceptionHandlerTest {
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.email").value("must not be blank"));
 	}
 
+	@Test
+	void handleResponseStatusException_withNullReason_returnsDefaultMessage() throws Exception {
+		mockMvc.perform(get("/test/response-status/null-reason")).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Erreur"));
+	}
+
+	@Test
+	void handleGeneralException_returns500() throws Exception {
+		mockMvc.perform(get("/test/unhandled")).andExpect(status().isInternalServerError())
+				.andExpect(jsonPath("$.message").value("Une erreur interne est survenue."));
+	}
+
 	@RestController
 	static class TestController {
 
@@ -57,6 +69,16 @@ class GlobalExceptionHandlerTest {
 		@GetMapping("/test/response-status/bad-request")
 		ResponseEntity<Map<String, String>> throwBadRequest() {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
+		}
+
+		@GetMapping("/test/response-status/null-reason")
+		ResponseEntity<Map<String, String>> throwNullReason() {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, null);
+		}
+
+		@GetMapping("/test/unhandled")
+		ResponseEntity<Map<String, String>> throwUnhandled() {
+			throw new RuntimeException("boom");
 		}
 
 		@PostMapping("/test/validate")
