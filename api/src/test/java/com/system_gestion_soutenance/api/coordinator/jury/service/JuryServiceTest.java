@@ -222,7 +222,7 @@ class JuryServiceTest {
 
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("members", List.of(Map.of("teacherId", "5", "roleName", "président")));
-		var result = service.update(1L, updates);
+		service.update(1L, updates);
 
 		assertEquals(1, existingMembers.size());
 		assertEquals("président", existingMembers.get(0).getRoleName());

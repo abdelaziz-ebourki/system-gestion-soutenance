@@ -4,7 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.teacher.schedule.service.TeacherScheduleService;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -27,8 +26,6 @@ class TeacherScheduleControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
 	@MockitoBean
 	private TeacherScheduleService service;
 	@MockitoBean

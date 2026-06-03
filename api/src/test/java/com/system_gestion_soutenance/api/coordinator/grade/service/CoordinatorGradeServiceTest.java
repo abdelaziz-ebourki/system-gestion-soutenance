@@ -18,7 +18,6 @@ import com.system_gestion_soutenance.api.teacher.evaluation.repository.Evaluatio
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class CoordinatorGradeServiceTest {

@@ -4,7 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.service.JuryRoleTemplateService;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
@@ -26,8 +25,6 @@ class JuryRoleTemplateControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
 	@MockitoBean
 	private JuryRoleTemplateService juryRoleTemplateService;
 	@MockitoBean

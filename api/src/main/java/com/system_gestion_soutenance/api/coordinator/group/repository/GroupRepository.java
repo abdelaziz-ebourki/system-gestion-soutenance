@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface GroupRepository extends JpaRepository<Group, Long> {
 	List<Group> findByProjectId(Long projectId);
 
-@Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :studentId")
-Optional<Group> findByStudentId(Long studentId);
+	@Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :studentId")
+	Optional<Group> findByStudentId(Long studentId);
 
 	@Query("SELECT DISTINCT g FROM Group g LEFT JOIN FETCH g.project LEFT JOIN FETCH g.students")
 	List<Group> findAllWithDetails();

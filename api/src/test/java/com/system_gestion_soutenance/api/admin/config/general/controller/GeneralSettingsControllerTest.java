@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.admin.config.general.dto.UpdateGeneralSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
 import com.system_gestion_soutenance.api.admin.config.general.service.GeneralSettingsService;
@@ -26,8 +25,6 @@ class GeneralSettingsControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@MockitoBean
 	private GeneralSettingsService service;

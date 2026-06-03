@@ -4,7 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
 import com.system_gestion_soutenance.api.admin.config.grade.service.GradeConfigService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
@@ -24,8 +23,6 @@ class GradeConfigControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
 	@MockitoBean
 	private GradeConfigService gradeConfigService;
 	@MockitoBean

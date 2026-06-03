@@ -4,7 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
 import com.system_gestion_soutenance.api.admin.config.email.service.EmailConfigService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
@@ -23,8 +22,6 @@ class EmailConfigControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
 	@MockitoBean
 	private EmailConfigService service;
 	@MockitoBean

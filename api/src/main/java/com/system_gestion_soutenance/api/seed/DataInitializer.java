@@ -175,7 +175,6 @@ public class DataInitializer implements CommandLineRunner {
 		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
 		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
 		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
-		List<Department> depts = List.of(dInfo, dMath, dPhys, dBio);
 
 		// Phase 6: Users
 		User admin = new User();
@@ -222,7 +221,6 @@ public class DataInitializer implements CommandLineRunner {
 		// Phase 8: Students (100)
 		record StudentSeed(String lastName, String firstName, String email, String cne, Major major, Level level) {
 		}
-		List<StudentSeed> studentSeeds = new ArrayList<>();
 
 		String[][] studentData = {{"Khalid", "Mohamed", "student", "E13000999"},
 				{"Benali", "Salma", "student1", "E1300001"}, {"Fassi", "Yassine", "student2", "E1300002"},
@@ -293,8 +291,6 @@ public class DataInitializer implements CommandLineRunner {
 		List<Student> studentsList = students;
 
 		// Phase 9: Rooms
-		record RoomSeed(String name, int capacity, Department dept) {
-		}
 		List<Room> rooms = roomRepo
 				.saveAll(List.of(new Room(null, "Amphi A", 200, dInfo), new Room(null, "Amphi B", 150, dInfo),
 						new Room(null, "Salle 101", 50, dInfo), new Room(null, "Salle 102", 40, dMath),
