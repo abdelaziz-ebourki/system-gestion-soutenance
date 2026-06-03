@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
+import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
@@ -34,12 +35,12 @@ public class EvaluationService {
 		this.groupRepository = groupRepository;
 	}
 
-	public List<Map<String, Object>> findByTeacher(Long teacherId) {
+	public List<EvaluationResponse> findByTeacher(Long teacherId) {
 		return evaluationRepository.findByTeacherId(teacherId).stream().map(this::toResponse)
 				.collect(Collectors.toList());
 	}
 
-	public Map<String, Object> submit(Long id, EvaluationSubmitRequest request) {
+	public EvaluationResponse submit(Long id, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));
 
@@ -65,21 +66,16 @@ public class EvaluationService {
 		return toResponse(evaluationRepository.save(evaluation));
 	}
 
-	private Map<String, Object> toResponse(Evaluation evaluation) {
-		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("id", evaluation.getId());
-		map.put("defenseId", evaluation.getDefenseSessionId());
-		map.put("role", evaluation.getRole());
-		map.put("score", evaluation.getScore());
-		map.put("comment", evaluation.getComment());
-		map.put("status", evaluation.getStatus());
-		map.put("submittedAt", evaluation.getSubmittedAt());
-
+	private EvaluationResponse toResponse(Evaluation evaluation) {
 		Project project = projectRepository.findById(evaluation.getProjectId()).orElse(null);
-		map.put("projectTitle", project != null ? project.getTitle() : "");
-		map.put("studentNames", getStudentNames(evaluation.getProjectId()));
-
-		return map;
+		return new EvaluationResponse(
+				evaluation.getId(),
+				evaluation.getProjectId(),
+				project != null ? project.getTitle() : "",
+				evaluation.getScore(),
+				evaluation.getComment(),
+				evaluation.getStatus()
+		);
 	}
 
 	private List<String> getStudentNames(Long projectId) {

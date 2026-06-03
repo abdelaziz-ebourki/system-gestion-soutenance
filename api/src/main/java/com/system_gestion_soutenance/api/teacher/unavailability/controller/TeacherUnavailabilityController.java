@@ -1,11 +1,13 @@
 package com.system_gestion_soutenance.api.teacher.unavailability.controller;
 
+import com.system_gestion_soutenance.api.teacher.unavailability.dto.CreateUnavailabilityRequest;
+import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest;
+import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse;
 import com.system_gestion_soutenance.api.teacher.unavailability.service.TeacherUnavailabilityService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-import java.util.Map;
+import jakarta.validation.Valid;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,21 +24,14 @@ public class TeacherUnavailabilityController {
 
 	@GetMapping
 	@Operation(summary = "Get unavailability for the connected teacher")
-	public Map<String, Object> get() {
+	public TeacherUnavailabilityResponse get() {
 		return service.getByTeacher(getCurrentUserId());
 	}
 
-	@SuppressWarnings("unchecked")
 	@PostMapping
 	@Operation(summary = "Save unavailability slots for the connected teacher")
-	public Map<String, Object> save(@RequestBody Map<String, Object> body) {
-		Map<String, List<String>> slotsByDate;
-		if (body.get("slotsByDate") != null) {
-			slotsByDate = (Map<String, List<String>>) body.get("slotsByDate");
-		} else {
-			slotsByDate = (Map<String, List<String>>) (Map) body;
-		}
-		return service.saveForTeacher(getCurrentUserId(), slotsByDate);
+	public TeacherUnavailabilityResponse save(@Valid @RequestBody TeacherUnavailabilityRequest request) {
+		return service.saveForTeacher(getCurrentUserId(), request);
 	}
 
 	private Long getCurrentUserId() {
