@@ -1,10 +1,10 @@
 package com.system_gestion_soutenance.api.student.stats.controller;
 
+import com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse;
 import com.system_gestion_soutenance.api.student.stats.service.StudentStatsService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Map;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ public class StudentStatsController {
 
 	@GetMapping
 	@Operation(summary = "Get personal statistics for the connected student")
-	public Map<String, Object> getStats() {
+	public StudentStatsResponse getStats() {
 		return statsService.getStats(getCurrentUserId());
 	}
 

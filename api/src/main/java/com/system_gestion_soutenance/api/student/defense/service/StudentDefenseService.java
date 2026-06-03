@@ -8,6 +8,8 @@ import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryReposit
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import com.system_gestion_soutenance.api.student.defense.dto.JuryMemberResponse;
+import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse;
 import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class StudentDefenseService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<String, Object> getDefense(Long studentId) {
+	public StudentDefenseResponse getDefense(Long studentId) {
 		Group group = groupRepository.findByStudentId(studentId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucune soutenance trouvée pour cet étudiant"));
 
@@ -38,43 +40,36 @@ public class StudentDefenseService {
 		}
 
 		Project project = group.getProject();
-		Map<String, Object> defense = new LinkedHashMap<>();
-		defense.put("projectTitle", project.getTitle());
-		defense.put("projectDescription", project.getDescription());
 
-		defense.put("supervisorName",
-				project.getSupervisor() != null
-						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
-						: null);
-
-		List<Map<String, String>> juryMembers = new ArrayList<>();
+		List<JuryMemberResponse> juryMembers = new ArrayList<>();
 		for (Jury jury : juryRepository.findByProjectId(project.getId())) {
 			for (JuryMember member : jury.getMembers()) {
 				if (member.getTeacher() != null) {
-					Map<String, String> m = new LinkedHashMap<>();
-					m.put("name", member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
-					m.put("role", member.getRoleName());
-					juryMembers.add(m);
+					juryMembers.add(new JuryMemberResponse(
+							member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(),
+							member.getRoleName()));
 				}
 			}
 		}
-		defense.put("juryMembers", juryMembers);
+
+		String date = null;
+		String startTime = null;
+		String roomName = null;
+		String status = "pending";
 
 		List<SlotAssignment> slots = slotAssignmentRepository.findByProjectId(project.getId());
 		if (!slots.isEmpty()) {
 			SlotAssignment slot = slots.get(0);
-			defense.put("date", slot.getDate());
-			defense.put("startTime", slot.getTime());
-			defense.put("endTime", "");
-			defense.put("roomName", slot.getRoom() != null ? slot.getRoom().getName() : "");
-			defense.put("status", "scheduled");
-		} else {
-			defense.put("status", "pending");
+			date = slot.getDate();
+			startTime = slot.getTime();
+			roomName = slot.getRoom() != null ? slot.getRoom().getName() : "";
+			status = "scheduled";
 		}
 
-		defense.put("convocationUrl", null);
-		defense.put("result", null);
-
-		return defense;
+		return new StudentDefenseResponse(project.getTitle(), project.getDescription(),
+				project.getSupervisor() != null
+						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
+						: null,
+				juryMembers, date, startTime, "", roomName, status, null, null);
 	}
 }

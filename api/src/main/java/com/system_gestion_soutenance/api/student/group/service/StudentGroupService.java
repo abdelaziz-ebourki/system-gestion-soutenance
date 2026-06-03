@@ -6,11 +6,13 @@ import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
+import com.system_gestion_soutenance.api.student.group.dto.AvailableGroupResponse;
+import com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse;
+import com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse;
+import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,36 +33,29 @@ public class StudentGroupService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<String, Object> getWorkspace(Long studentId) {
+	public StudentGroupWorkspaceResponse getWorkspace(Long studentId) {
 		Group currentGroup = groupRepository.findByStudentId(studentId).orElse(null);
 
-		Map<String, Object> workspace = new LinkedHashMap<>();
-		workspace.put("currentGroup", currentGroup != null ? groupToDetails(currentGroup, studentId) : null);
+		GroupDetailsResponse currentDetails = currentGroup != null ? groupToDetails(currentGroup, studentId) : null;
 
-		List<Map<String, Object>> available = new ArrayList<>();
+		List<AvailableGroupResponse> available = new ArrayList<>();
 		for (Group g : groupRepository.findAllWithDetails()) {
 			if (currentGroup == null || !g.getId().equals(currentGroup.getId())) {
-				Map<String, Object> ag = new LinkedHashMap<>();
-				ag.put("id", g.getId());
-				ag.put("groupName", g.getGroupName());
-				ag.put("memberCount", g.getStudents() != null ? g.getStudents().size() : 0);
-				available.add(ag);
+				available.add(new AvailableGroupResponse(g.getId(), g.getGroupName(),
+						g.getStudents() != null ? g.getStudents().size() : 0));
 			}
 		}
-		workspace.put("availableGroups", available);
 
 		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
 		String startDate = ds != null ? ds.getGroupCreationStartDate() : "";
 		String endDate = ds != null ? ds.getGroupCreationEndDate() : "";
-		workspace.put("groupCreationStartDate", startDate);
-		workspace.put("groupCreationEndDate", endDate);
-		workspace.put("isGroupCreationOpen", isCreationOpen(startDate, endDate));
 
-		return workspace;
+		return new StudentGroupWorkspaceResponse(currentDetails, available, startDate, endDate,
+				isCreationOpen(startDate, endDate));
 	}
 
 	@Transactional
-	public Map<String, Object> createGroup(Long studentId) {
+	public GroupDetailsResponse createGroup(Long studentId) {
 		if (groupRepository.findByStudentId(studentId).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
 		}
@@ -81,7 +76,7 @@ public class StudentGroupService {
 	}
 
 	@Transactional
-	public Map<String, Object> joinGroup(Long groupId, Long studentId) {
+	public GroupDetailsResponse joinGroup(Long groupId, Long studentId) {
 		if (groupRepository.findByStudentId(studentId).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
 		}
@@ -107,32 +102,24 @@ public class StudentGroupService {
 		return groupToDetails(group, studentId);
 	}
 
-	private Map<String, Object> groupToDetails(Group group, Long currentStudentId) {
-		Map<String, Object> details = new LinkedHashMap<>();
-		details.put("id", group.getId());
-		details.put("groupName", group.getGroupName());
-		details.put("projectTitle", group.getProject() != null ? group.getProject().getTitle() : null);
-		details.put("supervisorName",
-				group.getProject() != null && group.getProject().getSupervisor() != null
-						? group.getProject().getSupervisor().getFirstName() + " "
-								+ group.getProject().getSupervisor().getLastName()
-						: null);
-
-		List<Map<String, Object>> members = new ArrayList<>();
+	private GroupDetailsResponse groupToDetails(Group group, Long currentStudentId) {
+		List<GroupMemberResponse> members = new ArrayList<>();
 		if (group.getStudents() != null) {
 			boolean first = true;
 			for (Student s : group.getStudents()) {
-				Map<String, Object> m = new LinkedHashMap<>();
-				m.put("id", s.getId());
-				m.put("fullName", s.getFirstName() + " " + s.getLastName());
-				m.put("email", s.getEmail());
-				m.put("role", s.getId().equals(currentStudentId) && first ? "leader" : "member");
-				members.add(m);
+				members.add(new GroupMemberResponse(s.getId(), s.getFirstName() + " " + s.getLastName(), s.getEmail(),
+						s.getId().equals(currentStudentId) && first ? "leader" : "member"));
 				first = false;
 			}
 		}
-		details.put("members", members);
-		return details;
+
+		return new GroupDetailsResponse(group.getId(), group.getGroupName(),
+				group.getProject() != null ? group.getProject().getTitle() : null,
+				group.getProject() != null && group.getProject().getSupervisor() != null
+						? group.getProject().getSupervisor().getFirstName() + " "
+								+ group.getProject().getSupervisor().getLastName()
+						: null,
+				members);
 	}
 
 	private boolean isCreationPeriodOpen() {
