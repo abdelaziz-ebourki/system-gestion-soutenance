@@ -219,7 +219,20 @@
         {
           "name": "List all users",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -250,7 +263,20 @@
         {
           "name": "List users by role",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -281,7 +307,20 @@
         {
           "name": "List students (paginated)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -312,7 +351,20 @@
         {
           "name": "List teachers (paginated)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -343,7 +395,20 @@
         {
           "name": "List coordinators (paginated)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -374,7 +439,20 @@
         {
           "name": "List all teachers (simple)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -406,7 +484,20 @@
         {
           "name": "List all students (simple)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -438,7 +529,26 @@
         {
           "name": "Create user",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -478,7 +588,26 @@
         {
           "name": "Create student",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -518,7 +647,26 @@
         {
           "name": "Create teacher",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -558,7 +706,26 @@
         {
           "name": "Create coordinator",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -598,7 +765,21 @@
         {
           "name": "Bulk create users",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 or 200\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response is array or contains results\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -639,7 +820,22 @@
         {
           "name": "Update user",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -680,7 +876,17 @@
         {
           "name": "Delete user (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -712,7 +918,20 @@
         {
           "name": "List faculties",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -743,7 +962,22 @@
         {
           "name": "Get faculty by ID",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -775,7 +1009,26 @@
         {
           "name": "Create faculty",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -815,7 +1068,22 @@
         {
           "name": "Update faculty",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -856,7 +1124,17 @@
         {
           "name": "Delete faculty (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -888,7 +1166,20 @@
         {
           "name": "List departments",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -919,7 +1210,22 @@
         {
           "name": "Get department by ID",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -951,7 +1257,26 @@
         {
           "name": "Create department",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -991,7 +1316,22 @@
         {
           "name": "Update department",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1032,7 +1372,17 @@
         {
           "name": "Delete department (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -1064,7 +1414,20 @@
         {
           "name": "List rooms (paginated)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1095,7 +1458,26 @@
         {
           "name": "Create room",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1135,7 +1517,21 @@
         {
           "name": "Bulk create rooms",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 or 200\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response is array or contains results\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1176,7 +1572,22 @@
         {
           "name": "Update room",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1217,7 +1628,17 @@
         {
           "name": "Delete room (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -1249,7 +1670,20 @@
         {
           "name": "List levels",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1281,7 +1715,26 @@
         {
           "name": "Create level",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1322,7 +1775,22 @@
         {
           "name": "Update level",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1364,7 +1832,17 @@
         {
           "name": "Delete level (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -1397,7 +1875,20 @@
         {
           "name": "List majors",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1429,7 +1920,26 @@
         {
           "name": "Create major",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1470,7 +1980,22 @@
         {
           "name": "Update major",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1512,7 +2037,17 @@
         {
           "name": "Delete major (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -1545,7 +2080,20 @@
         {
           "name": "List grades",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1577,7 +2125,26 @@
         {
           "name": "Create grade",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1618,7 +2185,22 @@
         {
           "name": "Update grade",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1660,7 +2242,17 @@
         {
           "name": "Delete grade (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -1693,7 +2285,20 @@
         {
           "name": "List jury role templates",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1725,7 +2330,26 @@
         {
           "name": "Create jury role template",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1766,7 +2390,22 @@
         {
           "name": "Update template",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1808,7 +2447,17 @@
         {
           "name": "Delete template (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -1841,7 +2490,22 @@
         {
           "name": "Get general settings",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1873,7 +2537,22 @@
         {
           "name": "Update general settings",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1914,7 +2593,22 @@
         {
           "name": "Get document config",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -1946,7 +2640,22 @@
         {
           "name": "Update document config",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -1987,7 +2696,22 @@
         {
           "name": "Get email config",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2019,7 +2743,22 @@
         {
           "name": "Update email config",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -2060,7 +2799,22 @@
         {
           "name": "Get defense settings",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2092,7 +2846,22 @@
         {
           "name": "Update defense settings",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -2133,7 +2902,20 @@
         {
           "name": "List audit logs",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2164,7 +2946,22 @@
         {
           "name": "Get admin stats",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2200,7 +2997,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -2250,7 +3051,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -2300,7 +3105,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -2578,7 +3387,20 @@
         {
           "name": "List teachers (coord)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2609,7 +3431,20 @@
         {
           "name": "Search teachers (coord)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2640,7 +3475,20 @@
         {
           "name": "List students (coord)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2671,7 +3519,20 @@
         {
           "name": "Search students (coord)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2702,7 +3563,20 @@
         {
           "name": "List groups",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2733,7 +3607,26 @@
         {
           "name": "Create group",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -2773,7 +3666,17 @@
         {
           "name": "Delete group (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -2805,7 +3708,20 @@
         {
           "name": "List projects",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2836,7 +3752,26 @@
         {
           "name": "Create project",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -2876,7 +3811,22 @@
         {
           "name": "Update project",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -2917,7 +3867,17 @@
         {
           "name": "Delete project (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -2949,7 +3909,20 @@
         {
           "name": "List juries",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -2980,7 +3953,26 @@
         {
           "name": "Create jury",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3020,7 +4012,22 @@
         {
           "name": "Update jury",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -3061,7 +4068,17 @@
         {
           "name": "Delete jury (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -3093,7 +4110,20 @@
         {
           "name": "List defense sessions",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -3124,7 +4154,26 @@
         {
           "name": "Create defense session",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3164,7 +4213,22 @@
         {
           "name": "Update defense session",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [
@@ -3205,7 +4269,17 @@
         {
           "name": "Delete defense session (not found)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Delete successful (204 or 200)\", function() { pm.expect([200, 204]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
@@ -3237,7 +4311,26 @@
         {
           "name": "Transition session status",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3279,7 +4372,26 @@
         {
           "name": "Cancel defense",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3312,7 +4424,20 @@
         {
           "name": "Get schedule",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -3343,7 +4468,26 @@
         {
           "name": "Save schedule",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3383,7 +4527,26 @@
         {
           "name": "Auto-generate schedule",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3424,7 +4587,26 @@
         {
           "name": "Publish schedule",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3465,7 +4647,26 @@
         {
           "name": "Validate schedule",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3506,7 +4707,20 @@
         {
           "name": "List grades (coord)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -3537,7 +4751,22 @@
         {
           "name": "Get coordinator stats",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -3568,7 +4797,26 @@
         {
           "name": "Generate evaluation sheets",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3609,7 +4857,26 @@
         {
           "name": "Generate attendance lists",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3650,7 +4917,26 @@
         {
           "name": "Generate jury convocations",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3691,7 +4977,26 @@
         {
           "name": "Generate schedule doc",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3732,7 +5037,26 @@
         {
           "name": "Generate proces verbal",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -3773,7 +5097,20 @@
         {
           "name": "List unavailability",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -3809,7 +5146,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -3859,7 +5200,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -3909,7 +5254,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -3959,7 +5308,11 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });"
+                  "pm.test(\"Status 400\", function() { pm.response.to.have.status(400); });",
+                  "pm.test(\"Error response has message\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message || json.error).to.exist;",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -4010,7 +5363,22 @@
         {
           "name": "Get my group",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4041,7 +5409,26 @@
         {
           "name": "Create my group",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4072,7 +5459,26 @@
         {
           "name": "Join group",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4105,7 +5511,22 @@
         {
           "name": "Get my defense info",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4136,7 +5557,22 @@
         {
           "name": "Download my convocation (PDF)",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4167,7 +5603,20 @@
         {
           "name": "List my documents",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4198,7 +5647,22 @@
         {
           "name": "Get my stats",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4235,7 +5699,20 @@
         {
           "name": "List my evaluations",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4266,7 +5743,26 @@
         {
           "name": "Submit evaluation",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4307,7 +5803,22 @@
         {
           "name": "Get my schedule",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4338,7 +5849,22 @@
         {
           "name": "Get my stats",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4369,7 +5895,22 @@
         {
           "name": "Get my unavailability",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4400,7 +5941,26 @@
         {
           "name": "Set unavailability",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4446,7 +6006,20 @@
         {
           "name": "List notifications",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -4476,7 +6049,21 @@
         {
           "name": "Mark notification read",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 or 200\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response is array or contains results\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [
@@ -4508,7 +6095,21 @@
         {
           "name": "Mark all notifications read",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 or 200\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response is array or contains results\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [
@@ -4539,7 +6140,26 @@
         {
           "name": "Send notification email",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", function() { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.id).to.exist;",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4619,7 +6239,25 @@
         {
           "name": "Forgot password",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "if (pm.request.body) {",
+                  "  const body = JSON.parse(pm.request.body.raw);",
+                  "  if (body.email === \"admin@univh2c.ma\") pm.environment.set(\"admin_token\", jsonData.token);",
+                  "  else if (body.email === \"coord@univh2c.ma\") pm.environment.set(\"coord_token\", jsonData.token);",
+                  "  else if (body.email === \"teacher@univh2c.ma\") pm.environment.set(\"teacher_token\", jsonData.token);",
+                  "  else if (body.email === \"student@univh2c.ma\") pm.environment.set(\"student_token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4654,7 +6292,25 @@
         {
           "name": "Reset password",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "if (pm.request.body) {",
+                  "  const body = JSON.parse(pm.request.body.raw);",
+                  "  if (body.email === \"admin@univh2c.ma\") pm.environment.set(\"admin_token\", jsonData.token);",
+                  "  else if (body.email === \"coord@univh2c.ma\") pm.environment.set(\"coord_token\", jsonData.token);",
+                  "  else if (body.email === \"teacher@univh2c.ma\") pm.environment.set(\"teacher_token\", jsonData.token);",
+                  "  else if (body.email === \"student@univh2c.ma\") pm.environment.set(\"student_token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -4689,7 +6345,25 @@
         {
           "name": "Verify account",
           "description": "",
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "if (pm.request.body) {",
+                  "  const body = JSON.parse(pm.request.body.raw);",
+                  "  if (body.email === \"admin@univh2c.ma\") pm.environment.set(\"admin_token\", jsonData.token);",
+                  "  else if (body.email === \"coord@univh2c.ma\") pm.environment.set(\"coord_token\", jsonData.token);",
+                  "  else if (body.email === \"teacher@univh2c.ma\") pm.environment.set(\"teacher_token\", jsonData.token);",
+                  "  else if (body.email === \"student@univh2c.ma\") pm.environment.set(\"student_token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
