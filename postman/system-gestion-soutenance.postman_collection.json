@@ -40,12 +40,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/login",
+              "raw": "{{base_url}}/api/auth/login",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "auth",
                 "login"
               ]
             },
@@ -90,12 +91,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/login",
+              "raw": "{{base_url}}/api/auth/login",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "auth",
                 "login"
               ]
             },
@@ -140,12 +142,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/login",
+              "raw": "{{base_url}}/api/auth/login",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "auth",
                 "login"
               ]
             },
@@ -190,12 +193,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/login",
+              "raw": "{{base_url}}/api/auth/login",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "auth",
                 "login"
               ]
             },
@@ -6419,12 +6423,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/login",
+              "raw": "{{base_url}}/api/auth/login",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "auth",
                 "login"
               ]
             },
@@ -6463,12 +6468,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/login",
+              "raw": "{{base_url}}/api/auth/login",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
+                "auth",
                 "login"
               ]
             },
