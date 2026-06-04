@@ -28,9 +28,10 @@ class TeacherUnavailabilityServiceTest {
 		Unavailability ua = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00", "09:00"));
 		when(repository.findAll()).thenReturn(List.of(ua));
 
-		Map<String, Object> result = service.getByTeacher(1L);
+		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse result = service
+				.getByTeacher(1L);
 
-		Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
+		Map<String, List<String>> slotsByDate = result.slotsByDate();
 		assertEquals(1, slotsByDate.size());
 		assertEquals(2, slotsByDate.get("2026-06-01").size());
 	}
@@ -40,9 +41,10 @@ class TeacherUnavailabilityServiceTest {
 	void getByTeacher_noUnavailability_returnsEmpty() {
 		when(repository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> result = service.getByTeacher(1L);
+		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse result = service
+				.getByTeacher(1L);
 
-		Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
+		Map<String, List<String>> slotsByDate = result.slotsByDate();
 		assertTrue(slotsByDate.isEmpty());
 	}
 
@@ -51,10 +53,10 @@ class TeacherUnavailabilityServiceTest {
 		Unavailability ua = new Unavailability(1L, 2L, "2026-06-01", List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(ua));
 
-		Map<String, Object> result = service.getByTeacher(1L);
+		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse result = service
+				.getByTeacher(1L);
 
-		@SuppressWarnings("unchecked")
-		Map<String, List<String>> slotsByDate = (Map<String, List<String>>) result.get("slotsByDate");
+		Map<String, List<String>> slotsByDate = result.slotsByDate();
 		assertTrue(slotsByDate.isEmpty());
 	}
 
@@ -63,8 +65,10 @@ class TeacherUnavailabilityServiceTest {
 		Unavailability existing = new Unavailability(1L, 2L, "2026-06-01", List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(existing));
 
-		Map<String, List<String>> newSlots = Map.of("2026-06-02", List.of("10:00"));
-		service.saveForTeacher(1L, newSlots);
+		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest request = new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest(
+				List.of(new com.system_gestion_soutenance.api.teacher.unavailability.dto.UnavailabilitySlotRequest(
+						"2026-06-02", List.of("10:00"))));
+		service.saveForTeacher(1L, request);
 
 		verify(repository).deleteAll(List.of());
 		verify(repository, atLeastOnce()).save(any());
@@ -75,8 +79,10 @@ class TeacherUnavailabilityServiceTest {
 		Unavailability existing = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(existing));
 
-		Map<String, List<String>> newSlots = Map.of("2026-06-02", List.of("10:00", "11:00"));
-		service.saveForTeacher(1L, newSlots);
+		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest request = new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest(
+				List.of(new com.system_gestion_soutenance.api.teacher.unavailability.dto.UnavailabilitySlotRequest(
+						"2026-06-02", List.of("10:00", "11:00"))));
+		service.saveForTeacher(1L, request);
 
 		verify(repository).deleteAll(List.of(existing));
 		verify(repository, atLeastOnce()).save(any());

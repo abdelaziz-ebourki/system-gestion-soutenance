@@ -2,7 +2,6 @@ package com.system_gestion_soutenance.api.teacher.evaluation.service;
 
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
@@ -68,29 +67,8 @@ public class EvaluationService {
 
 	private EvaluationResponse toResponse(Evaluation evaluation) {
 		Project project = projectRepository.findById(evaluation.getProjectId()).orElse(null);
-		return new EvaluationResponse(
-				evaluation.getId(),
-				evaluation.getProjectId(),
-				project != null ? project.getTitle() : "",
-				evaluation.getScore(),
-				evaluation.getComment(),
-				evaluation.getStatus()
-		);
-	}
-
-	private List<String> getStudentNames(Long projectId) {
-		List<Group> groups = groupRepository.findByProjectId(projectId);
-		for (Group g : groups) {
-			if (g.getStudents() != null && !g.getStudents().isEmpty()) {
-				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-						.collect(Collectors.toList());
-			}
-		}
-		Project project = projectRepository.findById(projectId).orElse(null);
-		if (project != null && project.getStudents() != null) {
-			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-					.collect(Collectors.toList());
-		}
-		return List.of();
+		return new EvaluationResponse(evaluation.getId(), evaluation.getProjectId(),
+				project != null ? project.getTitle() : "", evaluation.getScore(), evaluation.getComment(),
+				evaluation.getStatus());
 	}
 }

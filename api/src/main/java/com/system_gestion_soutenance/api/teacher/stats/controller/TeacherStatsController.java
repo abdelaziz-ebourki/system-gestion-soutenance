@@ -1,11 +1,10 @@
 package com.system_gestion_soutenance.api.teacher.stats.controller;
 
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse;
 import com.system_gestion_soutenance.api.teacher.stats.service.TeacherStatsService;
-import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,18 +13,16 @@ import org.springframework.web.bind.annotation.*;
 public class TeacherStatsController {
 
 	private final TeacherStatsService statsService;
+	private final SecurityService securityService;
 
-	public TeacherStatsController(TeacherStatsService statsService) {
+	public TeacherStatsController(TeacherStatsService statsService, SecurityService securityService) {
 		this.statsService = statsService;
+		this.securityService = securityService;
 	}
 
 	@GetMapping
 	@Operation(summary = "Get personal statistics for the connected teacher")
 	public TeacherStatsResponse getStats() {
-		return statsService.getStats(getCurrentUserId());
-	}
-
-	private Long getCurrentUserId() {
-		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+		return statsService.getStats(securityService.getCurrentUserId());
 	}
 }

@@ -78,13 +78,13 @@ class StudentDefenseServiceTest {
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
 		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of(slot));
 
-		Map<String, Object> result = service.getDefense(1L);
+		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
-		assertEquals("Projet Test", result.get("projectTitle"));
-		assertEquals("John Doe", result.get("supervisorName"));
-		assertEquals("2026-06-15", result.get("date"));
-		assertEquals("09:00", result.get("startTime"));
-		assertEquals("scheduled", result.get("status"));
+		assertEquals("Projet Test", result.projectTitle());
+		assertEquals("John Doe", result.supervisorName());
+		assertEquals("2026-06-15", result.date());
+		assertEquals("09:00", result.startTime());
+		assertEquals("scheduled", result.status());
 	}
 
 	@Test
@@ -102,9 +102,9 @@ class StudentDefenseServiceTest {
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
 		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
-		Map<String, Object> result = service.getDefense(1L);
+		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
-		assertNull(result.get("supervisorName"));
+		assertNull(result.supervisorName());
 	}
 
 	@Test
@@ -127,9 +127,9 @@ class StudentDefenseServiceTest {
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
 		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
-		Map<String, Object> result = service.getDefense(1L);
+		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
-		assertTrue(((List<?>) result.get("juryMembers")).isEmpty());
+		assertTrue(result.juryMembers().isEmpty());
 	}
 
 	@Test
@@ -150,9 +150,9 @@ class StudentDefenseServiceTest {
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
 		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of(slot));
 
-		Map<String, Object> result = service.getDefense(1L);
+		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
-		assertEquals("", result.get("roomName"));
+		assertEquals("", result.roomName());
 	}
 
 	@Test
@@ -191,12 +191,13 @@ class StudentDefenseServiceTest {
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
 		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
-		Map<String, Object> result = service.getDefense(1L);
+		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
-		List<Map<String, String>> juryMembers = (List<Map<String, String>>) result.get("juryMembers");
+		List<com.system_gestion_soutenance.api.student.defense.dto.JuryMemberResponse> juryMembers = result
+				.juryMembers();
 		assertEquals(1, juryMembers.size());
-		assertEquals("Jane Smith", juryMembers.get(0).get("name"));
-		assertEquals("Président", juryMembers.get(0).get("role"));
+		assertEquals("Jane Smith", juryMembers.get(0).name());
+		assertEquals("Président", juryMembers.get(0).role());
 	}
 
 	@Test
@@ -214,9 +215,9 @@ class StudentDefenseServiceTest {
 		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
 		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
 
-		Map<String, Object> result = service.getDefense(1L);
+		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
-		assertEquals("pending", result.get("status"));
+		assertEquals("pending", result.status());
 	}
 
 	private static Student student(Long id) {

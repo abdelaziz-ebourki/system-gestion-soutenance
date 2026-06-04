@@ -1,14 +1,12 @@
 package com.system_gestion_soutenance.api.teacher.unavailability.controller;
 
-import com.system_gestion_soutenance.api.teacher.unavailability.dto.CreateUnavailabilityRequest;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest;
 import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse;
 import com.system_gestion_soutenance.api.teacher.unavailability.service.TeacherUnavailabilityService;
-import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,24 +15,22 @@ import org.springframework.web.bind.annotation.*;
 public class TeacherUnavailabilityController {
 
 	private final TeacherUnavailabilityService service;
+	private final SecurityService securityService;
 
-	public TeacherUnavailabilityController(TeacherUnavailabilityService service) {
+	public TeacherUnavailabilityController(TeacherUnavailabilityService service, SecurityService securityService) {
 		this.service = service;
+		this.securityService = securityService;
 	}
 
 	@GetMapping
 	@Operation(summary = "Get unavailability for the connected teacher")
 	public TeacherUnavailabilityResponse get() {
-		return service.getByTeacher(getCurrentUserId());
+		return service.getByTeacher(securityService.getCurrentUserId());
 	}
 
 	@PostMapping
 	@Operation(summary = "Save unavailability slots for the connected teacher")
 	public TeacherUnavailabilityResponse save(@Valid @RequestBody TeacherUnavailabilityRequest request) {
-		return service.saveForTeacher(getCurrentUserId(), request);
-	}
-
-	private Long getCurrentUserId() {
-		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+		return service.saveForTeacher(securityService.getCurrentUserId(), request);
 	}
 }

@@ -36,7 +36,7 @@ class GroupServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Groupe A", result.get(0).get("groupName"));
+		assertEquals("Groupe A", result.get(0).groupName());
 	}
 
 	@Test
@@ -64,8 +64,8 @@ class GroupServiceTest {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L), 100L);
 		var result = service.create(request);
 
-		assertEquals("Groupe A", result.get("groupName"));
-		assertEquals(10L, result.get("projectId"));
+		assertEquals("Groupe A", result.groupName());
+		assertEquals(10L, result.projectId());
 	}
 
 	@Test
@@ -96,7 +96,7 @@ class GroupServiceTest {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe", 1L, null, null);
 		var result = service.create(request);
 
-		assertEquals("Groupe", result.get("groupName"));
+		assertEquals("Groupe", result.groupName());
 	}
 
 	@Test
@@ -111,8 +111,8 @@ class GroupServiceTest {
 
 		var result = service.findAll();
 
-		assertEquals(0, ((List<?>) result.get(0).get("studentIds")).size());
-		assertEquals(0, ((List<?>) result.get(0).get("studentNames")).size());
+		assertEquals(0, result.get(0).memberCount());
+		assertEquals(0, result.get(0).studentNames().size());
 	}
 
 	@Test

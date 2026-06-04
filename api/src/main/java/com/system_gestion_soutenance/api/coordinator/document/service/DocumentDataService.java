@@ -4,7 +4,7 @@ import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSett
 import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
+import com.system_gestion_soutenance.api.coordinator.document.dto.*;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
@@ -41,9 +41,9 @@ public class DocumentDataService {
 		this.generalSettingsRepository = generalSettingsRepository;
 	}
 
-	public List<Map<String, Object>> evaluationSheets(DefenseIdsRequest request) {
+	public List<EvaluationSheetResponse> evaluationSheets(DefenseIdsRequest request) {
 		List<Long> ids = resolveDefenseIds(request);
-		List<Map<String, Object>> result = new ArrayList<>();
+		List<EvaluationSheetResponse> result = new ArrayList<>();
 
 		for (Long id : ids) {
 			SlotAssignment slot = slotAssignmentRepository.findById(id).orElseThrow(
@@ -55,29 +55,24 @@ public class DocumentDataService {
 			if (project == null)
 				continue;
 
-			Map<String, Object> entry = buildDefenseData(slot, project);
-			result.add(entry);
+			result.add(buildDefenseData(slot, project));
 		}
 
 		return result;
 	}
 
-	public Map<String, Object> attendanceList(Long defenseSessionId) {
+	public AttendanceListResponse attendanceList(Long defenseSessionId) {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
 
-		List<Map<String, Object>> slots = buildGroupedSlots();
+		List<SlotDetails> slots = buildGroupedSlots();
 
-		Map<String, Object> result = new LinkedHashMap<>();
-		result.put("defenseSessionName", ds.getName());
-		result.put("slots", slots);
-
-		return result;
+		return new AttendanceListResponse(ds.getName(), slots);
 	}
 
-	public List<Map<String, Object>> juryConvocations(DefenseIdsRequest request) {
+	public List<JuryConvocationResponse> juryConvocations(DefenseIdsRequest request) {
 		List<Long> ids = resolveDefenseIds(request);
-		List<Map<String, Object>> result = new ArrayList<>();
+		List<JuryConvocationResponse> result = new ArrayList<>();
 
 		for (Long id : ids) {
 			SlotAssignment slot = slotAssignmentRepository.findById(id).orElseThrow(
@@ -92,17 +87,11 @@ public class DocumentDataService {
 			List<Jury> juries = juryRepository.findByProjectId(project.getId());
 			for (Jury jury : juries) {
 				for (JuryMember member : jury.getMembers()) {
-					Map<String, Object> conv = new LinkedHashMap<>();
-					conv.put("teacherName",
-							member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
-					conv.put("role", member.getRoleName());
-					conv.put("projectTitle", project.getTitle());
-					conv.put("studentNames", getStudentNames(project.getId()));
-					conv.put("date", slot.getDate());
-					conv.put("time", slot.getTime());
-					conv.put("roomName", slot.getRoom() != null ? slot.getRoom().getName() : null);
-					conv.put("defenseSessionName", findDefenseSessionName(project.getId()));
-					result.add(conv);
+					result.add(new JuryConvocationResponse(
+							member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(),
+							member.getRoleName(), project.getTitle(), getStudentNames(project.getId()), slot.getDate(),
+							slot.getTime(), slot.getRoom() != null ? slot.getRoom().getName() : null,
+							findDefenseSessionName(project.getId())));
 				}
 			}
 		}
@@ -110,22 +99,16 @@ public class DocumentDataService {
 		return result;
 	}
 
-	public Map<String, Object> schedule(Long defenseSessionId) {
+	public ScheduleDocResponse schedule(Long defenseSessionId) {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
 
-		List<Map<String, Object>> slots = buildGroupedSlots();
+		List<SlotDetails> slots = buildGroupedSlots();
 
-		Map<String, Object> result = new LinkedHashMap<>();
-		result.put("defenseSessionName", ds.getName());
-		result.put("slots", slots);
-
-		return result;
+		return new ScheduleDocResponse(ds.getName(), slots);
 	}
 
-	public Map<String, Object> procesVerbal(Long projectId) {
-		Map<String, Object> result = new LinkedHashMap<>();
-
+	public ProcesVerbalResponse procesVerbal(Long projectId) {
 		Project project = projectRepository.findById(projectId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé: " + projectId));
 
@@ -137,34 +120,24 @@ public class DocumentDataService {
 			settingsMap.put("timezone", settings.getTimezone());
 			settingsMap.put("dateFormat", settings.getDateFormat());
 		}
-		result.put("settings", settingsMap);
 
-		Map<String, Object> grade = new LinkedHashMap<>();
-		grade.put("projectId", project.getId());
-		grade.put("projectTitle", project.getTitle());
-		grade.put("finalScore", 0);
-		grade.put("decision", "En attente");
-		result.put("grade", grade);
+		ProcesVerbalResponse.GradeDetails grade = new ProcesVerbalResponse.GradeDetails(project.getId(),
+				project.getTitle(), 0.0, "En attente");
 
-		result.put("studentNames", getStudentNames(projectId));
-		result.put("supervisorName",
-				project.getSupervisor() != null
-						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
-						: null);
-
-		List<Map<String, Object>> juryMembers = new ArrayList<>();
+		List<ProcesVerbalResponse.JuryMemberDetails> juryMembers = new ArrayList<>();
 		List<Jury> juries = juryRepository.findByProjectId(projectId);
 		for (Jury jury : juries) {
 			for (JuryMember member : jury.getMembers()) {
-				Map<String, Object> jm = new LinkedHashMap<>();
-				jm.put("roleName", member.getRoleName());
-				jm.put("teacherName", member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
-				juryMembers.add(jm);
+				juryMembers.add(new ProcesVerbalResponse.JuryMemberDetails(member.getRoleName(),
+						member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName()));
 			}
 		}
-		result.put("juryMembers", juryMembers);
 
-		return result;
+		return new ProcesVerbalResponse(settingsMap, grade, getStudentNames(projectId),
+				project.getSupervisor() != null
+						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
+						: null,
+				juryMembers);
 	}
 
 	private List<Long> resolveDefenseIds(DefenseIdsRequest request) {
@@ -179,44 +152,31 @@ public class DocumentDataService {
 		return request.defenseIds();
 	}
 
-	private Map<String, Object> buildDefenseData(SlotAssignment slot, Project project) {
-		Map<String, Object> entry = new LinkedHashMap<>();
-		entry.put("projectId", project.getId());
-		entry.put("projectTitle", project.getTitle());
-		entry.put("studentNames", getStudentNames(project.getId()));
-		entry.put("supervisorName",
-				project.getSupervisor() != null
-						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
-						: null);
-		entry.put("date", slot.getDate());
-		entry.put("time", slot.getTime());
-		entry.put("roomName", slot.getRoom() != null ? slot.getRoom().getName() : null);
-
+	private EvaluationSheetResponse buildDefenseData(SlotAssignment slot, Project project) {
 		List<Jury> juries = juryRepository.findByProjectId(project.getId());
-		List<Map<String, Object>> juryMembers = new ArrayList<>();
+		List<EvaluationSheetResponse.JuryMemberResponse> juryMembers = new ArrayList<>();
 		Map<String, Integer> coefficients = new LinkedHashMap<>();
 
 		for (Jury jury : juries) {
 			for (JuryMember member : jury.getMembers()) {
-				Map<String, Object> jm = new LinkedHashMap<>();
-				jm.put("roleName", member.getRoleName());
-				jm.put("teacherName", member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
-				jm.put("coefficient", 0);
-				juryMembers.add(jm);
+				juryMembers.add(new EvaluationSheetResponse.JuryMemberResponse(member.getRoleName(),
+						member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(), 0));
 			}
 			if (jury.getTemplate() != null && jury.getTemplate().getRoles() != null) {
 				jury.getTemplate().getRoles().forEach(r -> coefficients.put(r.getName(), r.getCoefficient()));
 			}
 		}
 
-		entry.put("juryMembers", juryMembers);
-		entry.put("evaluationCoefficients", coefficients);
-
-		return entry;
+		return new EvaluationSheetResponse(project.getId(), project.getTitle(), getStudentNames(project.getId()),
+				project.getSupervisor() != null
+						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
+						: null,
+				slot.getDate(), slot.getTime(), slot.getRoom() != null ? slot.getRoom().getName() : null, juryMembers,
+				coefficients);
 	}
 
-	private List<Map<String, Object>> buildGroupedSlots() {
-		List<Map<String, Object>> slots = new ArrayList<>();
+	private List<SlotDetails> buildGroupedSlots() {
+		List<SlotDetails> slots = new ArrayList<>();
 
 		for (SlotAssignment slot : slotAssignmentRepository.findAll()) {
 			if (slot.getProjectId() == null)
@@ -226,17 +186,12 @@ public class DocumentDataService {
 			if (project == null)
 				continue;
 
-			Map<String, Object> s = new LinkedHashMap<>();
-			s.put("date", slot.getDate());
-			s.put("time", slot.getTime());
-			s.put("roomName", slot.getRoom() != null ? slot.getRoom().getName() : null);
-			s.put("projectTitle", project.getTitle());
-			s.put("studentNames", getStudentNames(project.getId()));
-			slots.add(s);
+			slots.add(new SlotDetails(slot.getDate(), slot.getTime(),
+					slot.getRoom() != null ? slot.getRoom().getName() : null, project.getTitle(),
+					getStudentNames(project.getId())));
 		}
 
-		slots.sort(Comparator.comparing((Map<String, Object> a) -> (String) a.get("date"))
-				.thenComparing(a -> (String) a.get("time")));
+		slots.sort(Comparator.comparing(SlotDetails::date).thenComparing(SlotDetails::time));
 
 		return slots;
 	}

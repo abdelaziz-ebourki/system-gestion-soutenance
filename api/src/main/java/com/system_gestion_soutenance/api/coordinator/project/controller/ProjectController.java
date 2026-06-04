@@ -1,12 +1,13 @@
 package com.system_gestion_soutenance.api.coordinator.project.controller;
 
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
+import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse;
+import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,20 +25,20 @@ public class ProjectController {
 
 	@GetMapping
 	@Operation(summary = "List all projects")
-	public List<Map<String, Object>> findAll() {
+	public List<ProjectResponse> findAll() {
 		return projectService.findAll();
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new project")
-	public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody CreateProjectRequest request) {
-		Map<String, Object> project = projectService.create(request);
+	public ResponseEntity<ProjectResponse> create(@Valid @RequestBody CreateProjectRequest request) {
+		ProjectResponse project = projectService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(project);
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a project")
-	public Map<String, Object> update(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+	public ProjectResponse update(@PathVariable Long id, @Valid @RequestBody UpdateProjectRequest updates) {
 		return projectService.update(id, updates);
 	}
 

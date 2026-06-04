@@ -85,18 +85,10 @@ public class TeacherScheduleService {
 			if (project == null)
 				continue;
 
-			result.add(new SlotDetails(
-					slot.getId(),
-					pid,
-					project.getTitle(),
-					projectStudents.getOrDefault(pid, List.of()),
-					slot.getDate(),
-					slot.getTime(),
-					"",
-					slot.getRoom() != null ? slot.getRoom().getName() : "",
-					projectRoles.getOrDefault(pid, ""),
-					"scheduled"
-			));
+			result.add(
+					new SlotDetails(slot.getId(), pid, project.getTitle(), projectStudents.getOrDefault(pid, List.of()),
+							slot.getDate(), slot.getTime(), "", slot.getRoom() != null ? slot.getRoom().getName() : "",
+							projectRoles.getOrDefault(pid, ""), "scheduled"));
 		}
 
 		return new TeacherScheduleResponse(result);

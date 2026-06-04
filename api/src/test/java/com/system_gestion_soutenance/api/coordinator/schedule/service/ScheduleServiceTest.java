@@ -57,7 +57,7 @@ class ScheduleServiceTest {
 		var result = service.getSchedule();
 
 		assertEquals(1, result.size());
-		assertEquals("Slot 1", result.get("1").get("title"));
+		assertEquals("Slot 1", result.get(0).title());
 	}
 
 	@Test
@@ -84,16 +84,12 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", 5);
-		slotData.put("roomId", 10);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, 10L)));
 
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-
-		var result = service.saveSchedule(schedule);
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 		verify(slotAssignmentRepository).deleteAll();
@@ -112,14 +108,11 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", 5);
-
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-		var result = service.saveSchedule(schedule);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, null)));
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 	}
@@ -137,15 +130,11 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", 5);
-		slotData.put("roomId", null);
-
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-		var result = service.saveSchedule(schedule);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, null)));
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 	}
@@ -235,14 +224,10 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(saved);
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of(saved));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "S");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", "5");
-
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-		service.saveSchedule(schedule);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L, List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("S",
+						"2025-06-01", "09:00", 5L, null)));
+		service.saveSchedule(request);
 
 		verify(slotAssignmentRepository).save(argThat(s -> s.getProjectId() == 5L));
 	}
@@ -251,15 +236,11 @@ class ScheduleServiceTest {
 	void saveSchedule_roomNotFound_throwsException() {
 		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("roomId", 99);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L, List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot",
+						"2025-06-01", "09:00", 5L, 99L)));
 
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-
-		assertThrows(ResponseStatusException.class, () -> service.saveSchedule(schedule));
+		assertThrows(ResponseStatusException.class, () -> service.saveSchedule(request));
 	}
 
 	@Test
@@ -301,7 +282,7 @@ class ScheduleServiceTest {
 		var result = service.autoGenerate(1L);
 
 		assertFalse(result.isEmpty());
-		assertEquals("Projet Test", result.values().iterator().next().get("title"));
+		assertEquals("Projet Test", result.get(0).title());
 	}
 
 	@Test
@@ -348,14 +329,12 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", null, null)));
 
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-
-		var result = service.saveSchedule(schedule);
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 		verify(slotAssignmentRepository).deleteAll();

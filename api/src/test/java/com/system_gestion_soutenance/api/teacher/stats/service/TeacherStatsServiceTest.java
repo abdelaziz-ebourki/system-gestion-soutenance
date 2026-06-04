@@ -42,9 +42,9 @@ class TeacherStatsServiceTest {
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
 
-		Map<String, Object> result = service.getStats(1L);
+		com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse result = service.getStats(1L);
 
-		assertEquals(0L, result.get("declaredUnavailabilitySlots"));
+		assertEquals(0L, result.declaredUnavailabilitySlots());
 	}
 
 	@Test
@@ -62,11 +62,11 @@ class TeacherStatsServiceTest {
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
 
-		Map<String, Object> result = service.getStats(1L);
+		com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse result = service.getStats(1L);
 
-		assertEquals(0, result.get("upcomingDefenses"));
-		assertEquals(1L, result.get("pendingEvaluations"));
-		assertEquals(2L, result.get("declaredUnavailabilitySlots"));
-		assertEquals(0L, result.get("juryAssignments"));
+		assertEquals(0, result.upcomingDefenses());
+		assertEquals(1L, result.pendingEvaluations());
+		assertEquals(2L, result.declaredUnavailabilitySlots());
+		assertEquals(0L, result.juryAssignments());
 	}
 }

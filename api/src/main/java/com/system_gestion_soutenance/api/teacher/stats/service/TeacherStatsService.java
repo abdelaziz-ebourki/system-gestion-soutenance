@@ -21,13 +21,11 @@ public class TeacherStatsService {
 	}
 
 	public TeacherStatsResponse getStats(Long teacherId) {
-		return new TeacherStatsResponse(
-				0,
-				evaluationRepository.findByTeacherId(teacherId).stream()
-						.filter(e -> "pending".equals(e.getStatus())).count(),
+		return new TeacherStatsResponse(0,
+				evaluationRepository.findByTeacherId(teacherId).stream().filter(e -> "pending".equals(e.getStatus()))
+						.count(),
 				unavailabilityRepository.findAll().stream().filter(u -> u.getTeacherId().equals(teacherId))
 						.mapToLong(u -> u.getSlots() != null ? u.getSlots().size() : 0).sum(),
-				(long) juryMemberRepository.findByTeacher_Id(teacherId).size()
-		);
+				(long) juryMemberRepository.findByTeacher_Id(teacherId).size());
 	}
 }

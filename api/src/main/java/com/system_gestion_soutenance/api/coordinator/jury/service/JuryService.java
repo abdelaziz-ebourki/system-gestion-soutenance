@@ -3,6 +3,8 @@ package com.system_gestion_soutenance.api.coordinator.jury.service;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
@@ -34,12 +36,12 @@ public class JuryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Map<String, Object>> findAll() {
+	public List<JuryResponse> findAll() {
 		return juryRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public Map<String, Object> create(CreateJuryRequest request) {
+	public JuryResponse create(CreateJuryRequest request) {
 		Project project = projectRepository.findById(request.projectId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
 
@@ -68,35 +70,31 @@ public class JuryService {
 	}
 
 	@Transactional
-	public Map<String, Object> update(Long id, Map<String, Object> updates) {
+	public JuryResponse update(Long id, UpdateJuryRequest updates) {
 		Jury jury = juryRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jury non trouvé"));
 
-		if (updates.containsKey("projectId")) {
-			Project project = projectRepository.findById(Long.parseLong((String) updates.get("projectId")))
+		if (updates.projectId() != null) {
+			Project project = projectRepository.findById(updates.projectId())
 					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
 			jury.setProject(project);
 		}
-		if (updates.containsKey("templateId")) {
-			JuryRoleTemplate template = juryRoleTemplateRepository
-					.findById(Long.parseLong((String) updates.get("templateId")))
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-							"Template de rôle jury introuvable"));
+		if (updates.templateId() != null) {
+			JuryRoleTemplate template = juryRoleTemplateRepository.findById(updates.templateId()).orElseThrow(
+					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Template de rôle jury introuvable"));
 			jury.setTemplate(template);
 		}
-		if (updates.containsKey("members")) {
-			@SuppressWarnings("unchecked")
-			List<Map<String, String>> memberData = (List<Map<String, String>>) updates.get("members");
-			validateNoDuplicateTeachers(memberData);
+		if (updates.members() != null) {
+			validateNoDuplicateTeachers(updates.members());
 
 			jury.getMembers().clear();
-			for (Map<String, String> m : memberData) {
-				Teacher teacher = teacherRepository.findById(Long.parseLong(m.get("teacherId")))
+			for (UpdateJuryRequest.MemberEntry m : updates.members()) {
+				Teacher teacher = teacherRepository.findById(m.teacherId())
 						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-								"Enseignant introuvable: " + m.get("teacherId")));
+								"Enseignant introuvable: " + m.teacherId()));
 				JuryMember jm = new JuryMember();
 				jm.setJury(jury);
-				jm.setRoleName(m.get("roleName"));
+				jm.setRoleName(m.roleName());
 				jm.setTeacher(teacher);
 				jury.getMembers().add(jm);
 			}
@@ -113,25 +111,14 @@ public class JuryService {
 		juryRepository.deleteById(id);
 	}
 
-	private Map<String, Object> toResponse(Jury jury) {
-		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("id", jury.getId());
-		map.put("projectId", jury.getProject().getId());
-		map.put("projectTitle", jury.getProject().getTitle());
-		map.put("defenseType", jury.getProject().getDefenseType());
-		map.put("templateId", jury.getTemplateId());
-		map.put("templateName", jury.getTemplateName());
+	private JuryResponse toResponse(Jury jury) {
+		List<JuryResponse.MemberResponse> members = jury.getMembers().stream()
+				.map(m -> new JuryResponse.MemberResponse(m.getRoleName(), m.getTeacher().getId(),
+						m.getTeacher().getFirstName() + " " + m.getTeacher().getLastName()))
+				.collect(Collectors.toList());
 
-		List<Map<String, Object>> members = jury.getMembers().stream().map(m -> {
-			Map<String, Object> mm = new LinkedHashMap<>();
-			mm.put("roleName", m.getRoleName());
-			mm.put("teacherId", m.getTeacher().getId());
-			mm.put("teacherName", m.getTeacher().getFirstName() + " " + m.getTeacher().getLastName());
-			return mm;
-		}).collect(Collectors.toList());
-		map.put("members", members);
-
-		return map;
+		return new JuryResponse(jury.getId(), jury.getProject().getId(), jury.getProject().getTitle(),
+				jury.getProject().getDefenseType(), jury.getTemplateId(), jury.getTemplateName(), members);
 	}
 
 	private void validateNoDuplicateTeachers(List<?> members) {
@@ -140,8 +127,8 @@ public class JuryService {
 			Long tid;
 			if (m instanceof CreateJuryRequest.MemberEntry entry) {
 				tid = entry.teacherId();
-			} else if (m instanceof Map<?, ?> map) {
-				tid = Long.parseLong((String) map.get("teacherId"));
+			} else if (m instanceof UpdateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
 			} else {
 				continue;
 			}

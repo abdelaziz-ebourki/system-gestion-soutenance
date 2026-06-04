@@ -49,7 +49,8 @@ class TeacherStatsControllerTest {
 
 	@Test
 	void getStats_returns200() throws Exception {
-		when(statsService.getStats(1L)).thenReturn(Map.of("upcomingDefenses", 0));
+		when(statsService.getStats(1L))
+				.thenReturn(new com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse(0, 0, 0, 0));
 		mockMvc.perform(get("/api/teacher/stats")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.upcomingDefenses").value(0));
 	}

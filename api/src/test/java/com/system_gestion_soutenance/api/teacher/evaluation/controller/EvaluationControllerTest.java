@@ -56,7 +56,9 @@ class EvaluationControllerTest {
 
 	@Test
 	void submit_returns200() throws Exception {
-		when(evaluationService.submit(anyLong(), any())).thenReturn(Map.of("status", "submitted"));
+		when(evaluationService.submit(anyLong(), any()))
+				.thenReturn(new com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse(1L, 1L,
+						"Project", 15.0, "Good", "submitted"));
 		mockMvc.perform(post("/api/teacher/evaluations/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"score\":15.0,\"comment\":\"Good\"}")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("submitted"));

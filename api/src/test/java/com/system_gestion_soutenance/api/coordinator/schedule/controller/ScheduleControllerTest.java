@@ -58,18 +58,27 @@ class ScheduleControllerTest {
 
 	@Test
 	void get_returnsSchedule() throws Exception {
-		when(scheduleService.getSchedule()).thenReturn(Map.of("1", Map.of("id", 1L, "title", "Slot 1")));
+		when(scheduleService.getSchedule())
+				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse(1L,
+						"Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"), "supervisor",
+						"Approved")));
 
 		mockMvc.perform(get("/api/coordinator/schedule")).andExpect(status().isOk())
-				.andExpect(jsonPath("$['1'].title").value("Slot 1"));
+				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].title").value("Slot 1"));
 	}
 
 	@Test
 	void save_noConflicts_returnsOk() throws Exception {
-		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(any(), eq("1"))).thenReturn(List.of());
-		when(scheduleService.saveSchedule(any())).thenReturn(Map.of("1", Map.of("title", "Slot 1")));
+		when(conflictDetectionService.validate(anyMap(), anyString())).thenReturn(List.of());
+		when(scheduleService.saveSchedule(any()))
+				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse(1L,
+						"Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"), "supervisor",
+						"Approved")));
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk());
@@ -77,9 +86,12 @@ class ScheduleControllerTest {
 
 	@Test
 	void save_withConflicts_returnsBadRequest() throws Exception {
-		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(any(), eq("1")))
+		when(conflictDetectionService.validate(anyMap(), anyString()))
 				.thenReturn(List.of(Map.of("severity", "error", "message", "Conflict detected")));
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
@@ -89,11 +101,14 @@ class ScheduleControllerTest {
 
 	@Test
 	void save_withWarningsOnly_returnsOk() throws Exception {
-		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(any(), eq("1")))
+		when(conflictDetectionService.validate(anyMap(), anyString()))
 				.thenReturn(List.of(Map.of("severity", "warning", "message", "Minor issue")));
-		when(scheduleService.saveSchedule(any())).thenReturn(Map.of());
+		when(scheduleService.saveSchedule(any())).thenReturn(List.of());
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk());
@@ -107,11 +122,14 @@ class ScheduleControllerTest {
 
 	@Test
 	void autoGenerate_withDefenseSessionId_returnsSchedule() throws Exception {
-		when(scheduleService.autoGenerate(1L)).thenReturn(Map.of("1", Map.of("title", "Generated Slot")));
+		when(scheduleService.autoGenerate(1L))
+				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse(1L,
+						"Generated Slot", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"),
+						"supervisor", "Approved")));
 
 		mockMvc.perform(post("/api/coordinator/schedule/auto-generate").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1")))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.schedule['1'].title").value("Generated Slot"));
+				.andExpect(jsonPath("$[0].title").value("Generated Slot"));
 	}
 
 	@Test

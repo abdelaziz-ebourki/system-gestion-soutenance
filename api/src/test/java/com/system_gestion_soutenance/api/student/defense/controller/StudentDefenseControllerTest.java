@@ -49,7 +49,9 @@ class StudentDefenseControllerTest {
 
 	@Test
 	void getDefense_returns200() throws Exception {
-		when(studentDefenseService.getDefense(1L)).thenReturn(Map.of("status", "scheduled"));
+		when(studentDefenseService.getDefense(1L))
+				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
+						null, List.of(), null, null, null, null, "scheduled", null, null));
 		mockMvc.perform(get("/api/student/defense")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("scheduled"));
 	}

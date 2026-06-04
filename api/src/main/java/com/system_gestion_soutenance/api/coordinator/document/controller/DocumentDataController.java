@@ -1,14 +1,11 @@
 package com.system_gestion_soutenance.api.coordinator.document.controller;
 
-import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
-import com.system_gestion_soutenance.api.coordinator.document.dto.ProjectIdRequest;
-import com.system_gestion_soutenance.api.coordinator.document.dto.SessionRequest;
+import com.system_gestion_soutenance.api.coordinator.document.dto.*;
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,33 +25,35 @@ public class DocumentDataController {
 
 	@PostMapping("/evaluation-sheets")
 	@Operation(summary = "Get evaluation sheets data for a project")
-	public ResponseEntity<List<Map<String, Object>>> evaluationSheets(@Valid @RequestBody ProjectIdRequest request) {
+	public ResponseEntity<List<EvaluationSheetResponse>> evaluationSheets(
+			@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
 		return ResponseEntity.ok(documentDataService.evaluationSheets(idsRequest));
 	}
 
 	@PostMapping("/attendance-lists")
 	@Operation(summary = "Get attendance lists data")
-	public ResponseEntity<Map<String, Object>> attendanceList(@Valid @RequestBody SessionRequest request) {
+	public ResponseEntity<AttendanceListResponse> attendanceList(@Valid @RequestBody SessionRequest request) {
 		return ResponseEntity.ok(documentDataService.attendanceList(request.defenseSessionId()));
 	}
 
 	@PostMapping("/jury-convocations")
 	@Operation(summary = "Get jury convocation data for a project")
-	public ResponseEntity<List<Map<String, Object>>> juryConvocations(@Valid @RequestBody ProjectIdRequest request) {
+	public ResponseEntity<List<JuryConvocationResponse>> juryConvocations(
+			@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
 		return ResponseEntity.ok(documentDataService.juryConvocations(idsRequest));
 	}
 
 	@PostMapping("/schedule")
 	@Operation(summary = "Get printable schedule data")
-	public ResponseEntity<Map<String, Object>> schedule(@Valid @RequestBody SessionRequest request) {
+	public ResponseEntity<ScheduleDocResponse> schedule(@Valid @RequestBody SessionRequest request) {
 		return ResponseEntity.ok(documentDataService.schedule(request.defenseSessionId()));
 	}
 
 	@PostMapping("/proces-verbal")
 	@Operation(summary = "Get proces-verbal (PV) data for a project")
-	public ResponseEntity<Map<String, Object>> procesVerbal(@Valid @RequestBody ProjectIdRequest request) {
+	public ResponseEntity<ProcesVerbalResponse> procesVerbal(@Valid @RequestBody ProjectIdRequest request) {
 		return ResponseEntity.ok(documentDataService.procesVerbal(request.projectId()));
 	}
 }

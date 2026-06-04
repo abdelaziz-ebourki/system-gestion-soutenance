@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
+import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse;
+import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -55,7 +57,8 @@ class ProjectControllerTest {
 
 	@Test
 	void findAll_returnsProjects() throws Exception {
-		when(projectService.findAll()).thenReturn(List.of(Map.of("id", 1L, "title", "Projet Test")));
+		ProjectResponse response = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", 1L, "Supervisor", List.of());
+		when(projectService.findAll()).thenReturn(List.of(response));
 
 		mockMvc.perform(get("/api/coordinator/projects")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].title").value("Projet Test"));
@@ -63,8 +66,9 @@ class ProjectControllerTest {
 
 	@Test
 	void create_returnsCreated() throws Exception {
-		CreateProjectRequest request = new CreateProjectRequest("New Project", "Description", 1L, List.of(1L), "PFE");
-		when(projectService.create(any())).thenReturn(Map.of("id", 1L, "title", "New Project"));
+		CreateProjectRequest request = new CreateProjectRequest("New Project", "Description", 1L, "PFE", List.of(1L));
+		ProjectResponse response = new ProjectResponse(1L, "New Project", "Desc", "PFE", 1L, "Supervisor", List.of());
+		when(projectService.create(any())).thenReturn(response);
 
 		mockMvc.perform(post("/api/coordinator/projects").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -73,8 +77,10 @@ class ProjectControllerTest {
 
 	@Test
 	void update_returnsProject() throws Exception {
-		Map<String, Object> updates = Map.of("title", "Updated Project");
-		when(projectService.update(eq(1L), any())).thenReturn(Map.of("id", 1L, "title", "Updated Project"));
+		UpdateProjectRequest updates = new UpdateProjectRequest("Updated Project", "Desc", "PFE");
+		ProjectResponse response = new ProjectResponse(1L, "Updated Project", "Desc", "PFE", 1L, "Supervisor",
+				List.of());
+		when(projectService.update(eq(1L), any())).thenReturn(response);
 
 		mockMvc.perform(put("/api/coordinator/projects/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())

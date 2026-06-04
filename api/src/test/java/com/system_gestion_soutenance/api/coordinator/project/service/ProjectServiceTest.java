@@ -46,7 +46,7 @@ class ProjectServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Projet Test", result.get(0).get("title"));
+		assertEquals("Projet Test", result.get(0).title());
 	}
 
 	@Test
@@ -74,19 +74,19 @@ class ProjectServiceTest {
 		when(studentRepository.findAllById(List.of(10L))).thenReturn(List.of(student));
 		when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
 
-		CreateProjectRequest request = new CreateProjectRequest("New Project", "A description", 1L, List.of(10L),
-				"PFE");
+		CreateProjectRequest request = new CreateProjectRequest("New Project", "A description", 1L, "PFE",
+				List.of(10L));
 		var result = service.create(request);
 
-		assertEquals("New Project", result.get("title"));
-		assertEquals("John Doe", result.get("supervisorName"));
+		assertEquals("New Project", result.title());
+		assertEquals("John Doe", result.supervisorName());
 	}
 
 	@Test
 	void create_supervisorNotFound_throwsException() {
 		when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
 
-		CreateProjectRequest request = new CreateProjectRequest("Title", "Desc", 99L, List.of(), "PFE");
+		CreateProjectRequest request = new CreateProjectRequest("Title", "Desc", 99L, "PFE", List.of());
 
 		assertThrows(ResponseStatusException.class, () -> service.create(request));
 	}
@@ -108,10 +108,10 @@ class ProjectServiceTest {
 		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
 		when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
 
-		CreateProjectRequest request = new CreateProjectRequest("Project", "Desc", 1L, null, "PFE");
+		CreateProjectRequest request = new CreateProjectRequest("Project", "Desc", 1L, "PFE", null);
 		var result = service.create(request);
 
-		assertEquals("Project", result.get("title"));
+		assertEquals("Project", result.title());
 	}
 
 	@Test
@@ -127,65 +127,22 @@ class ProjectServiceTest {
 		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
 
-		var result = service.update(1L, Map.of("title", "Updated"));
+		var result = service.update(1L,
+				new com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest("Updated", "Desc",
+						"PFE"));
 
 		verify(project).setTitle("Updated");
-		assertEquals("Updated", result.get("title"));
+		assertEquals("Updated", result.title());
 	}
 
 	@Test
 	void update_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.update(99L, Map.of("title", "X")));
-	}
-
-	@Test
-	void update_withSupervisorId_updatesSupervisor() {
-		Project project = mock(Project.class);
-		Teacher supervisor = mock(Teacher.class);
-		when(supervisor.getId()).thenReturn(2L);
-		when(supervisor.getFirstName()).thenReturn("John");
-		when(supervisor.getLastName()).thenReturn("Doe");
-
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(teacherRepository.findById(2L)).thenReturn(Optional.of(supervisor));
-		when(projectRepository.save(project)).thenReturn(project);
-		when(project.getId()).thenReturn(1L);
-		when(project.getTitle()).thenReturn("Title");
-		when(project.getDescription()).thenReturn("Desc");
-		when(project.getDefenseType()).thenReturn("PFE");
-		when(project.getStatus()).thenReturn("pending");
-		when(project.getStudents()).thenReturn(List.of());
-		when(project.getSupervisor()).thenReturn(supervisor);
-
-		service.update(1L, Map.of("supervisorId", "2"));
-
-		verify(project).setSupervisor(supervisor);
-	}
-
-	@Test
-	void update_withStudentIds_updatesStudents() {
-		Project project = mock(Project.class);
-		Student student = mock(Student.class);
-		when(student.getId()).thenReturn(5L);
-		when(student.getFirstName()).thenReturn("Jane");
-		when(student.getLastName()).thenReturn("Smith");
-
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(studentRepository.findAllById(List.of(5L))).thenReturn(List.of(student));
-		when(projectRepository.save(project)).thenReturn(project);
-		when(project.getId()).thenReturn(1L);
-		when(project.getTitle()).thenReturn("Title");
-		when(project.getDescription()).thenReturn("Desc");
-		when(project.getDefenseType()).thenReturn("PFE");
-		when(project.getStatus()).thenReturn("pending");
-		when(project.getStudents()).thenReturn(List.of(student));
-		when(project.getSupervisor()).thenReturn(null);
-
-		service.update(1L, Map.of("studentIds", List.of(5)));
-
-		verify(project).setStudents(List.of(student));
+		assertThrows(ResponseStatusException.class,
+				() -> service.update(99L,
+						new com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest("X", "Desc",
+								"PFE")));
 	}
 
 	@Test
@@ -228,50 +185,6 @@ class ProjectServiceTest {
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(mock(Group.class)));
 
 		assertThrows(ResponseStatusException.class, () -> service.delete(1L));
-	}
-
-	@Test
-	void update_withStudentIdsAsNumbers_parsesCorrectly() {
-		Project project = mock(Project.class);
-		Student student = mock(Student.class);
-		when(student.getId()).thenReturn(5L);
-		when(student.getFirstName()).thenReturn("Jane");
-		when(student.getLastName()).thenReturn("Smith");
-
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(studentRepository.findAllById(List.of(5L))).thenReturn(List.of(student));
-		when(projectRepository.save(project)).thenReturn(project);
-		when(project.getId()).thenReturn(1L);
-		when(project.getTitle()).thenReturn("Title");
-		when(project.getDescription()).thenReturn("Desc");
-		when(project.getDefenseType()).thenReturn("PFE");
-		when(project.getStatus()).thenReturn("pending");
-		when(project.getStudents()).thenReturn(List.of(student));
-		when(project.getSupervisor()).thenReturn(null);
-
-		Map<String, Object> updates = new LinkedHashMap<>();
-		updates.put("studentIds", List.of(5));
-		service.update(1L, updates);
-
-		verify(project).setStudents(List.of(student));
-	}
-
-	@Test
-	void update_withStatus_updatesStatus() {
-		Project project = mock(Project.class);
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(projectRepository.save(project)).thenReturn(project);
-		when(project.getId()).thenReturn(1L);
-		when(project.getTitle()).thenReturn("Title");
-		when(project.getDescription()).thenReturn("Desc");
-		when(project.getDefenseType()).thenReturn("PFE");
-		when(project.getStatus()).thenReturn("approved");
-		when(project.getStudents()).thenReturn(List.of());
-		when(project.getSupervisor()).thenReturn(null);
-
-		service.update(1L, Map.of("status", "approved"));
-
-		verify(project).setStatus("approved");
 	}
 
 	@Test

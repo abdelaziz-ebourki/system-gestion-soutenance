@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.service.JuryService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -55,7 +57,8 @@ class JuryControllerTest {
 
 	@Test
 	void findAll_returnsJuries() throws Exception {
-		when(juryService.findAll()).thenReturn(List.of(Map.of("id", 1L, "projectTitle", "Projet Test")));
+		when(juryService.findAll())
+				.thenReturn(List.of(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of())));
 
 		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
@@ -65,7 +68,8 @@ class JuryControllerTest {
 	void create_returnsCreated() throws Exception {
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
-		when(juryService.create(any())).thenReturn(Map.of("id", 1L, "projectId", 1L));
+		JuryResponse response = new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of());
+		when(juryService.create(any())).thenReturn(response);
 
 		mockMvc.perform(post("/api/coordinator/juries").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -74,8 +78,9 @@ class JuryControllerTest {
 
 	@Test
 	void update_returnsJury() throws Exception {
-		Map<String, Object> updates = Map.of("projectId", "2");
-		when(juryService.update(eq(1L), any())).thenReturn(Map.of("id", 1L, "projectId", 2L));
+		UpdateJuryRequest updates = new UpdateJuryRequest(2L, 1L, List.of());
+		JuryResponse response = new JuryResponse(1L, 2L, "Projet Test", "Soutenance", 1L, "Template", List.of());
+		when(juryService.update(eq(1L), any())).thenReturn(response);
 
 		mockMvc.perform(put("/api/coordinator/juries/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())

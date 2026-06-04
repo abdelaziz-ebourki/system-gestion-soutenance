@@ -1,12 +1,12 @@
 package com.system_gestion_soutenance.api.coordinator.group.controller;
 
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
+import com.system_gestion_soutenance.api.coordinator.group.dto.GroupResponse;
 import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,14 +24,14 @@ public class GroupController {
 
 	@GetMapping
 	@Operation(summary = "List all groups")
-	public List<Map<String, Object>> findAll() {
+	public List<GroupResponse> findAll() {
 		return groupService.findAll();
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new group")
-	public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody CreateGroupRequest request) {
-		Map<String, Object> group = groupService.create(request);
+	public ResponseEntity<GroupResponse> create(@Valid @RequestBody CreateGroupRequest request) {
+		GroupResponse group = groupService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(group);
 	}
 

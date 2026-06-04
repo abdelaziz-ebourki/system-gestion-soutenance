@@ -50,20 +50,26 @@ class TeacherUnavailabilityControllerTest {
 
 	@Test
 	void get_returns200() throws Exception {
-		when(service.getByTeacher(1L)).thenReturn(Map.of("slotsByDate", Map.of()));
+		when(service.getByTeacher(1L)).thenReturn(
+				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
+						Map.of()));
 		mockMvc.perform(get("/api/teacher/unavailability")).andExpect(status().isOk());
 	}
 
 	@Test
 	void save_withFlatBody_returns200() throws Exception {
-		when(service.saveForTeacher(anyLong(), any())).thenReturn(Map.of("slotsByDate", Map.of()));
+		when(service.saveForTeacher(anyLong(), any())).thenReturn(
+				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
+						Map.of()));
 		mockMvc.perform(post("/api/teacher/unavailability").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"2026-06-01\":[\"08:00\"]}")).andExpect(status().isOk());
 	}
 
 	@Test
 	void save_returns200() throws Exception {
-		when(service.saveForTeacher(anyLong(), any())).thenReturn(Map.of("slotsByDate", Map.of()));
+		when(service.saveForTeacher(anyLong(), any())).thenReturn(
+				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
+						Map.of()));
 		mockMvc.perform(post("/api/teacher/unavailability").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"slotsByDate\":{\"2026-06-01\":[\"08:00\"]}}")).andExpect(status().isOk());
 	}
