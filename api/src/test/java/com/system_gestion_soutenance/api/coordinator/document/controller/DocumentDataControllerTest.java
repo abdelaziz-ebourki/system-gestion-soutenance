@@ -99,8 +99,8 @@ class DocumentDataControllerTest {
 
 	@Test
 	void procesVerbal_returnsData() throws Exception {
-		when(documentDataService.procesVerbal(1L)).thenReturn(
-				new ProcesVerbalResponse(new ProcesVerbalResponse.Settings(null, null, null, null), null,
+		when(documentDataService.procesVerbal(1L))
+				.thenReturn(new ProcesVerbalResponse(new ProcesVerbalResponse.Settings(null, null, null, null), null,
 						List.of("Jane Smith"), "Supervisor", List.of()));
 
 		mockMvc.perform(post("/api/coordinator/documents/proces-verbal").contentType(MediaType.APPLICATION_JSON)
