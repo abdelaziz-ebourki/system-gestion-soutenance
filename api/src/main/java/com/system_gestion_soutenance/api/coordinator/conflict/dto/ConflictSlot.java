@@ -1,0 +1,4 @@
+package com.system_gestion_soutenance.api.coordinator.conflict.dto;
+
+public record ConflictSlot(String id, String title, String date, String time, String projectId, String roomId) {
+}

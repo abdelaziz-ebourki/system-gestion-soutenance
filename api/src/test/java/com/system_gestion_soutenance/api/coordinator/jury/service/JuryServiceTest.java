@@ -158,7 +158,7 @@ class JuryServiceTest {
 		when(jury.getProject()).thenReturn(newProject);
 		when(jury.getTemplateId()).thenReturn(null);
 		when(jury.getTemplateName()).thenReturn(null);
-		when(jury.getMembers()).thenReturn(List.of());
+		when(jury.getMembers()).thenReturn(new ArrayList<>());
 
 		var result = service.update(1L,
 				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(2L, null, List.of()));
@@ -187,7 +187,7 @@ class JuryServiceTest {
 		when(jury.getProject()).thenReturn(project);
 		when(jury.getTemplateId()).thenReturn(20L);
 		when(jury.getTemplateName()).thenReturn("Template B");
-		when(jury.getMembers()).thenReturn(List.of());
+		when(jury.getMembers()).thenReturn(new ArrayList<>());
 
 		var result = service.update(1L,
 				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(null, 20L, List.of()));

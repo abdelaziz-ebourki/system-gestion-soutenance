@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -64,7 +65,7 @@ class ScheduleControllerTest {
 						"Approved")));
 
 		mockMvc.perform(get("/api/coordinator/schedule")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].title").value("Slot 1"));
+				.andExpect(jsonPath("$.data.size()").value(1)).andExpect(jsonPath("$.data[0].title").value("Slot 1"));
 	}
 
 	@Test
@@ -74,14 +75,15 @@ class ScheduleControllerTest {
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(anyMap(), anyString())).thenReturn(List.of());
+		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString())).thenReturn(List.of());
 		when(scheduleService.saveSchedule(any()))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse(1L,
 						"Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"), "supervisor",
 						"Approved")));
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk());
+				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
@@ -91,12 +93,12 @@ class ScheduleControllerTest {
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(anyMap(), anyString()))
+		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString()))
 				.thenReturn(List.of(Map.of("severity", "error", "message", "Conflict detected")));
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.conflicts").isArray());
+				.andExpect(jsonPath("$.errors").isArray());
 	}
 
 	@Test
@@ -106,7 +108,7 @@ class ScheduleControllerTest {
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(anyMap(), anyString()))
+		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString()))
 				.thenReturn(List.of(Map.of("severity", "warning", "message", "Minor issue")));
 		when(scheduleService.saveSchedule(any())).thenReturn(List.of());
 
@@ -127,9 +129,10 @@ class ScheduleControllerTest {
 						"Generated Slot", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"),
 						"supervisor", "Approved")));
 
+		var body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.DefenseSessionIdRequest(1L);
 		mockMvc.perform(post("/api/coordinator/schedule/auto-generate").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1")))).andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].title").value("Generated Slot"));
+				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data[0].title").value("Generated Slot"));
 	}
 
 	@Test
@@ -142,8 +145,9 @@ class ScheduleControllerTest {
 	void publish_withDefenseSessionId_returnsOk() throws Exception {
 		doNothing().when(scheduleService).publish(1L);
 
+		var body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.DefenseSessionIdRequest(1L);
 		mockMvc.perform(post("/api/coordinator/schedule/publish").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1")))).andExpect(status().isOk())
+				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("Planning publié avec succès."));
 	}
 

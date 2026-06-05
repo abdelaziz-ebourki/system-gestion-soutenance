@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictSlot;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,27 +50,29 @@ public class ConflictDetectionService {
 		this.defenseSessionRepository = defenseSessionRepository;
 	}
 
-	public List<Map<String, Object>> validate(Map<String, Map<String, Object>> proposedSchedule,
-			String defenseSessionId) {
-		Map<String, Map<String, Object>> mergedSchedule = new LinkedHashMap<>();
+	public List<Map<String, Object>> validate(ScheduleRequest request, String defenseSessionId) {
+		Map<String, ConflictSlot> mergedSchedule = new LinkedHashMap<>();
 
 		for (SlotAssignment existing : slotAssignmentRepository.findAll()) {
-			Map<String, Object> entry = new LinkedHashMap<>();
-			entry.put("id", existing.getId());
-			entry.put("title", existing.getTitle());
-			entry.put("date", existing.getDate());
-			entry.put("time", existing.getTime());
-			entry.put("projectId", String.valueOf(existing.getProjectId()));
-			entry.put("roomId", existing.getRoom() != null ? String.valueOf(existing.getRoom().getId()) : null);
-			mergedSchedule.put(String.valueOf(existing.getId()), entry);
+			mergedSchedule.put(String.valueOf(existing.getId()),
+					new ConflictSlot(String.valueOf(existing.getId()), existing.getTitle(), existing.getDate(),
+							existing.getTime(), String.valueOf(existing.getProjectId()),
+							existing.getRoom() != null ? String.valueOf(existing.getRoom().getId()) : null));
 		}
 
-		mergedSchedule.putAll(proposedSchedule);
+		for (int i = 0; i < request.slots().size(); i++) {
+			var slot = request.slots().get(i);
+			String tempId = "new_" + i;
+			mergedSchedule.put(tempId,
+					new ConflictSlot(tempId, slot.title(), slot.date(), slot.time(),
+							slot.projectId() == null ? null : String.valueOf(slot.projectId()),
+							slot.roomId() == null ? null : String.valueOf(slot.roomId())));
+		}
 
 		return runAllChecks(mergedSchedule, defenseSessionId);
 	}
 
-	private List<Map<String, Object>> runAllChecks(Map<String, Map<String, Object>> schedule, String defenseSessionId) {
+	private List<Map<String, Object>> runAllChecks(Map<String, ConflictSlot> schedule, String defenseSessionId) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 
 		conflicts.addAll(checkProjectAlreadyScheduled(schedule));
@@ -83,13 +87,13 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkProjectAlreadyScheduled(Map<String, Map<String, Object>> schedule) {
+	private List<Map<String, Object>> checkProjectAlreadyScheduled(Map<String, ConflictSlot> schedule) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		Map<String, String> projectToSlot = new HashMap<>();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			String projectId = (String) entry.getValue().get("projectId");
+			String projectId = entry.getValue().projectId();
 			if (projectId == null)
 				continue;
 
@@ -104,16 +108,16 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkSlotOccupied(Map<String, Map<String, Object>> schedule) {
+	private List<Map<String, Object>> checkSlotOccupied(Map<String, ConflictSlot> schedule) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-			String date = (String) data.get("date");
-			String roomId = (String) data.get("roomId");
-			String time = (String) data.get("time");
+			ConflictSlot data = entry.getValue();
+			String date = data.date();
+			String roomId = data.roomId();
+			String time = data.time();
 			String key = date + "|" + roomId + "|" + time;
 
 			if (seen.contains(key)) {
@@ -127,14 +131,14 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkRoomCapacity(Map<String, Map<String, Object>> schedule) {
+	private List<Map<String, Object>> checkRoomCapacity(Map<String, ConflictSlot> schedule) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-			String projectId = (String) data.get("projectId");
-			String roomId = (String) data.get("roomId");
+			ConflictSlot data = entry.getValue();
+			String projectId = data.projectId();
+			String roomId = data.roomId();
 			if (projectId == null || roomId == null)
 				continue;
 
@@ -153,7 +157,7 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkDateOutOfBounds(Map<String, Map<String, Object>> schedule,
+	private List<Map<String, Object>> checkDateOutOfBounds(Map<String, ConflictSlot> schedule,
 			String defenseSessionId) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		if (defenseSessionId == null)
@@ -163,9 +167,9 @@ public class ConflictDetectionService {
 		if (ds == null)
 			return conflicts;
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			String dateStr = (String) entry.getValue().get("date");
+			String dateStr = entry.getValue().date();
 			if (dateStr == null)
 				continue;
 
@@ -184,15 +188,15 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkTeacherDoubleBooked(Map<String, Map<String, Object>> schedule) {
+	private List<Map<String, Object>> checkTeacherDoubleBooked(Map<String, ConflictSlot> schedule) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		Map<String, Map<String, String>> dateTeacherSlot = new HashMap<>();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-			String projectId = (String) data.get("projectId");
-			String date = (String) data.get("date");
+			ConflictSlot data = entry.getValue();
+			String projectId = data.projectId();
+			String date = data.date();
 			if (projectId == null || date == null)
 				continue;
 
@@ -213,15 +217,15 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkSupervisorConflict(Map<String, Map<String, Object>> schedule) {
+	private List<Map<String, Object>> checkSupervisorConflict(Map<String, ConflictSlot> schedule) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		Map<String, String> dateSupervisorSlot = new HashMap<>();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-			String projectId = (String) data.get("projectId");
-			String date = (String) data.get("date");
+			ConflictSlot data = entry.getValue();
+			String projectId = data.projectId();
+			String date = data.date();
 			if (projectId == null || date == null)
 				continue;
 
@@ -243,8 +247,7 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkBreakInterval(Map<String, Map<String, Object>> schedule,
-			String defenseSessionId) {
+	private List<Map<String, Object>> checkBreakInterval(Map<String, ConflictSlot> schedule, String defenseSessionId) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		int breakDuration = 15;
 
@@ -254,22 +257,22 @@ public class ConflictDetectionService {
 				breakDuration = ds.getBreakDuration();
 		}
 
-		Map<String, List<Map.Entry<String, Map<String, Object>>>> byDateRoom = new HashMap<>();
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
-			Map<String, Object> data = entry.getValue();
-			String date = (String) data.get("date");
-			String roomId = (String) data.get("roomId");
+		Map<String, List<Map.Entry<String, ConflictSlot>>> byDateRoom = new HashMap<>();
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
+			ConflictSlot data = entry.getValue();
+			String date = data.date();
+			String roomId = data.roomId();
 			String key = date + "|" + roomId;
 			byDateRoom.computeIfAbsent(key, k -> new ArrayList<>()).add(entry);
 		}
 
-		for (Map.Entry<String, List<Map.Entry<String, Map<String, Object>>>> group : byDateRoom.entrySet()) {
-			List<Map.Entry<String, Map<String, Object>>> slots = group.getValue();
-			slots.sort(Comparator.comparing(e -> (String) e.getValue().get("time")));
+		for (Map.Entry<String, List<Map.Entry<String, ConflictSlot>>> group : byDateRoom.entrySet()) {
+			List<Map.Entry<String, ConflictSlot>> slots = group.getValue();
+			slots.sort(Comparator.comparing(e -> e.getValue().time()));
 
 			for (int i = 1; i < slots.size(); i++) {
-				String prevTime = (String) slots.get(i - 1).getValue().get("time");
-				String currTime = (String) slots.get(i).getValue().get("time");
+				String prevTime = slots.get(i - 1).getValue().time();
+				String currTime = slots.get(i).getValue().time();
 				if (prevTime == null || currTime == null)
 					continue;
 
@@ -289,16 +292,16 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkTeacherUnavailable(Map<String, Map<String, Object>> schedule) {
+	private List<Map<String, Object>> checkTeacherUnavailable(Map<String, ConflictSlot> schedule) {
 		List<Map<String, Object>> conflicts = new ArrayList<>();
 		List<Unavailability> unavailabilityList = unavailabilityRepository.findAll();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
-			Map<String, Object> data = entry.getValue();
-			String projectId = (String) data.get("projectId");
-			String date = (String) data.get("date");
-			String time = (String) data.get("time");
+			ConflictSlot data = entry.getValue();
+			String projectId = data.projectId();
+			String date = data.date();
+			String time = data.time();
 			if (projectId == null || date == null || time == null)
 				continue;
 

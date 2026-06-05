@@ -20,6 +20,8 @@ import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unava
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest;
 import java.time.LocalDate;
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -38,13 +40,9 @@ class ConflictDetectionServiceTest {
 			roomRepository, groupRepository, projectRepository, juryRepository, unavailabilityRepository,
 			defenseSessionRepository);
 
-	private Map<String, Map<String, Object>> singleSlot(String projectId, String roomId, String date, String time) {
-		Map<String, Object> data = new LinkedHashMap<>();
-		data.put("projectId", projectId);
-		data.put("roomId", roomId);
-		data.put("date", date);
-		data.put("time", time);
-		return new LinkedHashMap<>(Map.of("1", data));
+	private ScheduleRequest singleSlot(String projectId, String roomId, String date, String time) {
+		return new ScheduleRequest(1L, List
+				.of(new SlotAssignmentRequest("Slot 1", date, time, Long.valueOf(projectId), Long.valueOf(roomId))));
 	}
 
 	@Test
@@ -62,19 +60,10 @@ class ConflictDetectionServiceTest {
 	void checkProjectAlreadyScheduled_detectsDuplicate() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 1L, 1L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "1");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "10:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
@@ -85,21 +74,10 @@ class ConflictDetectionServiceTest {
 	void checkSlotOccupied_detectsOverlap() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("roomId", "10");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:00", 2L, 10L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("roomId", "10");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "09:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
@@ -182,19 +160,10 @@ class ConflictDetectionServiceTest {
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 		when(juryRepository.findByProjectId(2L)).thenReturn(List.of(jury));
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-02", "09:00", 2L, 1L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("date", "2025-06-02");
-		data2.put("time", "09:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
@@ -217,19 +186,10 @@ class ConflictDetectionServiceTest {
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 		when(juryRepository.findByProjectId(2L)).thenReturn(List.of(jury));
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 1L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "10:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
@@ -268,19 +228,10 @@ class ConflictDetectionServiceTest {
 		when(p2.getSupervisor()).thenReturn(sup2);
 		when(projectRepository.findById(2L)).thenReturn(Optional.of(p2));
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 1L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "10:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
@@ -302,19 +253,10 @@ class ConflictDetectionServiceTest {
 		when(project2.getSupervisor()).thenReturn(supervisor);
 		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 1L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "10:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
@@ -331,21 +273,10 @@ class ConflictDetectionServiceTest {
 		when(ds.getEndDate()).thenReturn(LocalDate.of(2025, 6, 30));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("roomId", "10");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:15", 2L, 10L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("roomId", "10");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "09:15");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
+		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, "1");
 
@@ -403,13 +334,9 @@ class ConflictDetectionServiceTest {
 	void checkProjectAlreadyScheduled_nullProjectId_skipsCheck() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data = new LinkedHashMap<>();
-		data.put("projectId", null);
-		data.put("date", "2025-06-01");
-
-		var schedule = new LinkedHashMap<>(Map.of("1", data));
+		var schedule = new ScheduleRequest(1L,
+				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
 		var result = service.validate(schedule, null);
-
 		assertTrue(result.stream().noneMatch(c -> "project_already_scheduled".equals(c.get("type"))));
 	}
 
@@ -417,13 +344,9 @@ class ConflictDetectionServiceTest {
 	void checkRoomCapacity_nullProjectIdOrRoomId_skipsCheck() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data = new LinkedHashMap<>();
-		data.put("projectId", null);
-		data.put("roomId", "1");
-		data.put("date", "2025-06-01");
-		data.put("time", "09:00");
-
-		var result = service.validate(new LinkedHashMap<>(Map.of("1", data)), null);
+		var schedule = new ScheduleRequest(1L,
+				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
+		var result = service.validate(schedule, null);
 		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.get("type"))));
 	}
 
@@ -483,11 +406,9 @@ class ConflictDetectionServiceTest {
 	void checkTeacherDoubleBooked_nullProjectId_skipsCheck() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data = new LinkedHashMap<>();
-		data.put("projectId", null);
-		data.put("date", "2025-06-01");
-
-		var result = service.validate(new LinkedHashMap<>(Map.of("1", data)), null);
+		var schedule = new ScheduleRequest(1L,
+				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
+		var result = service.validate(schedule, null);
 		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.get("type"))));
 	}
 
@@ -504,22 +425,10 @@ class ConflictDetectionServiceTest {
 	void checkBreakInterval_invalidTimeFormat_skipsCheck() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("roomId", "10");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "not-a-time");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "not-a-time", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:00", 2L, 10L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("roomId", "10");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "09:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
-
+		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);
 		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.get("type"))));
 	}
@@ -528,12 +437,8 @@ class ConflictDetectionServiceTest {
 	void checkTeacherUnavailable_nullFields_skipsCheck() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data = new LinkedHashMap<>();
-		data.put("projectId", null);
-		data.put("date", null);
-		data.put("time", null);
-
-		var result = service.validate(new LinkedHashMap<>(Map.of("1", data)), null);
+		var schedule = new ScheduleRequest(1L, List.of(new SlotAssignmentRequest("Slot 1", null, null, null, 1L)));
+		var result = service.validate(schedule, null);
 		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.get("type"))));
 	}
 
@@ -607,24 +512,11 @@ class ConflictDetectionServiceTest {
 	void checkBreakInterval_sufficientGap_noViolation() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("roomId", "10");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 10L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("roomId", "10");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "10:00");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
-
+		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);
-
 		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.get("type"))));
 	}
 
@@ -632,24 +524,11 @@ class ConflictDetectionServiceTest {
 	void checkBreakInterval_nullSessionId_usesDefaultBreak() {
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
-		Map<String, Object> data1 = new LinkedHashMap<>();
-		data1.put("projectId", "1");
-		data1.put("roomId", "10");
-		data1.put("date", "2025-06-01");
-		data1.put("time", "09:00");
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:10", 2L, 10L));
 
-		Map<String, Object> data2 = new LinkedHashMap<>();
-		data2.put("projectId", "2");
-		data2.put("roomId", "10");
-		data2.put("date", "2025-06-01");
-		data2.put("time", "09:10");
-
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
-		schedule.put("1", data1);
-		schedule.put("2", data2);
-
+		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);
-
 		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
 	}
 }
