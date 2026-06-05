@@ -14,7 +14,11 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -112,14 +116,12 @@ public class DocumentDataService {
 		Project project = projectRepository.findById(projectId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé: " + projectId));
 
-		GeneralSettings settings = generalSettingsRepository.findById(1L).orElse(null);
-		Map<String, Object> settingsMap = new LinkedHashMap<>();
-		if (settings != null) {
-			settingsMap.put("institutionName", settings.getInstitutionName());
-			settingsMap.put("institutionLogoUrl", settings.getInstitutionLogoUrl());
-			settingsMap.put("timezone", settings.getTimezone());
-			settingsMap.put("dateFormat", settings.getDateFormat());
-		}
+		GeneralSettings generalSettings = generalSettingsRepository.findById(1L).orElse(null);
+		ProcesVerbalResponse.Settings settings = generalSettings != null
+				? new ProcesVerbalResponse.Settings(generalSettings.getInstitutionName(),
+						generalSettings.getInstitutionLogoUrl(), generalSettings.getTimezone(),
+						generalSettings.getDateFormat())
+				: new ProcesVerbalResponse.Settings(null, null, null, null);
 
 		ProcesVerbalResponse.GradeDetails grade = new ProcesVerbalResponse.GradeDetails(project.getId(),
 				project.getTitle(), 0.0, "En attente");
@@ -133,7 +135,7 @@ public class DocumentDataService {
 			}
 		}
 
-		return new ProcesVerbalResponse(settingsMap, grade, getStudentNames(projectId),
+		return new ProcesVerbalResponse(settings, grade, getStudentNames(projectId),
 				project.getSupervisor() != null
 						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
 						: null,

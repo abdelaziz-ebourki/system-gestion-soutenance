@@ -21,41 +21,41 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = StudentDefenseController.class, excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class })
+		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
 class StudentDefenseControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @MockitoBean
-    private StudentDefenseService studentDefenseService;
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
-    @MockitoBean
-    private UserRepository userRepository;
-    @MockitoBean
-    private SecurityService securityService;
+	@Autowired
+	private MockMvc mockMvc;
+	@MockitoBean
+	private StudentDefenseService studentDefenseService;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private UserRepository userRepository;
+	@MockitoBean
+	private SecurityService securityService;
 
-    @BeforeEach
-    void setUp() {
-        User user = new User();
-        user.setId(1L);
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-        when(securityService.getCurrentUserId()).thenReturn(1L);
-    }
+	@BeforeEach
+	void setUp() {
+		User user = new User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		when(securityService.getCurrentUserId()).thenReturn(1L);
+	}
 
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
 
-    @Test
-    void getDefense_returns200() throws Exception {
-        when(studentDefenseService.getDefense(1L))
-                .thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
-                        null, List.of(), null, null, null, null, "scheduled", null, null));
-        mockMvc.perform(get("/api/student/defense")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("scheduled"));
-    }
+	@Test
+	void getDefense_returns200() throws Exception {
+		when(studentDefenseService.getDefense(1L))
+				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
+						null, List.of(), null, null, null, null, "scheduled", null, null));
+		mockMvc.perform(get("/api/student/defense")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.status").value("scheduled"));
+	}
 }

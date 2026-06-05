@@ -113,7 +113,6 @@ class AuditLogControllerTest {
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
 
-
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());
 

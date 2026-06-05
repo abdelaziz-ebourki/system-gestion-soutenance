@@ -32,13 +32,14 @@ public class StudentDocumentController {
 	@GetMapping
 	@Operation(summary = "List documents for the connected student")
 	public ApiResponse<List<StudentDocumentDto>> findByStudent() {
-		return ApiResponse.success(studentDocumentService.findByStudent(securityService.getCurrentUserId()).stream().map(mapper::toDto)
-				.toList());
+		return ApiResponse.success(studentDocumentService.findByStudent(securityService.getCurrentUserId()).stream()
+				.map(mapper::toDto).toList());
 	}
 
 	@PostMapping("/{id}/upload")
 	@Operation(summary = "Upload a document file")
-	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
+			@RequestParam("file") MultipartFile file) {
 		StudentDocument doc = studentDocumentService.upload(id, file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}

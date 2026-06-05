@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDa
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
+import com.system_gestion_soutenance.api.coordinator.document.dto.ProcesVerbalResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ class DocumentDataControllerTest {
 	@Test
 	void procesVerbal_returnsData() throws Exception {
 		when(documentDataService.procesVerbal(1L)).thenReturn(
-				new com.system_gestion_soutenance.api.coordinator.document.dto.ProcesVerbalResponse(Map.of(), null,
+				new ProcesVerbalResponse(new ProcesVerbalResponse.Settings(null, null, null, null), null,
 						List.of("Jane Smith"), "Supervisor", List.of()));
 
 		mockMvc.perform(post("/api/coordinator/documents/proces-verbal").contentType(MediaType.APPLICATION_JSON)

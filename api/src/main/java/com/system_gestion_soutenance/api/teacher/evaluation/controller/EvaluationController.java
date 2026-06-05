@@ -32,7 +32,8 @@ public class EvaluationController {
 
 	@PostMapping("/{id}")
 	@Operation(summary = "Submit an evaluation score and comment")
-	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id, @Valid @RequestBody EvaluationSubmitRequest request) {
+	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id,
+			@Valid @RequestBody EvaluationSubmitRequest request) {
 		return ApiResponse.success(evaluationService.submit(id, request));
 	}
 }
