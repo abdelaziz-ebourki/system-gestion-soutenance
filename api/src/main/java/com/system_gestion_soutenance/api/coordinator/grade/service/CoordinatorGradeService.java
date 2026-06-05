@@ -2,6 +2,8 @@ package com.system_gestion_soutenance.api.coordinator.grade.service;
 
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
+import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
+import com.system_gestion_soutenance.api.coordinator.grade.dto.IndividualScoreResponse;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
@@ -36,7 +38,7 @@ public class CoordinatorGradeService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Map<String, Object>> getGrades() {
+	public List<GradeWeightedAverageResponse> getGrades() {
 		List<Jury> juries = juryRepository.findAllWithDetails();
 		if (juries.isEmpty())
 			return List.of();
@@ -70,35 +72,25 @@ public class CoordinatorGradeService {
 		Map<Long, Map<String, Integer>> coefficientsBySession = defenseSessionRepository.findAllById(sessionIdsToFetch)
 				.stream().collect(Collectors.toMap(DefenseSession::getId, DefenseSession::getEvaluationCoefficients));
 
-		List<Map<String, Object>> grades = new ArrayList<>();
+		List<GradeWeightedAverageResponse> grades = new ArrayList<>();
 		for (Jury jury : juries) {
 			Long projectId = jury.getProject().getId();
 			List<Evaluation> evaluations = evaluationsByProject.getOrDefault(projectId, List.of());
-			System.out.println("Project: " + projectId + ", Evaluations: " + evaluations.size());
 
 			Long defenseSessionId = sessionIdsByProject.get(projectId);
 			Map<String, Integer> coefficients = coefficientsBySession.getOrDefault(defenseSessionId, Map.of());
-			System.out.println("Session: " + defenseSessionId + ", Coefficients: " + coefficients);
 
 			String defenseDate = datesByProject.get(projectId);
 
-			List<Map<String, Object>> individualScores = buildIndividualScores(jury.getMembers(), evaluations);
+			List<IndividualScoreResponse> individualScores = buildIndividualScores(jury.getMembers(), evaluations);
 
 			String status = computeStatus(evaluations, jury.getMembers().size());
 			Double finalScore = status.equals("completed")
 					? computeWeightedScore(jury.getMembers(), evaluations, coefficients)
 					: null;
-			System.out.println("Status: " + status + ", Final Score: " + finalScore);
 
-			Map<String, Object> entry = new LinkedHashMap<>();
-			entry.put("projectId", projectId);
-			entry.put("projectTitle", jury.getProject().getTitle());
-			entry.put("defenseDate", defenseDate);
-			entry.put("status", status);
-			entry.put("finalScore", finalScore);
-			entry.put("evaluationCoefficients", coefficients);
-			entry.put("individualScores", individualScores);
-			grades.add(entry);
+			grades.add(new GradeWeightedAverageResponse(projectId, jury.getProject().getTitle(), defenseDate, status,
+					finalScore, coefficients, individualScores));
 		}
 
 		return grades;
@@ -112,17 +104,16 @@ public class CoordinatorGradeService {
 				.findFirst().orElse(null);
 	}
 
-	private List<Map<String, Object>> buildIndividualScores(List<JuryMember> members, List<Evaluation> evaluations) {
-		List<Map<String, Object>> scores = new ArrayList<>();
+	private List<IndividualScoreResponse> buildIndividualScores(List<JuryMember> members,
+			List<Evaluation> evaluations) {
+		List<IndividualScoreResponse> scores = new ArrayList<>();
 		for (JuryMember member : members) {
 			Evaluation eval = evaluations.stream().filter(e -> e.getTeacherId().equals(member.getTeacher().getId()))
 					.findFirst().orElse(null);
 
-			Map<String, Object> s = new LinkedHashMap<>();
-			s.put("roleName", member.getRoleName());
-			s.put("teacherName", member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName());
-			s.put("score", eval != null ? eval.getScore() : null);
-			scores.add(s);
+			scores.add(new IndividualScoreResponse(member.getRoleName(),
+					member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(),
+					eval != null ? eval.getScore() : null));
 		}
 		return scores;
 	}

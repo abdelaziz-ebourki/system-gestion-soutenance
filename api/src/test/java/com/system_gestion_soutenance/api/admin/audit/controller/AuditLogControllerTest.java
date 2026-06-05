@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.admin.audit.entity.AuditLog;
 import com.system_gestion_soutenance.api.admin.audit.service.AuditLogService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -40,6 +41,8 @@ class AuditLogControllerTest {
 	private UserRepository userRepository;
 	@MockitoBean
 	private com.system_gestion_soutenance.api.common.mapper.AuditLogMapper auditLogMapper;
+	@MockitoBean
+	private SecurityService securityService;
 
 	@AfterEach
 	void tearDown() {
@@ -108,6 +111,8 @@ class AuditLogControllerTest {
 		when(auth.isAuthenticated()).thenReturn(true);
 		when(auth.getPrincipal()).thenReturn("admin@test.com");
 		SecurityContextHolder.getContext().setAuthentication(auth);
+		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
+
 
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());
@@ -128,6 +133,7 @@ class AuditLogControllerTest {
 		when(auth.isAuthenticated()).thenReturn(true);
 		when(auth.getPrincipal()).thenReturn(user);
 		SecurityContextHolder.getContext().setAuthentication(auth);
+		when(securityService.getCurrentUserEmail()).thenReturn("user@test.com");
 
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());

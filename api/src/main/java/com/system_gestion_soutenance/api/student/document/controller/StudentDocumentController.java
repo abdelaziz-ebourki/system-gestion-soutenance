@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.student.document.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
@@ -30,15 +31,15 @@ public class StudentDocumentController {
 
 	@GetMapping
 	@Operation(summary = "List documents for the connected student")
-	public List<StudentDocumentDto> findByStudent() {
-		return studentDocumentService.findByStudent(securityService.getCurrentUserId()).stream().map(mapper::toDto)
-				.toList();
+	public ApiResponse<List<StudentDocumentDto>> findByStudent() {
+		return ApiResponse.success(studentDocumentService.findByStudent(securityService.getCurrentUserId()).stream().map(mapper::toDto)
+				.toList());
 	}
 
 	@PostMapping("/{id}/upload")
 	@Operation(summary = "Upload a document file")
-	public ResponseEntity<StudentDocumentDto> upload(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
 		StudentDocument doc = studentDocumentService.upload(id, file);
-		return ResponseEntity.ok(mapper.toDto(doc));
+		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}
 }

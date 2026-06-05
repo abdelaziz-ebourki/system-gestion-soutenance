@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.schedule.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.*;
 import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
@@ -8,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +34,13 @@ public class ScheduleController {
 	@PostMapping
 	@Operation(summary = "Save schedule with conflict validation")
 	public ResponseEntity<ApiResponse<List<ScheduleResponse>>> save(@Valid @RequestBody ScheduleRequest request) {
-		List<Map<String, Object>> conflicts = conflictDetectionService.validate(request, "Soutenance");
+		List<ConflictDetailResponse> conflicts = conflictDetectionService.validate(request,
+				request.defenseSessionId().toString());
 		if (!conflicts.isEmpty()) {
-			boolean hasError = conflicts.stream().anyMatch(c -> "error".equals(c.get("severity")));
+			boolean hasError = conflicts.stream().anyMatch(c -> "error".equals(c.severity()));
 			if (hasError) {
-				return ResponseEntity.badRequest().body(ApiResponse.error("Conflicts detected",
-						conflicts.stream().map(c -> (String) c.get("message")).toList()));
+				return ResponseEntity.badRequest().body(
+						ApiResponse.error("Conflicts detected", conflicts.stream().map(c -> c.message()).toList()));
 			}
 		}
 		List<ScheduleResponse> result = scheduleService.saveSchedule(request);

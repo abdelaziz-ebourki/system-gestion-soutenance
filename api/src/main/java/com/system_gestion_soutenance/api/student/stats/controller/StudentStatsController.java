@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.student.stats.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse;
 import com.system_gestion_soutenance.api.student.stats.service.StudentStatsService;
@@ -22,7 +23,7 @@ public class StudentStatsController {
 
 	@GetMapping
 	@Operation(summary = "Get personal statistics for the connected student")
-	public StudentStatsResponse getStats() {
-		return statsService.getStats(securityService.getCurrentUserId());
+	public ApiResponse<StudentStatsResponse> getStats() {
+		return ApiResponse.success(statsService.getStats(securityService.getCurrentUserId()));
 	}
 }

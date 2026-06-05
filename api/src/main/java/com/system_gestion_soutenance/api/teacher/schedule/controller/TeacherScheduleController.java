@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.teacher.schedule.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.schedule.dto.TeacherScheduleResponse;
 import com.system_gestion_soutenance.api.teacher.schedule.service.TeacherScheduleService;
@@ -22,7 +23,7 @@ public class TeacherScheduleController {
 
 	@GetMapping
 	@Operation(summary = "Get the connected teacher's defense schedule")
-	public TeacherScheduleResponse get() {
-		return scheduleService.getSchedule(securityService.getCurrentUserId());
+	public ApiResponse<TeacherScheduleResponse> get() {
+		return ApiResponse.success(scheduleService.getSchedule(securityService.getCurrentUserId()));
 	}
 }

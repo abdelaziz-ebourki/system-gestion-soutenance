@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
 import com.system_gestion_soutenance.api.coordinator.grade.service.CoordinatorGradeService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -49,10 +50,11 @@ class CoordinatorGradeControllerTest {
 
 	@Test
 	void getGrades_returnsGrades() throws Exception {
-		when(gradeService.getGrades())
-				.thenReturn(List.of(Map.of("projectId", 1L, "projectTitle", "Projet Test", "status", "completed")));
+		when(gradeService.getGrades()).thenReturn(List.of(new GradeWeightedAverageResponse(1L, "Projet Test",
+				"2025-06-15", "completed", 15.0, Map.of(), List.of())));
 
 		mockMvc.perform(get("/api/coordinator/grades")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].projectTitle").value("Projet Test"));
 	}
 }

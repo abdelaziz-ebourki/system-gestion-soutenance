@@ -43,7 +43,8 @@ class GlobalExceptionHandlerTest {
 	@Test
 	void handleValidationException() throws Exception {
 		mockMvc.perform(post("/test/validate").contentType(MediaType.APPLICATION_JSON).content("{\"email\": \"\"}"))
-				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.email").value("must not be blank"));
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors[0]").value("email: must not be blank"));
 	}
 
 	@Test

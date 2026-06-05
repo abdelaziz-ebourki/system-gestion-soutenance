@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.student.group.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse;
 import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse;
@@ -25,20 +26,20 @@ public class StudentGroupController {
 
 	@GetMapping
 	@Operation(summary = "Get the connected student's group workspace")
-	public StudentGroupWorkspaceResponse getWorkspace() {
-		return studentGroupService.getWorkspace(securityService.getCurrentUserId());
+	public ApiResponse<StudentGroupWorkspaceResponse> getWorkspace() {
+		return ApiResponse.success(studentGroupService.getWorkspace(securityService.getCurrentUserId()));
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new group (during creation period)")
-	public ResponseEntity<GroupDetailsResponse> createGroup() {
+	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup() {
 		GroupDetailsResponse group = studentGroupService.createGroup(securityService.getCurrentUserId());
-		return ResponseEntity.status(HttpStatus.CREATED).body(group);
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(group));
 	}
 
 	@PostMapping("/{id}/join")
 	@Operation(summary = "Join an existing group by ID")
-	public GroupDetailsResponse joinGroup(@PathVariable Long id) {
-		return studentGroupService.joinGroup(id, securityService.getCurrentUserId());
+	public ApiResponse<GroupDetailsResponse> joinGroup(@PathVariable Long id) {
+		return ApiResponse.success(studentGroupService.joinGroup(id, securityService.getCurrentUserId()));
 	}
 }

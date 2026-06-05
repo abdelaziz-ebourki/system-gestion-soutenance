@@ -5,9 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
+import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -93,8 +94,8 @@ class ScheduleControllerTest {
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString()))
-				.thenReturn(List.of(Map.of("severity", "error", "message", "Conflict detected")));
+		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString())).thenReturn(
+				List.of(new ConflictDetailResponse("type", "error", "Conflict detected", "slotId", "suggestion")));
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isBadRequest())
@@ -108,8 +109,8 @@ class ScheduleControllerTest {
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
-		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString()))
-				.thenReturn(List.of(Map.of("severity", "warning", "message", "Minor issue")));
+		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString())).thenReturn(
+				List.of(new ConflictDetailResponse("type", "warning", "Minor issue", "slotId", "suggestion")));
 		when(scheduleService.saveSchedule(any())).thenReturn(List.of());
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)

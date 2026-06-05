@@ -1,9 +1,8 @@
 package com.system_gestion_soutenance.api.coordinator.stats.service;
 
+import com.system_gestion_soutenance.api.coordinator.stats.dto.CoordinatorStatsResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +14,7 @@ public class CoordinatorStatsService {
 		this.entityManager = entityManager;
 	}
 
-	public Map<String, Object> getStats() {
+	public CoordinatorStatsResponse getStats() {
 		Query query = entityManager.createNativeQuery("""
 				SELECT
 				  (SELECT COUNT(*) FROM project) AS total_projects,
@@ -26,11 +25,7 @@ public class CoordinatorStatsService {
 
 		Object[] row = (Object[]) query.getSingleResult();
 
-		Map<String, Object> stats = new HashMap<>();
-		stats.put("totalProjects", row[0]);
-		stats.put("totalGroups", row[1]);
-		stats.put("totalJuries", row[2]);
-		stats.put("scheduledDefenses", row[3]);
-		return stats;
+		return new CoordinatorStatsResponse(((Number) row[0]).longValue(), ((Number) row[1]).longValue(),
+				((Number) row[2]).longValue(), ((Number) row[3]).longValue());
 	}
 }

@@ -21,10 +21,10 @@ class CoordinatorStatsServiceTest {
 
 		var result = service.getStats();
 
-		assertEquals(10L, result.get("totalProjects"));
-		assertEquals(5L, result.get("totalGroups"));
-		assertEquals(8L, result.get("totalJuries"));
-		assertEquals(3L, result.get("scheduledDefenses"));
+		assertEquals(10L, result.totalProjects());
+		assertEquals(5L, result.totalGroups());
+		assertEquals(8L, result.totalJuries());
+		assertEquals(3L, result.scheduledDefenses());
 	}
 
 	@Test
@@ -34,7 +34,7 @@ class CoordinatorStatsServiceTest {
 
 		var result = service.getStats();
 
-		assertEquals(0L, result.get("totalProjects"));
-		assertEquals(0L, result.get("totalGroups"));
+		assertEquals(0L, result.totalProjects());
+		assertEquals(0L, result.totalGroups());
 	}
 }

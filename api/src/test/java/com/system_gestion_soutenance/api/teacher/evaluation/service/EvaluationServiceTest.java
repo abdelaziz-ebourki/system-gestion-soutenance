@@ -130,7 +130,7 @@ class EvaluationServiceTest {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
-		when(groupRepository.findByProjectId(10L)).thenReturn(List.of());
+
 
 		List<com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse> result = service
 				.findByTeacher(1L);
@@ -150,7 +150,7 @@ class EvaluationServiceTest {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
-		when(groupRepository.findByProjectId(10L)).thenReturn(List.of(group));
+
 
 		List<com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse> result = service
 				.findByTeacher(1L);

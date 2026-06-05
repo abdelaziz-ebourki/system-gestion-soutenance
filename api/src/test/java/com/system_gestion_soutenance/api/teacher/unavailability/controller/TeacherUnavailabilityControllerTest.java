@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.unavailability.service.TeacherUnavailabilityService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -34,6 +35,8 @@ class TeacherUnavailabilityControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private SecurityService securityService;
 
 	@BeforeEach
 	void setUp() {
@@ -41,6 +44,7 @@ class TeacherUnavailabilityControllerTest {
 		user.setId(1L);
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		when(securityService.getCurrentUserId()).thenReturn(1L);
 	}
 
 	@AfterEach
@@ -62,7 +66,7 @@ class TeacherUnavailabilityControllerTest {
 				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
 						Map.of()));
 		mockMvc.perform(post("/api/teacher/unavailability").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"2026-06-01\":[\"08:00\"]}")).andExpect(status().isOk());
+				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -71,6 +75,6 @@ class TeacherUnavailabilityControllerTest {
 				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
 						Map.of()));
 		mockMvc.perform(post("/api/teacher/unavailability").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"slotsByDate\":{\"2026-06-01\":[\"08:00\"]}}")).andExpect(status().isOk());
+				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}")).andExpect(status().isOk());
 	}
 }

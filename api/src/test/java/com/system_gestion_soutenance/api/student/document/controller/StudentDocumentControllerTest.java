@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
@@ -36,6 +37,8 @@ class StudentDocumentControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 	@MockitoBean
+	private SecurityService securityService;
+	@MockitoBean
 	private com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper studentDocumentMapper;
 
 	@BeforeEach
@@ -44,6 +47,7 @@ class StudentDocumentControllerTest {
 		user.setId(1L);
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		when(securityService.getCurrentUserId()).thenReturn(1L);
 	}
 
 	@AfterEach
@@ -70,6 +74,6 @@ class StudentDocumentControllerTest {
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());
 		mockMvc.perform(multipart("/api/student/documents/1/upload").file(file)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("submitted"));
+				.andExpect(jsonPath("$.data.status").value("submitted"));
 	}
 }

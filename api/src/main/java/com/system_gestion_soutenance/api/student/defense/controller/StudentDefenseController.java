@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.student.defense.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
@@ -22,7 +23,7 @@ public class StudentDefenseController {
 
 	@GetMapping
 	@Operation(summary = "Get the connected student's defense info (project, jury, schedule, status)")
-	public StudentDefenseResponse getDefense() {
-		return studentDefenseService.getDefense(securityService.getCurrentUserId());
+	public ApiResponse<StudentDefenseResponse> getDefense() {
+		return ApiResponse.success(studentDefenseService.getDefense(securityService.getCurrentUserId()));
 	}
 }

@@ -67,7 +67,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().anyMatch(c -> "project_already_scheduled".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "project_already_scheduled".equals(c.type())));
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().anyMatch(c -> "slot_occupied".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "slot_occupied".equals(c.type())));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.type())));
 	}
 
 	@Test
@@ -124,7 +124,7 @@ class ConflictDetectionServiceTest {
 		var schedule = singleSlot("1", "10", "2025-06-01", "09:00");
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.type())));
 	}
 
 	@Test
@@ -141,7 +141,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, "1");
 
-		assertTrue(result.stream().anyMatch(c -> "out_of_bounds".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "out_of_bounds".equals(c.type())));
 	}
 
 	@Test
@@ -167,7 +167,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.type())));
 	}
 
 	@Test
@@ -193,7 +193,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().anyMatch(c -> "teacher_double_booked".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "teacher_double_booked".equals(c.type())));
 	}
 
 	@Test
@@ -207,7 +207,7 @@ class ConflictDetectionServiceTest {
 		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.type())));
 	}
 
 	@Test
@@ -235,7 +235,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.type())));
 	}
 
 	@Test
@@ -260,7 +260,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().anyMatch(c -> "supervisor_conflict".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "supervisor_conflict".equals(c.type())));
 	}
 
 	@Test
@@ -280,7 +280,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, "1");
 
-		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.type())));
 	}
 
 	@Test
@@ -303,7 +303,7 @@ class ConflictDetectionServiceTest {
 		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.type())));
 	}
 
 	@Test
@@ -327,7 +327,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().anyMatch(c -> "teacher_unavailable".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "teacher_unavailable".equals(c.type())));
 	}
 
 	@Test
@@ -337,7 +337,7 @@ class ConflictDetectionServiceTest {
 		var schedule = new ScheduleRequest(1L,
 				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "project_already_scheduled".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "project_already_scheduled".equals(c.type())));
 	}
 
 	@Test
@@ -347,7 +347,7 @@ class ConflictDetectionServiceTest {
 		var schedule = new ScheduleRequest(1L,
 				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.type())));
 	}
 
 	@Test
@@ -356,7 +356,7 @@ class ConflictDetectionServiceTest {
 		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
 		var result = service.validate(singleSlot("1", "99", "2025-06-01", "09:00"), null);
-		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.type())));
 	}
 
 	@Test
@@ -382,7 +382,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(singleSlot("1", "10", "2025-06-01", "09:00"), null);
 
-		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.type())));
 	}
 
 	@Test
@@ -399,7 +399,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(singleSlot("1", "1", "2025-06-01", "09:00"), null);
 
-		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.type())));
 	}
 
 	@Test
@@ -409,7 +409,7 @@ class ConflictDetectionServiceTest {
 		var schedule = new ScheduleRequest(1L,
 				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.type())));
 	}
 
 	@Test
@@ -418,7 +418,7 @@ class ConflictDetectionServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
 		var result = service.validate(singleSlot("1", "1", "2025-06-01", "09:00"), null);
-		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.type())));
 	}
 
 	@Test
@@ -430,7 +430,7 @@ class ConflictDetectionServiceTest {
 
 		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.type())));
 	}
 
 	@Test
@@ -439,7 +439,7 @@ class ConflictDetectionServiceTest {
 
 		var schedule = new ScheduleRequest(1L, List.of(new SlotAssignmentRequest("Slot 1", null, null, null, 1L)));
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.type())));
 	}
 
 	@Test
@@ -460,7 +460,7 @@ class ConflictDetectionServiceTest {
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 
 		var result = service.validate(singleSlot("1", "1", "2025-06-01", "09:00"), null);
-		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "teacher_unavailable".equals(c.type())));
 	}
 
 	@Test
@@ -494,7 +494,7 @@ class ConflictDetectionServiceTest {
 		var schedule = singleSlot("1", "1", "2025-06-15", "09:00");
 		var result = service.validate(schedule, "1");
 
-		assertTrue(result.stream().noneMatch(c -> "out_of_bounds".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "out_of_bounds".equals(c.type())));
 	}
 
 	@Test
@@ -505,7 +505,7 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(schedule, null);
 
-		assertTrue(result.stream().noneMatch(c -> "out_of_bounds".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "out_of_bounds".equals(c.type())));
 	}
 
 	@Test
@@ -517,7 +517,7 @@ class ConflictDetectionServiceTest {
 
 		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.get("type"))));
+		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.type())));
 	}
 
 	@Test
@@ -529,6 +529,6 @@ class ConflictDetectionServiceTest {
 
 		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);
-		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.get("type"))));
+		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.type())));
 	}
 }

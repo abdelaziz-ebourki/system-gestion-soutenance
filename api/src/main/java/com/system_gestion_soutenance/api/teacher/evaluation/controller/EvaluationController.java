@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.teacher.evaluation.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
@@ -25,13 +26,13 @@ public class EvaluationController {
 
 	@GetMapping
 	@Operation(summary = "List evaluations assigned to the connected teacher")
-	public List<EvaluationResponse> findByTeacher() {
-		return evaluationService.findByTeacher(securityService.getCurrentUserId());
+	public ApiResponse<List<EvaluationResponse>> findByTeacher() {
+		return ApiResponse.success(evaluationService.findByTeacher(securityService.getCurrentUserId()));
 	}
 
 	@PostMapping("/{id}")
 	@Operation(summary = "Submit an evaluation score and comment")
-	public EvaluationResponse submit(@PathVariable Long id, @Valid @RequestBody EvaluationSubmitRequest request) {
-		return evaluationService.submit(id, request);
+	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id, @Valid @RequestBody EvaluationSubmitRequest request) {
+		return ApiResponse.success(evaluationService.submit(id, request));
 	}
 }

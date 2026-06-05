@@ -4,10 +4,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.system_gestion_soutenance.api.admin.stats.dto.GlobalStatsResponse;
 import com.system_gestion_soutenance.api.admin.stats.service.StatsService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,10 +29,10 @@ class StatsControllerTest {
 	private UserRepository userRepository;
 
 	@Test
-	void getStats_returnsMap() throws Exception {
-		when(statsService.getStats()).thenReturn(Map.of("totalStudents", 100L));
+	void getStats_returnsGlobalStats() throws Exception {
+		when(statsService.getStats()).thenReturn(new GlobalStatsResponse(100L, 0L, 0L, 0L, 0L));
 
 		mockMvc.perform(get("/api/admin/stats")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.totalStudents").value(100));
+				.andExpect(jsonPath("$.data.totalStudents").value(100));
 	}
 }

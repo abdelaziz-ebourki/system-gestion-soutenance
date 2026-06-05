@@ -13,6 +13,7 @@ import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryReposit
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
@@ -73,8 +74,8 @@ class CoordinatorGradeServiceTest {
 		var result = service.getGrades();
 
 		assertEquals(1, result.size());
-		assertEquals("no_evaluations", result.get(0).get("status"));
-		assertNull(result.get(0).get("finalScore"));
+		assertEquals("no_evaluations", result.get(0).status());
+		assertNull(result.get(0).finalScore());
 	}
 
 	@Test
@@ -109,8 +110,8 @@ class CoordinatorGradeServiceTest {
 		var result = service.getGrades();
 
 		assertEquals(1, result.size());
-		assertEquals("completed", result.get(0).get("status"));
-		assertNotNull(result.get(0).get("finalScore"));
+		assertEquals("completed", result.get(0).status());
+		assertNotNull(result.get(0).finalScore());
 	}
 
 	@Test
@@ -136,7 +137,7 @@ class CoordinatorGradeServiceTest {
 
 		var result = service.getGrades();
 
-		assertEquals("2025-06-15", result.get(0).get("defenseDate"));
+		assertEquals("2025-06-15", result.get(0).defenseDate());
 	}
 
 	@Test
@@ -169,7 +170,7 @@ class CoordinatorGradeServiceTest {
 
 		var result = service.getGrades();
 
-		assertEquals("pending", result.get(0).get("status"));
+		assertEquals("pending", result.get(0).status());
 	}
 
 	@Test
@@ -195,7 +196,7 @@ class CoordinatorGradeServiceTest {
 
 		var result = service.getGrades();
 
-		assertNull(result.get(0).get("defenseDate"));
+		assertNull(result.get(0).defenseDate());
 	}
 
 	@Test
@@ -228,7 +229,7 @@ class CoordinatorGradeServiceTest {
 
 		var result = service.getGrades();
 
-		assertNull(result.get(0).get("finalScore"));
+		assertNull(result.get(0).finalScore());
 	}
 
 	@Test

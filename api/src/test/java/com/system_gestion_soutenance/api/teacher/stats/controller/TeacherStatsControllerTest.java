@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.stats.service.TeacherStatsService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -33,6 +34,8 @@ class TeacherStatsControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private SecurityService securityService;
 
 	@BeforeEach
 	void setUp() {
@@ -40,6 +43,7 @@ class TeacherStatsControllerTest {
 		user.setId(1L);
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		when(securityService.getCurrentUserId()).thenReturn(1L);
 	}
 
 	@AfterEach
@@ -52,6 +56,6 @@ class TeacherStatsControllerTest {
 		when(statsService.getStats(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse(0, 0, 0, 0));
 		mockMvc.perform(get("/api/teacher/stats")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.upcomingDefenses").value(0));
+				.andExpect(jsonPath("$.data.upcomingDefenses").value(0));
 	}
 }

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictSlot;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import java.util.*;
@@ -50,7 +51,7 @@ public class ConflictDetectionService {
 		this.defenseSessionRepository = defenseSessionRepository;
 	}
 
-	public List<Map<String, Object>> validate(ScheduleRequest request, String defenseSessionId) {
+	public List<ConflictDetailResponse> validate(ScheduleRequest request, String defenseSessionId) {
 		Map<String, ConflictSlot> mergedSchedule = new LinkedHashMap<>();
 
 		for (SlotAssignment existing : slotAssignmentRepository.findAll()) {
@@ -72,8 +73,8 @@ public class ConflictDetectionService {
 		return runAllChecks(mergedSchedule, defenseSessionId);
 	}
 
-	private List<Map<String, Object>> runAllChecks(Map<String, ConflictSlot> schedule, String defenseSessionId) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> runAllChecks(Map<String, ConflictSlot> schedule, String defenseSessionId) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 
 		conflicts.addAll(checkProjectAlreadyScheduled(schedule));
 		conflicts.addAll(checkSlotOccupied(schedule));
@@ -87,8 +88,8 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkProjectAlreadyScheduled(Map<String, ConflictSlot> schedule) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> checkProjectAlreadyScheduled(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		Map<String, String> projectToSlot = new HashMap<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
@@ -99,8 +100,8 @@ public class ConflictDetectionService {
 
 			if (projectToSlot.containsKey(projectId)) {
 				conflicts.add(createConflict("project_already_scheduled", "error",
-						"Le projet est déjà planifié dans le créneau " + projectToSlot.get(projectId), slotId,
-						"Supprimez l'ancien créneau ou choisissez un autre projet"));
+						"Le projet est deja planifie dans le creneau " + projectToSlot.get(projectId), slotId,
+						"Supprimez l'ancien creneau ou choisissez un autre projet"));
 			} else {
 				projectToSlot.put(projectId, slotId);
 			}
@@ -108,8 +109,8 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkSlotOccupied(Map<String, ConflictSlot> schedule) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> checkSlotOccupied(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
@@ -122,7 +123,7 @@ public class ConflictDetectionService {
 
 			if (seen.contains(key)) {
 				conflicts.add(createConflict(
-						"slot_occupied", "error", "Un autre projet occupe déjà ce créneau (date: " + date + ", salle: "
+						"slot_occupied", "error", "Un autre projet occupe deja ce creneau (date: " + date + ", salle: "
 								+ roomId + ", horaire: " + time + ")",
 						slotId, "Choisissez une autre date, salle ou horaire"));
 			}
@@ -131,8 +132,8 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkRoomCapacity(Map<String, ConflictSlot> schedule) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> checkRoomCapacity(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
@@ -149,17 +150,18 @@ public class ConflictDetectionService {
 			int studentCount = getStudentCountForProject(projectId);
 			if (studentCount > room.getCapacity()) {
 				conflicts.add(createConflict("room_capacity", "error",
-						"Capacité de la salle insuffisante: " + studentCount + " étudiants pour " + room.getCapacity()
+						"Capacite de la salle insuffisante: " + studentCount + " etudiants pour " + room.getCapacity()
 								+ " places",
-						slotId, "Choisissez une salle plus grande ou réduisez la taille du groupe"));
+						slotId, "Choisissez une salle plus grande ou reduisez la taille du groupe"));
 			}
 		}
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkDateOutOfBounds(Map<String, ConflictSlot> schedule,
+	private List<ConflictDetailResponse> checkDateOutOfBounds(Map<String, ConflictSlot> schedule,
 			String defenseSessionId) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
+
 		if (defenseSessionId == null)
 			return conflicts;
 
@@ -177,8 +179,8 @@ public class ConflictDetectionService {
 				LocalDate date = LocalDate.parse(dateStr);
 				if (date.isBefore(ds.getStartDate()) || date.isAfter(ds.getEndDate())) {
 					conflicts.add(createConflict("out_of_bounds", "error",
-							"La date " + dateStr + " est en dehors de la période autorisée (" + ds.getStartDate()
-									+ " – " + ds.getEndDate() + ")",
+							"La date " + dateStr + " est en dehors de la periode autorisee (" + ds.getStartDate()
+									+ " - " + ds.getEndDate() + ")",
 							slotId, "Choisissez une date entre " + ds.getStartDate() + " et " + ds.getEndDate()));
 				}
 			} catch (DateTimeParseException e) {
@@ -188,9 +190,9 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkTeacherDoubleBooked(Map<String, ConflictSlot> schedule) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
-		Map<String, Map<String, String>> dateTeacherSlot = new HashMap<>();
+	private List<ConflictDetailResponse> checkTeacherDoubleBooked(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
+		Map<String, String> dateTeacherSlot = new HashMap<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
@@ -205,20 +207,18 @@ public class ConflictDetectionService {
 				String key = date + "|" + tid;
 				if (dateTeacherSlot.containsKey(key)) {
 					conflicts.add(createConflict("teacher_double_booked", "error",
-							"Un enseignant est déjà assigné à un autre projet le " + date, slotId,
-							"Vérifiez la disponibilité des enseignants"));
+							"Un enseignant est deja assigne a un autre projet le " + date, slotId,
+							"Verifiez la disponibilite des enseignants"));
 				} else {
-					Map<String, String> val = new HashMap<>();
-					val.put("slotId", slotId);
-					dateTeacherSlot.put(key, val);
+					dateTeacherSlot.put(key, slotId);
 				}
 			}
 		}
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkSupervisorConflict(Map<String, ConflictSlot> schedule) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> checkSupervisorConflict(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		Map<String, String> dateSupervisorSlot = new HashMap<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
@@ -238,8 +238,8 @@ public class ConflictDetectionService {
 
 			if (dateSupervisorSlot.containsKey(key)) {
 				conflicts.add(createConflict("supervisor_conflict", "warning",
-						"L'encadrant est déjà assigné à un autre projet le " + date, slotId,
-						"Vérifiez la disponibilité de l'encadrant"));
+						"L'encadrant est deja assigne a un autre projet le " + date, slotId,
+						"Verifiez la disponibilite de l'encadrant"));
 			} else {
 				dateSupervisorSlot.put(key, slotId);
 			}
@@ -247,8 +247,9 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkBreakInterval(Map<String, ConflictSlot> schedule, String defenseSessionId) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> checkBreakInterval(Map<String, ConflictSlot> schedule,
+			String defenseSessionId) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		int breakDuration = 15;
 
 		if (defenseSessionId != null) {
@@ -280,9 +281,9 @@ public class ConflictDetectionService {
 					long gap = ChronoUnit.MINUTES.between(LocalTime.parse(prevTime), LocalTime.parse(currTime));
 					if (gap < breakDuration) {
 						conflicts.add(createConflict("break_violation", "warning",
-								"Intervalle insuffisant entre les créneaux: " + gap + " min au lieu de " + breakDuration
+								"Intervalle insuffisant entre les creneaux: " + gap + " min au lieu de " + breakDuration
 										+ " min",
-								slots.get(i).getKey(), "Ajoutez un écart d'au moins " + breakDuration + " minutes"));
+								slots.get(i).getKey(), "Ajoutez un ecart d'au moins " + breakDuration + " minutes"));
 					}
 				} catch (DateTimeParseException e) {
 					log.warn("Invalid time format: prev={}, curr={}", prevTime, currTime, e);
@@ -292,8 +293,8 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private List<Map<String, Object>> checkTeacherUnavailable(Map<String, ConflictSlot> schedule) {
-		List<Map<String, Object>> conflicts = new ArrayList<>();
+	private List<ConflictDetailResponse> checkTeacherUnavailable(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		List<Unavailability> unavailabilityList = unavailabilityRepository.findAll();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
@@ -312,8 +313,8 @@ public class ConflictDetectionService {
 						continue;
 					if (ua.getSlots() != null && ua.getSlots().contains(time)) {
 						conflicts.add(createConflict("teacher_unavailable", "error",
-								"Un enseignant est indisponible le " + date + " à " + time, slotId,
-								"Choisissez un autre créneau ou modifiez les indisponibilités"));
+								"Un enseignant est indisponible le " + date + " a " + time, slotId,
+								"Choisissez un autre creneau ou modifiez les indisponibilites"));
 					}
 				}
 			}
@@ -323,6 +324,7 @@ public class ConflictDetectionService {
 
 	private int getStudentCountForProject(String projectId) {
 		var groups = groupRepository.findByProjectId(Long.valueOf(projectId));
+
 		for (var g : groups) {
 			if (g.getStudents() != null && !g.getStudents().isEmpty())
 				return g.getStudents().size();
@@ -345,14 +347,8 @@ public class ConflictDetectionService {
 		return ids;
 	}
 
-	private Map<String, Object> createConflict(String type, String severity, String message, String slot,
+	private ConflictDetailResponse createConflict(String type, String severity, String message, String slot,
 			String resolution) {
-		Map<String, Object> conflict = new LinkedHashMap<>();
-		conflict.put("type", type);
-		conflict.put("severity", severity);
-		conflict.put("message", message);
-		conflict.put("slot", slot);
-		conflict.put("suggestedResolution", resolution);
-		return conflict;
+		return new ConflictDetailResponse(type, severity, message, slot, resolution);
 	}
 }

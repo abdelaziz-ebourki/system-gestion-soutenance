@@ -1,9 +1,8 @@
 package com.system_gestion_soutenance.api.admin.stats.service;
 
+import com.system_gestion_soutenance.api.admin.stats.dto.GlobalStatsResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,7 @@ public class StatsService {
 		this.entityManager = entityManager;
 	}
 
-	public Map<String, Object> getStats() {
+	public GlobalStatsResponse getStats() {
 		Query query = entityManager.createNativeQuery("""
 				SELECT
 				  (SELECT COUNT(*) FROM users WHERE dtype = 'STUDENT') AS total_students,
@@ -29,12 +28,8 @@ public class StatsService {
 
 		Object[] row = (Object[]) query.getSingleResult();
 
-		Map<String, Object> stats = new HashMap<>();
-		stats.put("totalStudents", row[0]);
-		stats.put("totalTeachers", row[1]);
-		stats.put("totalDepartments", row[2]);
-		stats.put("totalRooms", row[3]);
-		stats.put("totalDefenseSessions", row[4]);
-		return stats;
+		return new GlobalStatsResponse(((Number) row[0]).longValue(), ((Number) row[1]).longValue(),
+				((Number) row[2]).longValue(), ((Number) row[3]).longValue(), ((Number) row[4]).longValue());
 	}
+
 }

@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.group.service.StudentGroupService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -33,6 +34,8 @@ class StudentGroupControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private SecurityService securityService;
 
 	@BeforeEach
 	void setUp() {
@@ -40,6 +43,7 @@ class StudentGroupControllerTest {
 		user.setId(1L);
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		when(securityService.getCurrentUserId()).thenReturn(1L);
 	}
 
 	@AfterEach
@@ -53,7 +57,7 @@ class StudentGroupControllerTest {
 				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse(null,
 						List.of(), null, null, true));
 		mockMvc.perform(get("/api/student/group")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.isGroupCreationOpen").value(true));
+				.andExpect(jsonPath("$.data.isGroupCreationOpen").value(true));
 	}
 
 	@Test
@@ -62,7 +66,7 @@ class StudentGroupControllerTest {
 				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(1L,
 						"Groupe de Alice", null, null, List.of()));
 		mockMvc.perform(post("/api/student/group")).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.groupName").value("Groupe de Alice"));
+				.andExpect(jsonPath("$.data.groupName").value("Groupe de Alice"));
 	}
 
 	@Test
@@ -71,6 +75,6 @@ class StudentGroupControllerTest {
 				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(1L,
 						"Groupe Test", null, null, List.of()));
 		mockMvc.perform(post("/api/student/group/10/join")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.groupName").value("Groupe Test"));
+				.andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
 	}
 }
