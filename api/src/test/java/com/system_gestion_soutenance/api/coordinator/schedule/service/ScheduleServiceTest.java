@@ -58,7 +58,7 @@ class ScheduleServiceTest {
 		var result = service.getSchedule();
 
 		assertEquals(1, result.size());
-		assertEquals("Slot 1", result.get(0).title());
+		assertEquals("Slot 1", result.get(0).getTitle());
 	}
 
 	@Test

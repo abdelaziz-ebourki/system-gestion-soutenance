@@ -47,7 +47,7 @@ class ProjectServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Projet Test", result.get(0).title());
+		assertEquals("Projet Test", result.get(0).getTitle());
 	}
 
 	@Test
@@ -79,8 +79,8 @@ class ProjectServiceTest {
 				List.of(10L));
 		var result = service.create(request);
 
-		assertEquals("New Project", result.title());
-		assertEquals("John Doe", result.supervisorName());
+		assertEquals("New Project", result.getTitle());
+		assertEquals("John", result.getSupervisor().getFirstName());
 	}
 
 	@Test
@@ -112,7 +112,7 @@ class ProjectServiceTest {
 		CreateProjectRequest request = new CreateProjectRequest("Project", "Desc", 1L, "PFE", null);
 		var result = service.create(request);
 
-		assertEquals("Project", result.title());
+		assertEquals("Project", result.getTitle());
 	}
 
 	@Test
@@ -133,7 +133,7 @@ class ProjectServiceTest {
 						"PFE"));
 
 		verify(project).setTitle("Updated");
-		assertEquals("Updated", result.title());
+		assertEquals("Updated", result.getTitle());
 	}
 
 	@Test

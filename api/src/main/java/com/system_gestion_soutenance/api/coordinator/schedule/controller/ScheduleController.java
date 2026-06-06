@@ -1,14 +1,18 @@
 package com.system_gestion_soutenance.api.coordinator.schedule.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.mapper.ScheduleMapper;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
+import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.*;
+import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,16 +23,25 @@ public class ScheduleController {
 
 	private final ScheduleService scheduleService;
 	private final ConflictDetectionService conflictDetectionService;
+	private final ScheduleMapper scheduleMapper;
 
-	public ScheduleController(ScheduleService scheduleService, ConflictDetectionService conflictDetectionService) {
+	public ScheduleController(ScheduleService scheduleService, ConflictDetectionService conflictDetectionService,
+			ScheduleMapper scheduleMapper) {
 		this.scheduleService = scheduleService;
 		this.conflictDetectionService = conflictDetectionService;
+		this.scheduleMapper = scheduleMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "Get the current schedule")
 	public ApiResponse<List<ScheduleResponse>> get() {
-		return ApiResponse.success(scheduleService.getSchedule());
+		List<SlotAssignment> slots = scheduleService.getSchedule();
+		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
+		Map<Long, List<String>> studentNamesMap = scheduleService.buildStudentNamesMap(projectMap);
+		List<ScheduleResponse> response = slots.stream()
+				.map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
+				.toList();
+		return ApiResponse.success(response);
 	}
 
 	@PostMapping
@@ -43,8 +56,13 @@ public class ScheduleController {
 						ApiResponse.error("Conflicts detected", conflicts.stream().map(c -> c.message()).toList()));
 			}
 		}
-		List<ScheduleResponse> result = scheduleService.saveSchedule(request);
-		return ResponseEntity.ok(ApiResponse.success(result));
+		List<SlotAssignment> slots = scheduleService.saveSchedule(request);
+		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
+		Map<Long, List<String>> studentNamesMap = scheduleService.buildStudentNamesMap(projectMap);
+		List<ScheduleResponse> response = slots.stream()
+				.map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
+				.toList();
+		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
 	@PostMapping("/auto-generate")

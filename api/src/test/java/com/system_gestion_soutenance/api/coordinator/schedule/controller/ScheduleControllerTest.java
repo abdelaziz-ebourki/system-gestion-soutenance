@@ -5,10 +5,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.system_gestion_soutenance.api.common.mapper.ScheduleMapper;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse;
+import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -39,6 +42,9 @@ class ScheduleControllerTest {
 	private ScheduleService scheduleService;
 
 	@MockitoBean
+	private ScheduleMapper scheduleMapper;
+
+	@MockitoBean
 	private ConflictDetectionService conflictDetectionService;
 
 	@MockitoBean
@@ -59,28 +65,44 @@ class ScheduleControllerTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void get_returnsSchedule() throws Exception {
-		when(scheduleService.getSchedule())
-				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse(1L,
-						"Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"), "supervisor",
-						"Approved")));
+		SlotAssignment slot = mock(SlotAssignment.class);
+		when(slot.getId()).thenReturn(1L);
+		when(slot.getTitle()).thenReturn("Slot 1");
+
+		ScheduleResponse dto = new ScheduleResponse(1L, "Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1",
+				List.of("S1"), "supervisor", "Approved");
+
+		when(scheduleService.getSchedule()).thenReturn(List.of(slot));
+		when(scheduleService.buildProjectMap(anyList())).thenReturn(Map.of());
+		when(scheduleService.buildStudentNamesMap(anyMap())).thenReturn(Map.of());
+		when(scheduleMapper.toDto(eq(slot), anyMap(), anyMap())).thenReturn(dto);
 
 		mockMvc.perform(get("/api/coordinator/schedule")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.size()").value(1)).andExpect(jsonPath("$.data[0].title").value("Slot 1"));
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void save_noConflicts_returnsOk() throws Exception {
 		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
 				1L,
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
+		SlotAssignment slot = mock(SlotAssignment.class);
+		when(slot.getId()).thenReturn(1L);
+		when(slot.getTitle()).thenReturn("Slot 1");
+
+		ScheduleResponse dto = new ScheduleResponse(1L, "Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1",
+				List.of("S1"), "supervisor", "Approved");
+
 		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString())).thenReturn(List.of());
-		when(scheduleService.saveSchedule(any()))
-				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse(1L,
-						"Slot 1", "2025-06-01", "09:00", 1L, 1L, "Salle 1", "Projet 1", List.of("S1"), "supervisor",
-						"Approved")));
+		when(scheduleService.saveSchedule(any())).thenReturn(List.of(slot));
+		when(scheduleService.buildProjectMap(anyList())).thenReturn(Map.of());
+		when(scheduleService.buildStudentNamesMap(anyMap())).thenReturn(Map.of());
+		when(scheduleMapper.toDto(eq(slot), anyMap(), anyMap())).thenReturn(dto);
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
@@ -103,15 +125,21 @@ class ScheduleControllerTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void save_withWarningsOnly_returnsOk() throws Exception {
 		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
 				1L,
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
 						"2025-06-01", "09:00", 1L, 1L)));
 
+		SlotAssignment slot = mock(SlotAssignment.class);
+
 		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString())).thenReturn(
 				List.of(new ConflictDetailResponse("type", "warning", "Minor issue", "slotId", "suggestion")));
-		when(scheduleService.saveSchedule(any())).thenReturn(List.of());
+		when(scheduleService.saveSchedule(any())).thenReturn(List.of(slot));
+		when(scheduleService.buildProjectMap(anyList())).thenReturn(Map.of());
+		when(scheduleService.buildStudentNamesMap(anyMap())).thenReturn(Map.of());
+		when(scheduleMapper.toDto(eq(slot), anyMap(), anyMap())).thenReturn(null);
 
 		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk());

@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
@@ -56,26 +57,23 @@ public class ScheduleService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ScheduleResponse> getSchedule() {
-		List<SlotAssignment> slots = slotAssignmentRepository.findAllWithRoom();
-		Map<Long, Project> projectMap = buildProjectMap(slots);
-		Map<Long, List<String>> studentNamesMap = buildStudentNamesMap(projectMap);
-		return slots.stream().map(s -> toResponse(s, projectMap, studentNamesMap)).collect(Collectors.toList());
+	public List<SlotAssignment> getSchedule() {
+		return slotAssignmentRepository.findAllWithRoom();
 	}
 
-	private Map<Long, Project> buildProjectMap(List<SlotAssignment> slots) {
+	public Map<Long, Project> buildProjectMap(List<SlotAssignment> slots) {
 		List<Long> projectIds = slots.stream().map(SlotAssignment::getProjectId).filter(Objects::nonNull).distinct()
 				.toList();
 		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
 	}
 
-	private Map<Long, List<String>> buildStudentNamesMap(Map<Long, Project> projectMap) {
+	public Map<Long, List<String>> buildStudentNamesMap(Map<Long, Project> projectMap) {
 		if (projectMap.isEmpty())
 			return Map.of();
 		List<Long> projectIds = new ArrayList<>(projectMap.keySet());
 		Map<Long, List<String>> namesMap = new HashMap<>();
 		var groups = groupRepository.findByProjectIdIn(projectIds);
-		Map<Long, List<com.system_gestion_soutenance.api.coordinator.group.entity.Group>> groupsByProject = groups
+		Map<Long, List<Group>> groupsByProject = groups
 				.stream().filter(g -> g.getProject() != null)
 				.collect(Collectors.groupingBy(g -> g.getProject().getId()));
 		for (var entry : projectMap.entrySet()) {
@@ -86,8 +84,7 @@ public class ScheduleService {
 		return namesMap;
 	}
 
-	private List<String> resolveStudentNames(Project project,
-			List<com.system_gestion_soutenance.api.coordinator.group.entity.Group> projectGroups) {
+	private List<String> resolveStudentNames(Project project, List<Group> projectGroups) {
 		if (projectGroups != null && !projectGroups.isEmpty()) {
 			var g = projectGroups.get(0);
 			if (g.getStudents() != null)
@@ -99,7 +96,7 @@ public class ScheduleService {
 	}
 
 	@Transactional
-	public List<ScheduleResponse> saveSchedule(ScheduleRequest request) {
+	public List<SlotAssignment> saveSchedule(ScheduleRequest request) {
 		slotAssignmentRepository.deleteAll();
 
 		for (var slotReq : request.slots()) {
@@ -147,7 +144,7 @@ public class ScheduleService {
 				.collect(Collectors.toSet());
 
 		Map<Long, Integer> projectStudentCounts = new HashMap<>();
-		List<com.system_gestion_soutenance.api.coordinator.group.entity.Group> allGroups = groupRepository.findAll();
+		List<Group> allGroups = groupRepository.findAll();
 
 		for (Project p : allProjects) {
 			int count = 0;
@@ -169,7 +166,7 @@ public class ScheduleService {
 		}
 
 		Map<Long, List<String>> studentNamesByProject = new HashMap<>();
-		Map<Long, List<com.system_gestion_soutenance.api.coordinator.group.entity.Group>> groupsByProject = allGroups
+		Map<Long, List<Group>> groupsByProject = allGroups
 				.stream().filter(g -> g.getProject() != null)
 				.collect(Collectors.groupingBy(g -> g.getProject().getId()));
 		for (Project p : allProjects) {
@@ -188,17 +185,7 @@ public class ScheduleService {
 
 					LocalDate currentDate = current;
 					LocalTime currentTime = time;
-					approvedProjects.stream().filter(p -> !assignedProjects.contains(p.getId()))
-							.filter(p -> projectStudentCounts.getOrDefault(p.getId(), 0) <= room.getCapacity())
-							.findFirst().ifPresent(project -> {
-								// We can't easily put into the outer list here, so we'll collect and sort later
-								// or use a list
-								// For now, let's use a temporary list and add to it.
-								// But this is inside a lambda. Let's use a simple for loop instead of stream
-								// for the project.
-							});
 
-					// Refactoring the inner loop to avoid lambda limitations
 					for (Project project : approvedProjects) {
 						if (!assignedProjects.contains(project.getId())
 								&& projectStudentCounts.getOrDefault(project.getId(), 0) <= room.getCapacity()) {
@@ -255,19 +242,6 @@ public class ScheduleService {
 		notification.setRead(false);
 		notification.setActionLink(actionLink);
 		notificationRepository.save(notification);
-	}
-
-	private ScheduleResponse toResponse(SlotAssignment slot, Map<Long, Project> projectMap,
-			Map<Long, List<String>> studentNamesMap) {
-		Long projectId = slot.getProjectId();
-		Project project = projectId != null ? projectMap.get(projectId) : null;
-		String projectTitle = project != null ? project.getTitle() : "";
-		List<String> studentNames = projectId != null ? studentNamesMap.getOrDefault(projectId, List.of()) : List.of();
-		Long roomId = slot.getRoom() != null ? slot.getRoom().getId() : null;
-		String roomName = slot.getRoom() != null ? slot.getRoom().getName() : null;
-
-		return new ScheduleResponse(slot.getId(), slot.getTitle(), slot.getDate(), slot.getTime(), projectId, roomId,
-				roomName, projectTitle, studentNames, "", "scheduled");
 	}
 
 }
