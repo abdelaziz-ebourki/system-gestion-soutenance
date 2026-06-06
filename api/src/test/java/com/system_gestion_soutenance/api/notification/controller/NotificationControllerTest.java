@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
+import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -42,9 +43,10 @@ class NotificationControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		AppNotification n1 = new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false, null, null);
-		AppNotification n2 = new AppNotification(2L, "warning", "Test 2", "Message 2", LocalDateTime.now(), true, null,
-				null);
+		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "Test", "Message", LocalDateTime.now(),
+				false, null, null);
+		AppNotification n2 = new AppNotification(2L, NotificationType.WARNING, "Test 2", "Message 2",
+				LocalDateTime.now(), true, null, null);
 		when(repository.findAllByOrderByTimestampDesc()).thenReturn(List.of(n1, n2));
 		when(appNotificationMapper.toDto(n1))
 				.thenReturn(new com.system_gestion_soutenance.api.notification.dto.AppNotificationDto(1L, "info",
@@ -59,8 +61,8 @@ class NotificationControllerTest {
 
 	@Test
 	void markRead_returns204() throws Exception {
-		AppNotification notification = new AppNotification(1L, "info", "Test", "Message", LocalDateTime.now(), false,
-				null, null);
+		AppNotification notification = new AppNotification(1L, NotificationType.INFO, "Test", "Message",
+				LocalDateTime.now(), false, null, null);
 		when(repository.findById(1L)).thenReturn(Optional.of(notification));
 
 		mockMvc.perform(patch("/api/notifications/1/read")).andExpect(status().isNoContent());
@@ -79,8 +81,10 @@ class NotificationControllerTest {
 
 	@Test
 	void markAllRead_returns204() throws Exception {
-		AppNotification n1 = new AppNotification(1L, "info", "A", "Msg", LocalDateTime.now(), false, null, null);
-		AppNotification n2 = new AppNotification(2L, "info", "B", "Msg", LocalDateTime.now(), false, null, null);
+		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "A", "Msg", LocalDateTime.now(), false,
+				null, null);
+		AppNotification n2 = new AppNotification(2L, NotificationType.INFO, "B", "Msg", LocalDateTime.now(), false,
+				null, null);
 		when(repository.findAll()).thenReturn(List.of(n1, n2));
 
 		mockMvc.perform(patch("/api/notifications/read-all")).andExpect(status().isNoContent());

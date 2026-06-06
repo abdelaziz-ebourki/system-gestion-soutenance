@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import java.time.LocalDate;
@@ -40,19 +41,19 @@ class EvaluationServiceTest {
 
 	@Test
 	void findByTeacher_returnsList() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-		when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
+		when(projectRepository.findAllById(any())).thenReturn(List.of(new Project()));
 
 		assertEquals(1, service.findByTeacher(1L).size());
 	}
 
 	@Test
 	void submit_success() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
+		when(projectRepository.findAllById(any())).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
@@ -61,17 +62,17 @@ class EvaluationServiceTest {
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
 		com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse result = service.submit(1L, req);
 
-		assertEquals("submitted", result.status());
+		assertEquals("SUBMITTED", result.status());
 		assertEquals(15.0, result.finalGrade());
 		assertEquals("Good", result.comment());
 	}
 
 	@Test
 	void submit_withNullScore_doesNotSetScore() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
+		when(projectRepository.findAllById(any())).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
@@ -86,10 +87,10 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_withNullComment_doesNotSetComment() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(projectRepository.findById(10L)).thenReturn(Optional.empty());
+		when(projectRepository.findAllById(any())).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
@@ -110,7 +111,7 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_alreadySubmitted_throws() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", 12.0, null, "submitted", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", 12.0, null, EvaluationStatus.SUBMITTED, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
 		assertThrows(ResponseStatusException.class,
@@ -127,9 +128,9 @@ class EvaluationServiceTest {
 		Project project = new Project();
 		project.setStudents(List.of(student));
 
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
+		when(projectRepository.findAllById(any())).thenReturn(List.of(project));
 
 		List<com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse> result = service
 				.findByTeacher(1L);
@@ -146,9 +147,9 @@ class EvaluationServiceTest {
 		com.system_gestion_soutenance.api.coordinator.group.entity.Group group = new com.system_gestion_soutenance.api.coordinator.group.entity.Group();
 		group.setStudents(List.of(student));
 
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, "pending", null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-		when(projectRepository.findById(10L)).thenReturn(Optional.of(new Project()));
+		when(projectRepository.findAllById(any())).thenReturn(List.of(new Project()));
 
 		List<com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse> result = service
 				.findByTeacher(1L);

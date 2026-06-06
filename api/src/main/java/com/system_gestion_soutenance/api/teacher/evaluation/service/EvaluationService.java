@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectR
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,15 +36,21 @@ public class EvaluationService {
 	}
 
 	public List<EvaluationResponse> findByTeacher(Long teacherId) {
-		return evaluationRepository.findByTeacherId(teacherId).stream().map(this::toResponse)
-				.collect(Collectors.toList());
+		List<Evaluation> evaluations = evaluationRepository.findByTeacherId(teacherId);
+		Map<Long, Project> projectMap = buildProjectMap(evaluations);
+		return evaluations.stream().map(e -> toResponse(e, projectMap)).collect(Collectors.toList());
+	}
+
+	private Map<Long, Project> buildProjectMap(List<Evaluation> evaluations) {
+		List<Long> projectIds = evaluations.stream().map(Evaluation::getProjectId).distinct().toList();
+		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
 	}
 
 	public EvaluationResponse submit(Long id, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));
 
-		if ("submitted".equals(evaluation.getStatus())) {
+		if (evaluation.getStatus() == EvaluationStatus.SUBMITTED) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette évaluation a déjà été soumise");
 		}
 
@@ -60,15 +67,16 @@ public class EvaluationService {
 		if (request.comment() != null)
 			evaluation.setComment(request.comment());
 
-		evaluation.setStatus("submitted");
+		evaluation.setStatus(EvaluationStatus.SUBMITTED);
 		evaluation.setSubmittedAt(LocalDateTime.now());
-		return toResponse(evaluationRepository.save(evaluation));
+		Map<Long, Project> projectMap = buildProjectMap(List.of(evaluation));
+		return toResponse(evaluationRepository.save(evaluation), projectMap);
 	}
 
-	private EvaluationResponse toResponse(Evaluation evaluation) {
-		Project project = projectRepository.findById(evaluation.getProjectId()).orElse(null);
+	private EvaluationResponse toResponse(Evaluation evaluation, Map<Long, Project> projectMap) {
+		Project project = projectMap.get(evaluation.getProjectId());
 		return new EvaluationResponse(evaluation.getId(), evaluation.getProjectId(),
 				project != null ? project.getTitle() : "", evaluation.getScore(), evaluation.getComment(),
-				evaluation.getStatus());
+				evaluation.getStatus().name());
 	}
 }

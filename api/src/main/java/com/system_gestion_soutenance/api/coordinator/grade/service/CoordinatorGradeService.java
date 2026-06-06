@@ -12,6 +12,7 @@ import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryReposit
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -120,11 +121,11 @@ public class CoordinatorGradeService {
 
 	private String computeStatus(List<Evaluation> evaluations, int totalMembers) {
 		long submittedCount = evaluations.stream()
-				.filter(e -> "submitted".equals(e.getStatus()) && e.getScore() != null).count();
+				.filter(e -> e.getStatus() == EvaluationStatus.SUBMITTED && e.getScore() != null).count();
 		if (submittedCount == 0)
 			return "no_evaluations";
 		if (submittedCount < totalMembers)
-			return "pending";
+			return "awaiting";
 		return "completed";
 	}
 

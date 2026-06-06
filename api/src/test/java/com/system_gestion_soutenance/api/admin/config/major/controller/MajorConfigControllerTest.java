@@ -35,7 +35,8 @@ class MajorConfigControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		when(majorConfigService.findAll()).thenReturn(List.of(new Major()));
-		mockMvc.perform(get("/api/admin/config/majors")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/admin/config/majors")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
@@ -43,7 +44,7 @@ class MajorConfigControllerTest {
 		when(majorConfigService.create(any())).thenReturn(new Major());
 		mockMvc.perform(
 				post("/api/admin/config/majors").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"GL\"}"))
-				.andExpect(status().isCreated());
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
@@ -51,12 +52,13 @@ class MajorConfigControllerTest {
 		when(majorConfigService.update(anyLong(), any())).thenReturn(new Major());
 		mockMvc.perform(
 				put("/api/admin/config/majors/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"IIR\"}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
-	void delete_returns204() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(majorConfigService).delete(1L);
-		mockMvc.perform(delete("/api/admin/config/majors/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/admin/config/majors/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

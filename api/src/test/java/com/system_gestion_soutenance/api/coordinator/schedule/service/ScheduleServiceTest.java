@@ -15,6 +15,7 @@ import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepos
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
@@ -144,7 +145,7 @@ class ScheduleServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet");
-		when(project.getStatus()).thenReturn("approved");
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
 		when(project.getStudents())
 				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
 
@@ -177,7 +178,7 @@ class ScheduleServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet");
-		when(project.getStatus()).thenReturn("approved");
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
 		when(project.getStudents())
 				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
 
@@ -263,7 +264,7 @@ class ScheduleServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet Test");
-		when(project.getStatus()).thenReturn("approved");
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
 
 		Group group = mock(Group.class);
 		when(group.getStudents())

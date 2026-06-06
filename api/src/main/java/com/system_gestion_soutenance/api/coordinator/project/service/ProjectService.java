@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
@@ -42,7 +43,15 @@ public class ProjectService {
 
 	@Transactional(readOnly = true)
 	public List<ProjectResponse> findAll() {
-		return projectRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
+		List<Project> projects = projectRepository.findAllWithDetails();
+		Map<Long, Long> projectGroupIds = buildProjectGroupIdMap(projects);
+		return projects.stream().map(p -> toResponse(p, projectGroupIds)).collect(Collectors.toList());
+	}
+
+	private Map<Long, Long> buildProjectGroupIdMap(List<Project> projects) {
+		List<Long> projectIds = projects.stream().map(Project::getId).toList();
+		return groupRepository.findByProjectIdIn(projectIds).stream().filter(g -> g.getProject() != null)
+				.collect(Collectors.toMap(g -> g.getProject().getId(), g -> g.getId(), (a, b) -> a));
 	}
 
 	@Transactional
@@ -59,7 +68,7 @@ public class ProjectService {
 		project.setTitle(request.title());
 		project.setDescription(request.description());
 		project.setDefenseType(request.defenseType());
-		project.setStatus("pending");
+		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(supervisor);
 		project.setStudents(students);
 
@@ -102,17 +111,24 @@ public class ProjectService {
 		projectRepository.delete(project);
 	}
 
-	private ProjectResponse toResponse(Project project) {
-		List<String> studentNames = project.getStudents() != null
-				? project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-						.collect(Collectors.toList())
-				: List.of();
+	private ProjectResponse toResponse(Project project, Map<Long, Long> projectGroupIds) {
+		return buildResponse(project, projectGroupIds.get(project.getId()));
+	}
 
+	private ProjectResponse toResponse(Project project) {
 		Long groupId = null;
 		var groups = groupRepository.findByProjectId(project.getId());
 		if (!groups.isEmpty()) {
 			groupId = groups.get(0).getId();
 		}
+		return buildResponse(project, groupId);
+	}
+
+	private ProjectResponse buildResponse(Project project, Long groupId) {
+		List<String> studentNames = project.getStudents() != null
+				? project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
+						.collect(Collectors.toList())
+				: List.of();
 
 		return new ProjectResponse(project.getId(), project.getTitle(), project.getDescription(),
 				project.getDefenseType(), groupId,

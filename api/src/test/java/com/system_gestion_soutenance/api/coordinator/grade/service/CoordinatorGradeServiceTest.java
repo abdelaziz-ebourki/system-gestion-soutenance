@@ -15,6 +15,7 @@ import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignm
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import java.util.List;
@@ -98,7 +99,7 @@ class CoordinatorGradeServiceTest {
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
-		when(eval.getStatus()).thenReturn("submitted");
+		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getDefenseSessionId()).thenReturn(1L);
 		when(eval.getProjectId()).thenReturn(1L);
 
@@ -161,7 +162,7 @@ class CoordinatorGradeServiceTest {
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
-		when(eval.getStatus()).thenReturn("submitted");
+		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getProjectId()).thenReturn(1L);
 
 		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
@@ -170,7 +171,7 @@ class CoordinatorGradeServiceTest {
 
 		var result = service.getGrades();
 
-		assertEquals("pending", result.get(0).status());
+		assertEquals("awaiting", result.get(0).status());
 	}
 
 	@Test
@@ -215,7 +216,7 @@ class CoordinatorGradeServiceTest {
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
-		when(eval.getStatus()).thenReturn("submitted");
+		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getDefenseSessionId()).thenReturn(1L);
 		when(eval.getProjectId()).thenReturn(1L);
 

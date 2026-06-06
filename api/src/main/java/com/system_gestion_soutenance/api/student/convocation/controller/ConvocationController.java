@@ -43,8 +43,8 @@ public class ConvocationController {
 			return ResponseEntity.notFound().build();
 		}
 
-		String placeholder = "Convocation pour l'étudiant: " + studentId
-				+ "\n\nCe document est un placeholder en attendant la génération PDF.";
+		// TODO: implement the actual file template
+		String placeholder = "Convocation pour l'étudiant: " + studentId + "\n\nCe document est un placeholder.";
 		byte[] content = placeholder.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
 		HttpHeaders headers = new HttpHeaders();

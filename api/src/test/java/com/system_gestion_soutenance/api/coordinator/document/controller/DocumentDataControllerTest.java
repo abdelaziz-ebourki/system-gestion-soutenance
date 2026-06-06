@@ -61,7 +61,8 @@ class DocumentDataControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/documents/evaluation-sheets").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("projectId", 1)))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].projectTitle").value("Projet Test"));
 	}
 
 	@Test
@@ -72,7 +73,7 @@ class DocumentDataControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/documents/attendance-lists").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", 1)))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.defenseSessionName").value("Session PFE"));
+				.andExpect(jsonPath("$.data.defenseSessionName").value("Session PFE"));
 	}
 
 	@Test
@@ -83,7 +84,8 @@ class DocumentDataControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/documents/jury-convocations").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("projectId", 1)))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].teacherName").value("John Doe"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].teacherName").value("John Doe"));
 	}
 
 	@Test
@@ -94,7 +96,7 @@ class DocumentDataControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/documents/schedule").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", 1)))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.defenseSessionName").value("Session PFE"));
+				.andExpect(jsonPath("$.data.defenseSessionName").value("Session PFE"));
 	}
 
 	@Test
@@ -105,6 +107,6 @@ class DocumentDataControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/documents/proces-verbal").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("projectId", 1)))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.studentNames[0]").value("Jane Smith")); // Wait, studentNames is List<String>
+				.andExpect(jsonPath("$.data.studentNames[0]").value("Jane Smith"));
 	}
 }

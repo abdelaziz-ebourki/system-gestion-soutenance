@@ -61,7 +61,8 @@ class ProjectControllerTest {
 		when(projectService.findAll()).thenReturn(List.of(response));
 
 		mockMvc.perform(get("/api/coordinator/projects")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].title").value("Projet Test"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].title").value("Projet Test"));
 	}
 
 	@Test
@@ -72,7 +73,7 @@ class ProjectControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/projects").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.title").value("New Project"));
+				.andExpect(jsonPath("$.data.title").value("New Project"));
 	}
 
 	@Test
@@ -84,13 +85,14 @@ class ProjectControllerTest {
 
 		mockMvc.perform(put("/api/coordinator/projects/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.title").value("Updated Project"));
+				.andExpect(jsonPath("$.data.title").value("Updated Project"));
 	}
 
 	@Test
-	void delete_returnsNoContent() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(projectService).delete(1L);
 
-		mockMvc.perform(delete("/api/coordinator/projects/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/coordinator/projects/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

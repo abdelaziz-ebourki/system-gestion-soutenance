@@ -35,7 +35,8 @@ class LevelConfigControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		when(levelConfigService.findAll()).thenReturn(List.of(new Level()));
-		mockMvc.perform(get("/api/admin/config/levels")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/admin/config/levels")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
@@ -43,7 +44,7 @@ class LevelConfigControllerTest {
 		when(levelConfigService.create(any())).thenReturn(new Level());
 		mockMvc.perform(
 				post("/api/admin/config/levels").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"S6\"}"))
-				.andExpect(status().isCreated());
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
@@ -51,12 +52,13 @@ class LevelConfigControllerTest {
 		when(levelConfigService.update(anyLong(), any())).thenReturn(new Level());
 		mockMvc.perform(
 				put("/api/admin/config/levels/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"S7\"}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
-	void delete_returns204() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(levelConfigService).delete(1L);
-		mockMvc.perform(delete("/api/admin/config/levels/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/admin/config/levels/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

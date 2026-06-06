@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRe
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,27 +26,28 @@ public class ProjectController {
 
 	@GetMapping
 	@Operation(summary = "List all projects")
-	public List<ProjectResponse> findAll() {
-		return projectService.findAll();
+	public ApiResponse<List<ProjectResponse>> findAll() {
+		return ApiResponse.success("Liste des projets récupérée avec succès", projectService.findAll());
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new project")
-	public ResponseEntity<ProjectResponse> create(@Valid @RequestBody CreateProjectRequest request) {
+	public ResponseEntity<ApiResponse<ProjectResponse>> create(@Valid @RequestBody CreateProjectRequest request) {
 		ProjectResponse project = projectService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(project);
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Projet créé avec succès", project));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a project")
-	public ProjectResponse update(@PathVariable Long id, @Valid @RequestBody UpdateProjectRequest updates) {
-		return projectService.update(id, updates);
+	public ApiResponse<ProjectResponse> update(@PathVariable Long id,
+			@Valid @RequestBody UpdateProjectRequest updates) {
+		return ApiResponse.success("Projet mis à jour avec succès", projectService.update(id, updates));
 	}
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete a project")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		projectService.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.success("Projet supprimé avec succès", null));
 	}
 }

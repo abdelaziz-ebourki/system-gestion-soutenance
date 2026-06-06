@@ -60,7 +60,8 @@ class GroupControllerTest {
 						"Groupe A", 1L, 2, List.of())));
 
 		mockMvc.perform(get("/api/coordinator/groups")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].groupName").value("Groupe A"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].groupName").value("Groupe A"));
 	}
 
 	@Test
@@ -72,13 +73,14 @@ class GroupControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/groups").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.groupName").value("Groupe A"));
+				.andExpect(jsonPath("$.data.groupName").value("Groupe A"));
 	}
 
 	@Test
-	void delete_returnsNoContent() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(groupService).delete(1L);
 
-		mockMvc.perform(delete("/api/coordinator/groups/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/coordinator/groups/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

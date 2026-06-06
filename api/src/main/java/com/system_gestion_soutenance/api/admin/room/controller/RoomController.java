@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.admin.room.dto.CreateRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.dto.RoomResponse;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.service.RoomService;
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,35 +28,37 @@ public class RoomController {
 
 	@GetMapping
 	@Operation(summary = "List all rooms with pagination")
-	public PaginatedResponse<RoomResponse> findAll(@RequestParam(defaultValue = "0") int page,
+	public ApiResponse<PaginatedResponse<RoomResponse>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit) {
-		return roomService.findAll(page, limit);
+		return ApiResponse.success("Liste des salles récupérée avec succès", roomService.findAll(page, limit));
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new room")
-	public ResponseEntity<RoomResponse> create(@Valid @RequestBody CreateRoomRequest request) {
+	public ResponseEntity<ApiResponse<RoomResponse>> create(@Valid @RequestBody CreateRoomRequest request) {
 		Room room = roomService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(RoomResponse.from(room));
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.success("Salle créée avec succès", RoomResponse.from(room)));
 	}
 
 	@PostMapping("/bulk")
 	@Operation(summary = "Bulk create rooms")
-	public ResponseEntity<List<RoomResponse>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
+	public ResponseEntity<ApiResponse<List<RoomResponse>>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
 		List<Room> rooms = roomService.bulkCreate(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(rooms.stream().map(RoomResponse::from).toList());
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				ApiResponse.success("Salles créées avec succès", rooms.stream().map(RoomResponse::from).toList()));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a room")
-	public RoomResponse update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
-		return RoomResponse.from(roomService.update(id, request));
+	public ApiResponse<RoomResponse> update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
+		return ApiResponse.success("Salle mise à jour avec succès", RoomResponse.from(roomService.update(id, request)));
 	}
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete a room")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		roomService.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.success("Salle supprimée avec succès", null));
 	}
 }

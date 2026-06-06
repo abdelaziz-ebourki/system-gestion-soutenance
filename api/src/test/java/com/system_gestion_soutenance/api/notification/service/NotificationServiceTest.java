@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.notification.service;
 
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
+import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -40,7 +41,8 @@ class NotificationServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		notification = new AppNotification(1L, "info", "Title", "Message", LocalDateTime.now(), false, null, null);
+		notification = new AppNotification(1L, NotificationType.INFO, "Title", "Message", LocalDateTime.now(), false,
+				null, null);
 
 		activeUser = new User();
 		activeUser.setEmail("active@test.com");

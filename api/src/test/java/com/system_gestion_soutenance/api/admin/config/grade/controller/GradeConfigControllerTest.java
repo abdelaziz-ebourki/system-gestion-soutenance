@@ -39,7 +39,7 @@ class GradeConfigControllerTest {
 		when(configMapper.toGradeDto(grade))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.config.grade.dto.GradeDto(1L, "Prof"));
 		mockMvc.perform(get("/api/admin/config/grades")).andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].name").value("Prof"));
+				.andExpect(jsonPath("$.data[0].name").value("Prof"));
 	}
 
 	@Test
@@ -50,7 +50,7 @@ class GradeConfigControllerTest {
 				.thenReturn(new com.system_gestion_soutenance.api.admin.config.grade.dto.GradeDto(1L, "Prof"));
 		mockMvc.perform(
 				post("/api/admin/config/grades").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Prof\"}"))
-				.andExpect(status().isCreated()).andExpect(jsonPath("$.name").value("Prof"));
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.data.name").value("Prof"));
 	}
 
 	@Test
@@ -61,12 +61,13 @@ class GradeConfigControllerTest {
 				.thenReturn(new com.system_gestion_soutenance.api.admin.config.grade.dto.GradeDto(1L, "Updated"));
 		mockMvc.perform(put("/api/admin/config/grades/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"Updated\"}")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("Updated"));
+				.andExpect(jsonPath("$.data.name").value("Updated"));
 	}
 
 	@Test
-	void delete_returns204() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(gradeConfigService).delete(1L);
-		mockMvc.perform(delete("/api/admin/config/grades/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/admin/config/grades/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

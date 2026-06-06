@@ -36,8 +36,9 @@ public class Evaluation {
 	@Column(columnDefinition = "TEXT")
 	private String comment;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String status = "pending";
+	private EvaluationStatus status = EvaluationStatus.PENDING;
 
 	@Column(name = "submitted_at")
 	private LocalDateTime submittedAt;

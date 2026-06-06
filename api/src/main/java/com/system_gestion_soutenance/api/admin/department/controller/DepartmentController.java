@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.admin.department.dto.CreateDepartmentRe
 import com.system_gestion_soutenance.api.admin.department.dto.DepartmentResponse;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.service.DepartmentService;
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,33 +29,39 @@ public class DepartmentController {
 
 	@GetMapping
 	@Operation(summary = "List all departments")
-	public List<DepartmentResponse> findAll() {
-		return departmentService.findAll().stream().map(configMapper::toDepartmentResponse).toList();
+	public ApiResponse<List<DepartmentResponse>> findAll() {
+		List<DepartmentResponse> departments = departmentService.findAll().stream()
+				.map(configMapper::toDepartmentResponse).toList();
+		return ApiResponse.success("Liste des départements récupérée avec succès", departments);
 	}
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Get a department by ID")
-	public DepartmentResponse findById(@PathVariable Long id) {
-		return configMapper.toDepartmentResponse(departmentService.findById(id));
+	public ApiResponse<DepartmentResponse> findById(@PathVariable Long id) {
+		return ApiResponse.success("Département récupéré avec succès",
+				configMapper.toDepartmentResponse(departmentService.findById(id)));
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new department")
-	public ResponseEntity<DepartmentResponse> create(@Valid @RequestBody CreateDepartmentRequest request) {
+	public ResponseEntity<ApiResponse<DepartmentResponse>> create(@Valid @RequestBody CreateDepartmentRequest request) {
 		Department department = departmentService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(configMapper.toDepartmentResponse(department));
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				ApiResponse.success("Département créé avec succès", configMapper.toDepartmentResponse(department)));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a department")
-	public DepartmentResponse update(@PathVariable Long id, @Valid @RequestBody CreateDepartmentRequest request) {
-		return configMapper.toDepartmentResponse(departmentService.update(id, request));
+	public ApiResponse<DepartmentResponse> update(@PathVariable Long id,
+			@Valid @RequestBody CreateDepartmentRequest request) {
+		return ApiResponse.success("Département mis à jour avec succès",
+				configMapper.toDepartmentResponse(departmentService.update(id, request)));
 	}
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete a department")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		departmentService.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.success("Département supprimé avec succès", null));
 	}
 }

@@ -61,7 +61,8 @@ class JuryControllerTest {
 				.thenReturn(List.of(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of())));
 
 		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].projectTitle").value("Projet Test"));
 	}
 
 	@Test
@@ -73,7 +74,7 @@ class JuryControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/juries").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.projectId").value(1L));
+				.andExpect(jsonPath("$.data.projectId").value(1L));
 	}
 
 	@Test
@@ -84,13 +85,14 @@ class JuryControllerTest {
 
 		mockMvc.perform(put("/api/coordinator/juries/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.projectId").value(2L));
+				.andExpect(jsonPath("$.data.projectId").value(2L));
 	}
 
 	@Test
-	void delete_returnsNoContent() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(juryService).delete(1L);
 
-		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

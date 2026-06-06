@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
@@ -154,7 +155,7 @@ class GroupRepositoryTest {
 		project.setTitle(title);
 		project.setDescription("Description");
 		project.setDefenseType("PFE");
-		project.setStatus("pending");
+		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
 		project.setStudents(List.of(savedStudent));
 		return project;

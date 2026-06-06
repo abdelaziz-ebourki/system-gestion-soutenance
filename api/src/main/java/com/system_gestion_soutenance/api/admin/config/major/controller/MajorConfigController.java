@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorReque
 import com.system_gestion_soutenance.api.admin.config.major.dto.MajorDto;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.service.MajorConfigService;
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,27 +29,30 @@ public class MajorConfigController {
 
 	@GetMapping
 	@Operation(summary = "List all majors")
-	public List<MajorDto> findAll() {
-		return majorConfigService.findAll().stream().map(configMapper::toMajorDto).toList();
+	public ApiResponse<List<MajorDto>> findAll() {
+		List<MajorDto> majors = majorConfigService.findAll().stream().map(configMapper::toMajorDto).toList();
+		return ApiResponse.success("Liste des filières récupérée avec succès", majors);
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new major")
-	public ResponseEntity<MajorDto> create(@Valid @RequestBody CreateMajorRequest request) {
+	public ResponseEntity<ApiResponse<MajorDto>> create(@Valid @RequestBody CreateMajorRequest request) {
 		Major major = majorConfigService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(configMapper.toMajorDto(major));
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.success("Filière créée avec succès", configMapper.toMajorDto(major)));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a major")
-	public MajorDto update(@PathVariable Long id, @Valid @RequestBody CreateMajorRequest request) {
-		return configMapper.toMajorDto(majorConfigService.update(id, request));
+	public ApiResponse<MajorDto> update(@PathVariable Long id, @Valid @RequestBody CreateMajorRequest request) {
+		return ApiResponse.success("Filière mise à jour avec succès",
+				configMapper.toMajorDto(majorConfigService.update(id, request)));
 	}
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete a major")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		majorConfigService.delete(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.success("Filière supprimée avec succès", null));
 	}
 }

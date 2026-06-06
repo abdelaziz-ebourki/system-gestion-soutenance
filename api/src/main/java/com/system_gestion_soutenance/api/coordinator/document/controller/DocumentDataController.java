@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.coordinator.document.controller;
 
 import com.system_gestion_soutenance.api.coordinator.document.dto.*;
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,35 +26,42 @@ public class DocumentDataController {
 
 	@PostMapping("/evaluation-sheets")
 	@Operation(summary = "Get evaluation sheets data for a project")
-	public ResponseEntity<List<EvaluationSheetResponse>> evaluationSheets(
+	public ResponseEntity<ApiResponse<List<EvaluationSheetResponse>>> evaluationSheets(
 			@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
-		return ResponseEntity.ok(documentDataService.evaluationSheets(idsRequest));
+		return ResponseEntity.ok(ApiResponse.success("Données des fiches d'évaluation récupérées avec succès",
+				documentDataService.evaluationSheets(idsRequest)));
 	}
 
 	@PostMapping("/attendance-lists")
 	@Operation(summary = "Get attendance lists data")
-	public ResponseEntity<AttendanceListResponse> attendanceList(@Valid @RequestBody SessionRequest request) {
-		return ResponseEntity.ok(documentDataService.attendanceList(request.defenseSessionId()));
+	public ResponseEntity<ApiResponse<AttendanceListResponse>> attendanceList(
+			@Valid @RequestBody SessionRequest request) {
+		return ResponseEntity.ok(ApiResponse.success("Données de la liste de présence récupérées avec succès",
+				documentDataService.attendanceList(request.defenseSessionId())));
 	}
 
 	@PostMapping("/jury-convocations")
 	@Operation(summary = "Get jury convocation data for a project")
-	public ResponseEntity<List<JuryConvocationResponse>> juryConvocations(
+	public ResponseEntity<ApiResponse<List<JuryConvocationResponse>>> juryConvocations(
 			@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
-		return ResponseEntity.ok(documentDataService.juryConvocations(idsRequest));
+		return ResponseEntity.ok(ApiResponse.success("Données des convocations récupérées avec succès",
+				documentDataService.juryConvocations(idsRequest)));
 	}
 
 	@PostMapping("/schedule")
 	@Operation(summary = "Get printable schedule data")
-	public ResponseEntity<ScheduleDocResponse> schedule(@Valid @RequestBody SessionRequest request) {
-		return ResponseEntity.ok(documentDataService.schedule(request.defenseSessionId()));
+	public ResponseEntity<ApiResponse<ScheduleDocResponse>> schedule(@Valid @RequestBody SessionRequest request) {
+		return ResponseEntity.ok(ApiResponse.success("Données du planning récupérées avec succès",
+				documentDataService.schedule(request.defenseSessionId())));
 	}
 
 	@PostMapping("/proces-verbal")
 	@Operation(summary = "Get proces-verbal (PV) data for a project")
-	public ResponseEntity<ProcesVerbalResponse> procesVerbal(@Valid @RequestBody ProjectIdRequest request) {
-		return ResponseEntity.ok(documentDataService.procesVerbal(request.projectId()));
+	public ResponseEntity<ApiResponse<ProcesVerbalResponse>> procesVerbal(
+			@Valid @RequestBody ProjectIdRequest request) {
+		return ResponseEntity.ok(ApiResponse.success("Données du procès-verbal récupérées avec succès",
+				documentDataService.procesVerbal(request.projectId())));
 	}
 }

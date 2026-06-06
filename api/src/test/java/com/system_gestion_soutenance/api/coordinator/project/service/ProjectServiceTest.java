@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
@@ -38,7 +39,7 @@ class ProjectServiceTest {
 		when(project.getTitle()).thenReturn("Projet Test");
 		when(project.getDescription()).thenReturn("Description");
 		when(project.getDefenseType()).thenReturn("PFE");
-		when(project.getStatus()).thenReturn("pending");
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
 		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
 		when(projectRepository.findAllWithDetails()).thenReturn(List.of(project));
@@ -66,7 +67,7 @@ class ProjectServiceTest {
 		when(savedProject.getTitle()).thenReturn("New Project");
 		when(savedProject.getDescription()).thenReturn("A description");
 		when(savedProject.getDefenseType()).thenReturn("PFE");
-		when(savedProject.getStatus()).thenReturn("pending");
+		when(savedProject.getStatus()).thenReturn(ProjectStatus.PENDING);
 		when(savedProject.getSupervisor()).thenReturn(supervisor);
 		when(savedProject.getStudents()).thenReturn(List.of(student));
 
@@ -101,7 +102,7 @@ class ProjectServiceTest {
 		when(savedProject.getTitle()).thenReturn("Project");
 		when(savedProject.getDescription()).thenReturn("Desc");
 		when(savedProject.getDefenseType()).thenReturn("PFE");
-		when(savedProject.getStatus()).thenReturn("pending");
+		when(savedProject.getStatus()).thenReturn(ProjectStatus.PENDING);
 		when(savedProject.getStudents()).thenReturn(List.of());
 		when(savedProject.getSupervisor()).thenReturn(supervisor);
 
@@ -123,7 +124,7 @@ class ProjectServiceTest {
 		when(project.getTitle()).thenReturn("Updated");
 		when(project.getDescription()).thenReturn("Desc");
 		when(project.getDefenseType()).thenReturn("PFE");
-		when(project.getStatus()).thenReturn("pending");
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
 		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
 
