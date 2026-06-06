@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.student.group.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse;
 import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse;
@@ -18,10 +19,13 @@ public class StudentGroupController {
 
 	private final StudentGroupService studentGroupService;
 	private final SecurityService securityService;
+	private final StudentGroupMapper studentGroupMapper;
 
-	public StudentGroupController(StudentGroupService studentGroupService, SecurityService securityService) {
+	public StudentGroupController(StudentGroupService studentGroupService, SecurityService securityService,
+			StudentGroupMapper studentGroupMapper) {
 		this.studentGroupService = studentGroupService;
 		this.securityService = securityService;
+		this.studentGroupMapper = studentGroupMapper;
 	}
 
 	@GetMapping
@@ -33,13 +37,15 @@ public class StudentGroupController {
 	@PostMapping
 	@Operation(summary = "Create a new group (during creation period)")
 	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup() {
-		GroupDetailsResponse group = studentGroupService.createGroup(securityService.getCurrentUserId());
+		Long studentId = securityService.getCurrentUserId();
+		GroupDetailsResponse group = studentGroupMapper.toDetails(studentGroupService.createGroup(studentId), studentId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(group));
 	}
 
 	@PostMapping("/{id}/join")
 	@Operation(summary = "Join an existing group by ID")
 	public ApiResponse<GroupDetailsResponse> joinGroup(@PathVariable Long id) {
-		return ApiResponse.success(studentGroupService.joinGroup(id, securityService.getCurrentUserId()));
+		Long studentId = securityService.getCurrentUserId();
+		return ApiResponse.success(studentGroupMapper.toDetails(studentGroupService.joinGroup(id, studentId), studentId));
 	}
 }

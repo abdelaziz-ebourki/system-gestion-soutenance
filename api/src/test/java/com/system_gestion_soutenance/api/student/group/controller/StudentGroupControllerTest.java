@@ -5,12 +5,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
+import com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse;
 import com.system_gestion_soutenance.api.student.group.service.StudentGroupService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,8 @@ class StudentGroupControllerTest {
 	private UserRepository userRepository;
 	@MockitoBean
 	private SecurityService securityService;
+	@MockitoBean
+	private StudentGroupMapper studentGroupMapper;
 
 	@BeforeEach
 	void setUp() {
@@ -62,18 +66,24 @@ class StudentGroupControllerTest {
 
 	@Test
 	void createGroup_returns201() throws Exception {
-		when(studentGroupService.createGroup(1L))
-				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(1L,
-						"Groupe de Alice", null, null, List.of()));
+		Group group = new Group();
+		group.setId(1L);
+		group.setGroupName("Groupe de Alice");
+		when(studentGroupService.createGroup(1L)).thenReturn(group);
+		when(studentGroupMapper.toDetails(group, 1L))
+				.thenReturn(new GroupDetailsResponse(1L, "Groupe de Alice", null, null, List.of()));
 		mockMvc.perform(post("/api/student/group")).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.data.groupName").value("Groupe de Alice"));
 	}
 
 	@Test
 	void joinGroup_returns200() throws Exception {
-		when(studentGroupService.joinGroup(anyLong(), eq(1L)))
-				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(1L,
-						"Groupe Test", null, null, List.of()));
+		Group group = new Group();
+		group.setId(1L);
+		group.setGroupName("Groupe Test");
+		when(studentGroupService.joinGroup(anyLong(), eq(1L))).thenReturn(group);
+		when(studentGroupMapper.toDetails(group, 1L))
+				.thenReturn(new GroupDetailsResponse(1L, "Groupe Test", null, null, List.of()));
 		mockMvc.perform(post("/api/student/group/10/join")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
 	}

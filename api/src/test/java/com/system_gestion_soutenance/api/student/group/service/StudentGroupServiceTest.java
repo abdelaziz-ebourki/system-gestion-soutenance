@@ -5,13 +5,13 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
+import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +29,8 @@ class StudentGroupServiceTest {
 	private StudentRepository studentRepository;
 	@Mock
 	private DefenseSettingsRepository defenseSettingsRepository;
+	@Mock
+	private StudentGroupMapper studentGroupMapper;
 
 	@InjectMocks
 	private StudentGroupService service;
@@ -86,6 +88,11 @@ class StudentGroupServiceTest {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
+				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
+						null, List.of(
+								new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+										"Alice Test", null, "leader"))));
 
 		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
 				.getWorkspace(1L);
@@ -134,9 +141,9 @@ class StudentGroupServiceTest {
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse result = service.joinGroup(10L, 1L);
+		Group result = service.joinGroup(10L, 1L);
 
-		assertEquals(1, result.members().size());
+		assertEquals(1, result.getStudents().size());
 	}
 
 	@Test
@@ -160,9 +167,9 @@ class StudentGroupServiceTest {
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse result = service.createGroup(1L);
+		Group result = service.createGroup(1L);
 
-		assertEquals("Groupe de Alice Test", result.groupName());
+		assertEquals("Groupe de Alice Test", result.getGroupName());
 	}
 
 	@Test
@@ -197,9 +204,9 @@ class StudentGroupServiceTest {
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse result = service.joinGroup(10L, 1L);
+		Group result = service.joinGroup(10L, 1L);
 
-		assertEquals(2, result.members().size());
+		assertEquals(2, result.getStudents().size());
 	}
 
 	@Test
@@ -223,6 +230,11 @@ class StudentGroupServiceTest {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
+				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
+						null, List.of(
+								new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+										"Alice Test", null, "member"))));
 
 		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
 				.getWorkspace(1L);

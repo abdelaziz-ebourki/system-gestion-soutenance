@@ -2,13 +2,12 @@ package com.system_gestion_soutenance.api.student.group.service;
 
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
+import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.student.group.dto.AvailableGroupResponse;
-import com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse;
-import com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse;
 import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,19 +23,23 @@ public class StudentGroupService {
 	private final GroupRepository groupRepository;
 	private final StudentRepository studentRepository;
 	private final DefenseSettingsRepository defenseSettingsRepository;
+	private final StudentGroupMapper studentGroupMapper;
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
-			DefenseSettingsRepository defenseSettingsRepository) {
+			DefenseSettingsRepository defenseSettingsRepository, StudentGroupMapper studentGroupMapper) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSettingsRepository = defenseSettingsRepository;
+		this.studentGroupMapper = studentGroupMapper;
 	}
 
 	@Transactional(readOnly = true)
 	public StudentGroupWorkspaceResponse getWorkspace(Long studentId) {
 		Group currentGroup = groupRepository.findByStudentId(studentId).orElse(null);
 
-		GroupDetailsResponse currentDetails = currentGroup != null ? groupToDetails(currentGroup, studentId) : null;
+		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse currentDetails = currentGroup != null
+				? studentGroupMapper.toDetails(currentGroup, studentId)
+				: null;
 
 		List<AvailableGroupResponse> available = new ArrayList<>();
 		for (Group g : groupRepository.findAllWithDetails()) {
@@ -55,7 +58,7 @@ public class StudentGroupService {
 	}
 
 	@Transactional
-	public GroupDetailsResponse createGroup(Long studentId) {
+	public Group createGroup(Long studentId) {
 		if (groupRepository.findByStudentId(studentId).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
 		}
@@ -70,13 +73,11 @@ public class StudentGroupService {
 		group.setGroupName("Groupe de " + student.getFirstName() + " " + student.getLastName());
 		group.setStudents(new ArrayList<>(List.of(student)));
 		group.setSessionId(null);
-		group = groupRepository.save(group);
-
-		return groupToDetails(group, studentId);
+		return groupRepository.save(group);
 	}
 
 	@Transactional
-	public GroupDetailsResponse joinGroup(Long groupId, Long studentId) {
+	public Group joinGroup(Long groupId, Long studentId) {
 		if (groupRepository.findByStudentId(studentId).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
 		}
@@ -97,29 +98,7 @@ public class StudentGroupService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà dans ce groupe");
 		}
 		group.getStudents().add(student);
-		group = groupRepository.save(group);
-
-		return groupToDetails(group, studentId);
-	}
-
-	private GroupDetailsResponse groupToDetails(Group group, Long currentStudentId) {
-		List<GroupMemberResponse> members = new ArrayList<>();
-		if (group.getStudents() != null) {
-			boolean first = true;
-			for (Student s : group.getStudents()) {
-				members.add(new GroupMemberResponse(s.getId(), s.getFirstName() + " " + s.getLastName(), s.getEmail(),
-						s.getId().equals(currentStudentId) && first ? "leader" : "member"));
-				first = false;
-			}
-		}
-
-		return new GroupDetailsResponse(group.getId(), group.getGroupName(),
-				group.getProject() != null ? group.getProject().getTitle() : null,
-				group.getProject() != null && group.getProject().getSupervisor() != null
-						? group.getProject().getSupervisor().getFirstName() + " "
-								+ group.getProject().getSupervisor().getLastName()
-						: null,
-				members);
+		return groupRepository.save(group);
 	}
 
 	private boolean isCreationPeriodOpen() {
