@@ -70,7 +70,7 @@ class AuditLogControllerTest {
 		mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isArray()).andExpect(jsonPath("$.items.length()").value(1))
 				.andExpect(jsonPath("$.items[0].id").value(1)).andExpect(jsonPath("$.items[0].action").value("CREATE"))
-				.andExpect(jsonPath("$.items[0].entity").value("User")).andExpect(jsonPath("$.total").value(1))
+				.andExpect(jsonPath("$.items[0].entity").value("User")).andExpect(jsonPath("$.items[0].performedByEmail").value("admin@test.com")).andExpect(jsonPath("$.total").value(1))
 				.andExpect(jsonPath("$.currentPage").value(0)).andExpect(jsonPath("$.size").value(20));
 	}
 
@@ -79,7 +79,7 @@ class AuditLogControllerTest {
 		when(service.save(any())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"a@a.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"a@a.com"}
 				""")).andExpect(status().isCreated());
 	}
 
@@ -93,10 +93,10 @@ class AuditLogControllerTest {
 		when(auditLogMapper.toDto(savedLog)).thenReturn(dto);
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"a@a.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"a@a.com"}
 				""")).andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.action").value("DELETE")).andExpect(jsonPath("$.entity").value("User"))
-				.andExpect(jsonPath("$.entityId").value(1)).andExpect(jsonPath("$.adminEmail").value("a@a.com"));
+				.andExpect(jsonPath("$.entityId").value(1)).andExpect(jsonPath("$.performedByEmail").value("a@a.com"));
 	}
 
 	@Test
@@ -111,16 +111,16 @@ class AuditLogControllerTest {
 		when(auth.isAuthenticated()).thenReturn(true);
 		when(auth.getPrincipal()).thenReturn("admin@test.com");
 		SecurityContextHolder.getContext().setAuthentication(auth);
-		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn("admin@test.com");
 
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"fallback@test.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"fallback@test.com"}
 				""")).andExpect(status().isCreated());
 
-		assertThat(captor.getValue().getAdminEmail()).isEqualTo("admin@test.com");
+		assertThat(captor.getValue().getPerformedByEmail()).isEqualTo("admin@test.com");
 	}
 
 	@Test
@@ -132,16 +132,16 @@ class AuditLogControllerTest {
 		when(auth.isAuthenticated()).thenReturn(true);
 		when(auth.getPrincipal()).thenReturn(user);
 		SecurityContextHolder.getContext().setAuthentication(auth);
-		when(securityService.getCurrentUserEmail()).thenReturn("user@test.com");
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn("user@test.com");
 
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"fallback@test.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"fallback@test.com"}
 				""")).andExpect(status().isCreated());
 
-		assertThat(captor.getValue().getAdminEmail()).isEqualTo("user@test.com");
+		assertThat(captor.getValue().getPerformedByEmail()).isEqualTo("user@test.com");
 	}
 
 	@Test
@@ -152,9 +152,9 @@ class AuditLogControllerTest {
 		when(service.save(captor.capture())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"explicit@test.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"explicit@test.com"}
 				""")).andExpect(status().isCreated());
 
-		assertThat(captor.getValue().getAdminEmail()).isEqualTo("explicit@test.com");
+		assertThat(captor.getValue().getPerformedByEmail()).isEqualTo("explicit@test.com");
 	}
 }

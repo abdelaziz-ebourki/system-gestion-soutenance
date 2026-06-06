@@ -38,8 +38,7 @@ public class ScheduleController {
 		List<SlotAssignment> slots = scheduleService.getSchedule();
 		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
 		Map<Long, List<String>> studentNamesMap = scheduleService.buildStudentNamesMap(projectMap);
-		List<ScheduleResponse> response = slots.stream()
-				.map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
+		List<ScheduleResponse> response = slots.stream().map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
 				.toList();
 		return ApiResponse.success(response);
 	}
@@ -59,8 +58,7 @@ public class ScheduleController {
 		List<SlotAssignment> slots = scheduleService.saveSchedule(request);
 		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
 		Map<Long, List<String>> studentNamesMap = scheduleService.buildStudentNamesMap(projectMap);
-		List<ScheduleResponse> response = slots.stream()
-				.map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
+		List<ScheduleResponse> response = slots.stream().map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
 				.toList();
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}

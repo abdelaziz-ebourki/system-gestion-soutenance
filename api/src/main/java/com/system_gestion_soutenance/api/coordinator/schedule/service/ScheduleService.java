@@ -73,8 +73,7 @@ public class ScheduleService {
 		List<Long> projectIds = new ArrayList<>(projectMap.keySet());
 		Map<Long, List<String>> namesMap = new HashMap<>();
 		var groups = groupRepository.findByProjectIdIn(projectIds);
-		Map<Long, List<Group>> groupsByProject = groups
-				.stream().filter(g -> g.getProject() != null)
+		Map<Long, List<Group>> groupsByProject = groups.stream().filter(g -> g.getProject() != null)
 				.collect(Collectors.groupingBy(g -> g.getProject().getId()));
 		for (var entry : projectMap.entrySet()) {
 			Long pid = entry.getKey();
@@ -166,8 +165,7 @@ public class ScheduleService {
 		}
 
 		Map<Long, List<String>> studentNamesByProject = new HashMap<>();
-		Map<Long, List<Group>> groupsByProject = allGroups
-				.stream().filter(g -> g.getProject() != null)
+		Map<Long, List<Group>> groupsByProject = allGroups.stream().filter(g -> g.getProject() != null)
 				.collect(Collectors.groupingBy(g -> g.getProject().getId()));
 		for (Project p : allProjects) {
 			studentNamesByProject.put(p.getId(), resolveStudentNames(p, groupsByProject.get(p.getId())));

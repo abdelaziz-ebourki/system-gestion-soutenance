@@ -54,7 +54,7 @@ public class AuditAspect {
 			auditLog.setAction(action);
 			auditLog.setEntity(entity);
 			auditLog.setEntityId(entityId);
-			auditLog.setAdminEmail(null);
+			auditLog.setPerformedByEmail(null);
 			auditLog.setDetails(action + " " + entity + (entityId != null ? " #" + entityId : "")
 					+ (errorDetail != null ? " — " + errorDetail : ""));
 			auditLog.setTimestamp(LocalDateTime.now());
@@ -68,7 +68,7 @@ public class AuditAspect {
 			auditLog.setAction(action);
 			auditLog.setEntity(entity);
 			auditLog.setEntityId(entityId);
-			auditLog.setAdminEmail(email);
+			auditLog.setPerformedByEmail(email);
 			auditLog.setDetails(action + " " + entity + (entityId != null ? " #" + entityId : "")
 					+ (errorDetail != null ? " — " + errorDetail : ""));
 			auditLog.setTimestamp(LocalDateTime.now());

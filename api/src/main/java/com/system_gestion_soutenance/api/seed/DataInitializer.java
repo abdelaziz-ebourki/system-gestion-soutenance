@@ -897,7 +897,7 @@ public class DataInitializer implements CommandLineRunner {
 		}
 
 		// Phase 22: Audit Logs
-		record AuditSeed(String action, String entity, String entityId, String admin, int day) {
+		record AuditSeed(String action, String entity, String entityId, String performedBy, int day) {
 		}
 		AuditSeed[] auditSeeds = {new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 10),
 				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 11),
@@ -923,7 +923,7 @@ public class DataInitializer implements CommandLineRunner {
 			AuditSeed as2 = auditSeeds[i];
 			String details = "Action " + as2.action.toLowerCase() + " effectuée sur " + as2.entity.toLowerCase() + " "
 					+ as2.entityId + ".";
-			auditLogRepo.save(new AuditLog(null, as2.action, as2.entity, (long) (i + 1), as2.admin, details,
+			auditLogRepo.save(new AuditLog(null, as2.action, as2.entity, (long) (i + 1), as2.performedBy, details,
 					LocalDateTime.of(2026, 5, as2.day, 9 + (i % 8), 30)));
 		}
 

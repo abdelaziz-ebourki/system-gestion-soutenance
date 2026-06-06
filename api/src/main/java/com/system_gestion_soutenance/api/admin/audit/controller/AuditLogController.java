@@ -47,8 +47,8 @@ public class AuditLogController {
 		log.setAction(request.action());
 		log.setEntity(request.entity());
 		log.setEntityId(request.entityId());
-		String adminEmail = securityService.getCurrentUserEmail();
-		log.setAdminEmail(adminEmail != null ? adminEmail : request.adminEmail());
+		String email = securityService.getOptionalCurrentUserEmail();
+		log.setPerformedByEmail(email != null ? email : request.performedByEmail());
 		log.setDetails(request.details());
 		log.setTimestamp(LocalDateTime.now());
 		return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(service.save(log)));

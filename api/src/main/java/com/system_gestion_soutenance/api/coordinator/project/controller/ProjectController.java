@@ -35,9 +35,7 @@ public class ProjectController {
 	public ApiResponse<List<ProjectResponse>> findAll() {
 		List<Project> projects = projectService.findAll();
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(projects);
-		List<ProjectResponse> response = projects.stream()
-				.map(p -> projectMapper.toDto(p, projectGroupIds))
-				.toList();
+		List<ProjectResponse> response = projects.stream().map(p -> projectMapper.toDto(p, projectGroupIds)).toList();
 		return ApiResponse.success("Liste des projets récupérée avec succès", response);
 	}
 
@@ -45,8 +43,8 @@ public class ProjectController {
 	@Operation(summary = "Create a new project")
 	public ResponseEntity<ApiResponse<ProjectResponse>> create(@Valid @RequestBody CreateProjectRequest request) {
 		Project project = projectService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.success("Projet créé avec succès", projectMapper.toDto(project, Collections.emptyMap())));
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				ApiResponse.success("Projet créé avec succès", projectMapper.toDto(project, Collections.emptyMap())));
 	}
 
 	@PutMapping("/{id}")
@@ -54,7 +52,8 @@ public class ProjectController {
 	public ApiResponse<ProjectResponse> update(@PathVariable Long id,
 			@Valid @RequestBody UpdateProjectRequest updates) {
 		Project project = projectService.update(id, updates);
-		return ApiResponse.success("Projet mis à jour avec succès", projectMapper.toDto(project, Collections.emptyMap()));
+		return ApiResponse.success("Projet mis à jour avec succès",
+				projectMapper.toDto(project, Collections.emptyMap()));
 	}
 
 	@DeleteMapping("/{id}")

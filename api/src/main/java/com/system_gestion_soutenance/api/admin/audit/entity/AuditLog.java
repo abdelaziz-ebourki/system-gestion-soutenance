@@ -28,8 +28,8 @@ public class AuditLog {
 	@Column(name = "entity_id")
 	private Long entityId;
 
-	@Column(name = "admin_email")
-	private String adminEmail;
+	@Column(name = "performed_by_email")
+	private String performedByEmail;
 
 	@Column(columnDefinition = "TEXT")
 	private String details;

@@ -86,7 +86,7 @@ class AuditAspectTest {
 
 		assertEquals(42L, result);
 		verify(auditLogRepository).save(argThat(log -> "CREATE".equals(log.getAction())
-				&& "Test".equals(log.getEntity()) && "admin@test.com".equals(log.getAdminEmail())));
+				&& "Test".equals(log.getEntity()) && "admin@test.com".equals(log.getPerformedByEmail())));
 	}
 
 	@Test
@@ -188,7 +188,7 @@ class AuditAspectTest {
 
 		aspect.audit(joinPoint, audited);
 
-		verify(auditLogRepository).save(argThat(log -> "user@test.com".equals(log.getAdminEmail())));
+		verify(auditLogRepository).save(argThat(log -> "user@test.com".equals(log.getPerformedByEmail())));
 	}
 
 	@Test
@@ -416,7 +416,7 @@ class AuditAspectTest {
 		assertThrows(RuntimeException.class, () -> aspect.audit(joinPoint, audited));
 
 		verify(auditLogRepository).save(argThat(
-				log -> "CREATE".equals(log.getAction()) && "Test".equals(log.getEntity()) && log.getAdminEmail() == null
+				log -> "CREATE".equals(log.getAction()) && "Test".equals(log.getEntity()) && log.getPerformedByEmail() == null
 						&& log.getDetails().contains("error detail") && log.getDetails().contains("#42")));
 	}
 
@@ -436,7 +436,7 @@ class AuditAspectTest {
 
 		aspect.audit(joinPoint, audited);
 
-		verify(auditLogRepository).save(argThat(log -> "admin@test.com".equals(log.getAdminEmail())
+		verify(auditLogRepository).save(argThat(log -> "admin@test.com".equals(log.getPerformedByEmail())
 				&& log.getEntityId() == null && "UPDATE E".equals(log.getDetails())));
 	}
 }

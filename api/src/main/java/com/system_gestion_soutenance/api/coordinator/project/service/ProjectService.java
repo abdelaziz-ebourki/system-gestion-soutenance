@@ -47,7 +47,8 @@ public class ProjectService {
 
 	public Map<Long, Long> buildProjectGroupIdMap(List<Project> projects) {
 		List<Long> projectIds = projects.stream().map(Project::getId).toList();
-		if (projectIds.isEmpty()) return Map.of();
+		if (projectIds.isEmpty())
+			return Map.of();
 		return groupRepository.findByProjectIdIn(projectIds).stream().filter(g -> g.getProject() != null)
 				.collect(Collectors.toMap(g -> g.getProject().getId(), g -> g.getId(), (a, b) -> a));
 	}

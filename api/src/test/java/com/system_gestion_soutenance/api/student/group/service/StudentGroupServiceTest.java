@@ -90,9 +90,8 @@ class StudentGroupServiceTest {
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
 				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
-						null, List.of(
-								new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
-										"Alice Test", null, "leader"))));
+						null, List.of(new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+								"Alice Test", null, "leader"))));
 
 		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
 				.getWorkspace(1L);
@@ -232,9 +231,8 @@ class StudentGroupServiceTest {
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
 				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
-						null, List.of(
-								new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
-										"Alice Test", null, "member"))));
+						null, List.of(new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+								"Alice Test", null, "member"))));
 
 		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
 				.getWorkspace(1L);

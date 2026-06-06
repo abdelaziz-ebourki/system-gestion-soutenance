@@ -38,7 +38,8 @@ public class StudentGroupController {
 	@Operation(summary = "Create a new group (during creation period)")
 	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup() {
 		Long studentId = securityService.getCurrentUserId();
-		GroupDetailsResponse group = studentGroupMapper.toDetails(studentGroupService.createGroup(studentId), studentId);
+		GroupDetailsResponse group = studentGroupMapper.toDetails(studentGroupService.createGroup(studentId),
+				studentId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(group));
 	}
 
@@ -46,6 +47,7 @@ public class StudentGroupController {
 	@Operation(summary = "Join an existing group by ID")
 	public ApiResponse<GroupDetailsResponse> joinGroup(@PathVariable Long id) {
 		Long studentId = securityService.getCurrentUserId();
-		return ApiResponse.success(studentGroupMapper.toDetails(studentGroupService.joinGroup(id, studentId), studentId));
+		return ApiResponse
+				.success(studentGroupMapper.toDetails(studentGroupService.joinGroup(id, studentId), studentId));
 	}
 }
