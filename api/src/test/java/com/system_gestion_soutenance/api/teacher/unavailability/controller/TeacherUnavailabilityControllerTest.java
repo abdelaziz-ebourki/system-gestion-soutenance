@@ -6,11 +6,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.teacher.unavailability.service.TeacherUnavailabilityService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,26 +54,20 @@ class TeacherUnavailabilityControllerTest {
 
 	@Test
 	void get_returns200() throws Exception {
-		when(service.getByTeacher(1L)).thenReturn(
-				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
-						Map.of()));
+		when(service.getByTeacher(1L)).thenReturn(List.of());
 		mockMvc.perform(get("/api/teacher/unavailability")).andExpect(status().isOk());
 	}
 
 	@Test
 	void save_withFlatBody_returns200() throws Exception {
-		when(service.saveForTeacher(anyLong(), any())).thenReturn(
-				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
-						Map.of()));
+		when(service.saveForTeacher(anyLong(), any())).thenReturn(List.of());
 		mockMvc.perform(post("/api/teacher/unavailability").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}")).andExpect(status().isOk());
 	}
 
 	@Test
 	void save_returns200() throws Exception {
-		when(service.saveForTeacher(anyLong(), any())).thenReturn(
-				new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse(
-						Map.of()));
+		when(service.saveForTeacher(anyLong(), any())).thenReturn(List.of());
 		mockMvc.perform(post("/api/teacher/unavailability").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}")).andExpect(status().isOk());
 	}

@@ -2,8 +2,10 @@ package com.system_gestion_soutenance.api.coordinator.group.controller;
 
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.dto.GroupResponse;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -18,22 +20,27 @@ import org.springframework.web.bind.annotation.*;
 public class GroupController {
 
 	private final GroupService groupService;
+	private final GroupMapper groupMapper;
 
-	public GroupController(GroupService groupService) {
+	public GroupController(GroupService groupService, GroupMapper groupMapper) {
 		this.groupService = groupService;
+		this.groupMapper = groupMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List all groups")
 	public ApiResponse<List<GroupResponse>> findAll() {
-		return ApiResponse.success("Liste des groupes récupérée avec succès", groupService.findAll());
+		List<Group> groups = groupService.findAll();
+		return ApiResponse.success("Liste des groupes récupérée avec succès",
+				groups.stream().map(groupMapper::toDto).toList());
 	}
 
 	@PostMapping
 	@Operation(summary = "Create a new group")
 	public ResponseEntity<ApiResponse<GroupResponse>> create(@Valid @RequestBody CreateGroupRequest request) {
-		GroupResponse group = groupService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Groupe créé avec succès", group));
+		Group group = groupService.create(request);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.success("Groupe créé avec succès", groupMapper.toDto(group)));
 	}
 
 	@DeleteMapping("/{id}")

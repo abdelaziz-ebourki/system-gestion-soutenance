@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.user.controller;
 
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
@@ -20,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserAdminController {
 
 	private final UserService userService;
+	private final UserMapper userMapper;
 
-	public UserAdminController(UserService userService) {
+	public UserAdminController(UserService userService, UserMapper userMapper) {
 		this.userService = userService;
+		this.userMapper = userMapper;
 	}
 
 	@GetMapping("/users")
@@ -30,46 +33,54 @@ public class UserAdminController {
 	public PaginatedResponse<UserDto> listUsers(@RequestParam(required = false) String role,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
 			@RequestParam(required = false) String search) {
-		return userService.listUsers(role, page, limit, search);
+		var userPage = userService.listUsers(role, page, limit, search);
+		var items = userPage.getContent().stream().map(userMapper::toDto).toList();
+		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
 	@GetMapping("/users/teachers-list")
 	@Operation(summary = "List all teachers (unpaginated)")
 	public List<UserDto> listAllTeachers() {
-		return userService.listAllByRole("teacher");
+		return userService.listAllByRole("teacher").stream().map(userMapper::toDto).toList();
 	}
 
 	@GetMapping("/users/students-list")
 	@Operation(summary = "List all students (unpaginated)")
 	public List<UserDto> listAllStudents() {
-		return userService.listAllByRole("student");
+		return userService.listAllByRole("student").stream().map(userMapper::toDto).toList();
 	}
 
 	@GetMapping("/students")
 	@Operation(summary = "List students with pagination")
 	public PaginatedResponse<UserDto> listStudents(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String search) {
-		return userService.listUsers("student", page, limit, search);
+		var userPage = userService.listUsers("student", page, limit, search);
+		var items = userPage.getContent().stream().map(userMapper::toDto).toList();
+		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
 	@GetMapping("/teachers")
 	@Operation(summary = "List teachers with pagination")
 	public PaginatedResponse<UserDto> listTeachers(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String search) {
-		return userService.listUsers("teacher", page, limit, search);
+		var userPage = userService.listUsers("teacher", page, limit, search);
+		var items = userPage.getContent().stream().map(userMapper::toDto).toList();
+		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
 	@GetMapping("/coordinators")
 	@Operation(summary = "List coordinators with pagination")
 	public PaginatedResponse<UserDto> listCoordinators(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String search) {
-		return userService.listUsers("coordinator", page, limit, search);
+		var userPage = userService.listUsers("coordinator", page, limit, search);
+		var items = userPage.getContent().stream().map(userMapper::toDto).toList();
+		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
 	@PostMapping("/users")
 	@Operation(summary = "Create a new user")
 	public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest request) {
-		UserDto user = userService.createUser(request);
+		UserDto user = userMapper.toDto(userService.createUser(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
 	}
 
@@ -80,7 +91,7 @@ public class UserAdminController {
 			request = new CreateUserRequest(request.lastName(), request.firstName(), request.email(), "student",
 					request.cne(), request.majorId(), request.levelId(), null, null);
 		}
-		UserDto user = userService.createUser(request);
+		UserDto user = userMapper.toDto(userService.createUser(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
 	}
 
@@ -91,7 +102,7 @@ public class UserAdminController {
 			request = new CreateUserRequest(request.lastName(), request.firstName(), request.email(), "teacher", null,
 					null, null, request.gradeId(), request.departmentId());
 		}
-		UserDto user = userService.createUser(request);
+		UserDto user = userMapper.toDto(userService.createUser(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
 	}
 
@@ -102,21 +113,21 @@ public class UserAdminController {
 			request = new CreateUserRequest(request.lastName(), request.firstName(), request.email(), "coordinator",
 					null, null, null, null, null);
 		}
-		UserDto user = userService.createUser(request);
+		UserDto user = userMapper.toDto(userService.createUser(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
 	}
 
 	@PostMapping("/users/bulk")
 	@Operation(summary = "Bulk create users")
 	public ResponseEntity<List<UserDto>> bulkCreate(@Valid @RequestBody BulkCreateRequest request) {
-		List<UserDto> users = userService.bulkCreate(request);
+		List<UserDto> users = userService.bulkCreate(request).stream().map(userMapper::toDto).toList();
 		return ResponseEntity.status(HttpStatus.CREATED).body(users);
 	}
 
 	@PutMapping("/users/{id}")
 	@Operation(summary = "Update a user")
 	public UserDto updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
-		return userService.updateUser(id, request);
+		return userMapper.toDto(userService.updateUser(id, request));
 	}
 
 	@DeleteMapping("/users/{id}")

@@ -3,7 +3,6 @@ package com.system_gestion_soutenance.api.coordinator.jury.service;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
-import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
@@ -12,8 +11,9 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,12 +36,12 @@ public class JuryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<JuryResponse> findAll() {
-		return juryRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
+	public List<Jury> findAll() {
+		return juryRepository.findAllWithDetails();
 	}
 
 	@Transactional
-	public JuryResponse create(CreateJuryRequest request) {
+	public Jury create(CreateJuryRequest request) {
 		Project project = projectRepository.findById(request.projectId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
 
@@ -63,14 +63,14 @@ public class JuryService {
 			jm.setRoleName(m.roleName());
 			jm.setTeacher(teacher);
 			return jm;
-		}).collect(Collectors.toList());
+		}).toList();
 		jury.setMembers(members);
 
-		return toResponse(juryRepository.save(jury));
+		return juryRepository.save(jury);
 	}
 
 	@Transactional
-	public JuryResponse update(Long id, UpdateJuryRequest updates) {
+	public Jury update(Long id, UpdateJuryRequest updates) {
 		Jury jury = juryRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jury non trouvé"));
 
@@ -100,7 +100,7 @@ public class JuryService {
 			}
 		}
 
-		return toResponse(juryRepository.save(jury));
+		return juryRepository.save(jury);
 	}
 
 	@Transactional
@@ -109,16 +109,6 @@ public class JuryService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jury non trouvé");
 		}
 		juryRepository.deleteById(id);
-	}
-
-	private JuryResponse toResponse(Jury jury) {
-		List<JuryResponse.MemberResponse> members = jury.getMembers().stream()
-				.map(m -> new JuryResponse.MemberResponse(m.getRoleName(), m.getTeacher().getId(),
-						m.getTeacher().getFirstName() + " " + m.getTeacher().getLastName()))
-				.collect(Collectors.toList());
-
-		return new JuryResponse(jury.getId(), jury.getProject().getId(), jury.getProject().getTitle(),
-				jury.getProject().getDefenseType(), jury.getTemplateId(), jury.getTemplateName(), members);
 	}
 
 	private void validateNoDuplicateTeachers(List<?> members) {

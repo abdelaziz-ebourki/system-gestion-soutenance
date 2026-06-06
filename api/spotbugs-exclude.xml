@@ -26,6 +26,10 @@
         <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
     </Match>
     <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH"/>
+        <Class name="~.*\.common\.mapper\..*Impl"/>
+    </Match>
+    <Match>
         <Bug pattern="UUF_UNUSED_FIELD"/>
         <Or>
             <Class name="com.system_gestion_soutenance.api.auth.controller.AuthController"/>

@@ -5,14 +5,14 @@ import com.system_gestion_soutenance.api.admin.defensesession.repository.Defense
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,18 +35,16 @@ public class EvaluationService {
 		this.groupRepository = groupRepository;
 	}
 
-	public List<EvaluationResponse> findByTeacher(Long teacherId) {
-		List<Evaluation> evaluations = evaluationRepository.findByTeacherId(teacherId);
-		Map<Long, Project> projectMap = buildProjectMap(evaluations);
-		return evaluations.stream().map(e -> toResponse(e, projectMap)).collect(Collectors.toList());
+	public List<Evaluation> findByTeacher(Long teacherId) {
+		return evaluationRepository.findByTeacherId(teacherId);
 	}
 
-	private Map<Long, Project> buildProjectMap(List<Evaluation> evaluations) {
+	public Map<Long, Project> buildProjectMap(List<Evaluation> evaluations) {
 		List<Long> projectIds = evaluations.stream().map(Evaluation::getProjectId).distinct().toList();
 		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
 	}
 
-	public EvaluationResponse submit(Long id, EvaluationSubmitRequest request) {
+	public Evaluation submit(Long id, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));
 
@@ -69,14 +67,6 @@ public class EvaluationService {
 
 		evaluation.setStatus(EvaluationStatus.SUBMITTED);
 		evaluation.setSubmittedAt(LocalDateTime.now());
-		Map<Long, Project> projectMap = buildProjectMap(List.of(evaluation));
-		return toResponse(evaluationRepository.save(evaluation), projectMap);
-	}
-
-	private EvaluationResponse toResponse(Evaluation evaluation, Map<Long, Project> projectMap) {
-		Project project = projectMap.get(evaluation.getProjectId());
-		return new EvaluationResponse(evaluation.getId(), evaluation.getProjectId(),
-				project != null ? project.getTitle() : "", evaluation.getScore(), evaluation.getComment(),
-				evaluation.getStatus().name());
+		return evaluationRepository.save(evaluation);
 	}
 }

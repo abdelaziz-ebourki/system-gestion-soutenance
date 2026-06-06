@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.service.RoomService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.mapper.RoomMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,16 +22,22 @@ import org.springframework.web.bind.annotation.*;
 public class RoomController {
 
 	private final RoomService roomService;
+	private final RoomMapper roomMapper;
 
-	public RoomController(RoomService roomService) {
+	public RoomController(RoomService roomService, RoomMapper roomMapper) {
 		this.roomService = roomService;
+		this.roomMapper = roomMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List all rooms with pagination")
 	public ApiResponse<PaginatedResponse<RoomResponse>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit) {
-		return ApiResponse.success("Liste des salles récupérée avec succès", roomService.findAll(page, limit));
+		PaginatedResponse<Room> result = roomService.findAll(page, limit);
+		List<RoomResponse> items = result.items().stream().map(roomMapper::toDto).toList();
+		PaginatedResponse<RoomResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des salles récupérée avec succès", mapped);
 	}
 
 	@PostMapping
@@ -38,7 +45,7 @@ public class RoomController {
 	public ResponseEntity<ApiResponse<RoomResponse>> create(@Valid @RequestBody CreateRoomRequest request) {
 		Room room = roomService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.success("Salle créée avec succès", RoomResponse.from(room)));
+				.body(ApiResponse.success("Salle créée avec succès", roomMapper.toDto(room)));
 	}
 
 	@PostMapping("/bulk")
@@ -46,13 +53,13 @@ public class RoomController {
 	public ResponseEntity<ApiResponse<List<RoomResponse>>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
 		List<Room> rooms = roomService.bulkCreate(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(
-				ApiResponse.success("Salles créées avec succès", rooms.stream().map(RoomResponse::from).toList()));
+				ApiResponse.success("Salles créées avec succès", rooms.stream().map(roomMapper::toDto).toList()));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a room")
 	public ApiResponse<RoomResponse> update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
-		return ApiResponse.success("Salle mise à jour avec succès", RoomResponse.from(roomService.update(id, request)));
+		return ApiResponse.success("Salle mise à jour avec succès", roomMapper.toDto(roomService.update(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

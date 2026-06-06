@@ -36,7 +36,7 @@ class GroupServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Groupe A", result.get(0).groupName());
+		assertEquals("Groupe A", result.get(0).getGroupName());
 	}
 
 	@Test
@@ -64,8 +64,8 @@ class GroupServiceTest {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L), 100L);
 		var result = service.create(request);
 
-		assertEquals("Groupe A", result.groupName());
-		assertEquals(10L, result.projectId());
+		assertEquals("Groupe A", result.getGroupName());
+		assertEquals(Long.valueOf(10L), result.getProject().getId());
 	}
 
 	@Test
@@ -96,23 +96,7 @@ class GroupServiceTest {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe", 1L, null, null);
 		var result = service.create(request);
 
-		assertEquals("Groupe", result.groupName());
-	}
-
-	@Test
-	void findAll_withNullStudents_returnsEmptyStudentLists() {
-		Group group = mock(Group.class);
-		when(group.getId()).thenReturn(1L);
-		when(group.getGroupName()).thenReturn("Groupe A");
-		when(group.getProject()).thenReturn(null);
-		when(group.getStudents()).thenReturn(null);
-		when(group.getSessionId()).thenReturn(null);
-		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
-
-		var result = service.findAll();
-
-		assertEquals(0, result.get(0).memberCount());
-		assertEquals(0, result.get(0).studentNames().size());
+		assertEquals("Groupe", result.getGroupName());
 	}
 
 	@Test

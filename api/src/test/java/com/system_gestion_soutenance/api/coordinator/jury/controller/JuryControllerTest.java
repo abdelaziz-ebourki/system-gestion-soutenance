@@ -9,7 +9,9 @@ import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
+import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.service.JuryService;
+import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,9 @@ class JuryControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 
+	@MockitoBean
+	private JuryMapper juryMapper;
+
 	@BeforeEach
 	void setUp() {
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
@@ -57,8 +62,11 @@ class JuryControllerTest {
 
 	@Test
 	void findAll_returnsJuries() throws Exception {
-		when(juryService.findAll())
-				.thenReturn(List.of(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of())));
+		Jury jury = new Jury();
+		jury.setId(1L);
+		when(juryService.findAll()).thenReturn(List.of(jury));
+		when(juryMapper.toDto(jury))
+				.thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
 
 		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.size()").value(1))
@@ -69,8 +77,11 @@ class JuryControllerTest {
 	void create_returnsCreated() throws Exception {
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
-		JuryResponse response = new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of());
-		when(juryService.create(any())).thenReturn(response);
+		Jury jury = new Jury();
+		jury.setId(1L);
+		when(juryService.create(any())).thenReturn(jury);
+		when(juryMapper.toDto(jury))
+				.thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
 
 		mockMvc.perform(post("/api/coordinator/juries").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -80,8 +91,11 @@ class JuryControllerTest {
 	@Test
 	void update_returnsJury() throws Exception {
 		UpdateJuryRequest updates = new UpdateJuryRequest(2L, 1L, List.of());
-		JuryResponse response = new JuryResponse(1L, 2L, "Projet Test", "Soutenance", 1L, "Template", List.of());
-		when(juryService.update(eq(1L), any())).thenReturn(response);
+		Jury jury = new Jury();
+		jury.setId(1L);
+		when(juryService.update(eq(1L), any())).thenReturn(jury);
+		when(juryMapper.toDto(jury))
+				.thenReturn(new JuryResponse(1L, 2L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
 
 		mockMvc.perform(put("/api/coordinator/juries/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())

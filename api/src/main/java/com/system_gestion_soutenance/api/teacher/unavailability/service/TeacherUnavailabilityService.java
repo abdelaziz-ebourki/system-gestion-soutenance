@@ -3,11 +3,8 @@ package com.system_gestion_soutenance.api.teacher.unavailability.service;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest;
-import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,18 +17,18 @@ public class TeacherUnavailabilityService {
 		this.repository = repository;
 	}
 
-	public TeacherUnavailabilityResponse getByTeacher(Long teacherId) {
-		Map<String, List<String>> slotsByDate = new LinkedHashMap<>();
+	public List<Unavailability> getByTeacher(Long teacherId) {
+		List<Unavailability> result = new ArrayList<>();
 		for (Unavailability u : repository.findAll()) {
 			if (u.getTeacherId().equals(teacherId)) {
-				slotsByDate.put(u.getDate(), u.getSlots());
+				result.add(u);
 			}
 		}
-		return new TeacherUnavailabilityResponse(slotsByDate);
+		return result;
 	}
 
 	@Transactional
-	public TeacherUnavailabilityResponse saveForTeacher(Long teacherId, TeacherUnavailabilityRequest request) {
+	public List<Unavailability> saveForTeacher(Long teacherId, TeacherUnavailabilityRequest request) {
 		List<Unavailability> existing = new ArrayList<>();
 		for (Unavailability u : repository.findAll()) {
 			if (u.getTeacherId().equals(teacherId)) {

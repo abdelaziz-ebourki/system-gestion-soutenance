@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,30 +21,24 @@ class TeacherUnavailabilityServiceTest {
 	@InjectMocks
 	private TeacherUnavailabilityService service;
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void getByTeacher_returnsSlotsByDate() {
 		Unavailability ua = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00", "09:00"));
 		when(repository.findAll()).thenReturn(List.of(ua));
 
-		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse result = service
-				.getByTeacher(1L);
+		List<Unavailability> result = service.getByTeacher(1L);
 
-		Map<String, List<String>> slotsByDate = result.slotsByDate();
-		assertEquals(1, slotsByDate.size());
-		assertEquals(2, slotsByDate.get("2026-06-01").size());
+		assertEquals(1, result.size());
+		assertEquals(2, result.get(0).getSlots().size());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void getByTeacher_noUnavailability_returnsEmpty() {
 		when(repository.findAll()).thenReturn(List.of());
 
-		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse result = service
-				.getByTeacher(1L);
+		List<Unavailability> result = service.getByTeacher(1L);
 
-		Map<String, List<String>> slotsByDate = result.slotsByDate();
-		assertTrue(slotsByDate.isEmpty());
+		assertTrue(result.isEmpty());
 	}
 
 	@Test
@@ -53,11 +46,9 @@ class TeacherUnavailabilityServiceTest {
 		Unavailability ua = new Unavailability(1L, 2L, "2026-06-01", List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(ua));
 
-		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse result = service
-				.getByTeacher(1L);
+		List<Unavailability> result = service.getByTeacher(1L);
 
-		Map<String, List<String>> slotsByDate = result.slotsByDate();
-		assertTrue(slotsByDate.isEmpty());
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

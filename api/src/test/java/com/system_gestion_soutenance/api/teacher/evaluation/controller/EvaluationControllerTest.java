@@ -5,7 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.mapper.EvaluationMapper;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.service.EvaluationService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -37,6 +40,8 @@ class EvaluationControllerTest {
 	private UserRepository userRepository;
 	@MockitoBean
 	private SecurityService securityService;
+	@MockitoBean
+	private EvaluationMapper evaluationMapper;
 
 	@BeforeEach
 	void setUp() {
@@ -55,16 +60,21 @@ class EvaluationControllerTest {
 	@Test
 	void findByTeacher_returnsList() throws Exception {
 		when(evaluationService.findByTeacher(1L)).thenReturn(List.of());
+		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
 		mockMvc.perform(get("/api/teacher/evaluations")).andExpect(status().isOk());
 	}
 
 	@Test
 	void submit_returns200() throws Exception {
-		when(evaluationService.submit(anyLong(), any()))
-				.thenReturn(new com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse(1L, 1L,
-						"Project", 15.0, "Good", "submitted"));
+		Evaluation evaluation = new Evaluation();
+		evaluation.setId(1L);
+		evaluation.setProjectId(1L);
+		when(evaluationService.submit(anyLong(), any())).thenReturn(evaluation);
+		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
+		when(evaluationMapper.toDto(eq(evaluation), any()))
+				.thenReturn(new EvaluationResponse(1L, 1L, "Project", 15.0, "Good", "SUBMITTED"));
 		mockMvc.perform(post("/api/teacher/evaluations/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"score\":15.0,\"comment\":\"Good\"}")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.status").value("submitted"));
+				.andExpect(jsonPath("$.data.status").value("SUBMITTED"));
 	}
 }

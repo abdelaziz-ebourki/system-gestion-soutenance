@@ -6,16 +6,13 @@ import static org.mockito.Mockito.*;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
-import com.system_gestion_soutenance.api.user.entity.Student;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +40,6 @@ class EvaluationServiceTest {
 	void findByTeacher_returnsList() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-		when(projectRepository.findAllById(any())).thenReturn(List.of(new Project()));
 
 		assertEquals(1, service.findByTeacher(1L).size());
 	}
@@ -53,18 +49,17 @@ class EvaluationServiceTest {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(projectRepository.findAllById(any())).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
-		com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse result = service.submit(1L, req);
+		Evaluation result = service.submit(1L, req);
 
-		assertEquals("SUBMITTED", result.status());
-		assertEquals(15.0, result.finalGrade());
-		assertEquals("Good", result.comment());
+		assertEquals(EvaluationStatus.SUBMITTED, result.getStatus());
+		assertEquals(15.0, result.getScore());
+		assertEquals("Good", result.getComment());
 	}
 
 	@Test
@@ -72,17 +67,16 @@ class EvaluationServiceTest {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(projectRepository.findAllById(any())).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(null, "Good");
-		com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse result = service.submit(1L, req);
+		Evaluation result = service.submit(1L, req);
 
-		assertNull(result.finalGrade());
-		assertEquals("Good", result.comment());
+		assertNull(result.getScore());
+		assertEquals("Good", result.getComment());
 	}
 
 	@Test
@@ -90,17 +84,16 @@ class EvaluationServiceTest {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		when(projectRepository.findAllById(any())).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, null);
-		com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse result = service.submit(1L, req);
+		Evaluation result = service.submit(1L, req);
 
-		assertEquals(15.0, result.finalGrade());
-		assertNull(result.comment());
+		assertEquals(15.0, result.getScore());
+		assertNull(result.getComment());
 	}
 
 	@Test
@@ -120,39 +113,11 @@ class EvaluationServiceTest {
 	}
 
 	@Test
-	void toResponse_withNoGroups_usesProjectStudents() {
-		Student student = new Student();
-		student.setFirstName("Bob");
-		student.setLastName("Test");
-
-		Project project = new Project();
-		project.setStudents(List.of(student));
-
+	void findByTeacher_returnsListWithProject() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-		when(projectRepository.findAllById(any())).thenReturn(List.of(project));
 
-		List<com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse> result = service
-				.findByTeacher(1L);
-
-		assertEquals(1, result.size());
-	}
-
-	@Test
-	void toResponse_includesStudentNames() {
-		Student student = new Student();
-		student.setFirstName("Alice");
-		student.setLastName("Test");
-
-		com.system_gestion_soutenance.api.coordinator.group.entity.Group group = new com.system_gestion_soutenance.api.coordinator.group.entity.Group();
-		group.setStudents(List.of(student));
-
-		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
-		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
-		when(projectRepository.findAllById(any())).thenReturn(List.of(new Project()));
-
-		List<com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse> result = service
-				.findByTeacher(1L);
+		List<Evaluation> result = service.findByTeacher(1L);
 
 		assertEquals(1, result.size());
 	}

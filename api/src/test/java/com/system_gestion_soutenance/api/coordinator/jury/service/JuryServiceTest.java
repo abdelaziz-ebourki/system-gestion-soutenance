@@ -59,7 +59,7 @@ class JuryServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Projet Test", result.get(0).projectTitle());
+		assertEquals("Projet Test", result.get(0).getProject().getTitle());
 	}
 
 	@Test
@@ -95,7 +95,7 @@ class JuryServiceTest {
 		CreateJuryRequest request = new CreateJuryRequest(1L, 10L, List.of(member));
 		var result = service.create(request);
 
-		assertEquals("Projet", result.projectTitle());
+		assertEquals("Projet", result.getProject().getTitle());
 	}
 
 	@Test
@@ -164,7 +164,7 @@ class JuryServiceTest {
 				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(2L, null, List.of()));
 
 		verify(jury).setProject(newProject);
-		assertEquals("New Proj", result.projectTitle());
+		assertEquals("New Proj", result.getProject().getTitle());
 	}
 
 	@Test
@@ -193,7 +193,7 @@ class JuryServiceTest {
 				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(null, 20L, List.of()));
 
 		verify(jury).setTemplate(template);
-		assertEquals("Template B", result.templateName());
+		assertEquals("Template B", result.getTemplateName());
 	}
 
 	@Test

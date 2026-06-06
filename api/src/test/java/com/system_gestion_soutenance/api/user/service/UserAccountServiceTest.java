@@ -8,11 +8,9 @@ import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
-import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
-import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.*;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,8 +46,6 @@ class UserAccountServiceTest {
 	private EmailService emailService;
 	@Mock
 	private PasswordEncoder passwordEncoder;
-	@Mock
-	private UserMapper userMapper;
 
 	private UserAccountService userAccountService;
 	private final String baseUrl = "http://localhost:8080";
@@ -57,7 +53,7 @@ class UserAccountServiceTest {
 	@BeforeEach
 	void setUp() {
 		userAccountService = new UserAccountService(userRepository, majorRepository, levelRepository, gradeRepository,
-				departmentRepository, emailService, passwordEncoder, userMapper, baseUrl);
+				departmentRepository, emailService, passwordEncoder, baseUrl);
 	}
 
 	@Test
@@ -78,16 +74,13 @@ class UserAccountServiceTest {
 				null, null);
 		Major major = new Major();
 		Level level = new Level();
-		UserDto dto = new UserDto(1L, "student@test.com", "STUDENT", "Last", "First", true, "CNE123", 1L, "Major", 1L,
-				"Level", null, null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(majorRepository.findById(1L)).thenReturn(Optional.of(major));
 		when(levelRepository.findById(1L)).thenReturn(Optional.of(level));
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		UserDto result = userAccountService.createUser(request, Role.STUDENT);
+		User result = userAccountService.createUser(request, Role.STUDENT);
 
 		assertNotNull(result);
 		verify(userRepository).save(any(Student.class));
@@ -100,16 +93,13 @@ class UserAccountServiceTest {
 				1L, 1L);
 		Department dept = new Department();
 		Grade grade = new Grade();
-		UserDto dto = new UserDto(1L, "teacher@test.com", "TEACHER", "Last", "First", true, null, null, null, null,
-				null, 1L, "Grade", 1L, "Dept");
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 		when(gradeRepository.findById(1L)).thenReturn(Optional.of(grade));
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		UserDto result = userAccountService.createUser(request, Role.TEACHER);
+		User result = userAccountService.createUser(request, Role.TEACHER);
 
 		assertNotNull(result);
 		verify(userRepository).save(any(Teacher.class));
@@ -119,14 +109,11 @@ class UserAccountServiceTest {
 	void createUser_Coordinator_Success() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "coord@test.com", null, null, null, null,
 				null, null);
-		UserDto dto = new UserDto(1L, "coord@test.com", "COORDINATOR", "Last", "First", true, null, null, null, null,
-				null, null, null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		UserDto result = userAccountService.createUser(request, Role.COORDINATOR);
+		User result = userAccountService.createUser(request, Role.COORDINATOR);
 
 		assertNotNull(result);
 		verify(userRepository).save(any(Coordinator.class));
@@ -136,14 +123,11 @@ class UserAccountServiceTest {
 	void createUser_AdminRole_CreatesBaseUser() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "admin@test.com", null, null, null, null,
 				null, null);
-		UserDto dto = new UserDto(1L, "admin@test.com", "ADMIN", "Last", "First", true, null, null, null, null, null,
-				null, null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		UserDto result = userAccountService.createUser(request, Role.ADMIN);
+		User result = userAccountService.createUser(request, Role.ADMIN);
 
 		assertNotNull(result);
 		verify(userRepository).save(any(User.class));
@@ -208,15 +192,12 @@ class UserAccountServiceTest {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
 				null, 1L);
 		Department dept = new Department();
-		UserDto dto = new UserDto(1L, "teacher@test.com", "TEACHER", "Last", "First", true, null, null, null, null,
-				null, null, null, 1L, "Dept");
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		UserDto result = userAccountService.createUser(request, Role.TEACHER);
+		User result = userAccountService.createUser(request, Role.TEACHER);
 
 		assertNotNull(result);
 		verify(userRepository).save(any(Teacher.class));
@@ -244,16 +225,13 @@ class UserAccountServiceTest {
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "STUDENT");
 		Major major = new Major();
 		Level level = new Level();
-		UserDto dto = new UserDto(1L, "bulk@test.com", "STUDENT", "Last", "First", true, "CNE", 1L, "Major", 1L,
-				"Level", null, null, null, null);
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
 		when(majorRepository.findByName("Major")).thenReturn(Optional.of(major));
 		when(levelRepository.findByName("Level")).thenReturn(Optional.of(level));
 		when(passwordEncoder.encode(any())).thenReturn("encoded");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		List<UserDto> results = userAccountService.bulkCreate(request, Role.STUDENT);
+		List<User> results = userAccountService.bulkCreate(request, Role.STUDENT);
 
 		assertEquals(1, results.size());
 		verify(userRepository, times(1)).save(any(Student.class));
@@ -312,15 +290,12 @@ class UserAccountServiceTest {
 				null, null, null, null, "Dept");
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "TEACHER");
 		Department dept = new Department();
-		UserDto dto = new UserDto(1L, "teacher@test.com", "TEACHER", "Last", "First", true, null, null, null, null,
-				null, null, null, null, null);
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findByName("Dept")).thenReturn(Optional.of(dept));
 		when(passwordEncoder.encode(any())).thenReturn("encoded");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		List<UserDto> results = userAccountService.bulkCreate(request, Role.TEACHER);
+		List<User> results = userAccountService.bulkCreate(request, Role.TEACHER);
 
 		assertEquals(1, results.size());
 		verify(userRepository).save(any(Teacher.class));
@@ -331,14 +306,11 @@ class UserAccountServiceTest {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "coord@test.com",
 				null, null, null, null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "COORDINATOR");
-		UserDto dto = new UserDto(1L, "coord@test.com", "COORDINATOR", "Last", "First", true, null, null, null, null,
-				null, null, null, null, null);
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encoded");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		List<UserDto> results = userAccountService.bulkCreate(request, Role.COORDINATOR);
+		List<User> results = userAccountService.bulkCreate(request, Role.COORDINATOR);
 
 		assertEquals(1, results.size());
 		verify(userRepository).save(any(Coordinator.class));
@@ -399,16 +371,13 @@ class UserAccountServiceTest {
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry1, entry2), "STUDENT");
 		Major major = new Major();
 		Level level = new Level();
-		UserDto dto = new UserDto(1L, "student@test.com", "STUDENT", "Last", "First", true, "CNE", 1L, "Major", 1L,
-				"Level", null, null, null, null);
 
 		when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 		when(majorRepository.findByName("Major")).thenReturn(Optional.of(major));
 		when(levelRepository.findByName("Level")).thenReturn(Optional.of(level));
 		when(passwordEncoder.encode(any())).thenReturn("encoded");
-		doReturn(dto).when(userMapper).toDto(any(User.class));
 
-		List<UserDto> results = userAccountService.bulkCreate(request, Role.STUDENT);
+		List<User> results = userAccountService.bulkCreate(request, Role.STUDENT);
 
 		assertEquals(2, results.size());
 		verify(userRepository, times(2)).save(any(Student.class));

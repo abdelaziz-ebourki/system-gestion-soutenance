@@ -8,11 +8,9 @@ import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
-import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
-import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.*;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.ArrayList;
@@ -36,12 +34,11 @@ public class UserAccountService {
 	private final DepartmentRepository departmentRepository;
 	private final EmailService emailService;
 	private final PasswordEncoder passwordEncoder;
-	private final UserMapper userMapper;
 	private final String baseUrl;
 
 	public UserAccountService(UserRepository userRepository, MajorRepository majorRepository,
 			LevelRepository levelRepository, GradeRepository gradeRepository, DepartmentRepository departmentRepository,
-			EmailService emailService, PasswordEncoder passwordEncoder, UserMapper userMapper,
+			EmailService emailService, PasswordEncoder passwordEncoder,
 			@Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.majorRepository = majorRepository;
@@ -50,11 +47,10 @@ public class UserAccountService {
 		this.departmentRepository = departmentRepository;
 		this.emailService = emailService;
 		this.passwordEncoder = passwordEncoder;
-		this.userMapper = userMapper;
 		this.baseUrl = baseUrl;
 	}
 
-	public UserDto createUser(CreateUserRequest request, Role role) {
+	public User createUser(CreateUserRequest request, Role role) {
 		if (userRepository.findByEmail(request.email()).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un utilisateur avec cet email existe déjà");
 		}
@@ -73,12 +69,12 @@ public class UserAccountService {
 		userRepository.save(user);
 		sendVerificationEmail(user);
 
-		return userMapper.toDto(user);
+		return user;
 	}
 
 	@Transactional
-	public List<UserDto> bulkCreate(BulkCreateRequest request, Role role) {
-		List<UserDto> results = new ArrayList<>();
+	public List<User> bulkCreate(BulkCreateRequest request, Role role) {
+		List<User> results = new ArrayList<>();
 
 		for (BulkCreateRequest.BulkUserEntry entry : request.users()) {
 			if (userRepository.findByEmail(entry.email()).isPresent()) {
@@ -100,7 +96,7 @@ public class UserAccountService {
 
 			userRepository.save(user);
 			sendVerificationEmail(user);
-			results.add(userMapper.toDto(user));
+			results.add(user);
 		}
 
 		return results;

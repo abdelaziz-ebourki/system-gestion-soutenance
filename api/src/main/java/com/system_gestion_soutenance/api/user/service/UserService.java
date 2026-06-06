@@ -1,18 +1,15 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
-import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
-import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
-import org.springframework.cache.annotation.CacheEvict;
 import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,58 +19,51 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
 	private final UserRepository userRepository;
-	private final UserMapper userMapper;
 	private final UserAccountService accountService;
 	private final UserProfileService profileService;
 	private final UserConstraintService constraintService;
 
-	public UserService(UserRepository userRepository, UserMapper userMapper, UserAccountService accountService,
+	public UserService(UserRepository userRepository, UserAccountService accountService,
 			UserProfileService profileService, UserConstraintService constraintService) {
 		this.userRepository = userRepository;
-		this.userMapper = userMapper;
 		this.accountService = accountService;
 		this.profileService = profileService;
 		this.constraintService = constraintService;
 	}
 
-	public PaginatedResponse<UserDto> listUsers(String role, int page, int limit, String search) {
+	public Page<User> listUsers(String role, int page, int limit, String search) {
 		PageRequest pageable = PageRequest.of(page, limit);
-		Page<User> userPage;
 
 		Role roleEnum = (role != null && !role.isBlank()) ? parseRole(role) : null;
 
 		if (search != null && !search.isBlank()) {
-			userPage = userRepository.findByRoleAndSearch(roleEnum, search, pageable);
+			return userRepository.findByRoleAndSearch(roleEnum, search, pageable);
 		} else if (roleEnum != null) {
-			userPage = userRepository.findByRole(roleEnum, pageable);
+			return userRepository.findByRole(roleEnum, pageable);
 		} else {
-			userPage = userRepository.findAll(pageable);
+			return userRepository.findAll(pageable);
 		}
-
-		List<UserDto> items = userPage.getContent().stream().map(userMapper::toDto).toList();
-
-		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
-	public List<UserDto> listAllByRole(String role) {
+	public List<User> listAllByRole(String role) {
 		Role roleEnum = parseRole(role);
-		return userRepository.findByRole(roleEnum, PageRequest.of(0, 1000)).stream().map(userMapper::toDto).toList();
+		return userRepository.findByRole(roleEnum, PageRequest.of(0, 1000)).getContent();
 	}
 
-	public UserDto createUser(CreateUserRequest request) {
+	public User createUser(CreateUserRequest request) {
 		Role role = parseRole(request.role());
 		return accountService.createUser(request, role);
 	}
 
 	@Transactional
-	public List<UserDto> bulkCreate(BulkCreateRequest request) {
+	public List<User> bulkCreate(BulkCreateRequest request) {
 		Role role = parseRole(request.role());
 		return accountService.bulkCreate(request, role);
 	}
 
 	@Transactional
 	@CacheEvict(value = "users", key = "#id")
-	public UserDto updateUser(Long id, UpdateUserRequest request) {
+	public User updateUser(Long id, UpdateUserRequest request) {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
 						org.springframework.http.HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
@@ -90,8 +80,7 @@ public class UserService {
 			user.setRole(parseRole(request.role()));
 		}
 
-		userRepository.save(user);
-		return userMapper.toDto(user);
+		return userRepository.save(user);
 	}
 
 	@Transactional
