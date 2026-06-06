@@ -31,8 +31,8 @@ public class RoomService {
 
 	public PaginatedResponse<Room> findAll(int page, int limit) {
 		Page<Room> roomPage = roomRepository.findAll(PageRequest.of(page, limit));
-		return new PaginatedResponse<>(roomPage.getContent(), roomPage.getTotalElements(), roomPage.getTotalPages(), page,
-				limit);
+		return new PaginatedResponse<>(roomPage.getContent(), roomPage.getTotalElements(), roomPage.getTotalPages(),
+				page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "Room")

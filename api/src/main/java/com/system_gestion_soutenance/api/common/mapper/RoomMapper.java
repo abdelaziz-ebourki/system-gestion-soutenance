@@ -7,6 +7,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(config = CentralMapperConfig.class)
 public interface RoomMapper {
-    @Mapping(target = "departmentId", source = "department.id")
-    RoomResponse toDto(Room room);
+	@Mapping(target = "departmentId", source = "department.id")
+	RoomResponse toDto(Room room);
 }

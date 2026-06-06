@@ -10,13 +10,13 @@ import org.mapstruct.Mapping;
 @Mapper(config = CentralMapperConfig.class)
 public interface EvaluationMapper {
 
-    @Mapping(target = "projectTitle", expression = "java(resolveProjectTitle(evaluation, projectMap))")
-    @Mapping(target = "finalGrade", source = "evaluation.score")
-    @Mapping(target = "status", expression = "java(evaluation.getStatus().name())")
-    EvaluationResponse toDto(Evaluation evaluation, Map<Long, Project> projectMap);
+	@Mapping(target = "projectTitle", expression = "java(resolveProjectTitle(evaluation, projectMap))")
+	@Mapping(target = "finalGrade", source = "evaluation.score")
+	@Mapping(target = "status", expression = "java(evaluation.getStatus().name())")
+	EvaluationResponse toDto(Evaluation evaluation, Map<Long, Project> projectMap);
 
-    default String resolveProjectTitle(Evaluation evaluation, Map<Long, Project> projectMap) {
-        Project p = projectMap.get(evaluation.getProjectId());
-        return p != null ? p.getTitle() : "";
-    }
+	default String resolveProjectTitle(Evaluation evaluation, Map<Long, Project> projectMap) {
+		Project p = projectMap.get(evaluation.getProjectId());
+		return p != null ? p.getTitle() : "";
+	}
 }

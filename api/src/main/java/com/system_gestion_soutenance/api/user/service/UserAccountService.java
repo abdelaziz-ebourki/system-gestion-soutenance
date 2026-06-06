@@ -38,8 +38,7 @@ public class UserAccountService {
 
 	public UserAccountService(UserRepository userRepository, MajorRepository majorRepository,
 			LevelRepository levelRepository, GradeRepository gradeRepository, DepartmentRepository departmentRepository,
-			EmailService emailService, PasswordEncoder passwordEncoder,
-			@Value("${app.ui.base-url}") String baseUrl) {
+			EmailService emailService, PasswordEncoder passwordEncoder, @Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;

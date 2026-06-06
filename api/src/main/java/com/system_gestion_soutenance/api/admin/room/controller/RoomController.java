@@ -52,8 +52,8 @@ public class RoomController {
 	@Operation(summary = "Bulk create rooms")
 	public ResponseEntity<ApiResponse<List<RoomResponse>>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
 		List<Room> rooms = roomService.bulkCreate(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(
-				ApiResponse.success("Salles créées avec succès", rooms.stream().map(roomMapper::toDto).toList()));
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.success("Salles créées avec succès", rooms.stream().map(roomMapper::toDto).toList()));
 	}
 
 	@PutMapping("/{id}")
