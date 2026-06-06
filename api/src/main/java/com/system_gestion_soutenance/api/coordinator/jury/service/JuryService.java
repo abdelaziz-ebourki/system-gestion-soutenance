@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.jury.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
@@ -40,6 +41,7 @@ public class JuryService {
 		return juryRepository.findAllWithDetails();
 	}
 
+	@Audited(action = "CREATE", entity = "Jury")
 	@Transactional
 	public Jury create(CreateJuryRequest request) {
 		Project project = projectRepository.findById(request.projectId())
@@ -69,6 +71,7 @@ public class JuryService {
 		return juryRepository.save(jury);
 	}
 
+	@Audited(action = "UPDATE", entity = "Jury")
 	@Transactional
 	public Jury update(Long id, UpdateJuryRequest updates) {
 		Jury jury = juryRepository.findById(id)
@@ -103,6 +106,7 @@ public class JuryService {
 		return juryRepository.save(jury);
 	}
 
+	@Audited(action = "DELETE", entity = "Jury")
 	@Transactional
 	public void delete(Long id) {
 		if (!juryRepository.existsById(id)) {

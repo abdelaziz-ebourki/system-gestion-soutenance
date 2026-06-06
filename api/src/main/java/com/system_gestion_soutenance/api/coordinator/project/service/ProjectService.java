@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.project.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
@@ -53,6 +54,7 @@ public class ProjectService {
 				.collect(Collectors.toMap(g -> g.getProject().getId(), g -> g.getId(), (a, b) -> a));
 	}
 
+	@Audited(action = "CREATE", entity = "Project")
 	@Transactional
 	public Project create(CreateProjectRequest request) {
 		Teacher supervisor = teacherRepository.findById(request.supervisorId())
@@ -74,6 +76,7 @@ public class ProjectService {
 		return projectRepository.save(project);
 	}
 
+	@Audited(action = "UPDATE", entity = "Project")
 	@Transactional
 	public Project update(Long id, UpdateProjectRequest updates) {
 		Project project = projectRepository.findById(id)
@@ -89,6 +92,7 @@ public class ProjectService {
 		return projectRepository.save(project);
 	}
 
+	@Audited(action = "DELETE", entity = "Project")
 	@Transactional
 	public void delete(Long id) {
 		Project project = projectRepository.findById(id)

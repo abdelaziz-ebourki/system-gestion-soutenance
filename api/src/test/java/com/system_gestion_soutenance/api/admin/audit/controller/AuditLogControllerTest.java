@@ -70,8 +70,10 @@ class AuditLogControllerTest {
 		mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isArray()).andExpect(jsonPath("$.items.length()").value(1))
 				.andExpect(jsonPath("$.items[0].id").value(1)).andExpect(jsonPath("$.items[0].action").value("CREATE"))
-				.andExpect(jsonPath("$.items[0].entity").value("User")).andExpect(jsonPath("$.items[0].performedByEmail").value("admin@test.com")).andExpect(jsonPath("$.total").value(1))
-				.andExpect(jsonPath("$.currentPage").value(0)).andExpect(jsonPath("$.size").value(20));
+				.andExpect(jsonPath("$.items[0].entity").value("User"))
+				.andExpect(jsonPath("$.items[0].performedByEmail").value("admin@test.com"))
+				.andExpect(jsonPath("$.total").value(1)).andExpect(jsonPath("$.currentPage").value(0))
+				.andExpect(jsonPath("$.size").value(20));
 	}
 
 	@Test

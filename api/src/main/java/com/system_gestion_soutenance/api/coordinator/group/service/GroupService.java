@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.group.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
@@ -33,6 +34,7 @@ public class GroupService {
 		return groupRepository.findAllWithDetails();
 	}
 
+	@Audited(action = "CREATE", entity = "Group")
 	@Transactional
 	public Group create(CreateGroupRequest request) {
 		Project project = projectRepository.findById(request.projectId())
@@ -52,6 +54,7 @@ public class GroupService {
 		return groupRepository.save(group);
 	}
 
+	@Audited(action = "DELETE", entity = "Group")
 	@Transactional
 	public void delete(Long id) {
 		if (!groupRepository.existsById(id)) {

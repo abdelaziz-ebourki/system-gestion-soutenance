@@ -415,9 +415,9 @@ class AuditAspectTest {
 
 		assertThrows(RuntimeException.class, () -> aspect.audit(joinPoint, audited));
 
-		verify(auditLogRepository).save(argThat(
-				log -> "CREATE".equals(log.getAction()) && "Test".equals(log.getEntity()) && log.getPerformedByEmail() == null
-						&& log.getDetails().contains("error detail") && log.getDetails().contains("#42")));
+		verify(auditLogRepository).save(argThat(log -> "CREATE".equals(log.getAction())
+				&& "Test".equals(log.getEntity()) && log.getPerformedByEmail() == null
+				&& log.getDetails().contains("error detail") && log.getDetails().contains("#42")));
 	}
 
 	@Test

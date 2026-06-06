@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.schedule.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
@@ -94,6 +95,7 @@ public class ScheduleService {
 		return List.of();
 	}
 
+	@Audited(action = "BULK_CREATE", entity = "SlotAssignment")
 	@Transactional
 	public List<SlotAssignment> saveSchedule(ScheduleRequest request) {
 		slotAssignmentRepository.deleteAll();
@@ -206,6 +208,7 @@ public class ScheduleService {
 		return result;
 	}
 
+	@Audited(action = "UPDATE", entity = "DefenseSession")
 	@Transactional
 	public void publish(Long defenseSessionId) {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
@@ -220,6 +223,7 @@ public class ScheduleService {
 				"Le planning des soutenances pour " + ds.getName() + " a été publié.", "/coordinator/schedule");
 	}
 
+	@Audited(action = "DELETE", entity = "SlotAssignment")
 	@Transactional
 	public void cancelDefense(Long slotId) {
 		SlotAssignment slot = slotAssignmentRepository.findById(slotId).orElseThrow(

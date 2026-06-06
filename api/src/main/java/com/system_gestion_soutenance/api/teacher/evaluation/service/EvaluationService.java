@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.teacher.evaluation.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
@@ -44,6 +45,7 @@ public class EvaluationService {
 		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
 	}
 
+	@Audited(action = "UPDATE", entity = "Evaluation")
 	public Evaluation submit(Long id, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));

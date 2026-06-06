@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.user.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
@@ -50,17 +51,20 @@ public class UserService {
 		return userRepository.findByRole(roleEnum, PageRequest.of(0, 1000)).getContent();
 	}
 
+	@Audited(action = "CREATE", entity = "User")
 	public User createUser(CreateUserRequest request) {
 		Role role = parseRole(request.role());
 		return accountService.createUser(request, role);
 	}
 
+	@Audited(action = "BULK_CREATE", entity = "User")
 	@Transactional
 	public List<User> bulkCreate(BulkCreateRequest request) {
 		Role role = parseRole(request.role());
 		return accountService.bulkCreate(request, role);
 	}
 
+	@Audited(action = "UPDATE", entity = "User")
 	@Transactional
 	@CacheEvict(value = "users", key = "#id")
 	public User updateUser(Long id, UpdateUserRequest request) {
@@ -83,6 +87,7 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
+	@Audited(action = "DELETE", entity = "User")
 	@Transactional
 	@CacheEvict(value = "users", key = "#id")
 	public void deleteUser(Long id) {
