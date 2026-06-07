@@ -229,6 +229,7 @@
 				<version>3.28.0</version>
 				<configuration>
 					<failOnViolation>true</failOnViolation>
+					<targetJdk>17</targetJdk>
 					<rulesets>
 						<ruleset>pmd-ruleset-default.xml</ruleset>
 					</rulesets>
