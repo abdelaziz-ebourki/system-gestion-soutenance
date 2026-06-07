@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/conflicts")
-@Tag(name = "Coordinator - Conflicts", description = "Detection et validation des conflits de planning")
+@Tag(name = "Coordinator - Conflicts", description = "Schedule Conflict Detection & Validation")
 public class ConflictController {
 
 	private final ConflictDetectionService conflictDetectionService;

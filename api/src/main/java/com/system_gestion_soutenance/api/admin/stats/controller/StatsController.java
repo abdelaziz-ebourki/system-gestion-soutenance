@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/stats")
-@Tag(name = "Admin - Stats", description = "Statistiques globales")
+@Tag(name = "Admin - Stats", description = "Global Statistics")
 public class StatsController {
 
 	private final StatsService statsService;

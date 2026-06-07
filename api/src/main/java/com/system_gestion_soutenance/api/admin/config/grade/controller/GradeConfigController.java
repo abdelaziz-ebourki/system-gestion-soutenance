@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/config/grades")
-@Tag(name = "Admin - Grades", description = "Gestion des grades")
+@Tag(name = "Admin - Grades", description = "Grade Management")
 public class GradeConfigController {
 
 	private final GradeConfigService gradeConfigService;

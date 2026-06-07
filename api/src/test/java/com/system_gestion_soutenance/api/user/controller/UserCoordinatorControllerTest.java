@@ -39,29 +39,30 @@ class UserCoordinatorControllerTest {
 	private UserRepository userRepository;
 
 	@Test
-	void listTeachers_returnsPaginatedResponse() throws Exception {
+	void listUsers_withTeacherRole_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(eq("teacher"), anyInt(), anyInt(), any())).thenReturn(Page.empty());
 
-		mockMvc.perform(get("/api/coordinator/teachers")).andExpect(status().isOk())
+		mockMvc.perform(get("/api/coordinator/users").param("role", "teacher")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isArray());
 
 		verify(userService).listUsers(eq("teacher"), eq(0), eq(5000), isNull());
 	}
 
 	@Test
-	void listTeachers_withSearch_passesSearchParam() throws Exception {
+	void listUsers_withTeacherRoleAndSearch_passesSearchParam() throws Exception {
 		when(userService.listUsers(eq("teacher"), anyInt(), anyInt(), any())).thenReturn(Page.empty());
 
-		mockMvc.perform(get("/api/coordinator/teachers").param("search", "ali")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/coordinator/users").param("role", "teacher").param("search", "ali"))
+				.andExpect(status().isOk());
 
 		verify(userService).listUsers(eq("teacher"), eq(0), eq(5000), eq("ali"));
 	}
 
 	@Test
-	void listStudents_returnsPaginatedResponse() throws Exception {
+	void listUsers_withStudentRole_returnsPaginatedResponse() throws Exception {
 		when(userService.listUsers(eq("student"), anyInt(), anyInt(), any())).thenReturn(Page.empty());
 
-		mockMvc.perform(get("/api/coordinator/students")).andExpect(status().isOk())
+		mockMvc.perform(get("/api/coordinator/users").param("role", "student")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isArray());
 
 		verify(userService).listUsers(eq("student"), eq(0), eq(5000), isNull());

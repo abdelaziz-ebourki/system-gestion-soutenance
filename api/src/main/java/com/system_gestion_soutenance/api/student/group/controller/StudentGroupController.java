@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspace
 import com.system_gestion_soutenance.api.student.group.service.StudentGroupService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/student/group")
-@Tag(name = "Student - Group", description = "Gestion du groupe de soutenance")
+@RequestMapping("/api/student/groups")
+@Tag(name = "Student - Group Management", description = "Endpoints for students to manage their defense groups")
 public class StudentGroupController {
 
 	private final StudentGroupService studentGroupService;
@@ -27,13 +28,18 @@ public class StudentGroupController {
 	}
 
 	@GetMapping
-	@Operation(summary = "Get the connected student's group workspace")
+	@Operation(summary = "Get group workspace", description = "Retrieves the workspace and group details for the connected student.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved workspace")})
 	public ApiResponse<StudentGroupWorkspaceResponse> getWorkspace(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(studentGroupService.getWorkspace(user.getId()));
 	}
 
 	@PostMapping
-	@Operation(summary = "Create a new group (during creation period)")
+	@Operation(summary = "Create group", description = "Creates a new group for the connected student (during creation period).")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Group created successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Creation period closed or invalid request")})
 	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup(@AuthenticationPrincipal User user) {
 		Long studentId = user.getId();
 		GroupDetailsResponse group = studentGroupMapper.toDetails(studentGroupService.createGroup(studentId),
@@ -41,8 +47,12 @@ public class StudentGroupController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(group));
 	}
 
-	@PostMapping("/{id}/join")
-	@Operation(summary = "Join an existing group by ID")
+	@PostMapping("/{id}/members")
+	@Operation(summary = "Join group", description = "Allows a student to join an existing group by its ID.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully joined the group"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Group is full or student already in a group"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
 	public ApiResponse<GroupDetailsResponse> joinGroup(@PathVariable Long id, @AuthenticationPrincipal User user) {
 		Long studentId = user.getId();
 		return ApiResponse

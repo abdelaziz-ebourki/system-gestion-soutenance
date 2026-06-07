@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/config/email")
-@Tag(name = "Admin - Email Config", description = "Configuration email")
+@Tag(name = "Admin - Email Config", description = "Email Configuration")
 public class EmailConfigController {
 
 	private final EmailConfigService service;

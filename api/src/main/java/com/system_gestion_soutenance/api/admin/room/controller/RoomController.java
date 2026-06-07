@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.RoomMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/rooms")
-@Tag(name = "Admin - Rooms", description = "Gestion des salles")
+@Tag(name = "Admin - Room Management", description = "Endpoints for managing defense rooms")
 public class RoomController {
 
 	private final RoomService roomService;
@@ -30,7 +31,9 @@ public class RoomController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List all rooms with pagination")
+	@Operation(summary = "List rooms", description = "Retrieves a paginated list of available rooms.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved rooms")})
 	public ApiResponse<PaginatedResponse<RoomResponse>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit) {
 		PaginatedResponse<Room> result = roomService.findAll(page, limit);
@@ -41,7 +44,10 @@ public class RoomController {
 	}
 
 	@PostMapping
-	@Operation(summary = "Create a new room")
+	@Operation(summary = "Create room", description = "Creates a new room.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Room created successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid room data")})
 	public ResponseEntity<ApiResponse<RoomResponse>> create(@Valid @RequestBody CreateRoomRequest request) {
 		Room room = roomService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -49,7 +55,10 @@ public class RoomController {
 	}
 
 	@PostMapping("/bulk")
-	@Operation(summary = "Bulk create rooms")
+	@Operation(summary = "Bulk create rooms", description = "Creates multiple rooms in a single request.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Rooms created successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk data")})
 	public ResponseEntity<ApiResponse<List<RoomResponse>>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
 		List<Room> rooms = roomService.bulkCreate(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,13 +66,20 @@ public class RoomController {
 	}
 
 	@PutMapping("/{id}")
-	@Operation(summary = "Update a room")
+	@Operation(summary = "Update room", description = "Updates an existing room's details.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room updated successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<RoomResponse> update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
 		return ApiResponse.success("Salle mise à jour avec succès", roomMapper.toDto(roomService.update(id, request)));
 	}
 
 	@DeleteMapping("/{id}")
-	@Operation(summary = "Delete a room")
+	@Operation(summary = "Delete room", description = "Removes a room from the system.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room deleted successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		roomService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Salle supprimée avec succès", null));

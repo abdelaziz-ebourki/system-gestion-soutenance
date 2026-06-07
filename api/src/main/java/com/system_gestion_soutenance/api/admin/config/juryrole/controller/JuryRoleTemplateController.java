@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/config/jury-role-templates")
-@Tag(name = "Admin - Jury Role Templates", description = "Gestion des templates de rôles jury")
+@Tag(name = "Admin - Jury Role Templates", description = "Jury Role Template Management")
 public class JuryRoleTemplateController {
 
 	private final JuryRoleTemplateService juryRoleTemplateService;

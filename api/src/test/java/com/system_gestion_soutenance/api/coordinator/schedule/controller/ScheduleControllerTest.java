@@ -79,7 +79,7 @@ class ScheduleControllerTest {
 		when(scheduleService.buildStudentNamesMap(anyMap())).thenReturn(Map.of());
 		when(scheduleMapper.toDto(eq(slot), anyMap(), anyMap())).thenReturn(dto);
 
-		mockMvc.perform(get("/api/coordinator/schedule")).andExpect(status().isOk())
+		mockMvc.perform(get("/api/coordinator/schedules")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.size()").value(1)).andExpect(jsonPath("$.data[0].title").value("Slot 1"));
 	}
 
@@ -104,7 +104,7 @@ class ScheduleControllerTest {
 		when(scheduleService.buildStudentNamesMap(anyMap())).thenReturn(Map.of());
 		when(scheduleMapper.toDto(eq(slot), anyMap(), anyMap())).thenReturn(dto);
 
-		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/schedules").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
@@ -119,7 +119,7 @@ class ScheduleControllerTest {
 		when(conflictDetectionService.validate(any(ScheduleRequest.class), anyString())).thenReturn(
 				List.of(new ConflictDetailResponse("type", "error", "Conflict detected", "slotId", "suggestion")));
 
-		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/schedules").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.errors").isArray());
 	}
@@ -141,13 +141,13 @@ class ScheduleControllerTest {
 		when(scheduleService.buildStudentNamesMap(anyMap())).thenReturn(Map.of());
 		when(scheduleMapper.toDto(eq(slot), anyMap(), anyMap())).thenReturn(null);
 
-		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/schedules").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk());
 	}
 
 	@Test
 	void autoGenerate_missingDefenseSessionId_throwsBadRequest() throws Exception {
-		mockMvc.perform(post("/api/coordinator/schedule/auto-generate").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/schedules/generation").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of()))).andExpect(status().isBadRequest());
 	}
 
@@ -159,14 +159,14 @@ class ScheduleControllerTest {
 						"supervisor", "Approved")));
 
 		var body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.DefenseSessionIdRequest(1L);
-		mockMvc.perform(post("/api/coordinator/schedule/auto-generate").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/schedules/generation").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data[0].title").value("Generated Slot"));
 	}
 
 	@Test
 	void publish_missingDefenseSessionId_throwsBadRequest() throws Exception {
-		mockMvc.perform(post("/api/coordinator/schedule/publish").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(patch("/api/coordinator/schedules/publication").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of()))).andExpect(status().isBadRequest());
 	}
 
@@ -175,14 +175,14 @@ class ScheduleControllerTest {
 		doNothing().when(scheduleService).publish(1L);
 
 		var body = new com.system_gestion_soutenance.api.coordinator.schedule.dto.DefenseSessionIdRequest(1L);
-		mockMvc.perform(post("/api/coordinator/schedule/publish").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(patch("/api/coordinator/schedules/publication").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("Planning publié avec succès."));
 	}
 
 	@Test
 	void save_missingSchedule_throwsBadRequest() throws Exception {
-		mockMvc.perform(post("/api/coordinator/schedule").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/schedules").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("defenseSessionId", "1"))))
 				.andExpect(status().isBadRequest());
 	}

@@ -55,7 +55,7 @@ class ConvocationControllerTest {
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "scheduled", null, null));
-		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(content().contentType("application/pdf"));
 	}
 
@@ -67,7 +67,7 @@ class ConvocationControllerTest {
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(studentDefenseService.getDefense(1L)).thenThrow(new EntityNotFoundException("Not found"));
-		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isNotFound());
+		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -80,6 +80,6 @@ class ConvocationControllerTest {
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "pending", null, null));
-		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isNotFound());
+		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isNotFound());
 	}
 }

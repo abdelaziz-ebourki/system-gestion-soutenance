@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/defenses")
-@Tag(name = "Coordinator - Defenses", description = "Gestion des soutenances individuelles")
+@Tag(name = "Coordinator - Defenses", description = "Individual Defense Management")
 public class CoordinatorDefenseController {
 
 	private final ScheduleService scheduleService;

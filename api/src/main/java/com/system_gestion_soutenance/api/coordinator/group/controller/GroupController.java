@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/groups")
-@Tag(name = "Coordinator - Groups", description = "Gestion des groupes d'étudiants")
+@Tag(name = "Coordinator - Group Management", description = "Endpoints for managing student groups")
 public class GroupController {
 
 	private final GroupService groupService;
@@ -28,7 +29,9 @@ public class GroupController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List all groups")
+	@Operation(summary = "List groups", description = "Retrieves all student groups for the current session.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved groups")})
 	public ApiResponse<List<GroupResponse>> findAll() {
 		List<Group> groups = groupService.findAll();
 		return ApiResponse.success("Liste des groupes récupérée avec succès",
@@ -36,7 +39,10 @@ public class GroupController {
 	}
 
 	@PostMapping
-	@Operation(summary = "Create a new group")
+	@Operation(summary = "Create group", description = "Creates a new student group.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Group created successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid group data")})
 	public ResponseEntity<ApiResponse<GroupResponse>> create(@Valid @RequestBody CreateGroupRequest request) {
 		Group group = groupService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -44,7 +50,10 @@ public class GroupController {
 	}
 
 	@DeleteMapping("/{id}")
-	@Operation(summary = "Delete a group")
+	@Operation(summary = "Delete group", description = "Removes a student group from the system.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group deleted successfully"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		groupService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Groupe supprimé avec succès", null));

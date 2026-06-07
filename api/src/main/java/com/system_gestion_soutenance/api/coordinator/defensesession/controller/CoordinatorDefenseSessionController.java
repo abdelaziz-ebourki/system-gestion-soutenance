@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/defense-sessions")
-@Tag(name = "Coordinator - Defense Sessions", description = "Gestion des sessions de soutenance")
+@Tag(name = "Coordinator - Defense Sessions", description = "Defense Session Management")
 public class CoordinatorDefenseSessionController {
 
 	private final CoordinatorDefenseSessionService service;

@@ -1,5 +1,15 @@
 package com.system_gestion_soutenance.api.user.dto;
 
-public record UpdateUserRequest(String lastName, String firstName, String email, String role, String cne, Long majorId,
-		Long levelId, Long gradeId, Long departmentId) {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Request for updating user information")
+public record UpdateUserRequest(@Schema(description = "User's last name", example = "Doe") String lastName,
+		@Schema(description = "User's first name", example = "John") String firstName,
+		@Schema(description = "User's email address", example = "john.doe@univh2c.ma") String email,
+		@Schema(description = "User role", example = "STUDENT") String role,
+		@Schema(description = "Student's national student number (CNE)", example = "12345678") String cne,
+		@Schema(description = "Major ID", example = "1") Long majorId,
+		@Schema(description = "Level ID", example = "1") Long levelId,
+		@Schema(description = "Grade ID", example = "1") Long gradeId,
+		@Schema(description = "Department ID", example = "1") Long departmentId) {
 }

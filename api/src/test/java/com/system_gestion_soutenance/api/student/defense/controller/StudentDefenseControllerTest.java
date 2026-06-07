@@ -53,7 +53,7 @@ class StudentDefenseControllerTest {
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "scheduled", null, null));
-		mockMvc.perform(get("/api/student/defense").with(authentication(auth))).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/defenses").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.status").value("scheduled"));
 	}
 }

@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseRespo
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.system_gestion_soutenance.api.common.exception.BaseBusinessException;
 
 @RestController
-@RequestMapping("/api/student/convocation")
-@Tag(name = "Student - Convocation", description = "Génération de la convocation PDF")
+@RequestMapping("/api/student/convocations")
+@Tag(name = "Student - Convocation Management", description = "Endpoints for generating the convocation PDF")
 public class ConvocationController {
 
 	private final StudentDefenseService studentDefenseService;
@@ -27,7 +28,10 @@ public class ConvocationController {
 	}
 
 	@GetMapping
-	@Operation(summary = "Get the convocation PDF for the connected student")
+	@Operation(summary = "Get convocation PDF", description = "Generates and returns the convocation PDF for the connected student.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully generated PDF"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Convocation not available or student not scheduled")})
 	public ResponseEntity<byte[]> getConvocation(@AuthenticationPrincipal User user) {
 		Long studentId = user.getId();
 

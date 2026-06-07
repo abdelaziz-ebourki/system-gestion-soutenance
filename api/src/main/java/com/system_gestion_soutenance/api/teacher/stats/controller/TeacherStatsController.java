@@ -5,13 +5,14 @@ import com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse;
 import com.system_gestion_soutenance.api.teacher.stats.service.TeacherStatsService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/teacher/stats")
-@Tag(name = "Teacher - Stats", description = "Statistiques personnelles de l'enseignant")
+@Tag(name = "Teacher - Statistics", description = "Endpoints for teachers to view their personal statistics")
 public class TeacherStatsController {
 
 	private final TeacherStatsService statsService;
@@ -21,7 +22,9 @@ public class TeacherStatsController {
 	}
 
 	@GetMapping
-	@Operation(summary = "Get statistics for the connected teacher")
+	@Operation(summary = "Get personal statistics", description = "Retrieves personal statistics for the connected teacher.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")})
 	public ApiResponse<TeacherStatsResponse> getStats(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(statsService.getStats(user.getId()));
 	}

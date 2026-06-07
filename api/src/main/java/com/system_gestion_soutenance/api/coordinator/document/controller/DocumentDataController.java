@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/coordinator/documents")
-@Tag(name = "Coordinator - Documents", description = "Données pour les documents PDF (fiches d'évaluation, listes de présence, convocations, planning)")
+@Tag(name = "Coordinator - Documents", description = "PDF Document Data (Evaluation Sheets, Attendance Lists, Convocations, Schedule)")
 public class DocumentDataController {
 
 	private final DocumentDataService documentDataService;

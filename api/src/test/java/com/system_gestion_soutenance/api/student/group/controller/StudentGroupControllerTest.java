@@ -58,7 +58,7 @@ class StudentGroupControllerTest {
 		when(studentGroupService.getWorkspace(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse(null,
 						List.of(), null, null, true));
-		mockMvc.perform(get("/api/student/group").with(authentication(auth))).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/groups").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.isGroupCreationOpen").value(true));
 	}
 
@@ -75,7 +75,7 @@ class StudentGroupControllerTest {
 		when(studentGroupService.createGroup(1L)).thenReturn(group);
 		when(studentGroupMapper.toDetails(group, 1L))
 				.thenReturn(new GroupDetailsResponse(1L, "Groupe de Alice", null, null, List.of()));
-		mockMvc.perform(post("/api/student/group").with(authentication(auth)).with(csrf()))
+		mockMvc.perform(post("/api/student/groups").with(authentication(auth)).with(csrf()))
 				.andExpect(status().isCreated()).andExpect(jsonPath("$.data.groupName").value("Groupe de Alice"));
 	}
 
@@ -92,7 +92,7 @@ class StudentGroupControllerTest {
 		when(studentGroupService.joinGroup(anyLong(), eq(1L))).thenReturn(group);
 		when(studentGroupMapper.toDetails(group, 1L))
 				.thenReturn(new GroupDetailsResponse(1L, "Groupe Test", null, null, List.of()));
-		mockMvc.perform(post("/api/student/group/10/join").with(authentication(auth)).with(csrf()))
+		mockMvc.perform(post("/api/student/groups/10/members").with(authentication(auth)).with(csrf()))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
 	}
 }

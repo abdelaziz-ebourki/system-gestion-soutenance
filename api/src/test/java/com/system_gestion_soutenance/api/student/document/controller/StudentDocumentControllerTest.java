@@ -76,7 +76,8 @@ class StudentDocumentControllerTest {
 		when(studentDocumentMapper.toDto(doc)).thenReturn(dto);
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());
-		mockMvc.perform(multipart("/api/student/documents/1/upload").file(file).with(authentication(auth)).with(csrf()))
+		mockMvc.perform(
+				multipart("/api/student/documents/1/attachments").file(file).with(authentication(auth)).with(csrf()))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("submitted"));
 	}
 }

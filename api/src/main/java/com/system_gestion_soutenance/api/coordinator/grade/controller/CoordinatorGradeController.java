@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/coordinator/grades")
-@Tag(name = "Coordinator - Grades", description = "Consultation des notes")
+@Tag(name = "Coordinator - Grades", description = "Grade Consultation")
 public class CoordinatorGradeController {
 
 	private final CoordinatorGradeService gradeService;

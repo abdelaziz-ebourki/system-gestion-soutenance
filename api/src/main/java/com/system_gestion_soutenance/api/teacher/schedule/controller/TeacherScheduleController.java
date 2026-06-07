@@ -5,13 +5,14 @@ import com.system_gestion_soutenance.api.teacher.schedule.dto.TeacherScheduleRes
 import com.system_gestion_soutenance.api.teacher.schedule.service.TeacherScheduleService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/teacher/schedule")
-@Tag(name = "Teacher - Schedule", description = "Planning des soutenances pour l'enseignant")
+@RequestMapping("/api/teacher/schedules")
+@Tag(name = "Teacher - Schedule View", description = "Endpoints for teachers to view their defense schedule")
 public class TeacherScheduleController {
 
 	private final TeacherScheduleService scheduleService;
@@ -21,7 +22,9 @@ public class TeacherScheduleController {
 	}
 
 	@GetMapping
-	@Operation(summary = "Get the connected teacher's defense schedule")
+	@Operation(summary = "Get defense schedule", description = "Retrieves the defense schedule for the connected teacher.")
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
 	public ApiResponse<TeacherScheduleResponse> get(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(scheduleService.getSchedule(user.getId()));
 	}

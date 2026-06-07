@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/coordinator/unavailability")
-@Tag(name = "Coordinator - Unavailability", description = "Consultation des indisponibilités des enseignants")
+@Tag(name = "Coordinator - Unavailability", description = "Teacher Unavailability")
 public class UnavailabilityController {
 
 	private final UnavailabilityRepository repository;

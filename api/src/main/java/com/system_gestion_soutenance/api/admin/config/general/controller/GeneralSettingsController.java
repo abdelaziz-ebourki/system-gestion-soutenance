@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/config/general")
-@Tag(name = "Admin - General Settings", description = "Paramètres généraux")
+@Tag(name = "Admin - General Settings", description = "General Settings")
 public class GeneralSettingsController {
 
 	private final GeneralSettingsService service;

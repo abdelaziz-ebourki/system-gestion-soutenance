@@ -34,7 +34,7 @@ public class AuthController {
 	@PostMapping("/auth/login")
 	@Operation(summary = "Authenticate a user", description = "Validates credentials and returns a JWT token with user info.")
 	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
-	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid email or password", content = @Content(examples = @ExampleObject("{\"message\": \"Identifiants invalides (E-mail ou mot de passe incorrect)\"}")))
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid email or password", content = @Content(examples = @ExampleObject("{\"message\": \"Invalid credentials (email or password incorrect)\"}")))
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
 		LoginResponse loginResponse = authService.login(request);
 

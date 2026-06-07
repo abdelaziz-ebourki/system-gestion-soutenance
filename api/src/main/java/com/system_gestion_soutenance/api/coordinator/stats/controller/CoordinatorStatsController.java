@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/coordinator/stats")
-@Tag(name = "Coordinator - Stats", description = "Statistiques du coordinateur")
+@Tag(name = "Coordinator - Stats", description = "Coordinator Statistics")
 public class CoordinatorStatsController {
 
 	private final CoordinatorStatsService statsService;
