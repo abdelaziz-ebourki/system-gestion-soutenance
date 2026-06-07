@@ -8,10 +8,11 @@ import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,8 +34,7 @@ public class FacultyService {
 	}
 
 	public Faculty findById(Long id) {
-		return facultyRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
+		return facultyRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Faculté non trouvée"));
 	}
 
 	@Audited(action = "CREATE", entity = "Faculty")
@@ -52,7 +52,7 @@ public class FacultyService {
 	@Transactional
 	public Faculty update(Long id, CreateFacultyRequest request) {
 		Faculty faculty = facultyRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
+				.orElseThrow(() -> new EntityNotFoundException("Faculté non trouvée"));
 
 		faculty.setName(request.name());
 		faculty.setCode(request.code());
@@ -64,18 +64,18 @@ public class FacultyService {
 	private Teacher resolveDean(Long deanId) {
 		if (deanId == null)
 			return null;
-		return teacherRepository.findById(deanId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant (doyen) non trouvé"));
+		return teacherRepository.findById(deanId)
+				.orElseThrow(() -> new InvalidBusinessStateException("Enseignant (doyen) non trouvé"));
 	}
 
 	@Audited(action = "DELETE", entity = "Faculty")
 	@Transactional
 	public void delete(Long id) {
 		Faculty faculty = facultyRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Faculté non trouvée"));
+				.orElseThrow(() -> new EntityNotFoundException("Faculté non trouvée"));
 
 		if (!departmentRepository.findByFaculty_Id(id).isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
+			throw new ResourceConflictException(
 					"Impossible de supprimer cette faculté car des départements y sont rattachés");
 		}
 

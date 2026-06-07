@@ -15,10 +15,11 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ProjectService {
@@ -58,7 +59,7 @@ public class ProjectService {
 	@Transactional
 	public Project create(CreateProjectRequest request) {
 		Teacher supervisor = teacherRepository.findById(request.supervisorId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Encadrant introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Encadrant introuvable"));
 
 		List<Student> students = Collections.emptyList();
 		if (request.studentIds() != null) {
@@ -80,7 +81,7 @@ public class ProjectService {
 	@Transactional
 	public Project update(Long id, UpdateProjectRequest updates) {
 		Project project = projectRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé"));
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
 
 		if (updates.title() != null)
 			project.setTitle(updates.title());
@@ -96,18 +97,16 @@ public class ProjectService {
 	@Transactional
 	public void delete(Long id) {
 		Project project = projectRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé"));
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
 
 		if (!juryRepository.findByProjectId(id).isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"Impossible de supprimer ce projet car des jurys y sont rattachés");
+			throw new ResourceConflictException("Impossible de supprimer ce projet car des jurys y sont rattachés");
 		}
 		if (!groupRepository.findByProjectId(id).isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"Impossible de supprimer ce projet car des groupes y sont rattachés");
+			throw new ResourceConflictException("Impossible de supprimer ce projet car des groupes y sont rattachés");
 		}
 		if (slotAssignmentRepository.existsByProjectId(id)) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
+			throw new ResourceConflictException(
 					"Impossible de supprimer ce projet car des soutenances sont planifiées");
 		}
 

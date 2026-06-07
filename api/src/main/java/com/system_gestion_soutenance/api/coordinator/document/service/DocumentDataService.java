@@ -20,9 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class DocumentDataService {
@@ -50,8 +49,8 @@ public class DocumentDataService {
 		List<EvaluationSheetResponse> result = new ArrayList<>();
 
 		for (Long id : ids) {
-			SlotAssignment slot = slotAssignmentRepository.findById(id).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Soutenance non trouvée: " + id));
+			SlotAssignment slot = slotAssignmentRepository.findById(id)
+					.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée: " + id));
 
 			Project project = slot.getProjectId() != null
 					? projectRepository.findById(slot.getProjectId()).orElse(null)
@@ -66,8 +65,8 @@ public class DocumentDataService {
 	}
 
 	public AttendanceListResponse attendanceList(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
 		List<SlotDetails> slots = buildGroupedSlots();
 
@@ -79,8 +78,8 @@ public class DocumentDataService {
 		List<JuryConvocationResponse> result = new ArrayList<>();
 
 		for (Long id : ids) {
-			SlotAssignment slot = slotAssignmentRepository.findById(id).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Soutenance non trouvée: " + id));
+			SlotAssignment slot = slotAssignmentRepository.findById(id)
+					.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée: " + id));
 
 			Project project = slot.getProjectId() != null
 					? projectRepository.findById(slot.getProjectId()).orElse(null)
@@ -104,8 +103,8 @@ public class DocumentDataService {
 	}
 
 	public ScheduleDocResponse schedule(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
 		List<SlotDetails> slots = buildGroupedSlots();
 
@@ -113,8 +112,8 @@ public class DocumentDataService {
 	}
 
 	public ProcesVerbalResponse procesVerbal(Long projectId) {
-		Project project = projectRepository.findById(projectId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet non trouvé: " + projectId));
+		Project project = projectRepository.findById(projectId)
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé: " + projectId));
 
 		GeneralSettings generalSettings = generalSettingsRepository.findById(1L).orElse(null);
 		ProcesVerbalResponse.Settings settings = generalSettings != null
@@ -146,8 +145,7 @@ public class DocumentDataService {
 		if (request.projectId() != null) {
 			List<SlotAssignment> slots = slotAssignmentRepository.findByProjectId(request.projectId());
 			if (slots.isEmpty()) {
-				throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-						"Aucune soutenance trouvée pour le projet: " + request.projectId());
+				throw new EntityNotFoundException("Aucune soutenance trouvée pour le projet: " + request.projectId());
 			}
 			return slots.stream().map(SlotAssignment::getId).toList();
 		}

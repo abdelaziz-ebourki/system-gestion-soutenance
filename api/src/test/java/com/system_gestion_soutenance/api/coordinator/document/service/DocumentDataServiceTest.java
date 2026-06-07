@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 class DocumentDataServiceTest {
 
@@ -226,7 +226,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(99L), 1L);
 		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.evaluationSheets(request));
+		assertThrows(EntityNotFoundException.class, () -> service.evaluationSheets(request));
 	}
 
 	@Test
@@ -248,7 +248,7 @@ class DocumentDataServiceTest {
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 99L);
 
-		assertThrows(ResponseStatusException.class, () -> service.evaluationSheets(request));
+		assertThrows(EntityNotFoundException.class, () -> service.evaluationSheets(request));
 	}
 
 	@Test
@@ -295,7 +295,7 @@ class DocumentDataServiceTest {
 	void attendanceList_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.attendanceList(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.attendanceList(99L));
 	}
 
 	@Test
@@ -347,7 +347,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(99L), 1L);
 		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.juryConvocations(request));
+		assertThrows(EntityNotFoundException.class, () -> service.juryConvocations(request));
 	}
 
 	@Test
@@ -373,7 +373,7 @@ class DocumentDataServiceTest {
 	void schedule_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.schedule(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.schedule(99L));
 	}
 
 	@Test
@@ -403,7 +403,7 @@ class DocumentDataServiceTest {
 	void procesVerbal_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.procesVerbal(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.procesVerbal(99L));
 	}
 
 	@Test

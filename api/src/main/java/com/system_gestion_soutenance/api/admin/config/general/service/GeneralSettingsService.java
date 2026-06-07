@@ -3,9 +3,8 @@ package com.system_gestion_soutenance.api.admin.config.general.service;
 import com.system_gestion_soutenance.api.admin.config.general.dto.UpdateGeneralSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
 import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GeneralSettingsService {
@@ -17,8 +16,8 @@ public class GeneralSettingsService {
 	}
 
 	public GeneralSettings get() {
-		return repository.findById(1L).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètres généraux non configurés"));
+		return repository.findById(1L)
+				.orElseThrow(() -> new EntityNotFoundException("Paramètres généraux non configurés"));
 	}
 
 	public GeneralSettings update(UpdateGeneralSettingsRequest updates) {

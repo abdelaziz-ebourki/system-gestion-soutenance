@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserAccountService {
@@ -51,7 +50,7 @@ public class UserAccountService {
 
 	public User createUser(CreateUserRequest request, Role role) {
 		if (userRepository.findByEmail(request.email()).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un utilisateur avec cet email existe déjà");
+			throw new InvalidBusinessStateException("Un utilisateur avec cet email existe déjà");
 		}
 
 		User user = switch (role) {
@@ -77,7 +76,7 @@ public class UserAccountService {
 
 		for (BulkCreateRequest.BulkUserEntry entry : request.users()) {
 			if (userRepository.findByEmail(entry.email()).isPresent()) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+				throw new InvalidBusinessStateException(
 						"Un utilisateur avec l'email " + entry.email() + " existe déjà");
 			}
 
@@ -85,8 +84,7 @@ public class UserAccountService {
 				case STUDENT -> createBulkStudent(entry);
 				case TEACHER -> createBulkTeacher(entry);
 				case COORDINATOR -> createBulkCoordinator(entry);
-				default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						"Rôle non supporté pour l'import en masse: " + role);
+				default -> throw new InvalidBusinessStateException("Rôle non supporté pour l'import en masse: " + role);
 			};
 
 			user.setPassword(passwordEncoder.encode(generateTemporaryPassword()));
@@ -103,14 +101,13 @@ public class UserAccountService {
 
 	private Student createStudent(CreateUserRequest request) {
 		if (request.cne() == null || request.majorId() == null || request.levelId() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Les champs cne, majorId et levelId sont requis pour un étudiant");
+			throw new InvalidBusinessStateException("Les champs cne, majorId et levelId sont requis pour un étudiant");
 		}
 
 		Major major = majorRepository.findById(request.majorId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filière introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Filière introuvable"));
 		Level level = levelRepository.findById(request.levelId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Niveau introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Niveau introuvable"));
 
 		Student student = new Student();
 		student.setEmail(request.email());
@@ -125,12 +122,11 @@ public class UserAccountService {
 
 	private Teacher createTeacher(CreateUserRequest request) {
 		if (request.departmentId() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Le champ departmentId est requis pour un enseignant");
+			throw new InvalidBusinessStateException("Le champ departmentId est requis pour un enseignant");
 		}
 
 		Department dept = departmentRepository.findById(request.departmentId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
 
 		Teacher teacher = new Teacher();
 		teacher.setEmail(request.email());
@@ -139,7 +135,7 @@ public class UserAccountService {
 		teacher.setFirstName(request.firstName());
 		if (request.gradeId() != null) {
 			Grade grade = gradeRepository.findById(request.gradeId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Grade introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Grade introuvable"));
 			teacher.setGrade(grade);
 		}
 		teacher.setDepartment(dept);
@@ -166,14 +162,14 @@ public class UserAccountService {
 
 	private Student createBulkStudent(BulkCreateRequest.BulkUserEntry entry) {
 		if (entry.cne() == null || entry.majorName() == null || entry.levelName() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			throw new InvalidBusinessStateException(
 					"Les champs cne, majorName et levelName sont requis pour un étudiant");
 		}
 
-		Major major = majorRepository.findByName(entry.majorName()).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filière introuvable: " + entry.majorName()));
-		Level level = levelRepository.findByName(entry.levelName()).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Niveau introuvable: " + entry.levelName()));
+		Major major = majorRepository.findByName(entry.majorName())
+				.orElseThrow(() -> new InvalidBusinessStateException("Filière introuvable: " + entry.majorName()));
+		Level level = levelRepository.findByName(entry.levelName())
+				.orElseThrow(() -> new InvalidBusinessStateException("Niveau introuvable: " + entry.levelName()));
 
 		Student student = new Student();
 		student.setEmail(entry.email());
@@ -188,13 +184,11 @@ public class UserAccountService {
 
 	private Teacher createBulkTeacher(BulkCreateRequest.BulkUserEntry entry) {
 		if (entry.departmentName() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Le champ departmentName est requis pour un enseignant");
+			throw new InvalidBusinessStateException("Le champ departmentName est requis pour un enseignant");
 		}
 
-		Department dept = departmentRepository.findByName(entry.departmentName())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						"Département introuvable: " + entry.departmentName()));
+		Department dept = departmentRepository.findByName(entry.departmentName()).orElseThrow(
+				() -> new InvalidBusinessStateException("Département introuvable: " + entry.departmentName()));
 
 		Teacher teacher = new Teacher();
 		teacher.setEmail(entry.email());
@@ -203,8 +197,7 @@ public class UserAccountService {
 		teacher.setFirstName(entry.firstName());
 		if (entry.gradeName() != null) {
 			Grade grade = gradeRepository.findByName(entry.gradeName())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-							"Grade introuvable: " + entry.gradeName()));
+					.orElseThrow(() -> new InvalidBusinessStateException("Grade introuvable: " + entry.gradeName()));
 			teacher.setGrade(grade);
 		}
 		teacher.setDepartment(dept);

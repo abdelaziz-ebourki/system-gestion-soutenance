@@ -23,7 +23,8 @@ import com.system_gestion_soutenance.api.notification.repository.NotificationRep
 import java.time.LocalDate;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class ScheduleServiceTest {
 
@@ -164,13 +165,13 @@ class ScheduleServiceTest {
 		settings.setEndTime("10:00");
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -241,7 +242,7 @@ class ScheduleServiceTest {
 				1L, List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot",
 						"2025-06-01", "09:00", 5L, 99L)));
 
-		assertThrows(ResponseStatusException.class, () -> service.saveSchedule(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.saveSchedule(request));
 	}
 
 	@Test
@@ -290,7 +291,7 @@ class ScheduleServiceTest {
 	void autoGenerate_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(99L));
 	}
 
 	@Test
@@ -298,7 +299,7 @@ class ScheduleServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(new DefenseSession()));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -310,11 +311,11 @@ class ScheduleServiceTest {
 		settings.setStartTime("08:00");
 		settings.setEndTime("18:00");
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(new Room()));
 		when(projectRepository.findAll()).thenReturn(List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -345,10 +346,10 @@ class ScheduleServiceTest {
 	void autoGenerate_noRooms_throwsException() {
 		DefenseSession ds = new DefenseSession();
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(new DefenseSettings()));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(new DefenseSettings()));
 		when(roomRepository.findAll()).thenReturn(List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -385,7 +386,7 @@ class ScheduleServiceTest {
 	void publish_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.publish(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.publish(99L));
 	}
 
 	@Test
@@ -408,6 +409,6 @@ class ScheduleServiceTest {
 	void cancelDefense_slotNotFound_throwsException() {
 		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.cancelDefense(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.cancelDefense(99L));
 	}
 }

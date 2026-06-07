@@ -19,7 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluationServiceTest {
@@ -99,7 +100,7 @@ class EvaluationServiceTest {
 	@Test
 	void submit_notFound_throws() {
 		when(evaluationRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> service.submit(99L, new EvaluationSubmitRequest(10.0, "")));
+		assertThrows(EntityNotFoundException.class, () -> service.submit(99L, new EvaluationSubmitRequest(10.0, "")));
 	}
 
 	@Test
@@ -107,7 +108,7 @@ class EvaluationServiceTest {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", 12.0, null, EvaluationStatus.SUBMITTED, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> service.submit(1L, new EvaluationSubmitRequest(15.0, "Update")));
 		verify(evaluationRepository, never()).save(any());
 	}

@@ -15,10 +15,10 @@ import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class JuryService {
@@ -45,10 +45,10 @@ public class JuryService {
 	@Transactional
 	public Jury create(CreateJuryRequest request) {
 		Project project = projectRepository.findById(request.projectId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 
-		JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.templateId()).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Template de rôle jury introuvable"));
+		JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.templateId())
+				.orElseThrow(() -> new InvalidBusinessStateException("Template de rôle jury introuvable"));
 
 		validateNoDuplicateTeachers(request.members());
 
@@ -58,8 +58,7 @@ public class JuryService {
 
 		List<JuryMember> members = request.members().stream().map(m -> {
 			Teacher teacher = teacherRepository.findById(m.teacherId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-							"Enseignant introuvable: " + m.teacherId()));
+					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
 			JuryMember jm = new JuryMember();
 			jm.setJury(jury);
 			jm.setRoleName(m.roleName());
@@ -74,17 +73,16 @@ public class JuryService {
 	@Audited(action = "UPDATE", entity = "Jury")
 	@Transactional
 	public Jury update(Long id, UpdateJuryRequest updates) {
-		Jury jury = juryRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jury non trouvé"));
+		Jury jury = juryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Jury non trouvé"));
 
 		if (updates.projectId() != null) {
 			Project project = projectRepository.findById(updates.projectId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 			jury.setProject(project);
 		}
 		if (updates.templateId() != null) {
-			JuryRoleTemplate template = juryRoleTemplateRepository.findById(updates.templateId()).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Template de rôle jury introuvable"));
+			JuryRoleTemplate template = juryRoleTemplateRepository.findById(updates.templateId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Template de rôle jury introuvable"));
 			jury.setTemplate(template);
 		}
 		if (updates.members() != null) {
@@ -92,9 +90,8 @@ public class JuryService {
 
 			jury.getMembers().clear();
 			for (UpdateJuryRequest.MemberEntry m : updates.members()) {
-				Teacher teacher = teacherRepository.findById(m.teacherId())
-						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-								"Enseignant introuvable: " + m.teacherId()));
+				Teacher teacher = teacherRepository.findById(m.teacherId()).orElseThrow(
+						() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
 				JuryMember jm = new JuryMember();
 				jm.setJury(jury);
 				jm.setRoleName(m.roleName());
@@ -110,7 +107,7 @@ public class JuryService {
 	@Transactional
 	public void delete(Long id) {
 		if (!juryRepository.existsById(id)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jury non trouvé");
+			throw new EntityNotFoundException("Jury non trouvé");
 		}
 		juryRepository.deleteById(id);
 	}
@@ -127,7 +124,7 @@ public class JuryService {
 				continue;
 			}
 			if (!teacherIds.add(tid)) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+				throw new InvalidBusinessStateException(
 						"Un enseignant ne peut être assigné qu'à un seul rôle dans un même jury");
 			}
 		}

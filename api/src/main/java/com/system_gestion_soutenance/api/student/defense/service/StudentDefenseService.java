@@ -11,10 +11,9 @@ import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAss
 import com.system_gestion_soutenance.api.student.defense.dto.JuryMemberResponse;
 import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse;
 import java.util.*;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class StudentDefenseService {
@@ -32,11 +31,11 @@ public class StudentDefenseService {
 
 	@Transactional(readOnly = true)
 	public StudentDefenseResponse getDefense(Long studentId) {
-		Group group = groupRepository.findByStudentId(studentId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucune soutenance trouvée pour cet étudiant"));
+		Group group = groupRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new EntityNotFoundException("Aucune soutenance trouvée pour cet étudiant"));
 
 		if (group.getProject() == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucun projet associé à ce groupe");
+			throw new EntityNotFoundException("Aucun projet associé à ce groupe");
 		}
 
 		Project project = group.getProject();

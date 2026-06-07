@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -57,8 +57,8 @@ public class CoordinatorDefenseSessionService {
 		ds.setEndDate(LocalDate.parse(request.endDate()));
 
 		if (request.juryRoleTemplateId() != null) {
-			JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.juryRoleTemplateId()).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Template de rôle jury introuvable"));
+			JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.juryRoleTemplateId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Template de rôle jury introuvable"));
 			ds.setJuryRoleTemplate(template);
 		}
 
@@ -75,8 +75,8 @@ public class CoordinatorDefenseSessionService {
 
 	@Transactional
 	public DefenseSession update(Long id, CreateDefenseSessionRequest request) {
-		DefenseSession ds = defenseSessionRepository.findById(id).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
 		DefenseSessionStatus newStatus = request.status() != null ? parseStatus(request.status()) : ds.getStatus();
 		validateTransition(ds.getStatus(), newStatus);
@@ -93,8 +93,8 @@ public class CoordinatorDefenseSessionService {
 		ds.setEndDate(LocalDate.parse(request.endDate()));
 
 		if (request.juryRoleTemplateId() != null) {
-			JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.juryRoleTemplateId()).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Template de rôle jury introuvable"));
+			JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.juryRoleTemplateId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Template de rôle jury introuvable"));
 			ds.setJuryRoleTemplate(template);
 		} else {
 			ds.setJuryRoleTemplate(null);
@@ -114,15 +114,15 @@ public class CoordinatorDefenseSessionService {
 	@Transactional
 	public void delete(Long id) {
 		if (!defenseSessionRepository.existsById(id)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée");
+			throw new EntityNotFoundException("Session de soutenance non trouvée");
 		}
 		defenseSessionRepository.deleteById(id);
 	}
 
 	@Transactional
 	public DefenseSession transition(Long id, String toStatus) {
-		DefenseSession ds = defenseSessionRepository.findById(id).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
 		DefenseSessionStatus newStatus = parseStatus(toStatus);
 		validateTransition(ds.getStatus(), newStatus);
@@ -135,8 +135,7 @@ public class CoordinatorDefenseSessionService {
 			return;
 		Set<DefenseSessionStatus> allowed = VALID_TRANSITIONS.get(from);
 		if (allowed == null || !allowed.contains(to)) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Transition de statut invalide: " + from + " → " + to);
+			throw new InvalidBusinessStateException("Transition de statut invalide: " + from + " → " + to);
 		}
 	}
 
@@ -144,7 +143,7 @@ public class CoordinatorDefenseSessionService {
 		try {
 			return DefenseSessionStatus.valueOf(status.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			throw new InvalidBusinessStateException(
 					"Statut invalide. Valeurs autorisées: DRAFT, ACTIVE, SCHEDULED, COMPLETED, ARCHIVED");
 		}
 	}
@@ -153,7 +152,7 @@ public class CoordinatorDefenseSessionService {
 		try {
 			return DefenseType.valueOf(type.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			throw new InvalidBusinessStateException(
 					"Type de soutenance invalide. Valeurs autorisées: PFE, MEMOIRE, THESE");
 		}
 	}

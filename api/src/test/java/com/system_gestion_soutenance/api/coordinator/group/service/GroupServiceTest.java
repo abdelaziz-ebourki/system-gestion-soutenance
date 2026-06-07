@@ -13,7 +13,8 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class GroupServiceTest {
 
@@ -74,7 +75,7 @@ class GroupServiceTest {
 
 		CreateGroupRequest request = new CreateGroupRequest("Groupe", 99L, List.of(), null);
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -112,6 +113,6 @@ class GroupServiceTest {
 	void delete_groupNotFound_throwsException() {
 		when(groupRepository.existsById(99L)).thenReturn(false);
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 	}
 }

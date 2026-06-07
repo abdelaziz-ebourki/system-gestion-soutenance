@@ -6,10 +6,9 @@ import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepo
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,7 +27,7 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 	@Transactional
 	public Major create(CreateMajorRequest request) {
 		if (majorRepository.findByName(request.name()).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Une filière avec ce nom existe déjà");
+			throw new InvalidBusinessStateException("Une filière avec ce nom existe déjà");
 		}
 
 		Major major = new Major();

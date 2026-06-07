@@ -13,7 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.BaseBusinessException;
 
 @RestController
 @RequestMapping("/api/student/convocation")
@@ -34,7 +34,7 @@ public class ConvocationController {
 		StudentDefenseResponse defense;
 		try {
 			defense = studentDefenseService.getDefense(studentId);
-		} catch (ResponseStatusException e) {
+		} catch (BaseBusinessException e) {
 			return ResponseEntity.notFound().build();
 		}
 

@@ -16,12 +16,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 @WebMvcTest(controllers = ConvocationController.class)
 class ConvocationControllerTest {
@@ -66,7 +66,7 @@ class ConvocationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
-		when(studentDefenseService.getDefense(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+		when(studentDefenseService.getDefense(1L)).thenThrow(new EntityNotFoundException("Not found"));
 		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isNotFound());
 	}
 

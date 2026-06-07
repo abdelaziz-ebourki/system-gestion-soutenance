@@ -15,7 +15,8 @@ import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class JuryServiceTest {
 
@@ -104,7 +105,7 @@ class JuryServiceTest {
 
 		CreateJuryRequest request = new CreateJuryRequest(99L, 1L, List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -114,7 +115,7 @@ class JuryServiceTest {
 
 		CreateJuryRequest request = new CreateJuryRequest(1L, 99L, List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -126,7 +127,7 @@ class JuryServiceTest {
 		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(m1, m2));
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -139,7 +140,7 @@ class JuryServiceTest {
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(99L, "président");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -236,7 +237,7 @@ class JuryServiceTest {
 	void update_juryNotFound_throwsException() {
 		when(juryRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.update(99L,
+		assertThrows(EntityNotFoundException.class, () -> service.update(99L,
 				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(1L, null, List.of())));
 	}
 
@@ -253,7 +254,7 @@ class JuryServiceTest {
 	void delete_juryNotFound_throwsException() {
 		when(juryRepository.existsById(99L)).thenReturn(false);
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 	}
 
 	@Test
@@ -271,6 +272,6 @@ class JuryServiceTest {
 						new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest.MemberEntry(5L,
 								"examinateur")));
 
-		assertThrows(ResponseStatusException.class, () -> service.update(1L, updates));
+		assertThrows(InvalidBusinessStateException.class, () -> service.update(1L, updates));
 	}
 }

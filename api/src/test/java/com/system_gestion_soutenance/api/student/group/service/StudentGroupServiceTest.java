@@ -18,7 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 @ExtendWith(MockitoExtension.class)
 class StudentGroupServiceTest {
@@ -107,7 +108,7 @@ class StudentGroupServiceTest {
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
@@ -122,7 +123,7 @@ class StudentGroupServiceTest {
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
 		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -154,7 +155,7 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -177,7 +178,7 @@ class StudentGroupServiceTest {
 		group.setStudents(List.of(student(1L, "A", "B")));
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
@@ -185,7 +186,7 @@ class StudentGroupServiceTest {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
@@ -214,7 +215,7 @@ class StudentGroupServiceTest {
 		group.setStudents(List.of(student(1L, "A", "B")));
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -249,7 +250,7 @@ class StudentGroupServiceTest {
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(groupRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(99L, 1L));
+		assertThrows(EntityNotFoundException.class, () -> service.joinGroup(99L, 1L));
 	}
 
 	private static Student student(Long id, String firstName, String lastName) {

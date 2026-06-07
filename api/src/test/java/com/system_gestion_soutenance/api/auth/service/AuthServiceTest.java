@@ -18,7 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedException;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -82,7 +85,7 @@ class AuthServiceTest {
 	void login_userNotFound_throwsUnauthorized() {
 		when(userRepository.findByEmail("unknown@test.com")).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(UnauthorizedException.class,
 				() -> authService.login(new LoginRequest("unknown@test.com", "password")));
 	}
 
@@ -92,7 +95,7 @@ class AuthServiceTest {
 		when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
 		when(passwordEncoder.matches("wrong-pass", "encoded-pass")).thenReturn(false);
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(UnauthorizedException.class,
 				() -> authService.login(new LoginRequest("admin@test.com", "wrong-pass")));
 	}
 
@@ -103,7 +106,7 @@ class AuthServiceTest {
 		when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
 		when(passwordEncoder.matches("password", "encoded-pass")).thenReturn(true);
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(UnauthorizedAccessException.class,
 				() -> authService.login(new LoginRequest("admin@test.com", "password")));
 	}
 
@@ -126,7 +129,7 @@ class AuthServiceTest {
 	void verifyAccount_invalidToken_throwsNotFound() {
 		when(userRepository.findByVerificationToken("bad-token")).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> authService.verifyAccount(new VerifyRequest("bad-token", "password")));
 	}
 
@@ -175,7 +178,7 @@ class AuthServiceTest {
 		user.setResetTokenExpires(Instant.now().minusSeconds(3600));
 		when(userRepository.findByResetToken("expired-token")).thenReturn(Optional.of(user));
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> authService.resetPassword(new ResetPasswordRequest("expired-token", "password")));
 	}
 
@@ -186,7 +189,7 @@ class AuthServiceTest {
 		user.setResetTokenExpires(null);
 		when(userRepository.findByResetToken("no-expiry-token")).thenReturn(Optional.of(user));
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> authService.resetPassword(new ResetPasswordRequest("no-expiry-token", "password")));
 	}
 
@@ -194,7 +197,7 @@ class AuthServiceTest {
 	void resetPassword_invalidToken_throwsBadRequest() {
 		when(userRepository.findByResetToken("bad-token")).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> authService.resetPassword(new ResetPasswordRequest("bad-token", "password")));
 	}
 }

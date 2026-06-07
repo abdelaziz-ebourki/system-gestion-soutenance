@@ -18,7 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -169,7 +170,7 @@ class UserServiceTest {
 	void deleteUser_notFound_throws() {
 		when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> userService.deleteUser(99L));
+		assertThrows(EntityNotFoundException.class, () -> userService.deleteUser(99L));
 	}
 
 	@Test
@@ -185,6 +186,6 @@ class UserServiceTest {
 
 	@Test
 	void invalidRole_throws() {
-		assertThrows(ResponseStatusException.class, () -> userService.listAllByRole("invalid"));
+		assertThrows(InvalidBusinessStateException.class, () -> userService.listAllByRole("invalid"));
 	}
 }

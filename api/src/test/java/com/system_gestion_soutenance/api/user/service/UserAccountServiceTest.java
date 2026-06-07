@@ -18,9 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 import java.util.*;
 
@@ -62,10 +61,9 @@ class UserAccountServiceTest {
 				null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(new User()));
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Un utilisateur avec cet email existe déjà", ex.getReason());
+		assertEquals("Un utilisateur avec cet email existe déjà", ex.getMessage());
 	}
 
 	@Test
@@ -141,10 +139,9 @@ class UserAccountServiceTest {
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(majorRepository.findById(99L)).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Filière introuvable", ex.getReason());
+		assertEquals("Filière introuvable", ex.getMessage());
 	}
 
 	@Test
@@ -156,10 +153,9 @@ class UserAccountServiceTest {
 		when(majorRepository.findById(1L)).thenReturn(Optional.of(major));
 		when(levelRepository.findById(99L)).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Niveau introuvable", ex.getReason());
+		assertEquals("Niveau introuvable", ex.getMessage());
 	}
 
 	@Test
@@ -168,10 +164,9 @@ class UserAccountServiceTest {
 				null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.TEACHER));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Le champ departmentId est requis pour un enseignant", ex.getReason());
+		assertEquals("Le champ departmentId est requis pour un enseignant", ex.getMessage());
 	}
 
 	@Test
@@ -181,10 +176,9 @@ class UserAccountServiceTest {
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.TEACHER));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Département introuvable", ex.getReason());
+		assertEquals("Département introuvable", ex.getMessage());
 	}
 
 	@Test
@@ -212,10 +206,9 @@ class UserAccountServiceTest {
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 		when(gradeRepository.findById(99L)).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.TEACHER));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Grade introuvable", ex.getReason());
+		assertEquals("Grade introuvable", ex.getMessage());
 	}
 
 	@Test
@@ -243,10 +236,9 @@ class UserAccountServiceTest {
 				null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("requis pour un étudiant"));
+		assertTrue(ex.getMessage().contains("requis pour un étudiant"));
 	}
 
 	@Test
@@ -257,10 +249,9 @@ class UserAccountServiceTest {
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.bulkCreate(request, Role.ADMIN));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("Rôle non supporté"));
+		assertTrue(ex.getMessage().contains("Rôle non supporté"));
 	}
 
 	@Test
@@ -278,10 +269,9 @@ class UserAccountServiceTest {
 		when(majorRepository.findByName("Major")).thenReturn(Optional.of(major));
 		when(levelRepository.findByName("Level")).thenReturn(Optional.of(level));
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.bulkCreate(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("existe déjà"));
+		assertTrue(ex.getMessage().contains("existe déjà"));
 	}
 
 	@Test
@@ -324,10 +314,9 @@ class UserAccountServiceTest {
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.bulkCreate(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("cne, majorName et levelName sont requis"));
+		assertTrue(ex.getMessage().contains("cne, majorName et levelName sont requis"));
 	}
 
 	@Test
@@ -339,10 +328,9 @@ class UserAccountServiceTest {
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
 		when(majorRepository.findByName("NONEXISTENT")).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.bulkCreate(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("Filière introuvable"));
+		assertTrue(ex.getMessage().contains("Filière introuvable"));
 	}
 
 	@Test
@@ -356,10 +344,9 @@ class UserAccountServiceTest {
 		when(majorRepository.findByName("Major")).thenReturn(Optional.of(major));
 		when(levelRepository.findByName("NONEXISTENT")).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.bulkCreate(request, Role.STUDENT));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("Niveau introuvable"));
+		assertTrue(ex.getMessage().contains("Niveau introuvable"));
 	}
 
 	@Test

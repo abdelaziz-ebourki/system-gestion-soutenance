@@ -12,10 +12,10 @@ import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspace
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class StudentGroupService {
@@ -60,14 +60,14 @@ public class StudentGroupService {
 	@Transactional
 	public Group createGroup(Long studentId) {
 		if (groupRepository.findByStudentId(studentId).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
+			throw new InvalidBusinessStateException("Vous êtes déjà membre d'un groupe");
 		}
 		if (!isCreationPeriodOpen()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La période de création de groupes est fermée");
+			throw new InvalidBusinessStateException("La période de création de groupes est fermée");
 		}
 
 		Student student = studentRepository.findById(studentId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Étudiant introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Étudiant introuvable"));
 
 		Group group = new Group();
 		group.setGroupName("Groupe de " + student.getFirstName() + " " + student.getLastName());
@@ -79,23 +79,23 @@ public class StudentGroupService {
 	@Transactional
 	public Group joinGroup(Long groupId, Long studentId) {
 		if (groupRepository.findByStudentId(studentId).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà membre d'un groupe");
+			throw new InvalidBusinessStateException("Vous êtes déjà membre d'un groupe");
 		}
 		if (!isCreationPeriodOpen()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La période de création de groupes est fermée");
+			throw new InvalidBusinessStateException("La période de création de groupes est fermée");
 		}
 
 		Group group = groupRepository.findById(groupId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé"));
+				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
 
 		Student student = studentRepository.findById(studentId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Étudiant introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Étudiant introuvable"));
 
 		if (group.getStudents() == null) {
 			group.setStudents(new ArrayList<>());
 		}
 		if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vous êtes déjà dans ce groupe");
+			throw new InvalidBusinessStateException("Vous êtes déjà dans ce groupe");
 		}
 		group.getStudents().add(student);
 		return groupRepository.save(group);

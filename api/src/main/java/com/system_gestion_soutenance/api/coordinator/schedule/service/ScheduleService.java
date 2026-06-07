@@ -26,10 +26,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ScheduleService {
@@ -111,8 +111,7 @@ public class ScheduleService {
 
 			if (slotReq.roomId() != null) {
 				Room room = roomRepository.findById(slotReq.roomId())
-						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-								"Salle introuvable: " + slotReq.roomId()));
+						.orElseThrow(() -> new InvalidBusinessStateException("Salle introuvable: " + slotReq.roomId()));
 				slot.setRoom(room);
 			}
 
@@ -124,15 +123,15 @@ public class ScheduleService {
 
 	@Transactional(readOnly = true)
 	public List<ScheduleResponse> autoGenerate(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètres de soutenance non trouvés"));
+		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc()
+				.orElseThrow(() -> new EntityNotFoundException("Paramètres de soutenance non trouvés"));
 
 		List<Room> rooms = roomRepository.findAll();
 		if (rooms.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucune salle disponible");
+			throw new InvalidBusinessStateException("Aucune salle disponible");
 		}
 
 		LocalTime startTime = LocalTime.parse(settings.getStartTime());
@@ -163,7 +162,7 @@ public class ScheduleService {
 				.filter(p -> projectsWithJuries.contains(p.getId())).collect(Collectors.toList());
 
 		if (approvedProjects.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun projet approuvé avec jury");
+			throw new InvalidBusinessStateException("Aucun projet approuvé avec jury");
 		}
 
 		Map<Long, List<String>> studentNamesByProject = new HashMap<>();
@@ -211,8 +210,8 @@ public class ScheduleService {
 	@Audited(action = "UPDATE", entity = "DefenseSession")
 	@Transactional
 	public void publish(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
 		if (ds.getStatus() == DefenseSessionStatus.ACTIVE) {
 			ds.setStatus(DefenseSessionStatus.SCHEDULED);
@@ -226,8 +225,8 @@ public class ScheduleService {
 	@Audited(action = "DELETE", entity = "SlotAssignment")
 	@Transactional
 	public void cancelDefense(Long slotId) {
-		SlotAssignment slot = slotAssignmentRepository.findById(slotId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Créneau de soutenance non trouvé"));
+		SlotAssignment slot = slotAssignmentRepository.findById(slotId)
+				.orElseThrow(() -> new EntityNotFoundException("Créneau de soutenance non trouvé"));
 
 		slotAssignmentRepository.delete(slot);
 

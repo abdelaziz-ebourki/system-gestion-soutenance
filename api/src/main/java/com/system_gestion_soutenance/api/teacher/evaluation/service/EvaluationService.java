@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EvaluationService {
@@ -48,18 +48,17 @@ public class EvaluationService {
 	@Audited(action = "UPDATE", entity = "Evaluation")
 	public Evaluation submit(Long id, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Évaluation non trouvée"));
+				.orElseThrow(() -> new EntityNotFoundException("Évaluation non trouvée"));
 
 		if (evaluation.getStatus() == EvaluationStatus.SUBMITTED) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette évaluation a déjà été soumise");
+			throw new InvalidBusinessStateException("Cette évaluation a déjà été soumise");
 		}
 
-		DefenseSession ds = defenseSessionRepository.findById(evaluation.getDefenseSessionId()).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(evaluation.getDefenseSessionId())
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
 		if (ds.getSubmissionDeadline() != null && LocalDate.now().isAfter(ds.getSubmissionDeadline())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"La date limite de soumission des évaluations est dépassée");
+			throw new InvalidBusinessStateException("La date limite de soumission des évaluations est dépassée");
 		}
 
 		if (request.score() != null)

@@ -6,10 +6,9 @@ import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepo
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,7 +27,7 @@ public class LevelConfigService extends BaseCrudService<Level, Long, CreateLevel
 	@Transactional
 	public Level create(CreateLevelRequest request) {
 		if (levelRepository.findByName(request.name()).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un niveau avec ce nom existe déjà");
+			throw new InvalidBusinessStateException("Un niveau avec ce nom existe déjà");
 		}
 
 		Level level = new Level();

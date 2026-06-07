@@ -14,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class LevelConfigServiceTest {
@@ -44,7 +46,8 @@ class LevelConfigServiceTest {
 	@Test
 	void create_duplicate_throws() {
 		when(levelRepository.findByName("S6")).thenReturn(Optional.of(new Level()));
-		assertThrows(ResponseStatusException.class, () -> levelConfigService.create(new CreateLevelRequest("S6")));
+		assertThrows(InvalidBusinessStateException.class,
+				() -> levelConfigService.create(new CreateLevelRequest("S6")));
 	}
 
 	@Test
@@ -66,7 +69,7 @@ class LevelConfigServiceTest {
 		when(studentRepository.findByLevelId(1L))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.user.entity.Student()));
 
-		assertThrows(ResponseStatusException.class, () -> levelConfigService.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> levelConfigService.delete(1L));
 	}
 
 	@Test

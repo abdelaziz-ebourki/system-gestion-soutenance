@@ -10,10 +10,9 @@ import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,7 +40,7 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 	@Transactional
 	public Department create(CreateDepartmentRequest request) {
 		if (departmentRepository.findByName(request.name()).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un département avec ce nom existe déjà");
+			throw new InvalidBusinessStateException("Un département avec ce nom existe déjà");
 		}
 
 		Department department = new Department();
@@ -50,13 +49,13 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 
 		if (request.facultyId() != null) {
 			Faculty faculty = facultyRepository.findById(request.facultyId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faculté introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Faculté introuvable"));
 			department.setFaculty(faculty);
 		}
 
 		if (request.headId() != null) {
-			Teacher head = teacherRepository.findById(request.headId()).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant responsable introuvable"));
+			Teacher head = teacherRepository.findById(request.headId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant responsable introuvable"));
 			department.setHead(head);
 		}
 
@@ -73,15 +72,15 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 
 		if (request.facultyId() != null) {
 			Faculty faculty = facultyRepository.findById(request.facultyId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faculté introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Faculté introuvable"));
 			department.setFaculty(faculty);
 		} else {
 			department.setFaculty(null);
 		}
 
 		if (request.headId() != null) {
-			Teacher head = teacherRepository.findById(request.headId()).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enseignant responsable introuvable"));
+			Teacher head = teacherRepository.findById(request.headId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant responsable introuvable"));
 			department.setHead(head);
 		} else {
 			department.setHead(null);

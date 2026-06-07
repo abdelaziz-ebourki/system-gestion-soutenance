@@ -10,10 +10,9 @@ import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
 import com.system_gestion_soutenance.api.user.entity.*;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -44,12 +43,12 @@ public class UserProfileService {
 			student.setCne(request.cne());
 		if (request.majorId() != null) {
 			Major major = majorRepository.findById(request.majorId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filière introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Filière introuvable"));
 			student.setMajor(major);
 		}
 		if (request.levelId() != null) {
 			Level level = levelRepository.findById(request.levelId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Niveau introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Niveau introuvable"));
 			student.setLevel(level);
 		}
 	}
@@ -57,12 +56,12 @@ public class UserProfileService {
 	public void updateTeacherProfile(Teacher teacher, UpdateUserRequest request) {
 		if (request.gradeId() != null) {
 			Grade grade = gradeRepository.findById(request.gradeId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Grade introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Grade introuvable"));
 			teacher.setGrade(grade);
 		}
 		if (request.departmentId() != null) {
 			Department dept = departmentRepository.findById(request.departmentId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
 			teacher.setDepartment(dept);
 		}
 	}

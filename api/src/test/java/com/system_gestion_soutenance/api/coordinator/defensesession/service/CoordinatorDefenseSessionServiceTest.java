@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class CoordinatorDefenseSessionServiceTest {
 
@@ -108,7 +109,7 @@ class CoordinatorDefenseSessionServiceTest {
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "INVALID", null, 3, 30, 15,
 				null, null, null, "2025-06-01", "2025-06-30");
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -138,7 +139,7 @@ class CoordinatorDefenseSessionServiceTest {
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("X", "PFE", null, 1, 1, 1, null, null,
 				null, "2025-01-01", "2025-01-31");
 
-		assertThrows(ResponseStatusException.class, () -> service.update(99L, request));
+		assertThrows(EntityNotFoundException.class, () -> service.update(99L, request));
 	}
 
 	@Test
@@ -262,7 +263,7 @@ class CoordinatorDefenseSessionServiceTest {
 	void delete_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.existsById(99L)).thenReturn(false);
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 	}
 
 	@Test
@@ -329,7 +330,7 @@ class CoordinatorDefenseSessionServiceTest {
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-		assertThrows(ResponseStatusException.class, () -> service.transition(1L, "ARCHIVED"));
+		assertThrows(InvalidBusinessStateException.class, () -> service.transition(1L, "ARCHIVED"));
 	}
 
 	@Test
@@ -350,7 +351,7 @@ class CoordinatorDefenseSessionServiceTest {
 	void transition_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.transition(99L, "ACTIVE"));
+		assertThrows(EntityNotFoundException.class, () -> service.transition(99L, "ACTIVE"));
 	}
 
 	@Test
@@ -361,6 +362,6 @@ class CoordinatorDefenseSessionServiceTest {
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
-		assertThrows(ResponseStatusException.class, () -> service.transition(1L, "INVALID_STATUS"));
+		assertThrows(InvalidBusinessStateException.class, () -> service.transition(1L, "INVALID_STATUS"));
 	}
 }

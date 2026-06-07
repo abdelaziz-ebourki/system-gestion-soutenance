@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class StudentDefenseServiceTest {
@@ -42,7 +42,7 @@ class StudentDefenseServiceTest {
 	@Test
 	void getDefense_noGroup_throws() {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
+		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
 	@Test
@@ -50,7 +50,7 @@ class StudentDefenseServiceTest {
 		Group group = new Group();
 		group.setStudents(List.of(student(1L)));
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
+		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
 	@Test
@@ -162,7 +162,7 @@ class StudentDefenseServiceTest {
 
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.getDefense(1L));
+		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
 	@Test

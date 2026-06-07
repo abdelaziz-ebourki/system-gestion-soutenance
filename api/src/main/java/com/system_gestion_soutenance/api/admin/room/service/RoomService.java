@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,7 +39,7 @@ public class RoomService {
 	@Transactional
 	public Room create(CreateRoomRequest request) {
 		Department dept = departmentRepository.findById(request.departmentId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
 
 		Room room = new Room();
 		room.setName(request.name());
@@ -54,9 +54,8 @@ public class RoomService {
 		List<Room> rooms = new ArrayList<>();
 
 		for (BulkRoomRequest.RoomEntry entry : request.rooms()) {
-			Department dept = departmentRepository.findById(entry.departmentId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-							"Département introuvable: " + entry.departmentId()));
+			Department dept = departmentRepository.findById(entry.departmentId()).orElseThrow(
+					() -> new InvalidBusinessStateException("Département introuvable: " + entry.departmentId()));
 
 			Room room = new Room();
 			room.setName(entry.name());
@@ -71,11 +70,10 @@ public class RoomService {
 	@Audited(action = "UPDATE", entity = "Room")
 	@Transactional
 	public Room update(Long id, CreateRoomRequest request) {
-		Room room = roomRepository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée"));
+		Room room = roomRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Salle non trouvée"));
 
 		Department dept = departmentRepository.findById(request.departmentId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Département introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
 
 		room.setName(request.name());
 		room.setCapacity(request.capacity());
@@ -87,7 +85,7 @@ public class RoomService {
 	@Transactional
 	public void delete(Long id) {
 		if (!roomRepository.existsById(id)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Salle non trouvée");
+			throw new EntityNotFoundException("Salle non trouvée");
 		}
 		roomRepository.deleteById(id);
 	}

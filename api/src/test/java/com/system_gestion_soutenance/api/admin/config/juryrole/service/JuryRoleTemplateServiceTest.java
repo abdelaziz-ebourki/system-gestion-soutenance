@@ -17,7 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class JuryRoleTemplateServiceTest {
@@ -58,7 +60,7 @@ class JuryRoleTemplateServiceTest {
 		CreateJuryRoleTemplateRequest req = new CreateJuryRoleTemplateRequest("Template PFE", "PFE",
 				List.of(new CreateJuryRoleTemplateRequest.RoleEntry("Président", 1, 2)));
 
-		assertThrows(ResponseStatusException.class, () -> service.create(req));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(req));
 	}
 
 	@Test
@@ -68,7 +70,7 @@ class JuryRoleTemplateServiceTest {
 				List.of(new CreateJuryRoleTemplateRequest.RoleEntry("Président", 1, 2),
 						new CreateJuryRoleTemplateRequest.RoleEntry("Président", 1, 2)));
 
-		assertThrows(ResponseStatusException.class, () -> service.create(req));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(req));
 	}
 
 	@Test
@@ -96,7 +98,7 @@ class JuryRoleTemplateServiceTest {
 		CreateJuryRoleTemplateRequest req = new CreateJuryRoleTemplateRequest("X", "PFE",
 				List.of(new CreateJuryRoleTemplateRequest.RoleEntry("Rôle", 1, 1)));
 
-		assertThrows(ResponseStatusException.class, () -> service.update(99L, req));
+		assertThrows(EntityNotFoundException.class, () -> service.update(99L, req));
 	}
 
 	@Test
@@ -113,7 +115,7 @@ class JuryRoleTemplateServiceTest {
 	@Test
 	void delete_notFound_throws() {
 		when(juryRoleTemplateRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 		verify(juryRoleTemplateRepository, never()).delete(any());
 	}
 
@@ -123,7 +125,7 @@ class JuryRoleTemplateServiceTest {
 		when(juryRoleTemplateRepository.findById(1L)).thenReturn(Optional.of(template));
 		when(defenseSessionRepository.findByJuryRoleTemplate_Id(1L)).thenReturn(List.of(new DefenseSession()));
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
 		verify(juryRoleTemplateRepository, never()).delete(any());
 	}
 }

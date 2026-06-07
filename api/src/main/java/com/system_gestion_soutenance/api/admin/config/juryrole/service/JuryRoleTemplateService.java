@@ -10,10 +10,11 @@ import com.system_gestion_soutenance.api.common.audit.Audited;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,7 +37,7 @@ public class JuryRoleTemplateService {
 	@Audited(action = "CREATE", entity = "JuryRoleTemplate")
 	public JuryRoleTemplate create(CreateJuryRoleTemplateRequest request) {
 		if (juryRoleTemplateRepository.findByName(request.name()).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un template avec ce nom existe déjà");
+			throw new InvalidBusinessStateException("Un template avec ce nom existe déjà");
 		}
 
 		validateRoleNames(request.roles());
@@ -52,8 +53,8 @@ public class JuryRoleTemplateService {
 	@Transactional
 	@Audited(action = "UPDATE", entity = "JuryRoleTemplate")
 	public JuryRoleTemplate update(Long id, CreateJuryRoleTemplateRequest request) {
-		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
+		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Template de rôle jury non trouvé"));
 
 		validateRoleNames(request.roles());
 
@@ -68,11 +69,11 @@ public class JuryRoleTemplateService {
 	@Transactional
 	@Audited(action = "DELETE", entity = "JuryRoleTemplate")
 	public void delete(Long id) {
-		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template de rôle jury non trouvé"));
+		JuryRoleTemplate template = juryRoleTemplateRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Template de rôle jury non trouvé"));
 
 		if (!defenseSessionRepository.findByJuryRoleTemplate_Id(id).isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT,
+			throw new ResourceConflictException(
 					"Impossible de supprimer ce template car des sessions de soutenance l'utilisent");
 		}
 
@@ -83,8 +84,7 @@ public class JuryRoleTemplateService {
 		Set<String> names = roles.stream().map(CreateJuryRoleTemplateRequest.RoleEntry::name)
 				.collect(Collectors.toSet());
 		if (names.size() != roles.size()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Les noms de rôles doivent être uniques dans le template");
+			throw new InvalidBusinessStateException("Les noms de rôles doivent être uniques dans le template");
 		}
 	}
 }

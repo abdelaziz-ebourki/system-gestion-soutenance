@@ -14,8 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -68,11 +67,10 @@ class NotificationServiceTest {
 	void sendNotificationEmail_NotFound() {
 		when(notificationRepository.findById(1L)).thenReturn(Optional.empty());
 
-		ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+		EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
 			notificationService.sendNotificationEmail(1L);
 		});
 
-		assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-		assertEquals("Notification non trouvée", exception.getReason());
+		assertEquals("Notification non trouvée", exception.getMessage());
 	}
 }

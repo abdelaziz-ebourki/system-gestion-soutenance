@@ -6,22 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
-	}
-
-	@ExceptionHandler(ResponseStatusException.class)
-	public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
-		return ResponseEntity.status(ex.getStatusCode())
-				.body(ApiResponse.error(ex.getReason() != null ? ex.getReason() : "Erreur"));
+	@ExceptionHandler(BaseBusinessException.class)
+	public ResponseEntity<ApiResponse<Void>> handleBusinessException(BaseBusinessException ex) {
+		String message = ex.getMessage() != null ? ex.getMessage() : "Erreur";
+		return ResponseEntity.status(ex.getStatus()).body(ApiResponse.error(message));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

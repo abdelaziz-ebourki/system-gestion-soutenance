@@ -14,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class MajorConfigServiceTest {
@@ -43,7 +45,8 @@ class MajorConfigServiceTest {
 	@Test
 	void create_duplicate_throws() {
 		when(majorRepository.findByName("GL")).thenReturn(Optional.of(new Major()));
-		assertThrows(ResponseStatusException.class, () -> majorConfigService.create(new CreateMajorRequest("GL")));
+		assertThrows(InvalidBusinessStateException.class,
+				() -> majorConfigService.create(new CreateMajorRequest("GL")));
 	}
 
 	@Test
@@ -63,7 +66,7 @@ class MajorConfigServiceTest {
 		when(majorRepository.findById(1L)).thenReturn(Optional.of(major));
 		when(studentRepository.findByMajorId(1L))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.user.entity.Student()));
-		assertThrows(ResponseStatusException.class, () -> majorConfigService.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> majorConfigService.delete(1L));
 	}
 
 	@Test

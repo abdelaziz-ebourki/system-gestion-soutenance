@@ -8,10 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class StudentDocumentService {
@@ -29,7 +28,7 @@ public class StudentDocumentService {
 
 	public StudentDocument upload(Long id, MultipartFile file) {
 		StudentDocument doc = repository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document non trouvé"));
+				.orElseThrow(() -> new EntityNotFoundException("Document non trouvé"));
 
 		try {
 			Files.createDirectories(uploadDir);
@@ -42,8 +41,7 @@ public class StudentDocumentService {
 			doc.setStatus("submitted");
 			return repository.save(doc);
 		} catch (IOException e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-					"Erreur lors du téléchargement du fichier");
+			throw new RuntimeException("Erreur lors du téléchargement du fichier");
 		}
 	}
 }

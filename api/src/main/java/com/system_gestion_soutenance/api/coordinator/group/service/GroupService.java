@@ -10,10 +10,10 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.Collections;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GroupService {
@@ -38,7 +38,7 @@ public class GroupService {
 	@Transactional
 	public Group create(CreateGroupRequest request) {
 		Project project = projectRepository.findById(request.projectId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 
 		List<Student> students = Collections.emptyList();
 		if (request.studentIds() != null) {
@@ -58,7 +58,7 @@ public class GroupService {
 	@Transactional
 	public void delete(Long id) {
 		if (!groupRepository.existsById(id)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé");
+			throw new EntityNotFoundException("Groupe non trouvé");
 		}
 		groupRepository.deleteById(id);
 	}

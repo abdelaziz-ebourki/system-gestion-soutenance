@@ -9,6 +9,8 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -69,8 +71,7 @@ public class UserService {
 	@CacheEvict(value = "users", key = "#id")
 	public User updateUser(Long id, UpdateUserRequest request) {
 		User user = userRepository.findById(id)
-				.orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-						org.springframework.http.HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+				.orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
 
 		profileService.updateBasicInfo(user, request);
 
@@ -92,8 +93,7 @@ public class UserService {
 	@CacheEvict(value = "users", key = "#id")
 	public void deleteUser(Long id) {
 		User user = userRepository.findById(id)
-				.orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-						org.springframework.http.HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+				.orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
 
 		if (user instanceof Teacher) {
 			constraintService.checkTeacherDeletionConstraints(id);
@@ -106,14 +106,12 @@ public class UserService {
 
 	private Role parseRole(String role) {
 		if (role == null || role.isBlank()) {
-			throw new org.springframework.web.server.ResponseStatusException(
-					org.springframework.http.HttpStatus.BAD_REQUEST, "Le rôle est requis");
+			throw new InvalidBusinessStateException("Le rôle est requis");
 		}
 		try {
 			return Role.valueOf(role.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new org.springframework.web.server.ResponseStatusException(
-					org.springframework.http.HttpStatus.BAD_REQUEST, "Rôle invalide: " + role);
+			throw new InvalidBusinessStateException("Rôle invalide: " + role);
 		}
 	}
 }

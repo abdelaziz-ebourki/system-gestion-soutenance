@@ -18,7 +18,9 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 class ProjectServiceTest {
 
@@ -89,7 +91,7 @@ class ProjectServiceTest {
 
 		CreateProjectRequest request = new CreateProjectRequest("Title", "Desc", 99L, "PFE", List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -140,7 +142,7 @@ class ProjectServiceTest {
 	void update_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> service.update(99L,
 						new com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest("X", "Desc",
 								"PFE")));
@@ -164,7 +166,7 @@ class ProjectServiceTest {
 	void delete_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 	}
 
 	@Test
@@ -174,7 +176,7 @@ class ProjectServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
 	}
 
 	@Test
@@ -185,7 +187,7 @@ class ProjectServiceTest {
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(mock(Group.class)));
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
 	}
 
 	@Test
@@ -197,6 +199,6 @@ class ProjectServiceTest {
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(slotAssignmentRepository.existsByProjectId(1L)).thenReturn(true);
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
 	}
 }

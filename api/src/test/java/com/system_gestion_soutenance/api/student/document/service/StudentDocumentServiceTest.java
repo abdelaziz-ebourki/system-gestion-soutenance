@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class StudentDocumentServiceTest {
@@ -52,6 +52,6 @@ class StudentDocumentServiceTest {
 	@Test
 	void upload_notFound_throws() {
 		when(repository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> service.upload(99L, mock(MultipartFile.class)));
+		assertThrows(EntityNotFoundException.class, () -> service.upload(99L, mock(MultipartFile.class)));
 	}
 }

@@ -5,10 +5,9 @@ import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
 import com.system_gestion_soutenance.api.admin.config.email.repository.EmailConfigRepository;
 import com.system_gestion_soutenance.api.common.util.EncryptionUtil;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EmailConfigService {
@@ -25,8 +24,8 @@ public class EmailConfigService {
 	}
 
 	public EmailConfig get() {
-		return repository.findById(1L).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Configuration email non trouvée"));
+		return repository.findById(1L)
+				.orElseThrow(() -> new EntityNotFoundException("Configuration email non trouvée"));
 	}
 
 	@Transactional

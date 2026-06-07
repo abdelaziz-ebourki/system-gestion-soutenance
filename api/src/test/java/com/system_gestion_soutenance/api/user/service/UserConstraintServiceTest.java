@@ -8,8 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 import java.util.List;
 
@@ -45,10 +44,9 @@ class UserConstraintServiceTest {
 		when(departmentRepository.findByHead_Id(teacherId))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.admin.department.entity.Department()));
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		ResourceConflictException ex = assertThrows(ResourceConflictException.class,
 				() -> userConstraintService.checkTeacherDeletionConstraints(teacherId));
-		assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("responsable de département"));
+		assertTrue(ex.getMessage().contains("responsable de département"));
 	}
 
 	@Test
@@ -58,10 +56,9 @@ class UserConstraintServiceTest {
 		when(juryMemberRepository.findByTeacher_Id(teacherId))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember()));
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		ResourceConflictException ex = assertThrows(ResourceConflictException.class,
 				() -> userConstraintService.checkTeacherDeletionConstraints(teacherId));
-		assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("membre d'un jury"));
+		assertTrue(ex.getMessage().contains("membre d'un jury"));
 	}
 
 	@Test
@@ -72,10 +69,9 @@ class UserConstraintServiceTest {
 		when(projectRepository.findBySupervisorId(teacherId))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.project.entity.Project()));
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		ResourceConflictException ex = assertThrows(ResourceConflictException.class,
 				() -> userConstraintService.checkTeacherDeletionConstraints(teacherId));
-		assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("encadre des projets"));
+		assertTrue(ex.getMessage().contains("encadre des projets"));
 	}
 
 	@Test
@@ -92,9 +88,8 @@ class UserConstraintServiceTest {
 		when(projectRepository.findByStudentsId(studentId))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.project.entity.Project()));
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		ResourceConflictException ex = assertThrows(ResourceConflictException.class,
 				() -> userConstraintService.checkStudentDeletionConstraints(studentId));
-		assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-		assertTrue(ex.getReason().contains("lié à des projets"));
+		assertTrue(ex.getMessage().contains("lié à des projets"));
 	}
 }
