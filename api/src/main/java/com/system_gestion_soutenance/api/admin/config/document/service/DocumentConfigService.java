@@ -3,9 +3,8 @@ package com.system_gestion_soutenance.api.admin.config.document.service;
 import com.system_gestion_soutenance.api.admin.config.document.dto.UpdateDocumentConfigRequest;
 import com.system_gestion_soutenance.api.admin.config.document.entity.DocumentConfig;
 import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class DocumentConfigService {
@@ -17,8 +16,8 @@ public class DocumentConfigService {
 	}
 
 	public DocumentConfig get() {
-		return repository.findById(1L).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Configuration des documents non trouvée"));
+		return repository.findById(1L)
+				.orElseThrow(() -> new EntityNotFoundException("Configuration des documents non trouvée"));
 	}
 
 	public DocumentConfig update(UpdateDocumentConfigRequest updates) {

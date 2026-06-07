@@ -3,6 +3,8 @@ package com.system_gestion_soutenance.api.teacher.stats.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.teacher.stats.service.TeacherStatsService;
@@ -20,9 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = TeacherStatsController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+@WebMvcTest(controllers = TeacherStatsController.class)
 class TeacherStatsControllerTest {
 
 	@Autowired
@@ -36,10 +36,7 @@ class TeacherStatsControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -49,8 +46,14 @@ class TeacherStatsControllerTest {
 
 	@Test
 	void getStats_returns200() throws Exception {
-		when(statsService.getStats(1L)).thenReturn(Map.of("upcomingDefenses", 0));
-		mockMvc.perform(get("/api/teacher/stats")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.upcomingDefenses").value(0));
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		when(statsService.getStats(1L))
+				.thenReturn(new com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse(0, 0, 0, 0));
+		mockMvc.perform(get("/api/teacher/stats").with(authentication(auth))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.upcomingDefenses").value(0));
 	}
 }

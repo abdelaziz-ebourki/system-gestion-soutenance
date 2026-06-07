@@ -7,7 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
+import com.system_gestion_soutenance.api.coordinator.group.dto.GroupResponse;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
+import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,9 @@ class GroupControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 
+	@MockitoBean
+	private GroupMapper groupMapper;
+
 	@BeforeEach
 	void setUp() {
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
@@ -55,26 +61,36 @@ class GroupControllerTest {
 
 	@Test
 	void findAll_returnsGroups() throws Exception {
-		when(groupService.findAll()).thenReturn(List.of(Map.of("id", 1L, "groupName", "Groupe A")));
+		Group group = new Group();
+		group.setId(1L);
+		group.setGroupName("Groupe A");
+		when(groupService.findAll()).thenReturn(List.of(group));
+		when(groupMapper.toDto(group)).thenReturn(new GroupResponse(1L, "Groupe A", 1L, 2, List.of()));
 
 		mockMvc.perform(get("/api/coordinator/groups")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].groupName").value("Groupe A"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].groupName").value("Groupe A"));
 	}
 
 	@Test
 	void create_returnsCreated() throws Exception {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 1L, List.of(1L, 2L), null);
-		when(groupService.create(any())).thenReturn(Map.of("id", 1L, "groupName", "Groupe A"));
+		Group group = new Group();
+		group.setId(1L);
+		group.setGroupName("Groupe A");
+		when(groupService.create(any())).thenReturn(group);
+		when(groupMapper.toDto(group)).thenReturn(new GroupResponse(1L, "Groupe A", 1L, 2, List.of()));
 
 		mockMvc.perform(post("/api/coordinator/groups").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.groupName").value("Groupe A"));
+				.andExpect(jsonPath("$.data.groupName").value("Groupe A"));
 	}
 
 	@Test
-	void delete_returnsNoContent() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(groupService).delete(1L);
 
-		mockMvc.perform(delete("/api/coordinator/groups/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/coordinator/groups/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

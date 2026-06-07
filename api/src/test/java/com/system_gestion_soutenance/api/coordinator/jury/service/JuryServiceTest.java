@@ -15,7 +15,8 @@ import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class JuryServiceTest {
 
@@ -59,7 +60,7 @@ class JuryServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Projet Test", result.get(0).get("projectTitle"));
+		assertEquals("Projet Test", result.get(0).getProject().getTitle());
 	}
 
 	@Test
@@ -95,7 +96,7 @@ class JuryServiceTest {
 		CreateJuryRequest request = new CreateJuryRequest(1L, 10L, List.of(member));
 		var result = service.create(request);
 
-		assertEquals("Projet", result.get("projectTitle"));
+		assertEquals("Projet", result.getProject().getTitle());
 	}
 
 	@Test
@@ -104,7 +105,7 @@ class JuryServiceTest {
 
 		CreateJuryRequest request = new CreateJuryRequest(99L, 1L, List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -114,7 +115,7 @@ class JuryServiceTest {
 
 		CreateJuryRequest request = new CreateJuryRequest(1L, 99L, List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -126,7 +127,7 @@ class JuryServiceTest {
 		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(m1, m2));
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -139,7 +140,7 @@ class JuryServiceTest {
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(99L, "président");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -158,12 +159,13 @@ class JuryServiceTest {
 		when(jury.getProject()).thenReturn(newProject);
 		when(jury.getTemplateId()).thenReturn(null);
 		when(jury.getTemplateName()).thenReturn(null);
-		when(jury.getMembers()).thenReturn(List.of());
+		when(jury.getMembers()).thenReturn(new ArrayList<>());
 
-		var result = service.update(1L, Map.of("projectId", "2"));
+		var result = service.update(1L,
+				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(2L, null, List.of()));
 
 		verify(jury).setProject(newProject);
-		assertEquals("New Proj", result.get("projectTitle"));
+		assertEquals("New Proj", result.getProject().getTitle());
 	}
 
 	@Test
@@ -186,12 +188,13 @@ class JuryServiceTest {
 		when(jury.getProject()).thenReturn(project);
 		when(jury.getTemplateId()).thenReturn(20L);
 		when(jury.getTemplateName()).thenReturn("Template B");
-		when(jury.getMembers()).thenReturn(List.of());
+		when(jury.getMembers()).thenReturn(new ArrayList<>());
 
-		var result = service.update(1L, Map.of("templateId", "20"));
+		var result = service.update(1L,
+				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(null, 20L, List.of()));
 
 		verify(jury).setTemplate(template);
-		assertEquals("Template B", result.get("templateName"));
+		assertEquals("Template B", result.getTemplateName());
 	}
 
 	@Test
@@ -220,8 +223,10 @@ class JuryServiceTest {
 		when(jury.getTemplateName()).thenReturn(null);
 		when(jury.getMembers()).thenReturn(existingMembers);
 
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("members", List.of(Map.of("teacherId", "5", "roleName", "président")));
+		com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest updates = new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(
+				null, null,
+				List.of(new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest.MemberEntry(5L,
+						"président")));
 		service.update(1L, updates);
 
 		assertEquals(1, existingMembers.size());
@@ -232,7 +237,8 @@ class JuryServiceTest {
 	void update_juryNotFound_throwsException() {
 		when(juryRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.update(99L, Map.of("projectId", "1")));
+		assertThrows(EntityNotFoundException.class, () -> service.update(99L,
+				new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(1L, null, List.of())));
 	}
 
 	@Test
@@ -248,7 +254,7 @@ class JuryServiceTest {
 	void delete_juryNotFound_throwsException() {
 		when(juryRepository.existsById(99L)).thenReturn(false);
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 	}
 
 	@Test
@@ -259,10 +265,13 @@ class JuryServiceTest {
 		when(juryRepository.findById(1L)).thenReturn(Optional.of(jury));
 		when(teacherRepository.findById(5L)).thenReturn(Optional.of(mock(Teacher.class)));
 
-		Map<String, Object> updates = new HashMap<>();
-		updates.put("members", List.of(Map.of("teacherId", "5", "roleName", "président"),
-				Map.of("teacherId", "5", "roleName", "examinateur")));
+		com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest updates = new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest(
+				null, null,
+				List.of(new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest.MemberEntry(5L,
+						"président"),
+						new com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest.MemberEntry(5L,
+								"examinateur")));
 
-		assertThrows(ResponseStatusException.class, () -> service.update(1L, updates));
+		assertThrows(InvalidBusinessStateException.class, () -> service.update(1L, updates));
 	}
 }

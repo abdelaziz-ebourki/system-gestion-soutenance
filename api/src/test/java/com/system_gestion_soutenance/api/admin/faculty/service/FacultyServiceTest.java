@@ -17,7 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class FacultyServiceTest {
@@ -58,7 +60,7 @@ class FacultyServiceTest {
 	@Test
 	void findById_missing_throws() {
 		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> facultyService.findById(99L));
+		assertThrows(EntityNotFoundException.class, () -> facultyService.findById(99L));
 	}
 
 	@Test
@@ -94,7 +96,7 @@ class FacultyServiceTest {
 	@Test
 	void update_notFound_throws() {
 		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> facultyService.update(99L, new CreateFacultyRequest("N", "N", null, null)));
 	}
 
@@ -112,7 +114,7 @@ class FacultyServiceTest {
 	@Test
 	void delete_notFound_throws() {
 		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> facultyService.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> facultyService.delete(99L));
 		verify(facultyRepository, never()).delete(any());
 	}
 
@@ -122,7 +124,7 @@ class FacultyServiceTest {
 		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
 		when(departmentRepository.findByFaculty_Id(1L)).thenReturn(List.of(new Department()));
 
-		assertThrows(ResponseStatusException.class, () -> facultyService.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> facultyService.delete(1L));
 		verify(facultyRepository, never()).delete(any());
 	}
 }

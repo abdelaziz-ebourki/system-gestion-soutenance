@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class EmailConfigServiceTest {
@@ -39,7 +39,7 @@ class EmailConfigServiceTest {
 	@Test
 	void get_missing_throws() {
 		when(repository.findById(1L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> service.get());
+		assertThrows(EntityNotFoundException.class, () -> service.get());
 	}
 
 	@Test

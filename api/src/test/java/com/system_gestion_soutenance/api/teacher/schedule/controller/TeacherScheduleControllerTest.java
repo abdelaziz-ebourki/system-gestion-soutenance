@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.teacher.schedule.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.teacher.schedule.service.TeacherScheduleService;
@@ -35,10 +36,7 @@ class TeacherScheduleControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -48,7 +46,13 @@ class TeacherScheduleControllerTest {
 
 	@Test
 	void getSchedule_returns200() throws Exception {
-		when(service.getSchedule(1L)).thenReturn(List.of());
-		mockMvc.perform(get("/api/teacher/schedule")).andExpect(status().isOk());
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		when(service.getSchedule(1L)).thenReturn(
+				new com.system_gestion_soutenance.api.teacher.schedule.dto.TeacherScheduleResponse(List.of()));
+		mockMvc.perform(get("/api/teacher/schedules").with(authentication(auth))).andExpect(status().isOk());
 	}
 }

@@ -15,11 +15,13 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
@@ -47,23 +49,19 @@ public class AuthService {
 	}
 
 	public LoginResponse login(LoginRequest request) {
-		User user = userRepository.findByEmail(request.email())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-						messageService.getMessage("auth.login.invalid_credentials")));
+		User user = userRepository.findByEmail(request.email()).orElseThrow(
+				() -> new UnauthorizedException(messageService.getMessage("auth.login.invalid_credentials")));
 
 		if (user.getPassword() == null || user.getPassword().isBlank()) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-					messageService.getMessage("auth.login.invalid_credentials"));
+			throw new UnauthorizedException(messageService.getMessage("auth.login.invalid_credentials"));
 		}
 
 		if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-					messageService.getMessage("auth.login.invalid_credentials"));
+			throw new UnauthorizedException(messageService.getMessage("auth.login.invalid_credentials"));
 		}
 
 		if (!user.isActive()) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-					messageService.getMessage("auth.login.account_inactive"));
+			throw new UnauthorizedAccessException(messageService.getMessage("auth.login.account_inactive"));
 		}
 
 		String token = jwtTokenProvider.generateToken(String.valueOf(user.getId()), user.getRole().name());
@@ -75,13 +73,12 @@ public class AuthService {
 	@Transactional
 	public void verifyAccount(VerifyRequest request) {
 		User user = userRepository.findByVerificationToken(request.token())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-						messageService.getMessage("auth.verify.invalid_token")));
+				.orElseThrow(() -> new EntityNotFoundException(messageService.getMessage("auth.verify.invalid_token")));
 
 		try {
 			passwordValidator.validate(request.password());
 		} catch (IllegalArgumentException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+			throw new InvalidBusinessStateException(e.getMessage());
 		}
 
 		user.setPassword(passwordEncoder.encode(request.password()));
@@ -106,19 +103,17 @@ public class AuthService {
 
 	@Transactional
 	public void resetPassword(ResetPasswordRequest request) {
-		User user = userRepository.findByResetToken(request.token())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						messageService.getMessage("auth.reset.invalid_token")));
+		User user = userRepository.findByResetToken(request.token()).orElseThrow(
+				() -> new InvalidBusinessStateException(messageService.getMessage("auth.reset.invalid_token")));
 
 		if (user.getResetTokenExpires() == null || Instant.now().isAfter(user.getResetTokenExpires())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					messageService.getMessage("auth.reset.invalid_token"));
+			throw new InvalidBusinessStateException(messageService.getMessage("auth.reset.invalid_token"));
 		}
 
 		try {
 			passwordValidator.validate(request.password());
 		} catch (IllegalArgumentException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+			throw new InvalidBusinessStateException(e.getMessage());
 		}
 
 		user.setPassword(passwordEncoder.encode(request.password()));

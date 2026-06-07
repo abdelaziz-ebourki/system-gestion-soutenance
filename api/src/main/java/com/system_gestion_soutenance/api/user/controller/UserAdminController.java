@@ -1,12 +1,14 @@
 package com.system_gestion_soutenance.api.user.controller;
 
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
 import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -15,112 +17,67 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin")
-@Tag(name = "Admin - Users", description = "Gestion des utilisateurs")
+@RequestMapping("/api/admin/users")
+@Tag(name = "Admin - User Management", description = "Endpoints for administering users of the system")
 public class UserAdminController {
 
 	private final UserService userService;
+	private final UserMapper userMapper;
 
-	public UserAdminController(UserService userService) {
+	public UserAdminController(UserService userService, UserMapper userMapper) {
 		this.userService = userService;
+		this.userMapper = userMapper;
 	}
 
-	@GetMapping("/users")
-	@Operation(summary = "List users with pagination and optional role/search filters")
+	@GetMapping
+	@Operation(summary = "List users", description = "Retrieves a paginated list of users. Can be filtered by role or search term.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
 	public PaginatedResponse<UserDto> listUsers(@RequestParam(required = false) String role,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
 			@RequestParam(required = false) String search) {
-		return userService.listUsers(role, page, limit, search);
+		var userPage = userService.listUsers(role, page, limit, search);
+		var items = userPage.getContent().stream().map(userMapper::toDto).toList();
+		return new PaginatedResponse<>(items, userPage.getTotalElements(), userPage.getTotalPages(), page, limit);
 	}
 
-	@GetMapping("/users/teachers-list")
-	@Operation(summary = "List all teachers (unpaginated)")
-	public List<UserDto> listAllTeachers() {
-		return userService.listAllByRole("teacher");
-	}
-
-	@GetMapping("/users/students-list")
-	@Operation(summary = "List all students (unpaginated)")
-	public List<UserDto> listAllStudents() {
-		return userService.listAllByRole("student");
-	}
-
-	@GetMapping("/students")
-	@Operation(summary = "List students with pagination")
-	public PaginatedResponse<UserDto> listStudents(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String search) {
-		return userService.listUsers("student", page, limit, search);
-	}
-
-	@GetMapping("/teachers")
-	@Operation(summary = "List teachers with pagination")
-	public PaginatedResponse<UserDto> listTeachers(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String search) {
-		return userService.listUsers("teacher", page, limit, search);
-	}
-
-	@GetMapping("/coordinators")
-	@Operation(summary = "List coordinators with pagination")
-	public PaginatedResponse<UserDto> listCoordinators(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int limit, @RequestParam(required = false) String search) {
-		return userService.listUsers("coordinator", page, limit, search);
-	}
-
-	@PostMapping("/users")
-	@Operation(summary = "Create a new user")
+	@PostMapping
+	@Operation(summary = "Create user", description = "Creates a new user in the system with the specified role and details.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid user data"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "User already exists")})
 	public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest request) {
-		UserDto user = userService.createUser(request);
+		UserDto user = userMapper.toDto(userService.createUser(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
 	}
 
-	@PostMapping("/students")
-	@Operation(summary = "Create a new student")
-	public ResponseEntity<UserDto> createStudent(@Valid @RequestBody CreateUserRequest request) {
-		if (request.role() == null || request.role().isBlank()) {
-			request = new CreateUserRequest(request.lastName(), request.firstName(), request.email(), "student",
-					request.cne(), request.majorId(), request.levelId(), null, null);
-		}
-		UserDto user = userService.createUser(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(user);
-	}
-
-	@PostMapping("/teachers")
-	@Operation(summary = "Create a new teacher")
-	public ResponseEntity<UserDto> createTeacher(@Valid @RequestBody CreateUserRequest request) {
-		if (request.role() == null || request.role().isBlank()) {
-			request = new CreateUserRequest(request.lastName(), request.firstName(), request.email(), "teacher", null,
-					null, null, request.gradeId(), request.departmentId());
-		}
-		UserDto user = userService.createUser(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(user);
-	}
-
-	@PostMapping("/coordinators")
-	@Operation(summary = "Create a new coordinator")
-	public ResponseEntity<UserDto> createCoordinator(@Valid @RequestBody CreateUserRequest request) {
-		if (request.role() == null || request.role().isBlank()) {
-			request = new CreateUserRequest(request.lastName(), request.firstName(), request.email(), "coordinator",
-					null, null, null, null, null);
-		}
-		UserDto user = userService.createUser(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(user);
-	}
-
-	@PostMapping("/users/bulk")
-	@Operation(summary = "Bulk create users")
+	@PostMapping("/bulk")
+	@Operation(summary = "Bulk create users", description = "Creates multiple users of the same role in a single request.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Users created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk data")})
 	public ResponseEntity<List<UserDto>> bulkCreate(@Valid @RequestBody BulkCreateRequest request) {
-		List<UserDto> users = userService.bulkCreate(request);
+		List<UserDto> users = userService.bulkCreate(request).stream().map(userMapper::toDto).toList();
 		return ResponseEntity.status(HttpStatus.CREATED).body(users);
 	}
 
-	@PutMapping("/users/{id}")
-	@Operation(summary = "Update a user")
+	@PutMapping("/{id}")
+	@Operation(summary = "Update user", description = "Updates information for an existing user.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public UserDto updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
-		return userService.updateUser(id, request);
+		return userMapper.toDto(userService.updateUser(id, request));
 	}
 
-	@DeleteMapping("/users/{id}")
-	@Operation(summary = "Delete a user")
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete user", description = "Permanently removes a user from the system.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "User deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")})
 	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 		userService.deleteUser(id);
 		return ResponseEntity.noContent().build();

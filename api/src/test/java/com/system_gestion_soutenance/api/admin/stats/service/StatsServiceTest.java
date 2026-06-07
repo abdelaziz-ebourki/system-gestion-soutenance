@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import java.util.Map;
+import com.system_gestion_soutenance.api.admin.stats.dto.GlobalStatsResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,12 +27,12 @@ class StatsServiceTest {
 		when(entityManager.createNativeQuery(anyString())).thenReturn(query);
 		when(query.getSingleResult()).thenReturn(new Object[]{100L, 20L, 5L, 15L, 3L});
 
-		Map<String, Object> stats = statsService.getStats();
+		GlobalStatsResponse stats = statsService.getStats();
 
-		assertEquals(100L, stats.get("totalStudents"));
-		assertEquals(20L, stats.get("totalTeachers"));
-		assertEquals(5L, stats.get("totalDepartments"));
-		assertEquals(15L, stats.get("totalRooms"));
-		assertEquals(3L, stats.get("totalDefenseSessions"));
+		assertEquals(100L, stats.totalStudents());
+		assertEquals(20L, stats.totalTeachers());
+		assertEquals(5L, stats.totalDepartments());
+		assertEquals(15L, stats.totalRooms());
+		assertEquals(3L, stats.totalDefenseSessions());
 	}
 }

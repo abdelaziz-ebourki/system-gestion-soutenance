@@ -6,10 +6,9 @@ import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepo
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,7 +27,7 @@ public class GradeConfigService extends BaseCrudService<Grade, Long, CreateGrade
 	@Transactional
 	public Grade create(CreateGradeRequest request) {
 		if (gradeRepository.findByName(request.name()).isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un grade avec ce nom existe déjà");
+			throw new InvalidBusinessStateException("Un grade avec ce nom existe déjà");
 		}
 
 		Grade grade = new Grade();

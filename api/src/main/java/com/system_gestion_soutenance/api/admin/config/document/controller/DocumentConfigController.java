@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/config/documents")
-@Tag(name = "Admin - Document Config", description = "Configuration des documents")
+@Tag(name = "Admin - Document Config", description = "Document Configuration")
 public class DocumentConfigController {
 
 	private final DocumentConfigService service;

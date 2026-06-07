@@ -5,20 +5,21 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
+import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 @ExtendWith(MockitoExtension.class)
 class StudentGroupServiceTest {
@@ -29,6 +30,8 @@ class StudentGroupServiceTest {
 	private StudentRepository studentRepository;
 	@Mock
 	private DefenseSettingsRepository defenseSettingsRepository;
+	@Mock
+	private StudentGroupMapper studentGroupMapper;
 
 	@InjectMocks
 	private StudentGroupService service;
@@ -39,11 +42,12 @@ class StudentGroupServiceTest {
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-		Map<String, Object> result = service.getWorkspace(1L);
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
 
-		assertEquals("", result.get("groupCreationStartDate"));
-		assertEquals("", result.get("groupCreationEndDate"));
-		assertFalse((Boolean) result.get("isGroupCreationOpen"));
+		assertEquals("", result.groupCreationStartDate());
+		assertEquals("", result.groupCreationEndDate());
+		assertFalse(result.isGroupCreationOpen());
 	}
 
 	@Test
@@ -53,10 +57,11 @@ class StudentGroupServiceTest {
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2025-01-01", "2025-12-31")));
 
-		Map<String, Object> result = service.getWorkspace(1L);
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
 
-		assertEquals("2025-01-01", result.get("groupCreationStartDate"));
-		assertEquals("2025-12-31", result.get("groupCreationEndDate"));
+		assertEquals("2025-01-01", result.groupCreationStartDate());
+		assertEquals("2025-12-31", result.groupCreationEndDate());
 	}
 
 	@Test
@@ -65,10 +70,11 @@ class StudentGroupServiceTest {
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-		Map<String, Object> result = service.getWorkspace(1L);
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
 
-		assertNull(result.get("currentGroup"));
-		assertEquals(0, ((List<?>) result.get("availableGroups")).size());
+		assertNull(result.currentGroup());
+		assertEquals(0, result.availableGroups().size());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -83,11 +89,16 @@ class StudentGroupServiceTest {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
+				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
+						null, List.of(new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+								"Alice Test", null, "leader"))));
 
-		Map<String, Object> result = service.getWorkspace(1L);
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
 
-		assertNotNull(result.get("currentGroup"));
-		assertEquals("Groupe Test", ((Map<String, Object>) result.get("currentGroup")).get("groupName"));
+		assertNotNull(result.currentGroup());
+		assertEquals("Groupe Test", result.currentGroup().groupName());
 	}
 
 	@Test
@@ -97,7 +108,7 @@ class StudentGroupServiceTest {
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
@@ -112,7 +123,7 @@ class StudentGroupServiceTest {
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
 		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -130,9 +141,9 @@ class StudentGroupServiceTest {
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		Map<String, Object> result = service.joinGroup(10L, 1L);
+		Group result = service.joinGroup(10L, 1L);
 
-		assertEquals(1, ((List<?>) result.get("members")).size());
+		assertEquals(1, result.getStudents().size());
 	}
 
 	@Test
@@ -144,7 +155,7 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -156,9 +167,9 @@ class StudentGroupServiceTest {
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		Map<String, Object> result = service.createGroup(1L);
+		Group result = service.createGroup(1L);
 
-		assertEquals("Groupe de Alice Test", result.get("groupName"));
+		assertEquals("Groupe de Alice Test", result.getGroupName());
 	}
 
 	@Test
@@ -167,7 +178,7 @@ class StudentGroupServiceTest {
 		group.setStudents(List.of(student(1L, "A", "B")));
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
@@ -175,7 +186,7 @@ class StudentGroupServiceTest {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.createGroup(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L));
 	}
 
 	@Test
@@ -193,9 +204,9 @@ class StudentGroupServiceTest {
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		Map<String, Object> result = service.joinGroup(10L, 1L);
+		Group result = service.joinGroup(10L, 1L);
 
-		assertEquals(2, ((List<?>) result.get("members")).size());
+		assertEquals(2, result.getStudents().size());
 	}
 
 	@Test
@@ -204,7 +215,7 @@ class StudentGroupServiceTest {
 		group.setStudents(List.of(student(1L, "A", "B")));
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(10L, 1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test
@@ -219,13 +230,17 @@ class StudentGroupServiceTest {
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
+		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
+				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
+						null, List.of(new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+								"Alice Test", null, "member"))));
 
-		Map<String, Object> result = service.getWorkspace(1L);
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
 
-		@SuppressWarnings("unchecked")
-		Map<String, Object> current = (Map<String, Object>) result.get("currentGroup");
-		assertNull(current.get("projectTitle"));
-		assertNull(current.get("supervisorName"));
+		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse current = result.currentGroup();
+		assertNull(current.projectTitle());
+		assertNull(current.supervisorName());
 	}
 
 	@Test
@@ -235,7 +250,7 @@ class StudentGroupServiceTest {
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(groupRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.joinGroup(99L, 1L));
+		assertThrows(EntityNotFoundException.class, () -> service.joinGroup(99L, 1L));
 	}
 
 	private static Student student(Long id, String firstName, String lastName) {

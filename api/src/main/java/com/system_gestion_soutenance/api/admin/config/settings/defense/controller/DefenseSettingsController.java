@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/config/settings")
-@Tag(name = "Admin - Defense Settings", description = "Paramètres des soutenances")
+@Tag(name = "Admin - Defense Settings", description = "Defense Settings")
 public class DefenseSettingsController {
 
 	private final DefenseSettingsService service;

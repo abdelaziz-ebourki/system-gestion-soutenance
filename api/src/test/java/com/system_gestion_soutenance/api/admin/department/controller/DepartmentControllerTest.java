@@ -35,26 +35,30 @@ class DepartmentControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		when(departmentService.findAll()).thenReturn(List.of(new Department()));
-		mockMvc.perform(get("/api/admin/departments")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/admin/departments")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
 	void create_returns201() throws Exception {
 		when(departmentService.create(any())).thenReturn(new Department());
 		mockMvc.perform(post("/api/admin/departments").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"name\":\"Dept\",\"code\":\"D1\",\"facultyId\":1}")).andExpect(status().isCreated());
+				.content("{\"name\":\"Dept\",\"code\":\"D1\",\"facultyId\":1}")).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
 	void update_returns200() throws Exception {
 		when(departmentService.update(anyLong(), any())).thenReturn(new Department());
 		mockMvc.perform(put("/api/admin/departments/1").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"name\":\"Upd\",\"code\":\"UP\",\"facultyId\":1}")).andExpect(status().isOk());
+				.content("{\"name\":\"Upd\",\"code\":\"UP\",\"facultyId\":1}")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
-	void delete_returns204() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(departmentService).delete(1L);
-		mockMvc.perform(delete("/api/admin/departments/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/admin/departments/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

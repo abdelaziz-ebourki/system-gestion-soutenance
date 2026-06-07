@@ -7,8 +7,7 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 @Service
 public class NotificationService {
@@ -27,7 +26,7 @@ public class NotificationService {
 	@Transactional(readOnly = true)
 	public void sendNotificationEmail(Long notificationId) {
 		AppNotification notification = notificationRepository.findById(notificationId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification non trouvée"));
+				.orElseThrow(() -> new EntityNotFoundException("Notification non trouvée"));
 
 		List<User> users = userRepository.findAll();
 

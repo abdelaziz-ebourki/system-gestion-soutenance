@@ -19,7 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 @ExtendWith(MockitoExtension.class)
 class RoomServiceTest {
@@ -53,7 +54,8 @@ class RoomServiceTest {
 	@Test
 	void create_departmentNotFound_throws() {
 		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> roomService.create(new CreateRoomRequest("X", 10, 99L)));
+		assertThrows(InvalidBusinessStateException.class,
+				() -> roomService.create(new CreateRoomRequest("X", 10, 99L)));
 	}
 
 	@Test
@@ -93,6 +95,6 @@ class RoomServiceTest {
 	@Test
 	void delete_notFound_throws() {
 		when(roomRepository.existsById(99L)).thenReturn(false);
-		assertThrows(ResponseStatusException.class, () -> roomService.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> roomService.delete(99L));
 	}
 }

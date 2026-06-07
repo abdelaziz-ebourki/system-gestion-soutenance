@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
@@ -85,7 +86,7 @@ class ProjectRepositoryTest {
 		project.setTitle("Projet Test");
 		project.setDescription("Description");
 		project.setDefenseType("PFE");
-		project.setStatus("pending");
+		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
 		project.setStudents(List.of(savedStudent));
 		em.persist(project);
@@ -107,7 +108,7 @@ class ProjectRepositoryTest {
 		project.setTitle("Solo Project");
 		project.setDescription("No students yet");
 		project.setDefenseType("PFE");
-		project.setStatus("pending");
+		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
 		project.setStudents(List.of());
 		em.persist(project);
@@ -127,7 +128,7 @@ class ProjectRepositoryTest {
 		project.setTitle("Teacher Project");
 		project.setDescription("Desc");
 		project.setDefenseType("MEMOIRE");
-		project.setStatus("pending");
+		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
 		project.setStudents(List.of(savedStudent));
 		em.persist(project);
@@ -147,7 +148,7 @@ class ProjectRepositoryTest {
 		project.setTitle("Student Project");
 		project.setDescription("Desc");
 		project.setDefenseType("PFE");
-		project.setStatus("pending");
+		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
 		project.setStudents(List.of(savedStudent));
 		em.persist(project);

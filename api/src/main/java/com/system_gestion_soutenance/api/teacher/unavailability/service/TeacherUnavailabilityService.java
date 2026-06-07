@@ -2,11 +2,11 @@ package com.system_gestion_soutenance.api.teacher.unavailability.service;
 
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
+import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TeacherUnavailabilityService {
@@ -17,19 +17,18 @@ public class TeacherUnavailabilityService {
 		this.repository = repository;
 	}
 
-	public Map<String, Object> getByTeacher(Long teacherId) {
-		Map<String, List<String>> slotsByDate = new LinkedHashMap<>();
+	public List<Unavailability> getByTeacher(Long teacherId) {
+		List<Unavailability> result = new ArrayList<>();
 		for (Unavailability u : repository.findAll()) {
 			if (u.getTeacherId().equals(teacherId)) {
-				slotsByDate.put(u.getDate(), u.getSlots());
+				result.add(u);
 			}
 		}
-		Map<String, Object> result = new LinkedHashMap<>();
-		result.put("slotsByDate", slotsByDate);
 		return result;
 	}
 
-	public Map<String, Object> saveForTeacher(Long teacherId, Map<String, List<String>> slotsByDate) {
+	@Transactional
+	public List<Unavailability> saveForTeacher(Long teacherId, TeacherUnavailabilityRequest request) {
 		List<Unavailability> existing = new ArrayList<>();
 		for (Unavailability u : repository.findAll()) {
 			if (u.getTeacherId().equals(teacherId)) {
@@ -38,11 +37,11 @@ public class TeacherUnavailabilityService {
 		}
 		repository.deleteAll(existing);
 
-		for (Map.Entry<String, List<String>> entry : slotsByDate.entrySet()) {
+		for (var slotRequest : request.slots()) {
 			Unavailability u = new Unavailability();
 			u.setTeacherId(teacherId);
-			u.setDate(entry.getKey());
-			u.setSlots(entry.getValue());
+			u.setDate(slotRequest.date());
+			u.setSlots(slotRequest.slots());
 			repository.save(u);
 		}
 

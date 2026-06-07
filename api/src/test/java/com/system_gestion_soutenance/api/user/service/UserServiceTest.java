@@ -3,17 +3,13 @@ package com.system_gestion_soutenance.api.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
-import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
-import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.*;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,15 +18,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
-	@Mock
-	private UserMapper userMapper;
 	@Mock
 	private UserAccountService accountService;
 	@Mock
@@ -40,18 +35,6 @@ class UserServiceTest {
 
 	@InjectMocks
 	private UserService userService;
-
-	@BeforeEach
-	void setUp() {
-		lenient().when(userMapper.toDto(any(User.class))).thenAnswer(invocation -> {
-			User user = invocation.getArgument(0);
-			if (user == null)
-				return null;
-			return new UserDto(user.getId(), user.getEmail(),
-					user.getRole() == null ? null : user.getRole().name().toLowerCase(), user.getLastName(),
-					user.getFirstName(), user.isActive(), null, null, null, null, null, null, null, null, null);
-		});
-	}
 
 	private static User createUser(Long id, String email, Role role, String lastName, String firstName) {
 		User u = new User();
@@ -71,19 +54,19 @@ class UserServiceTest {
 		Page<User> page = new PageImpl<>(List.of(user));
 		when(userRepository.findByRole(eq(Role.STUDENT), any(PageRequest.class))).thenReturn(page);
 
-		PaginatedResponse<UserDto> result = userService.listUsers("student", 0, 10, null);
+		Page<User> result = userService.listUsers("student", 0, 10, null);
 
-		assertEquals(1, result.items().size());
-		assertEquals("student", result.items().get(0).role());
+		assertEquals(1, result.getContent().size());
+		assertEquals(user, result.getContent().get(0));
 	}
 
 	@Test
 	void listUsers_withBlankRole_treatsAsNull() {
 		when(userRepository.findAll(any(PageRequest.class))).thenReturn(Page.empty());
 
-		PaginatedResponse<UserDto> result = userService.listUsers(" ", 0, 10, null);
+		Page<User> result = userService.listUsers(" ", 0, 10, null);
 
-		assertEquals(0, result.items().size());
+		assertEquals(0, result.getContent().size());
 		verify(userRepository).findAll(PageRequest.of(0, 10));
 	}
 
@@ -91,13 +74,12 @@ class UserServiceTest {
 	void createUser_callsAccountService() {
 		CreateUserRequest request = new CreateUserRequest("Base", "User", "base@t.com", "ADMIN", null, null, null, null,
 				null);
-		UserDto expectedDto = new UserDto(1L, "base@t.com", "admin", "Base", "User", true, null, null, null, null, null,
-				null, null, null, null);
-		when(accountService.createUser(eq(request), eq(Role.ADMIN))).thenReturn(expectedDto);
+		User expectedUser = createUser(1L, "base@t.com", Role.ADMIN, "Base", "User");
+		when(accountService.createUser(eq(request), eq(Role.ADMIN))).thenReturn(expectedUser);
 
-		UserDto result = userService.createUser(request);
+		User result = userService.createUser(request);
 
-		assertEquals("base@t.com", result.email());
+		assertEquals("base@t.com", result.getEmail());
 		verify(accountService).createUser(request, Role.ADMIN);
 	}
 
@@ -105,11 +87,10 @@ class UserServiceTest {
 	void bulkCreate_callsAccountService() {
 		var entry = new BulkCreateRequest.BulkUserEntry("Doe", "John", "j@t.com", null, null, null, null, null);
 		var request = new BulkCreateRequest(List.of(entry), "teacher");
-		List<UserDto> expectedDtos = List.of(new UserDto(1L, "j@t.com", "teacher", "Doe", "John", true, null, null,
-				null, null, null, null, null, null, null));
-		when(accountService.bulkCreate(eq(request), eq(Role.TEACHER))).thenReturn(expectedDtos);
+		User expectedUser = createUser(1L, "j@t.com", Role.TEACHER, "Doe", "John");
+		when(accountService.bulkCreate(eq(request), eq(Role.TEACHER))).thenReturn(List.of(expectedUser));
 
-		List<UserDto> results = userService.bulkCreate(request);
+		List<User> results = userService.bulkCreate(request);
 
 		assertEquals(1, results.size());
 		verify(accountService).bulkCreate(request, Role.TEACHER);
@@ -122,8 +103,9 @@ class UserServiceTest {
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		UpdateUserRequest req = new UpdateUserRequest("New", "Name", null, null, null, null, null, null, null);
-		userService.updateUser(1L, req);
+		User result = userService.updateUser(1L, req);
 
+		assertNotNull(result);
 		verify(profileService).updateBasicInfo(eq(user), eq(req));
 		verify(userRepository).save(user);
 	}
@@ -137,8 +119,9 @@ class UserServiceTest {
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, 99L, null, null, null);
-		userService.updateUser(1L, req);
+		User result = userService.updateUser(1L, req);
 
+		assertNotNull(result);
 		verify(profileService).updateStudentProfile(eq(student), eq(req));
 	}
 
@@ -151,8 +134,9 @@ class UserServiceTest {
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, null, 99L, null);
-		userService.updateUser(1L, req);
+		User result = userService.updateUser(1L, req);
 
+		assertNotNull(result);
 		verify(profileService).updateTeacherProfile(eq(teacher), eq(req));
 	}
 
@@ -186,7 +170,7 @@ class UserServiceTest {
 	void deleteUser_notFound_throws() {
 		when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> userService.deleteUser(99L));
+		assertThrows(EntityNotFoundException.class, () -> userService.deleteUser(99L));
 	}
 
 	@Test
@@ -195,13 +179,13 @@ class UserServiceTest {
 		when(userRepository.findByRole(eq(Role.TEACHER), any(PageRequest.class)))
 				.thenReturn(new PageImpl<>(List.of(user)));
 
-		List<UserDto> result = userService.listAllByRole("teacher");
+		List<User> result = userService.listAllByRole("teacher");
 
 		assertEquals(1, result.size());
 	}
 
 	@Test
 	void invalidRole_throws() {
-		assertThrows(ResponseStatusException.class, () -> userService.listAllByRole("invalid"));
+		assertThrows(InvalidBusinessStateException.class, () -> userService.listAllByRole("invalid"));
 	}
 }

@@ -68,7 +68,7 @@ class CoordinatorDefenseSessionControllerTest {
 						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null));
 
 		mockMvc.perform(get("/api/coordinator/defense-sessions")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].name").value("Session 1"));
+				.andExpect(jsonPath("$.data.size()").value(1)).andExpect(jsonPath("$.data[0].name").value("Session 1"));
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class CoordinatorDefenseSessionControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.name").value("Session PFE"));
+				.andExpect(jsonPath("$.data.name").value("Session PFE"));
 	}
 
 	@Test
@@ -102,14 +102,14 @@ class CoordinatorDefenseSessionControllerTest {
 
 		mockMvc.perform(put("/api/coordinator/defense-sessions/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("Updated Session"));
+				.andExpect(jsonPath("$.data.name").value("Updated Session"));
 	}
 
 	@Test
-	void delete_returnsNoContent() throws Exception {
+	void delete_returnsOk() throws Exception {
 		doNothing().when(service).delete(1L);
 
-		mockMvc.perform(delete("/api/coordinator/defense-sessions/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/coordinator/defense-sessions/1")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -124,6 +124,6 @@ class CoordinatorDefenseSessionControllerTest {
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions/1/transition").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("toStatus", "ACTIVE")))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("ACTIVE"));
+				.andExpect(jsonPath("$.data.status").value("ACTIVE"));
 	}
 }

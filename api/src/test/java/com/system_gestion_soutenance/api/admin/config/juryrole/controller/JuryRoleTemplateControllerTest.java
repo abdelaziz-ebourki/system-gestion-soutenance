@@ -37,7 +37,8 @@ class JuryRoleTemplateControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		when(juryRoleTemplateService.findAll()).thenReturn(List.of());
-		mockMvc.perform(get("/api/admin/config/jury-role-templates")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/admin/config/jury-role-templates")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 
 	@Test
@@ -49,7 +50,7 @@ class JuryRoleTemplateControllerTest {
 						"Template PFE", "PFE", List.of()));
 		mockMvc.perform(post("/api/admin/config/jury-role-templates").contentType(MediaType.APPLICATION_JSON).content(
 				"{\"name\":\"Template PFE\",\"defenseType\":\"PFE\",\"roles\":[{\"name\":\"Président\",\"count\":1,\"coefficient\":2}]}"))
-				.andExpect(status().isCreated()).andExpect(jsonPath("$.name").value("Template PFE"));
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.data.name").value("Template PFE"));
 	}
 
 	@Test
@@ -61,12 +62,13 @@ class JuryRoleTemplateControllerTest {
 						"Updated", "MEMOIRE", List.of()));
 		mockMvc.perform(put("/api/admin/config/jury-role-templates/1").contentType(MediaType.APPLICATION_JSON).content(
 				"{\"name\":\"Updated\",\"defenseType\":\"MEMOIRE\",\"roles\":[{\"name\":\"Rapporteur\",\"count\":1,\"coefficient\":1}]}"))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Updated"));
+				.andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("Updated"));
 	}
 
 	@Test
-	void delete_returns204() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(juryRoleTemplateService).delete(1L);
-		mockMvc.perform(delete("/api/admin/config/jury-role-templates/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/admin/config/jury-role-templates/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

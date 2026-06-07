@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.admin.audit.repository.AuditLogRepository;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.TransactionException;
@@ -18,10 +21,13 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AuditAspectTest {
 
 	@Mock
 	private AuditLogRepository auditLogRepository;
+	@Mock
+	private SecurityService securityService;
 	@Mock
 	private ProceedingJoinPoint joinPoint;
 
@@ -40,7 +46,8 @@ class AuditAspectTest {
 				return null;
 			}
 		};
-		aspect = new AuditAspect(auditLogRepository, tt);
+		aspect = new AuditAspect(auditLogRepository, tt, securityService);
+		lenient().when(securityService.getOptionalCurrentUserEmail()).thenReturn("admin@test.com");
 	}
 
 	@AfterEach
@@ -79,12 +86,13 @@ class AuditAspectTest {
 
 		assertEquals(42L, result);
 		verify(auditLogRepository).save(argThat(log -> "CREATE".equals(log.getAction())
-				&& "Test".equals(log.getEntity()) && "admin@test.com".equals(log.getAdminEmail())));
+				&& "Test".equals(log.getEntity()) && "admin@test.com".equals(log.getPerformedByEmail())));
 	}
 
 	@Test
 	void audit_noSecurityContext_skipsAudit() throws Throwable {
 		when(joinPoint.proceed()).thenReturn("result");
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn(null);
 
 		SecurityContextHolder.clearContext();
 
@@ -152,6 +160,7 @@ class AuditAspectTest {
 	void audit_extractsEmailFromUserPrincipal() throws Throwable {
 		when(joinPoint.proceed()).thenReturn(42L);
 		when(joinPoint.getArgs()).thenReturn(new Object[]{1L});
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn("user@test.com");
 
 		com.system_gestion_soutenance.api.user.entity.User user = new com.system_gestion_soutenance.api.user.entity.User();
 		user.setEmail("user@test.com");
@@ -179,12 +188,13 @@ class AuditAspectTest {
 
 		aspect.audit(joinPoint, audited);
 
-		verify(auditLogRepository).save(argThat(log -> "user@test.com".equals(log.getAdminEmail())));
+		verify(auditLogRepository).save(argThat(log -> "user@test.com".equals(log.getPerformedByEmail())));
 	}
 
 	@Test
 	void audit_anonymousUser_skipsAudit() throws Throwable {
 		when(joinPoint.proceed()).thenReturn("result");
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn(null);
 
 		Authentication auth = mock(Authentication.class);
 		when(auth.isAuthenticated()).thenReturn(true);
@@ -216,6 +226,7 @@ class AuditAspectTest {
 	@Test
 	void audit_notAuthenticated_skipsAudit() throws Throwable {
 		when(joinPoint.proceed()).thenReturn("result");
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn(null);
 
 		Authentication auth = mock(Authentication.class);
 		when(auth.isAuthenticated()).thenReturn(false);
@@ -404,9 +415,9 @@ class AuditAspectTest {
 
 		assertThrows(RuntimeException.class, () -> aspect.audit(joinPoint, audited));
 
-		verify(auditLogRepository).save(argThat(
-				log -> "CREATE".equals(log.getAction()) && "Test".equals(log.getEntity()) && log.getAdminEmail() == null
-						&& log.getDetails().contains("error detail") && log.getDetails().contains("#42")));
+		verify(auditLogRepository).save(argThat(log -> "CREATE".equals(log.getAction())
+				&& "Test".equals(log.getEntity()) && log.getPerformedByEmail() == null
+				&& log.getDetails().contains("error detail") && log.getDetails().contains("#42")));
 	}
 
 	@Test
@@ -425,7 +436,7 @@ class AuditAspectTest {
 
 		aspect.audit(joinPoint, audited);
 
-		verify(auditLogRepository).save(argThat(log -> "admin@test.com".equals(log.getAdminEmail())
+		verify(auditLogRepository).save(argThat(log -> "admin@test.com".equals(log.getPerformedByEmail())
 				&& log.getEntityId() == null && "UPDATE E".equals(log.getDetails())));
 	}
 }

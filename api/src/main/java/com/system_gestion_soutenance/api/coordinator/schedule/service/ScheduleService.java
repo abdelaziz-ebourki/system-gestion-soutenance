@@ -1,28 +1,35 @@
 package com.system_gestion_soutenance.api.coordinator.schedule.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
+import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
+import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ScheduleService {
@@ -51,34 +58,60 @@ public class ScheduleService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<String, Map<String, Object>> getSchedule() {
-		List<SlotAssignment> slots = slotAssignmentRepository.findAllWithRoom();
-		Map<String, Map<String, Object>> result = new LinkedHashMap<>();
-		for (SlotAssignment slot : slots) {
-			result.put(slot.getId().toString(), toResponse(slot));
-		}
-		return result;
+	public List<SlotAssignment> getSchedule() {
+		return slotAssignmentRepository.findAllWithRoom();
 	}
 
+	public Map<Long, Project> buildProjectMap(List<SlotAssignment> slots) {
+		List<Long> projectIds = slots.stream().map(SlotAssignment::getProjectId).filter(Objects::nonNull).distinct()
+				.toList();
+		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
+	}
+
+	public Map<Long, List<String>> buildStudentNamesMap(Map<Long, Project> projectMap) {
+		if (projectMap.isEmpty())
+			return Map.of();
+		List<Long> projectIds = new ArrayList<>(projectMap.keySet());
+		Map<Long, List<String>> namesMap = new HashMap<>();
+		var groups = groupRepository.findByProjectIdIn(projectIds);
+		Map<Long, List<Group>> groupsByProject = groups.stream().filter(g -> g.getProject() != null)
+				.collect(Collectors.groupingBy(g -> g.getProject().getId()));
+		for (var entry : projectMap.entrySet()) {
+			Long pid = entry.getKey();
+			Project project = entry.getValue();
+			namesMap.put(pid, resolveStudentNames(project, groupsByProject.get(pid)));
+		}
+		return namesMap;
+	}
+
+	private List<String> resolveStudentNames(Project project, List<Group> projectGroups) {
+		if (projectGroups != null && !projectGroups.isEmpty()) {
+			var g = projectGroups.get(0);
+			if (g.getStudents() != null)
+				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
+		}
+		if (project.getStudents() != null)
+			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
+		return List.of();
+	}
+
+	@Audited(action = "BULK_CREATE", entity = "SlotAssignment")
 	@Transactional
-	public Map<String, Map<String, Object>> saveSchedule(Map<String, Map<String, Object>> schedule) {
+	public List<SlotAssignment> saveSchedule(ScheduleRequest request) {
 		slotAssignmentRepository.deleteAll();
 
-		for (Map.Entry<String, Map<String, Object>> entry : schedule.entrySet()) {
-			Map<String, Object> data = entry.getValue();
-
+		for (var slotReq : request.slots()) {
 			SlotAssignment slot = new SlotAssignment();
-			slot.setTitle((String) data.get("title"));
-			slot.setDate((String) data.get("date"));
-			slot.setTime((String) data.get("time"));
+			slot.setTitle(slotReq.title());
+			slot.setDate(slotReq.date());
+			slot.setTime(slotReq.time());
 
-			if (data.containsKey("projectId") && data.get("projectId") != null)
-				slot.setProjectId(toLong(data.get("projectId")));
+			if (slotReq.projectId() != null)
+				slot.setProjectId(slotReq.projectId());
 
-			if (data.containsKey("roomId") && data.get("roomId") != null) {
-				Room room = roomRepository.findById(toLong(data.get("roomId")))
-						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-								"Salle introuvable: " + data.get("roomId")));
+			if (slotReq.roomId() != null) {
+				Room room = roomRepository.findById(slotReq.roomId())
+						.orElseThrow(() -> new InvalidBusinessStateException("Salle introuvable: " + slotReq.roomId()));
 				slot.setRoom(room);
 			}
 
@@ -89,16 +122,16 @@ public class ScheduleService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<String, Map<String, Object>> autoGenerate(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+	public List<ScheduleResponse> autoGenerate(Long defenseSessionId) {
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètres de soutenance non trouvés"));
+		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc()
+				.orElseThrow(() -> new EntityNotFoundException("Paramètres de soutenance non trouvés"));
 
 		List<Room> rooms = roomRepository.findAll();
 		if (rooms.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucune salle disponible");
+			throw new InvalidBusinessStateException("Aucune salle disponible");
 		}
 
 		LocalTime startTime = LocalTime.parse(settings.getStartTime());
@@ -111,7 +144,7 @@ public class ScheduleService {
 				.collect(Collectors.toSet());
 
 		Map<Long, Integer> projectStudentCounts = new HashMap<>();
-		List<com.system_gestion_soutenance.api.coordinator.group.entity.Group> allGroups = groupRepository.findAll();
+		List<Group> allGroups = groupRepository.findAll();
 
 		for (Project p : allProjects) {
 			int count = 0;
@@ -125,14 +158,21 @@ public class ScheduleService {
 			projectStudentCounts.put(p.getId(), count);
 		}
 
-		List<Project> approvedProjects = allProjects.stream().filter(p -> "approved".equals(p.getStatus()))
+		List<Project> approvedProjects = allProjects.stream().filter(p -> p.getStatus() == ProjectStatus.APPROVED)
 				.filter(p -> projectsWithJuries.contains(p.getId())).collect(Collectors.toList());
 
 		if (approvedProjects.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aucun projet approuvé avec jury");
+			throw new InvalidBusinessStateException("Aucun projet approuvé avec jury");
 		}
 
-		Map<String, Map<String, Object>> schedule = new LinkedHashMap<>();
+		Map<Long, List<String>> studentNamesByProject = new HashMap<>();
+		Map<Long, List<Group>> groupsByProject = allGroups.stream().filter(g -> g.getProject() != null)
+				.collect(Collectors.groupingBy(g -> g.getProject().getId()));
+		for (Project p : allProjects) {
+			studentNamesByProject.put(p.getId(), resolveStudentNames(p, groupsByProject.get(p.getId())));
+		}
+
+		List<ScheduleResponse> result = new ArrayList<>();
 		Set<Long> assignedProjects = new HashSet<>();
 
 		LocalDate current = ds.getStartDate();
@@ -144,20 +184,19 @@ public class ScheduleService {
 
 					LocalDate currentDate = current;
 					LocalTime currentTime = time;
-					approvedProjects.stream().filter(p -> !assignedProjects.contains(p.getId()))
-							.filter(p -> projectStudentCounts.getOrDefault(p.getId(), 0) <= room.getCapacity())
-							.findFirst().ifPresent(project -> {
-								String slotId = UUID.randomUUID().toString();
-								Map<String, Object> entry = new LinkedHashMap<>();
-								entry.put("id", slotId);
-								entry.put("title", project.getTitle());
-								entry.put("date", currentDate.toString());
-								entry.put("time", currentTime.toString());
-								entry.put("projectId", project.getId());
-								entry.put("roomId", room.getId());
-								schedule.put(slotId, entry);
-								assignedProjects.add(project.getId());
-							});
+
+					for (Project project : approvedProjects) {
+						if (!assignedProjects.contains(project.getId())
+								&& projectStudentCounts.getOrDefault(project.getId(), 0) <= room.getCapacity()) {
+
+							result.add(new ScheduleResponse(null, // Temporary ID
+									project.getTitle(), currentDate.toString(), currentTime.toString(), project.getId(),
+									room.getId(), room.getName(), project.getTitle(),
+									studentNamesByProject.getOrDefault(project.getId(), List.of()), "", "scheduled"));
+							assignedProjects.add(project.getId());
+							break;
+						}
+					}
 
 					time = time.plusMinutes(slotDuration + breakMinutes);
 				}
@@ -165,35 +204,37 @@ public class ScheduleService {
 			current = current.plusDays(1);
 		}
 
-		return schedule;
+		return result;
 	}
 
+	@Audited(action = "UPDATE", entity = "DefenseSession")
 	@Transactional
 	public void publish(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session de soutenance non trouvée"));
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		if (ds.getStatus().name().equals("ACTIVE")) {
-			ds.setStatus(com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus.SCHEDULED);
+		if (ds.getStatus() == DefenseSessionStatus.ACTIVE) {
+			ds.setStatus(DefenseSessionStatus.SCHEDULED);
 			defenseSessionRepository.save(ds);
 		}
 
-		createNotification("success", "Soutenance publiée",
+		createNotification(NotificationType.SUCCESS, "Soutenance publiée",
 				"Le planning des soutenances pour " + ds.getName() + " a été publié.", "/coordinator/schedule");
 	}
 
+	@Audited(action = "DELETE", entity = "SlotAssignment")
 	@Transactional
 	public void cancelDefense(Long slotId) {
-		SlotAssignment slot = slotAssignmentRepository.findById(slotId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Créneau de soutenance non trouvé"));
+		SlotAssignment slot = slotAssignmentRepository.findById(slotId)
+				.orElseThrow(() -> new EntityNotFoundException("Créneau de soutenance non trouvé"));
 
 		slotAssignmentRepository.delete(slot);
 
-		createNotification("warning", "Soutenance annulée", "La soutenance \"" + slot.getTitle() + "\" du "
-				+ slot.getDate() + " à " + slot.getTime() + " a été annulée.", "/coordinator/schedule");
+		createNotification(NotificationType.WARNING, "Soutenance annulée", "La soutenance \"" + slot.getTitle()
+				+ "\" du " + slot.getDate() + " à " + slot.getTime() + " a été annulée.", "/coordinator/schedule");
 	}
 
-	private void createNotification(String type, String title, String message, String actionLink) {
+	private void createNotification(NotificationType type, String title, String message, String actionLink) {
 		AppNotification notification = new AppNotification();
 		notification.setType(type);
 		notification.setTitle(title);
@@ -204,22 +245,4 @@ public class ScheduleService {
 		notificationRepository.save(notification);
 	}
 
-	private Long toLong(Object value) {
-		if (value instanceof Number)
-			return ((Number) value).longValue();
-		if (value instanceof String)
-			return Long.parseLong((String) value);
-		return null;
-	}
-
-	private Map<String, Object> toResponse(SlotAssignment slot) {
-		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("id", slot.getId());
-		map.put("title", slot.getTitle());
-		map.put("date", slot.getDate());
-		map.put("time", slot.getTime());
-		map.put("projectId", slot.getProjectId());
-		map.put("roomId", slot.getRoom() != null ? slot.getRoom().getId() : null);
-		return map;
-	}
 }

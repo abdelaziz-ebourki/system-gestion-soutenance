@@ -1,7 +1,2 @@
 cd api
-./mvnw --no-transfer-progress spotless:apply -q
-./mvnw --no-transfer-progress compile -q
-./mvnw --no-transfer-progress checkstyle:check -q
-./mvnw --no-transfer-progress spotbugs:check -q
-./mvnw --no-transfer-progress pmd:check -q
-./mvnw --no-transfer-progress test -q
+./mvnw --no-transfer-progress clean spotless:apply compile checkstyle:check spotbugs:check pmd:check test -q

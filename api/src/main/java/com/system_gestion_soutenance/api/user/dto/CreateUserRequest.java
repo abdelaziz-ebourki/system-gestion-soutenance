@@ -1,8 +1,17 @@
 package com.system_gestion_soutenance.api.user.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record CreateUserRequest(@NotBlank String lastName, @NotBlank String firstName, @NotBlank @Email String email,
-		String role, String cne, Long majorId, Long levelId, Long gradeId, Long departmentId) {
+@Schema(description = "Request for creating a new user")
+public record CreateUserRequest(@Schema(description = "User's last name", example = "Doe") @NotBlank String lastName,
+		@Schema(description = "User's first name", example = "John") @NotBlank String firstName,
+		@Schema(description = "User's email address", example = "john.doe@univh2c.ma") @NotBlank @Email String email,
+		@Schema(description = "User role (STUDENT, TEACHER, COORDINATOR, ADMIN)", example = "STUDENT") String role,
+		@Schema(description = "Student's national student number (CNE)", example = "12345678") String cne,
+		@Schema(description = "Major ID (for students)", example = "1") Long majorId,
+		@Schema(description = "Level ID (for students)", example = "1") Long levelId,
+		@Schema(description = "Grade ID (for teachers)", example = "1") Long gradeId,
+		@Schema(description = "Department ID (for teachers)", example = "1") Long departmentId) {
 }

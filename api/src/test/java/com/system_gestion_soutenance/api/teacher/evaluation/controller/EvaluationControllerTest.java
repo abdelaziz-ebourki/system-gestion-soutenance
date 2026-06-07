@@ -3,8 +3,13 @@ package com.system_gestion_soutenance.api.teacher.evaluation.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.mapper.EvaluationMapper;
+import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.service.EvaluationService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -21,9 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = EvaluationController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+@WebMvcTest(controllers = EvaluationController.class)
 class EvaluationControllerTest {
 
 	@Autowired
@@ -34,13 +37,12 @@ class EvaluationControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
+	@MockitoBean
+	private EvaluationMapper evaluationMapper;
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -50,15 +52,32 @@ class EvaluationControllerTest {
 
 	@Test
 	void findByTeacher_returnsList() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
 		when(evaluationService.findByTeacher(1L)).thenReturn(List.of());
-		mockMvc.perform(get("/api/teacher/evaluations")).andExpect(status().isOk());
+		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
+		mockMvc.perform(get("/api/teacher/evaluations").with(authentication(auth))).andExpect(status().isOk());
 	}
 
 	@Test
 	void submit_returns200() throws Exception {
-		when(evaluationService.submit(anyLong(), any())).thenReturn(Map.of("status", "submitted"));
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		Evaluation evaluation = new Evaluation();
+		evaluation.setId(1L);
+		evaluation.setProjectId(1L);
+		when(evaluationService.submit(anyLong(), any())).thenReturn(evaluation);
+		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
+		when(evaluationMapper.toDto(eq(evaluation), any()))
+				.thenReturn(new EvaluationResponse(1L, 1L, "Project", 15.0, "Good", "SUBMITTED"));
 		mockMvc.perform(post("/api/teacher/evaluations/1").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"score\":15.0,\"comment\":\"Good\"}")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("submitted"));
+				.content("{\"score\":15.0,\"comment\":\"Good\"}").with(authentication(auth)).with(csrf()))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
 	}
 }

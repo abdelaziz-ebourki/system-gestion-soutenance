@@ -18,7 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class DepartmentServiceTest {
@@ -52,7 +54,7 @@ class DepartmentServiceTest {
 	@Test
 	void findById_missing_throws() {
 		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> departmentService.findById(99L));
+		assertThrows(EntityNotFoundException.class, () -> departmentService.findById(99L));
 	}
 
 	@Test
@@ -72,7 +74,7 @@ class DepartmentServiceTest {
 	@Test
 	void create_duplicateName_throws() {
 		when(departmentRepository.findByName("Dup")).thenReturn(Optional.of(new Department()));
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> departmentService.create(new CreateDepartmentRequest("Dup", "D", null, 1L)));
 	}
 
@@ -98,7 +100,7 @@ class DepartmentServiceTest {
 		when(departmentRepository.findByName("Dept")).thenReturn(Optional.empty());
 		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> departmentService.create(new CreateDepartmentRequest("Dept", "D", null, 99L)));
 	}
 
@@ -110,7 +112,7 @@ class DepartmentServiceTest {
 		when(facultyRepository.findById(1L)).thenReturn(Optional.of(faculty));
 		when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> departmentService.create(new CreateDepartmentRequest("Dept", "D", 99L, 1L)));
 	}
 
@@ -133,7 +135,7 @@ class DepartmentServiceTest {
 	@Test
 	void update_notFound_throws() {
 		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> departmentService.update(99L, new CreateDepartmentRequest("X", "X", null, 1L)));
 	}
 
@@ -144,7 +146,7 @@ class DepartmentServiceTest {
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 		when(facultyRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class,
+		assertThrows(InvalidBusinessStateException.class,
 				() -> departmentService.update(1L, new CreateDepartmentRequest("X", "X", null, 99L)));
 	}
 
@@ -200,7 +202,7 @@ class DepartmentServiceTest {
 	@Test
 	void delete_notFound_throws() {
 		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> departmentService.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> departmentService.delete(99L));
 	}
 
 	@Test
@@ -212,7 +214,7 @@ class DepartmentServiceTest {
 		when(roomRepository.findByDepartment_Id(1L))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.admin.room.entity.Room()));
 
-		assertThrows(ResponseStatusException.class, () -> departmentService.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> departmentService.delete(1L));
 		verify(departmentRepository, never()).deleteById(anyLong());
 	}
 
@@ -223,7 +225,7 @@ class DepartmentServiceTest {
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 		when(teacherRepository.findByDepartmentId(1L)).thenReturn(List.of(new Teacher()));
 
-		assertThrows(ResponseStatusException.class, () -> departmentService.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> departmentService.delete(1L));
 		verify(departmentRepository, never()).deleteById(anyLong());
 	}
 }

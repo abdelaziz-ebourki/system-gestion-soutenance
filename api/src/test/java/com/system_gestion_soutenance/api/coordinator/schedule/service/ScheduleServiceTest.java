@@ -15,6 +15,7 @@ import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepos
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
@@ -22,7 +23,8 @@ import com.system_gestion_soutenance.api.notification.repository.NotificationRep
 import java.time.LocalDate;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class ScheduleServiceTest {
 
@@ -57,7 +59,7 @@ class ScheduleServiceTest {
 		var result = service.getSchedule();
 
 		assertEquals(1, result.size());
-		assertEquals("Slot 1", result.get("1").get("title"));
+		assertEquals("Slot 1", result.get(0).getTitle());
 	}
 
 	@Test
@@ -84,16 +86,12 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", 5);
-		slotData.put("roomId", 10);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, 10L)));
 
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-
-		var result = service.saveSchedule(schedule);
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 		verify(slotAssignmentRepository).deleteAll();
@@ -112,14 +110,11 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", 5);
-
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-		var result = service.saveSchedule(schedule);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, null)));
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 	}
@@ -137,15 +132,11 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", 5);
-		slotData.put("roomId", null);
-
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-		var result = service.saveSchedule(schedule);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, null)));
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 	}
@@ -155,7 +146,7 @@ class ScheduleServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet");
-		when(project.getStatus()).thenReturn("approved");
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
 		when(project.getStudents())
 				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
 
@@ -174,13 +165,13 @@ class ScheduleServiceTest {
 		settings.setEndTime("10:00");
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -188,7 +179,7 @@ class ScheduleServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet");
-		when(project.getStatus()).thenReturn("approved");
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
 		when(project.getStudents())
 				.thenReturn(List.of(mock(com.system_gestion_soutenance.api.user.entity.Student.class)));
 
@@ -235,14 +226,10 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(saved);
 		when(slotAssignmentRepository.findAll()).thenReturn(List.of(saved));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "S");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("projectId", "5");
-
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-		service.saveSchedule(schedule);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L, List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("S",
+						"2025-06-01", "09:00", 5L, null)));
+		service.saveSchedule(request);
 
 		verify(slotAssignmentRepository).save(argThat(s -> s.getProjectId() == 5L));
 	}
@@ -251,15 +238,11 @@ class ScheduleServiceTest {
 	void saveSchedule_roomNotFound_throwsException() {
 		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
-		slotData.put("roomId", 99);
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L, List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot",
+						"2025-06-01", "09:00", 5L, 99L)));
 
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-
-		assertThrows(ResponseStatusException.class, () -> service.saveSchedule(schedule));
+		assertThrows(InvalidBusinessStateException.class, () -> service.saveSchedule(request));
 	}
 
 	@Test
@@ -282,7 +265,7 @@ class ScheduleServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet Test");
-		when(project.getStatus()).thenReturn("approved");
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
 
 		Group group = mock(Group.class);
 		when(group.getStudents())
@@ -301,14 +284,14 @@ class ScheduleServiceTest {
 		var result = service.autoGenerate(1L);
 
 		assertFalse(result.isEmpty());
-		assertEquals("Projet Test", result.values().iterator().next().get("title"));
+		assertEquals("Projet Test", result.get(0).title());
 	}
 
 	@Test
 	void autoGenerate_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(99L));
 	}
 
 	@Test
@@ -316,7 +299,7 @@ class ScheduleServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(new DefenseSession()));
 		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -328,11 +311,11 @@ class ScheduleServiceTest {
 		settings.setStartTime("08:00");
 		settings.setEndTime("18:00");
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(new Room()));
 		when(projectRepository.findAll()).thenReturn(List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -348,14 +331,12 @@ class ScheduleServiceTest {
 		when(slotAssignmentRepository.save(any(SlotAssignment.class))).thenReturn(savedSlot);
 		when(slotAssignmentRepository.findAllWithRoom()).thenReturn(List.of(savedSlot));
 
-		Map<String, Object> slotData = new LinkedHashMap<>();
-		slotData.put("title", "Slot 1");
-		slotData.put("date", "2025-06-01");
-		slotData.put("time", "09:00");
+		com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest request = new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+				1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", null, null)));
 
-		Map<String, Map<String, Object>> schedule = Map.of("1", slotData);
-
-		var result = service.saveSchedule(schedule);
+		var result = service.saveSchedule(request);
 
 		assertEquals(1, result.size());
 		verify(slotAssignmentRepository).deleteAll();
@@ -365,10 +346,10 @@ class ScheduleServiceTest {
 	void autoGenerate_noRooms_throwsException() {
 		DefenseSession ds = new DefenseSession();
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findById(1L)).thenReturn(Optional.of(new DefenseSettings()));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(new DefenseSettings()));
 		when(roomRepository.findAll()).thenReturn(List.of());
 
-		assertThrows(ResponseStatusException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -405,7 +386,7 @@ class ScheduleServiceTest {
 	void publish_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.publish(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.publish(99L));
 	}
 
 	@Test
@@ -428,6 +409,6 @@ class ScheduleServiceTest {
 	void cancelDefense_slotNotFound_throwsException() {
 		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.cancelDefense(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.cancelDefense(99L));
 	}
 }

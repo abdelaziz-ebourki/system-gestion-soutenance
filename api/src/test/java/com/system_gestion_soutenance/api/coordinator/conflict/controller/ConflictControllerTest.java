@@ -5,8 +5,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
+import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
@@ -54,25 +55,30 @@ class ConflictControllerTest {
 
 	@Test
 	void validate_returnsConflicts() throws Exception {
-		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+		Map<String, Object> body = Map.of("schedule", List
+				.of(Map.of("title", "Slot 1", "date", "2025-06-01", "time", "09:00", "projectId", 1L, "roomId", 1L)),
+				"defenseSessionId", 1L);
 
 		when(conflictDetectionService.validate(any(), eq("1")))
-				.thenReturn(List.of(Map.of("type", "project_already_scheduled", "severity", "error")));
+				.thenReturn(List.of(new ConflictDetailResponse("project_already_scheduled", "error",
+						"Conflict detected", "1", "Suggestion")));
 
-		mockMvc.perform(post("/api/coordinator/schedule/validate").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/conflicts/validate").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.conflicts.size()").value(1))
-				.andExpect(jsonPath("$.conflicts[0].type").value("project_already_scheduled"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].type").value("project_already_scheduled"));
 	}
 
 	@Test
 	void validate_noConflicts_returnsEmpty() throws Exception {
-		Map<String, Object> body = Map.of("schedule", Map.of("1", Map.of("title", "Slot 1")), "defenseSessionId", "1");
+		Map<String, Object> body = Map.of("schedule", List
+				.of(Map.of("title", "Slot 1", "date", "2025-06-01", "time", "09:00", "projectId", 1L, "roomId", 1L)),
+				"defenseSessionId", 1L);
 
 		when(conflictDetectionService.validate(any(), eq("1"))).thenReturn(List.of());
 
-		mockMvc.perform(post("/api/coordinator/schedule/validate").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/api/coordinator/conflicts/validate").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.conflicts.size()").value(0));
+				.andExpect(jsonPath("$.data.size()").value(0));
 	}
 }

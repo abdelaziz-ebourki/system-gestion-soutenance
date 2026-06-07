@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.group.service;
 
+import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
@@ -7,12 +8,12 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
-import java.util.*;
-import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
+import java.util.Collections;
+import java.util.List;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GroupService {
@@ -29,14 +30,15 @@ public class GroupService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Map<String, Object>> findAll() {
-		return groupRepository.findAllWithDetails().stream().map(this::toResponse).collect(Collectors.toList());
+	public List<Group> findAll() {
+		return groupRepository.findAllWithDetails();
 	}
 
+	@Audited(action = "CREATE", entity = "Group")
 	@Transactional
-	public Map<String, Object> create(CreateGroupRequest request) {
+	public Group create(CreateGroupRequest request) {
 		Project project = projectRepository.findById(request.projectId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projet introuvable"));
+				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 
 		List<Student> students = Collections.emptyList();
 		if (request.studentIds() != null) {
@@ -49,34 +51,15 @@ public class GroupService {
 		group.setStudents(students);
 		group.setSessionId(request.sessionId());
 
-		return toResponse(groupRepository.save(group));
+		return groupRepository.save(group);
 	}
 
+	@Audited(action = "DELETE", entity = "Group")
 	@Transactional
 	public void delete(Long id) {
 		if (!groupRepository.existsById(id)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe non trouvé");
+			throw new EntityNotFoundException("Groupe non trouvé");
 		}
 		groupRepository.deleteById(id);
-	}
-
-	private Map<String, Object> toResponse(Group group) {
-		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("id", group.getId());
-		map.put("groupName", group.getGroupName());
-		map.put("projectId", group.getProject() != null ? group.getProject().getId() : null);
-		map.put("projectTitle", group.getProject() != null ? group.getProject().getTitle() : null);
-
-		List<String> studentIds = group.getStudents() != null
-				? group.getStudents().stream().map(s -> String.valueOf(s.getId())).collect(Collectors.toList())
-				: List.of();
-		List<String> studentNames = group.getStudents() != null
-				? group.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-						.collect(Collectors.toList())
-				: List.of();
-		map.put("studentIds", studentIds);
-		map.put("studentNames", studentNames);
-		map.put("sessionId", group.getSessionId());
-		return map;
 	}
 }

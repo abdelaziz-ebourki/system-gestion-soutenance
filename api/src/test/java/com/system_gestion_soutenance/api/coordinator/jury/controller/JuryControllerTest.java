@@ -7,7 +7,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
+import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.service.JuryService;
+import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +46,9 @@ class JuryControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 
+	@MockitoBean
+	private JuryMapper juryMapper;
+
 	@BeforeEach
 	void setUp() {
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
@@ -55,37 +62,51 @@ class JuryControllerTest {
 
 	@Test
 	void findAll_returnsJuries() throws Exception {
-		when(juryService.findAll()).thenReturn(List.of(Map.of("id", 1L, "projectTitle", "Projet Test")));
+		Jury jury = new Jury();
+		jury.setId(1L);
+		when(juryService.findAll()).thenReturn(List.of(jury));
+		when(juryMapper.toDto(jury))
+				.thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
 
 		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].projectTitle").value("Projet Test"));
+				.andExpect(jsonPath("$.data.size()").value(1))
+				.andExpect(jsonPath("$.data[0].projectTitle").value("Projet Test"));
 	}
 
 	@Test
 	void create_returnsCreated() throws Exception {
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
 		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
-		when(juryService.create(any())).thenReturn(Map.of("id", 1L, "projectId", 1L));
+		Jury jury = new Jury();
+		jury.setId(1L);
+		when(juryService.create(any())).thenReturn(jury);
+		when(juryMapper.toDto(jury))
+				.thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
 
 		mockMvc.perform(post("/api/coordinator/juries").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.projectId").value(1L));
+				.andExpect(jsonPath("$.data.projectId").value(1L));
 	}
 
 	@Test
 	void update_returnsJury() throws Exception {
-		Map<String, Object> updates = Map.of("projectId", "2");
-		when(juryService.update(eq(1L), any())).thenReturn(Map.of("id", 1L, "projectId", 2L));
+		UpdateJuryRequest updates = new UpdateJuryRequest(2L, 1L, List.of());
+		Jury jury = new Jury();
+		jury.setId(1L);
+		when(juryService.update(eq(1L), any())).thenReturn(jury);
+		when(juryMapper.toDto(jury))
+				.thenReturn(new JuryResponse(1L, 2L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
 
 		mockMvc.perform(put("/api/coordinator/juries/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.projectId").value(2L));
+				.andExpect(jsonPath("$.data.projectId").value(2L));
 	}
 
 	@Test
-	void delete_returnsNoContent() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(juryService).delete(1L);
 
-		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

@@ -15,7 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 @ExtendWith(MockitoExtension.class)
 class GradeConfigServiceTest {
@@ -47,7 +49,8 @@ class GradeConfigServiceTest {
 	@Test
 	void create_duplicateName_throws() {
 		when(gradeRepository.findByName("Prof")).thenReturn(Optional.of(new Grade()));
-		assertThrows(ResponseStatusException.class, () -> gradeConfigService.create(new CreateGradeRequest("Prof")));
+		assertThrows(InvalidBusinessStateException.class,
+				() -> gradeConfigService.create(new CreateGradeRequest("Prof")));
 	}
 
 	@Test
@@ -64,7 +67,7 @@ class GradeConfigServiceTest {
 	@Test
 	void update_notFound_throws() {
 		when(gradeRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> gradeConfigService.update(99L, new CreateGradeRequest("Name")));
 	}
 
@@ -81,7 +84,7 @@ class GradeConfigServiceTest {
 	@Test
 	void delete_notFound_throws() {
 		when(gradeRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(ResponseStatusException.class, () -> gradeConfigService.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> gradeConfigService.delete(99L));
 		verify(gradeRepository, never()).delete(any());
 	}
 
@@ -91,7 +94,7 @@ class GradeConfigServiceTest {
 		when(gradeRepository.findById(1L)).thenReturn(Optional.of(grade));
 		when(teacherRepository.findByGradeId(1L)).thenReturn(List.of(new Teacher()));
 
-		assertThrows(ResponseStatusException.class, () -> gradeConfigService.delete(1L));
+		assertThrows(ResourceConflictException.class, () -> gradeConfigService.delete(1L));
 		verify(gradeRepository, never()).delete(any());
 	}
 }

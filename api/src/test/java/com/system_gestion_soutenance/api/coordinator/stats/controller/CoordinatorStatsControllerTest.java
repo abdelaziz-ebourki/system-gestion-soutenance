@@ -5,10 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.coordinator.stats.dto.CoordinatorStatsResponse;
 import com.system_gestion_soutenance.api.coordinator.stats.service.CoordinatorStatsService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,10 +49,10 @@ class CoordinatorStatsControllerTest {
 
 	@Test
 	void getStats_returnsStats() throws Exception {
-		when(statsService.getStats()).thenReturn(
-				Map.of("totalProjects", 10L, "totalGroups", 5L, "totalJuries", 8L, "scheduledDefenses", 3L));
+		when(statsService.getStats()).thenReturn(new CoordinatorStatsResponse(10L, 5L, 8L, 3L));
 
 		mockMvc.perform(get("/api/coordinator/stats")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.totalProjects").value(10)).andExpect(jsonPath("$.totalGroups").value(5));
+				.andExpect(jsonPath("$.data.totalProjects").value(10))
+				.andExpect(jsonPath("$.data.totalGroups").value(5));
 	}
 }

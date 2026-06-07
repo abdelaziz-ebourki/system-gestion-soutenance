@@ -13,7 +13,8 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 class GroupServiceTest {
 
@@ -36,7 +37,7 @@ class GroupServiceTest {
 		var result = service.findAll();
 
 		assertEquals(1, result.size());
-		assertEquals("Groupe A", result.get(0).get("groupName"));
+		assertEquals("Groupe A", result.get(0).getGroupName());
 	}
 
 	@Test
@@ -64,8 +65,8 @@ class GroupServiceTest {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L), 100L);
 		var result = service.create(request);
 
-		assertEquals("Groupe A", result.get("groupName"));
-		assertEquals(10L, result.get("projectId"));
+		assertEquals("Groupe A", result.getGroupName());
+		assertEquals(Long.valueOf(10L), result.getProject().getId());
 	}
 
 	@Test
@@ -74,7 +75,7 @@ class GroupServiceTest {
 
 		CreateGroupRequest request = new CreateGroupRequest("Groupe", 99L, List.of(), null);
 
-		assertThrows(ResponseStatusException.class, () -> service.create(request));
+		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
 
 	@Test
@@ -96,23 +97,7 @@ class GroupServiceTest {
 		CreateGroupRequest request = new CreateGroupRequest("Groupe", 1L, null, null);
 		var result = service.create(request);
 
-		assertEquals("Groupe", result.get("groupName"));
-	}
-
-	@Test
-	void findAll_withNullStudents_returnsEmptyStudentLists() {
-		Group group = mock(Group.class);
-		when(group.getId()).thenReturn(1L);
-		when(group.getGroupName()).thenReturn("Groupe A");
-		when(group.getProject()).thenReturn(null);
-		when(group.getStudents()).thenReturn(null);
-		when(group.getSessionId()).thenReturn(null);
-		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
-
-		var result = service.findAll();
-
-		assertEquals(0, ((List<?>) result.get(0).get("studentIds")).size());
-		assertEquals(0, ((List<?>) result.get(0).get("studentNames")).size());
+		assertEquals("Groupe", result.getGroupName());
 	}
 
 	@Test
@@ -128,6 +113,6 @@ class GroupServiceTest {
 	void delete_groupNotFound_throwsException() {
 		when(groupRepository.existsById(99L)).thenReturn(false);
 
-		assertThrows(ResponseStatusException.class, () -> service.delete(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
 	}
 }

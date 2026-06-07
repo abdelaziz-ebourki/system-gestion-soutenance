@@ -3,13 +3,14 @@ package com.system_gestion_soutenance.api.student.defense.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = StudentDefenseController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+@WebMvcTest(controllers = StudentDefenseController.class)
 class StudentDefenseControllerTest {
 
 	@Autowired
@@ -36,10 +35,7 @@ class StudentDefenseControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -49,8 +45,15 @@ class StudentDefenseControllerTest {
 
 	@Test
 	void getDefense_returns200() throws Exception {
-		when(studentDefenseService.getDefense(1L)).thenReturn(Map.of("status", "scheduled"));
-		mockMvc.perform(get("/api/student/defense")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.status").value("scheduled"));
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		when(studentDefenseService.getDefense(1L))
+				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
+						null, List.of(), null, null, null, null, "scheduled", null, null));
+		mockMvc.perform(get("/api/student/defenses").with(authentication(auth))).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.status").value("scheduled"));
 	}
 }

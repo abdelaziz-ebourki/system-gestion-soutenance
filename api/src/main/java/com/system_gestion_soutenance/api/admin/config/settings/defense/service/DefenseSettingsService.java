@@ -3,9 +3,8 @@ package com.system_gestion_soutenance.api.admin.config.settings.defense.service;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.dto.UpdateDefenseSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
-import org.springframework.http.HttpStatus;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class DefenseSettingsService {
@@ -17,8 +16,8 @@ public class DefenseSettingsService {
 	}
 
 	public DefenseSettings get() {
-		return repository.findById(1L).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètres de soutenance non configurés"));
+		return repository.findById(1L)
+				.orElseThrow(() -> new EntityNotFoundException("Paramètres de soutenance non configurés"));
 	}
 
 	public DefenseSettings update(UpdateDefenseSettingsRequest updates) {

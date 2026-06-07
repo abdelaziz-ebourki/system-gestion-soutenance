@@ -5,9 +5,8 @@ import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepos
 import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
-import java.util.HashMap;
+import com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +25,7 @@ public class StudentStatsService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<String, Object> getStats(Long studentId) {
+	public StudentStatsResponse getStats(Long studentId) {
 		List<StudentDocument> docs = documentRepository.findByStudentId(studentId);
 		long missing = docs.stream().filter(d -> "missing".equals(d.getStatus())).count();
 
@@ -36,11 +35,6 @@ public class StudentStatsService {
 
 		boolean hasSchedule = projectId != null && slotAssignmentRepository.existsByProjectId(projectId);
 
-		Map<String, Object> stats = new HashMap<>();
-		stats.put("documentCount", docs.size());
-		stats.put("missingDocuments", missing);
-		stats.put("groupMembers", groupMembers);
-		stats.put("defenseStatus", hasSchedule ? "scheduled" : "pending");
-		return stats;
+		return new StudentStatsResponse(docs.size(), missing, groupMembers, hasSchedule ? "scheduled" : "pending");
 	}
 }

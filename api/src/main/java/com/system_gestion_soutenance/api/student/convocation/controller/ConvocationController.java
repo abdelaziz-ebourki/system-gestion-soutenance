@@ -1,23 +1,24 @@
 package com.system_gestion_soutenance.api.student.convocation.controller;
 
+import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.BaseBusinessException;
 
 @RestController
-@RequestMapping("/api/student/convocation")
-@Tag(name = "Student - Convocation", description = "Génération de la convocation PDF")
+@RequestMapping("/api/student/convocations")
+@Tag(name = "Student - Convocation Management", description = "Endpoints for generating the convocation PDF")
 public class ConvocationController {
 
 	private final StudentDefenseService studentDefenseService;
@@ -27,23 +28,26 @@ public class ConvocationController {
 	}
 
 	@GetMapping
-	@Operation(summary = "Get the convocation PDF for the connected student")
-	public ResponseEntity<byte[]> getConvocation() {
-		Long studentId = getCurrentUserId();
+	@Operation(summary = "Get convocation PDF", description = "Generates and returns the convocation PDF for the connected student.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully generated PDF"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Convocation not available or student not scheduled")})
+	public ResponseEntity<byte[]> getConvocation(@AuthenticationPrincipal User user) {
+		Long studentId = user.getId();
 
-		Map<String, Object> defense;
+		StudentDefenseResponse defense;
 		try {
 			defense = studentDefenseService.getDefense(studentId);
-		} catch (ResponseStatusException e) {
+		} catch (BaseBusinessException e) {
 			return ResponseEntity.notFound().build();
 		}
 
-		if (!"scheduled".equals(defense.get("status"))) {
+		if (!"scheduled".equals(defense.status())) {
 			return ResponseEntity.notFound().build();
 		}
 
-		String placeholder = "Convocation pour l'étudiant: " + studentId
-				+ "\n\nCe document est un placeholder en attendant la génération PDF.";
+		// TODO: implement the actual file template
+		String placeholder = "Convocation pour l'étudiant: " + studentId + "\n\nCe document est un placeholder.";
 		byte[] content = placeholder.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
 		HttpHeaders headers = new HttpHeaders();
@@ -51,9 +55,5 @@ public class ConvocationController {
 		headers.setContentDispositionFormData("filename", "convocation.pdf");
 
 		return new ResponseEntity<>(content, headers, HttpStatus.OK);
-	}
-
-	private Long getCurrentUserId() {
-		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
 	}
 }

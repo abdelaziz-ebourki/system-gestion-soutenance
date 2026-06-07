@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 class DocumentDataServiceTest {
 
@@ -77,7 +77,7 @@ class DocumentDataServiceTest {
 		var result = service.evaluationSheets(request);
 
 		assertEquals(1, result.size());
-		assertEquals("Projet Test", result.get(0).get("projectTitle"));
+		assertEquals("Projet Test", result.get(0).projectTitle());
 	}
 
 	@Test
@@ -94,7 +94,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
 		var result = service.evaluationSheets(request);
 
-		assertNull(result.get(0).get("supervisorName"));
+		assertNull(result.get(0).supervisorName());
 	}
 
 	@Test
@@ -124,7 +124,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
 		var result = service.juryConvocations(request);
 
-		assertEquals("Salle B", result.get(0).get("roomName"));
+		assertEquals("Salle B", result.get(0).roomName());
 	}
 
 	@Test
@@ -146,7 +146,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
 		var result = service.evaluationSheets(request);
 
-		assertEquals(1, ((List<?>) result.get(0).get("studentNames")).size());
+		assertEquals(1, result.get(0).studentNames().size());
 	}
 
 	@Test
@@ -217,7 +217,7 @@ class DocumentDataServiceTest {
 		var result = service.evaluationSheets(request);
 
 		assertEquals(1, result.size());
-		Map<String, Integer> coeffs = (Map<String, Integer>) result.get(0).get("evaluationCoefficients");
+		Map<String, Integer> coeffs = result.get(0).evaluationCoefficients();
 		assertEquals(2, coeffs.get("président"));
 	}
 
@@ -226,7 +226,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(99L), 1L);
 		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.evaluationSheets(request));
+		assertThrows(EntityNotFoundException.class, () -> service.evaluationSheets(request));
 	}
 
 	@Test
@@ -248,7 +248,7 @@ class DocumentDataServiceTest {
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 99L);
 
-		assertThrows(ResponseStatusException.class, () -> service.evaluationSheets(request));
+		assertThrows(EntityNotFoundException.class, () -> service.evaluationSheets(request));
 	}
 
 	@Test
@@ -266,7 +266,7 @@ class DocumentDataServiceTest {
 
 		var result = service.attendanceList(1L);
 
-		assertEquals("Session PFE", result.get("defenseSessionName"));
+		assertEquals("Session PFE", result.defenseSessionName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -288,14 +288,14 @@ class DocumentDataServiceTest {
 
 		var result = service.attendanceList(1L);
 
-		assertEquals("Salle A", ((List<Map<String, Object>>) result.get("slots")).get(0).get("roomName"));
+		assertEquals("Salle A", result.slots().get(0).roomName());
 	}
 
 	@Test
 	void attendanceList_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.attendanceList(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.attendanceList(99L));
 	}
 
 	@Test
@@ -324,7 +324,7 @@ class DocumentDataServiceTest {
 		var result = service.juryConvocations(request);
 
 		assertEquals(1, result.size());
-		assertEquals("Jane Smith", result.get(0).get("teacherName"));
+		assertEquals("Jane Smith", result.get(0).teacherName());
 	}
 
 	@Test
@@ -347,7 +347,7 @@ class DocumentDataServiceTest {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(99L), 1L);
 		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.juryConvocations(request));
+		assertThrows(EntityNotFoundException.class, () -> service.juryConvocations(request));
 	}
 
 	@Test
@@ -365,15 +365,15 @@ class DocumentDataServiceTest {
 
 		var result = service.schedule(1L);
 
-		assertEquals("Session PFE", result.get("defenseSessionName"));
-		assertEquals(1, ((List<?>) result.get("slots")).size());
+		assertEquals("Session PFE", result.defenseSessionName());
+		assertEquals(1, result.slots().size());
 	}
 
 	@Test
 	void schedule_sessionNotFound_throwsException() {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.schedule(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.schedule(99L));
 	}
 
 	@Test
@@ -394,16 +394,16 @@ class DocumentDataServiceTest {
 
 		var result = service.procesVerbal(1L);
 
-		assertNotNull(result.get("settings"));
-		assertEquals("Projet Test", ((Map<?, ?>) result.get("grade")).get("projectTitle"));
-		assertEquals("John Doe", result.get("supervisorName"));
+		assertNotNull(result.settings());
+		assertEquals("Projet Test", result.grade().projectTitle());
+		assertEquals("John Doe", result.supervisorName());
 	}
 
 	@Test
 	void procesVerbal_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(ResponseStatusException.class, () -> service.procesVerbal(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.procesVerbal(99L));
 	}
 
 	@Test
@@ -428,6 +428,6 @@ class DocumentDataServiceTest {
 
 		var result = service.procesVerbal(1L);
 
-		assertEquals(1, ((List<?>) result.get("juryMembers")).size());
+		assertEquals(1, result.juryMembers().size());
 	}
 }

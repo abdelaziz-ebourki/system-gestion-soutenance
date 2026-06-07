@@ -30,8 +30,9 @@ public class Project {
 	@Column(name = "defense_type", nullable = false)
 	private String defenseType;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String status = "pending";
+	private ProjectStatus status = ProjectStatus.PENDING;
 
 	@ManyToOne
 	@JoinColumn(name = "supervisor_id")

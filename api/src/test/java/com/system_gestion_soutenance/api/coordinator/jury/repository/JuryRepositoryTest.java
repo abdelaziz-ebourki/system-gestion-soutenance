@@ -13,6 +13,7 @@ import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
@@ -88,7 +89,7 @@ class JuryRepositoryTest {
 		savedProject.setTitle("Projet Test");
 		savedProject.setDescription("Description");
 		savedProject.setDefenseType("PFE");
-		savedProject.setStatus("pending");
+		savedProject.setStatus(ProjectStatus.PENDING);
 		savedProject.setSupervisor(savedTeacher);
 		savedProject.setStudents(List.of(savedStudent));
 		em.persist(savedProject);

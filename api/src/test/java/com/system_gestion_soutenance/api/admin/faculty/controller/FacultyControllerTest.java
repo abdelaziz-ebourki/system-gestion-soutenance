@@ -47,7 +47,7 @@ class FacultyControllerTest {
 		when(configMapper.toFacultyDto(faculty)).thenReturn(
 				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(get("/api/admin/faculties")).andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].name").value("FS"));
+				.andExpect(jsonPath("$.data[0].name").value("FS"));
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class FacultyControllerTest {
 		when(configMapper.toFacultyDto(faculty)).thenReturn(
 				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(get("/api/admin/faculties/1")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("FS"));
+				.andExpect(jsonPath("$.data.name").value("FS"));
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class FacultyControllerTest {
 				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(post("/api/admin/faculties").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"FS\",\"code\":\"FS\"}")).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.name").value("FS"));
+				.andExpect(jsonPath("$.data.name").value("FS"));
 	}
 
 	@Test
@@ -79,12 +79,13 @@ class FacultyControllerTest {
 				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "New", "N", null, null));
 		mockMvc.perform(put("/api/admin/faculties/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"name\":\"New\",\"code\":\"N\"}")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("New"));
+				.andExpect(jsonPath("$.data.name").value("New"));
 	}
 
 	@Test
-	void delete_returns204() throws Exception {
+	void delete_returns200() throws Exception {
 		doNothing().when(facultyService).delete(1L);
-		mockMvc.perform(delete("/api/admin/faculties/1")).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/api/admin/faculties/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

@@ -25,7 +25,6 @@ class GeneralSettingsControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-
 	@MockitoBean
 	private GeneralSettingsService service;
 

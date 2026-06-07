@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.admin.audit.entity.AuditLog;
 import com.system_gestion_soutenance.api.admin.audit.service.AuditLogService;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -40,6 +41,8 @@ class AuditLogControllerTest {
 	private UserRepository userRepository;
 	@MockitoBean
 	private com.system_gestion_soutenance.api.common.mapper.AuditLogMapper auditLogMapper;
+	@MockitoBean
+	private SecurityService securityService;
 
 	@AfterEach
 	void tearDown() {
@@ -51,7 +54,7 @@ class AuditLogControllerTest {
 		when(service.getAuditLogs(0, 20)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 20));
 
 		mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.items").isArray());
+				.andExpect(jsonPath("$.data.items").isArray());
 	}
 
 	@Test
@@ -65,10 +68,13 @@ class AuditLogControllerTest {
 				new AuditLogDto(1L, "CREATE", "User", 1L, "admin@test.com", "details", LocalDateTime.now()));
 
 		mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.items").isArray()).andExpect(jsonPath("$.items.length()").value(1))
-				.andExpect(jsonPath("$.items[0].id").value(1)).andExpect(jsonPath("$.items[0].action").value("CREATE"))
-				.andExpect(jsonPath("$.items[0].entity").value("User")).andExpect(jsonPath("$.total").value(1))
-				.andExpect(jsonPath("$.currentPage").value(0)).andExpect(jsonPath("$.size").value(20));
+				.andExpect(jsonPath("$.data.items").isArray()).andExpect(jsonPath("$.data.items.length()").value(1))
+				.andExpect(jsonPath("$.data.items[0].id").value(1))
+				.andExpect(jsonPath("$.data.items[0].action").value("CREATE"))
+				.andExpect(jsonPath("$.data.items[0].entity").value("User"))
+				.andExpect(jsonPath("$.data.items[0].performedByEmail").value("admin@test.com"))
+				.andExpect(jsonPath("$.data.total").value(1)).andExpect(jsonPath("$.data.currentPage").value(0))
+				.andExpect(jsonPath("$.data.size").value(20));
 	}
 
 	@Test
@@ -76,7 +82,7 @@ class AuditLogControllerTest {
 		when(service.save(any())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"a@a.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"a@a.com"}
 				""")).andExpect(status().isCreated());
 	}
 
@@ -90,10 +96,11 @@ class AuditLogControllerTest {
 		when(auditLogMapper.toDto(savedLog)).thenReturn(dto);
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"a@a.com"}
-				""")).andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(1))
-				.andExpect(jsonPath("$.action").value("DELETE")).andExpect(jsonPath("$.entity").value("User"))
-				.andExpect(jsonPath("$.entityId").value(1)).andExpect(jsonPath("$.adminEmail").value("a@a.com"));
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"a@a.com"}
+				""")).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+				.andExpect(jsonPath("$.data.action").value("DELETE")).andExpect(jsonPath("$.data.entity").value("User"))
+				.andExpect(jsonPath("$.data.entityId").value(1))
+				.andExpect(jsonPath("$.data.performedByEmail").value("a@a.com"));
 	}
 
 	@Test
@@ -108,15 +115,16 @@ class AuditLogControllerTest {
 		when(auth.isAuthenticated()).thenReturn(true);
 		when(auth.getPrincipal()).thenReturn("admin@test.com");
 		SecurityContextHolder.getContext().setAuthentication(auth);
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn("admin@test.com");
 
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"fallback@test.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"fallback@test.com"}
 				""")).andExpect(status().isCreated());
 
-		assertThat(captor.getValue().getAdminEmail()).isEqualTo("admin@test.com");
+		assertThat(captor.getValue().getPerformedByEmail()).isEqualTo("admin@test.com");
 	}
 
 	@Test
@@ -128,15 +136,16 @@ class AuditLogControllerTest {
 		when(auth.isAuthenticated()).thenReturn(true);
 		when(auth.getPrincipal()).thenReturn(user);
 		SecurityContextHolder.getContext().setAuthentication(auth);
+		when(securityService.getOptionalCurrentUserEmail()).thenReturn("user@test.com");
 
 		ArgumentCaptor<AuditLog> captor = ArgumentCaptor.forClass(AuditLog.class);
 		when(service.save(captor.capture())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"fallback@test.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"fallback@test.com"}
 				""")).andExpect(status().isCreated());
 
-		assertThat(captor.getValue().getAdminEmail()).isEqualTo("user@test.com");
+		assertThat(captor.getValue().getPerformedByEmail()).isEqualTo("user@test.com");
 	}
 
 	@Test
@@ -147,9 +156,9 @@ class AuditLogControllerTest {
 		when(service.save(captor.capture())).thenReturn(mock());
 
 		mockMvc.perform(post("/api/admin/audit-logs").contentType(MediaType.APPLICATION_JSON).content("""
-				{"action":"DELETE","entity":"User","entityId":1,"adminEmail":"explicit@test.com"}
+				{"action":"DELETE","entity":"User","entityId":1,"performedByEmail":"explicit@test.com"}
 				""")).andExpect(status().isCreated());
 
-		assertThat(captor.getValue().getAdminEmail()).isEqualTo("explicit@test.com");
+		assertThat(captor.getValue().getPerformedByEmail()).isEqualTo("explicit@test.com");
 	}
 }

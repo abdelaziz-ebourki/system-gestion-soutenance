@@ -16,8 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
 import java.util.Optional;
 
@@ -95,10 +94,9 @@ class UserProfileServiceTest {
 		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, 1L, null, null, null);
 		when(majorRepository.findById(1L)).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userProfileService.updateStudentProfile(student, request));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Filière introuvable", ex.getReason());
+		assertEquals("Filière introuvable", ex.getMessage());
 	}
 
 	@Test
@@ -121,9 +119,8 @@ class UserProfileServiceTest {
 		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, 1L);
 		when(departmentRepository.findById(1L)).thenReturn(Optional.empty());
 
-		ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userProfileService.updateTeacherProfile(teacher, request));
-		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-		assertEquals("Département introuvable", ex.getReason());
+		assertEquals("Département introuvable", ex.getMessage());
 	}
 }
