@@ -31,7 +31,7 @@ public class StudentDocumentController {
 	@GetMapping
 	@Operation(summary = "List documents", description = "Retrieves all documents uploaded by the connected student.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved documents")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved documents")})
 	public ApiResponse<List<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user) {
 		return ApiResponse
 				.success(studentDocumentService.findByStudent(user.getId()).stream().map(mapper::toDto).toList());
@@ -40,9 +40,9 @@ public class StudentDocumentController {
 	@PostMapping("/{id}/attachments")
 	@Operation(summary = "Upload attachment", description = "Uploads a file as an attachment to a specific document.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File uploaded successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File uploaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
 	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
 			@RequestParam("file") MultipartFile file) {
 		StudentDocument doc = studentDocumentService.upload(id, file);

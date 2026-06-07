@@ -32,8 +32,8 @@ public class UserAdminController {
 	@GetMapping
 	@Operation(summary = "List users", description = "Retrieves a paginated list of users. Can be filtered by role or search term.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
 	public PaginatedResponse<UserDto> listUsers(@RequestParam(required = false) String role,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
 			@RequestParam(required = false) String search) {
@@ -45,9 +45,9 @@ public class UserAdminController {
 	@PostMapping
 	@Operation(summary = "Create user", description = "Creates a new user in the system with the specified role and details.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid user data"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "User already exists")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid user data"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "User already exists")})
 	public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest request) {
 		UserDto user = userMapper.toDto(userService.createUser(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(user);
@@ -56,8 +56,8 @@ public class UserAdminController {
 	@PostMapping("/bulk")
 	@Operation(summary = "Bulk create users", description = "Creates multiple users of the same role in a single request.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Users created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Users created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk data")})
 	public ResponseEntity<List<UserDto>> bulkCreate(@Valid @RequestBody BulkCreateRequest request) {
 		List<UserDto> users = userService.bulkCreate(request).stream().map(userMapper::toDto).toList();
 		return ResponseEntity.status(HttpStatus.CREATED).body(users);
@@ -66,9 +66,9 @@ public class UserAdminController {
 	@PutMapping("/{id}")
 	@Operation(summary = "Update user", description = "Updates information for an existing user.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User updated successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public UserDto updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
 		return userMapper.toDto(userService.updateUser(id, request));
 	}
@@ -76,8 +76,8 @@ public class UserAdminController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete user", description = "Permanently removes a user from the system.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "User deleted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "User deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")})
 	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 		userService.deleteUser(id);
 		return ResponseEntity.noContent().build();

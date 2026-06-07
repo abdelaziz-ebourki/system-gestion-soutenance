@@ -36,7 +36,7 @@ public class AuditLogController {
 	@GetMapping
 	@Operation(summary = "List audit logs", description = "Retrieves a paginated list of system audit logs.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved audit logs")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved audit logs")})
 	public ApiResponse<PaginatedResponse<AuditLogDto>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int limit) {
 		PaginatedResponse<AuditLog> response = service.getAuditLogs(page, limit);
@@ -49,8 +49,8 @@ public class AuditLogController {
 	@PostMapping
 	@Operation(summary = "Create audit log", description = "Manually creates an audit log entry.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Audit log created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid log data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Audit log created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid log data")})
 	public ResponseEntity<ApiResponse<AuditLogDto>> create(@Valid @RequestBody AuditLogRequest request) {
 		AuditLog log = new AuditLog();
 		log.setAction(request.action());

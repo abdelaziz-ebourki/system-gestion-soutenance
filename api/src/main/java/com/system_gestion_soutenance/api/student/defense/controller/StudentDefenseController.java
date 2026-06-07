@@ -24,7 +24,7 @@ public class StudentDefenseController {
 	@GetMapping
 	@Operation(summary = "Get defense info", description = "Retrieves defense info (project, jury, schedule, status) for the connected student.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved defense info")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved defense info")})
 	public ApiResponse<StudentDefenseResponse> getDefense(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(studentDefenseService.getDefense(user.getId()));
 	}

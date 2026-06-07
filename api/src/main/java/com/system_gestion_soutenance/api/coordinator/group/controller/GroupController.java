@@ -31,7 +31,7 @@ public class GroupController {
 	@GetMapping
 	@Operation(summary = "List groups", description = "Retrieves all student groups for the current session.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved groups")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved groups")})
 	public ApiResponse<List<GroupResponse>> findAll() {
 		List<Group> groups = groupService.findAll();
 		return ApiResponse.success("Liste des groupes récupérée avec succès",
@@ -41,8 +41,8 @@ public class GroupController {
 	@PostMapping
 	@Operation(summary = "Create group", description = "Creates a new student group.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Group created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid group data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Group created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid group data")})
 	public ResponseEntity<ApiResponse<GroupResponse>> create(@Valid @RequestBody CreateGroupRequest request) {
 		Group group = groupService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -52,8 +52,8 @@ public class GroupController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete group", description = "Removes a student group from the system.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group deleted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		groupService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Groupe supprimé avec succès", null));

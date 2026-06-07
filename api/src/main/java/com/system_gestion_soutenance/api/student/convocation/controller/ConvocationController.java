@@ -30,8 +30,8 @@ public class ConvocationController {
 	@GetMapping
 	@Operation(summary = "Get convocation PDF", description = "Generates and returns the convocation PDF for the connected student.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully generated PDF"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Convocation not available or student not scheduled")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully generated PDF"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Convocation not available or student not scheduled")})
 	public ResponseEntity<byte[]> getConvocation(@AuthenticationPrincipal User user) {
 		Long studentId = user.getId();
 

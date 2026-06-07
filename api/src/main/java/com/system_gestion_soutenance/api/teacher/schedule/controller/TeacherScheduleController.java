@@ -24,7 +24,7 @@ public class TeacherScheduleController {
 	@GetMapping
 	@Operation(summary = "Get defense schedule", description = "Retrieves the defense schedule for the connected teacher.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
 	public ApiResponse<TeacherScheduleResponse> get(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(scheduleService.getSchedule(user.getId()));
 	}

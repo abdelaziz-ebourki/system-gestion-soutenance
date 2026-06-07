@@ -25,8 +25,8 @@ public class UserCoordinatorController {
 	@GetMapping
 	@Operation(summary = "List users", description = "Retrieves a paginated list of users filtered by role (STUDENT or TEACHER).")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
 	public PaginatedResponse<UserDto> listUsers(@RequestParam String role, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5000") int limit, @RequestParam(required = false) String search) {
 		var userPage = userService.listUsers(role, page, limit, search);

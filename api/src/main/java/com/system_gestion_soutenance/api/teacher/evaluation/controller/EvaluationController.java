@@ -33,7 +33,7 @@ public class EvaluationController {
 	@GetMapping
 	@Operation(summary = "List evaluations", description = "Retrieves all evaluations assigned to the connected teacher.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved evaluations")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved evaluations")})
 	public ApiResponse<List<EvaluationResponse>> findByTeacher(@AuthenticationPrincipal User user) {
 		Long teacherId = user.getId();
 		List<Evaluation> evaluations = evaluationService.findByTeacher(teacherId);
@@ -44,9 +44,9 @@ public class EvaluationController {
 	@PostMapping("/{id}")
 	@Operation(summary = "Submit evaluation", description = "Submits the score and comments for a specific evaluation.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Evaluation submitted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid evaluation data"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Evaluation not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Evaluation submitted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid evaluation data"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Evaluation not found")})
 	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id,
 			@Valid @RequestBody EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationService.submit(id, request);

@@ -33,7 +33,7 @@ public class RoomController {
 	@GetMapping
 	@Operation(summary = "List rooms", description = "Retrieves a paginated list of available rooms.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved rooms")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved rooms")})
 	public ApiResponse<PaginatedResponse<RoomResponse>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int limit) {
 		PaginatedResponse<Room> result = roomService.findAll(page, limit);
@@ -46,8 +46,8 @@ public class RoomController {
 	@PostMapping
 	@Operation(summary = "Create room", description = "Creates a new room.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Room created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid room data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Room created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid room data")})
 	public ResponseEntity<ApiResponse<RoomResponse>> create(@Valid @RequestBody CreateRoomRequest request) {
 		Room room = roomService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,8 +57,8 @@ public class RoomController {
 	@PostMapping("/bulk")
 	@Operation(summary = "Bulk create rooms", description = "Creates multiple rooms in a single request.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Rooms created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Rooms created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid bulk data")})
 	public ResponseEntity<ApiResponse<List<RoomResponse>>> bulkCreate(@Valid @RequestBody BulkRoomRequest request) {
 		List<Room> rooms = roomService.bulkCreate(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -68,9 +68,9 @@ public class RoomController {
 	@PutMapping("/{id}")
 	@Operation(summary = "Update room", description = "Updates an existing room's details.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room updated successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<RoomResponse> update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
 		return ApiResponse.success("Salle mise à jour avec succès", roomMapper.toDto(roomService.update(id, request)));
 	}
@@ -78,8 +78,8 @@ public class RoomController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete room", description = "Removes a room from the system.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room deleted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		roomService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Salle supprimée avec succès", null));

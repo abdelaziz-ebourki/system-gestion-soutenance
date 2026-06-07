@@ -36,7 +36,7 @@ public class ScheduleController {
 	@GetMapping
 	@Operation(summary = "Get current schedule", description = "Retrieves the currently saved schedule for the active session.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
 	public ApiResponse<List<ScheduleResponse>> get() {
 		List<SlotAssignment> slots = scheduleService.getSchedule();
 		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
@@ -49,8 +49,8 @@ public class ScheduleController {
 	@PostMapping
 	@Operation(summary = "Save schedule", description = "Saves a new schedule after validating for conflicts.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule saved successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Conflicts detected in the proposed schedule")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule saved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Conflicts detected in the proposed schedule")})
 	public ResponseEntity<ApiResponse<List<ScheduleResponse>>> save(@Valid @RequestBody ScheduleRequest request) {
 		List<ConflictDetailResponse> conflicts = conflictDetectionService.validate(request,
 				request.defenseSessionId().toString());
@@ -72,8 +72,8 @@ public class ScheduleController {
 	@PostMapping("/generation")
 	@Operation(summary = "Auto-generate schedule", description = "Triggers the automatic generation of a proposed schedule based on constraints.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule generated successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid session ID")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule generated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid session ID")})
 	public ApiResponse<List<ScheduleResponse>> autoGenerate(@Valid @RequestBody DefenseSessionIdRequest request) {
 		List<ScheduleResponse> schedule = scheduleService.autoGenerate(request.defenseSessionId());
 		return ApiResponse.success(schedule);
@@ -82,8 +82,8 @@ public class ScheduleController {
 	@PatchMapping("/publication")
 	@Operation(summary = "Publish schedule", description = "Marks the current schedule as published and visible to students/teachers.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule published successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Session not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule published successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Session not found")})
 	public ApiResponse<Void> publish(@Valid @RequestBody DefenseSessionIdRequest request) {
 		scheduleService.publish(request.defenseSessionId());
 		return ApiResponse.success("Planning publié avec succès.", null);

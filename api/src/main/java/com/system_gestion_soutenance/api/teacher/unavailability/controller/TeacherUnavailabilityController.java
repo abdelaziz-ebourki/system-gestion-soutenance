@@ -38,7 +38,7 @@ public class TeacherUnavailabilityController {
 	@GetMapping
 	@Operation(summary = "Get unavailabilities", description = "Retrieves unavailability slots for the connected teacher.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved unavailabilities")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved unavailabilities")})
 	public ApiResponse<TeacherUnavailabilityResponse> get(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(toResponse(service.getByTeacher(user.getId())));
 	}
@@ -46,8 +46,8 @@ public class TeacherUnavailabilityController {
 	@PostMapping
 	@Operation(summary = "Save unavailabilities", description = "Saves or updates unavailability slots for the connected teacher.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Unavailabilities saved successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid unavailability data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Unavailabilities saved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid unavailability data")})
 	public ApiResponse<TeacherUnavailabilityResponse> save(@Valid @RequestBody TeacherUnavailabilityRequest request,
 			@AuthenticationPrincipal User user) {
 		return ApiResponse.success(toResponse(service.saveForTeacher(user.getId(), request)));

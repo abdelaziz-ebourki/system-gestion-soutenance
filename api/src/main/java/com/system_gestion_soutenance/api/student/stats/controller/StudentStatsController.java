@@ -24,7 +24,7 @@ public class StudentStatsController {
 	@GetMapping
 	@Operation(summary = "Get personal statistics", description = "Retrieves personal statistics for the connected student.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")})
 	public ApiResponse<StudentStatsResponse> getStats(@AuthenticationPrincipal User user) {
 		return ApiResponse.success(statsService.getStats(user.getId()));
 	}

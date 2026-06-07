@@ -31,7 +31,7 @@ public class MajorConfigController {
 	@GetMapping
 	@Operation(summary = "List majors", description = "Retrieves all configured academic majors.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved majors")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved majors")})
 	public ApiResponse<List<MajorDto>> findAll() {
 		List<MajorDto> majors = majorConfigService.findAll().stream().map(configMapper::toMajorDto).toList();
 		return ApiResponse.success("Liste des filières récupérée avec succès", majors);
@@ -40,8 +40,8 @@ public class MajorConfigController {
 	@PostMapping
 	@Operation(summary = "Create major", description = "Creates a new academic major.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Major created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid major data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Major created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid major data")})
 	public ResponseEntity<ApiResponse<MajorDto>> create(@Valid @RequestBody CreateMajorRequest request) {
 		Major major = majorConfigService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -51,9 +51,9 @@ public class MajorConfigController {
 	@PutMapping("/{id}")
 	@Operation(summary = "Update major", description = "Updates an existing major's details.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Major updated successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Major not found"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Major updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Major not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<MajorDto> update(@PathVariable Long id, @Valid @RequestBody CreateMajorRequest request) {
 		return ApiResponse.success("Filière mise à jour avec succès",
 				configMapper.toMajorDto(majorConfigService.update(id, request)));
@@ -62,8 +62,8 @@ public class MajorConfigController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete major", description = "Removes a major from the system.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Major deleted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Major not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Major deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Major not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		majorConfigService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Filière supprimée avec succès", null));

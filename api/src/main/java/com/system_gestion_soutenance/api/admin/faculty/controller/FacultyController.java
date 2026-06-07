@@ -31,7 +31,7 @@ public class FacultyController {
 	@GetMapping
 	@Operation(summary = "List faculties", description = "Retrieves all academic faculties.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculties")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculties")})
 	public ApiResponse<List<FacultyDto>> findAll() {
 		List<FacultyDto> faculties = facultyService.findAll().stream().map(configMapper::toFacultyDto).toList();
 		return ApiResponse.success("Liste des facultés récupérée avec succès", faculties);
@@ -40,8 +40,8 @@ public class FacultyController {
 	@GetMapping("/{id}")
 	@Operation(summary = "Get faculty", description = "Retrieves details of a specific faculty by its ID.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculty"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculty"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found")})
 	public ApiResponse<FacultyDto> findById(@PathVariable Long id) {
 		return ApiResponse.success("Faculté récupérée avec succès",
 				configMapper.toFacultyDto(facultyService.findById(id)));
@@ -50,8 +50,8 @@ public class FacultyController {
 	@PostMapping
 	@Operation(summary = "Create faculty", description = "Creates a new academic faculty.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Faculty created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid faculty data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Faculty created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid faculty data")})
 	public ResponseEntity<ApiResponse<FacultyDto>> create(@Valid @RequestBody CreateFacultyRequest request) {
 		Faculty faculty = facultyService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -61,9 +61,9 @@ public class FacultyController {
 	@PutMapping("/{id}")
 	@Operation(summary = "Update faculty", description = "Updates an existing faculty's details.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty updated successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<FacultyDto> update(@PathVariable Long id, @Valid @RequestBody CreateFacultyRequest request) {
 		return ApiResponse.success("Faculté mise à jour avec succès",
 				configMapper.toFacultyDto(facultyService.update(id, request)));
@@ -72,8 +72,8 @@ public class FacultyController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete faculty", description = "Removes a faculty from the system.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty deleted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		facultyService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Faculté supprimée avec succès", null));

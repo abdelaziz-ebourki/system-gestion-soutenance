@@ -34,7 +34,7 @@ public class ProjectController {
 	@GetMapping
 	@Operation(summary = "List projects", description = "Retrieves all projects assigned for the current session.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved projects")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved projects")})
 	public ApiResponse<List<ProjectResponse>> findAll() {
 		List<Project> projects = projectService.findAll();
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(projects);
@@ -45,8 +45,8 @@ public class ProjectController {
 	@PostMapping
 	@Operation(summary = "Create project", description = "Creates a new project.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Project created successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid project data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Project created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid project data")})
 	public ResponseEntity<ApiResponse<ProjectResponse>> create(@Valid @RequestBody CreateProjectRequest request) {
 		Project project = projectService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -56,9 +56,9 @@ public class ProjectController {
 	@PutMapping("/{id}")
 	@Operation(summary = "Update project", description = "Updates a project's details by its ID.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project updated successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<ProjectResponse> update(@PathVariable Long id,
 			@Valid @RequestBody UpdateProjectRequest updates) {
 		Project project = projectService.update(id, updates);
@@ -69,8 +69,8 @@ public class ProjectController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete project", description = "Removes a project from the system.")
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project deleted successfully"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		projectService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Projet supprimé avec succès", null));
