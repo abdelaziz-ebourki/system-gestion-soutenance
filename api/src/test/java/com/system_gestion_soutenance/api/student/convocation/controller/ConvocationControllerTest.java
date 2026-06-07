@@ -3,9 +3,10 @@ package com.system_gestion_soutenance.api.student.convocation.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -22,9 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
-@WebMvcTest(controllers = ConvocationController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+@WebMvcTest(controllers = ConvocationController.class)
 class ConvocationControllerTest {
 
 	@Autowired
@@ -35,16 +34,10 @@ class ConvocationControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
-	@MockitoBean
-	private SecurityService securityService;
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-		when(securityService.getCurrentUserId()).thenReturn(1L);
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -54,24 +47,39 @@ class ConvocationControllerTest {
 
 	@Test
 	void getConvocation_scheduled_returnsPdf() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "scheduled", null, null));
-		mockMvc.perform(get("/api/student/convocation")).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(content().contentType("application/pdf"));
 	}
 
 	@Test
 	void getConvocation_defenseNotFound_returns404() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(studentDefenseService.getDefense(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
-		mockMvc.perform(get("/api/student/convocation")).andExpect(status().isNotFound());
+		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isNotFound());
 	}
 
 	@Test
 	void getConvocation_notScheduled_returns404() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "pending", null, null));
-		mockMvc.perform(get("/api/student/convocation")).andExpect(status().isNotFound());
+		mockMvc.perform(get("/api/student/convocation").with(authentication(auth))).andExpect(status().isNotFound());
 	}
 }

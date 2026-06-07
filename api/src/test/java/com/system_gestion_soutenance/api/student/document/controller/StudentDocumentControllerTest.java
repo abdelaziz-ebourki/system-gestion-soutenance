@@ -3,9 +3,10 @@ package com.system_gestion_soutenance.api.student.document.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
@@ -23,9 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = StudentDocumentController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+@WebMvcTest(controllers = StudentDocumentController.class)
 class StudentDocumentControllerTest {
 
 	@Autowired
@@ -37,17 +36,11 @@ class StudentDocumentControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 	@MockitoBean
-	private SecurityService securityService;
-	@MockitoBean
 	private com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper studentDocumentMapper;
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-		when(securityService.getCurrentUserId()).thenReturn(1L);
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -57,12 +50,22 @@ class StudentDocumentControllerTest {
 
 	@Test
 	void findByStudent_returnsList() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(studentDocumentService.findByStudent(1L)).thenReturn(List.of());
-		mockMvc.perform(get("/api/student/documents")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/student/documents").with(authentication(auth))).andExpect(status().isOk());
 	}
 
 	@Test
 	void upload_returns200() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		StudentDocument doc = new StudentDocument();
 		doc.setId(1L);
 		doc.setStatus("submitted");
@@ -73,7 +76,7 @@ class StudentDocumentControllerTest {
 		when(studentDocumentMapper.toDto(doc)).thenReturn(dto);
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());
-		mockMvc.perform(multipart("/api/student/documents/1/upload").file(file)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.status").value("submitted"));
+		mockMvc.perform(multipart("/api/student/documents/1/upload").file(file).with(authentication(auth)).with(csrf()))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("submitted"));
 	}
 }

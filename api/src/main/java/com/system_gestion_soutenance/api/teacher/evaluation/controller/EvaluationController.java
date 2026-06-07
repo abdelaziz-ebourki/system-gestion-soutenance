@@ -2,17 +2,18 @@ package com.system_gestion_soutenance.api.teacher.evaluation.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.EvaluationMapper;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.service.EvaluationService;
+import com.system_gestion_soutenance.api.user.entity.User;
 import java.util.List;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,20 +22,17 @@ import org.springframework.web.bind.annotation.*;
 public class EvaluationController {
 
 	private final EvaluationService evaluationService;
-	private final SecurityService securityService;
 	private final EvaluationMapper evaluationMapper;
 
-	public EvaluationController(EvaluationService evaluationService, SecurityService securityService,
-			EvaluationMapper evaluationMapper) {
+	public EvaluationController(EvaluationService evaluationService, EvaluationMapper evaluationMapper) {
 		this.evaluationService = evaluationService;
-		this.securityService = securityService;
 		this.evaluationMapper = evaluationMapper;
 	}
 
 	@GetMapping
 	@Operation(summary = "List evaluations assigned to the connected teacher")
-	public ApiResponse<List<EvaluationResponse>> findByTeacher() {
-		Long teacherId = securityService.getCurrentUserId();
+	public ApiResponse<List<EvaluationResponse>> findByTeacher(@AuthenticationPrincipal User user) {
+		Long teacherId = user.getId();
 		List<Evaluation> evaluations = evaluationService.findByTeacher(teacherId);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(evaluations);
 		return ApiResponse.success(evaluations.stream().map(e -> evaluationMapper.toDto(e, projectMap)).toList());

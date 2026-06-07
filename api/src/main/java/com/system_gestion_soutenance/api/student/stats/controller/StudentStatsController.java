@@ -1,11 +1,12 @@
 package com.system_gestion_soutenance.api.student.stats.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse;
 import com.system_gestion_soutenance.api.student.stats.service.StudentStatsService;
+import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,16 +15,14 @@ import org.springframework.web.bind.annotation.*;
 public class StudentStatsController {
 
 	private final StudentStatsService statsService;
-	private final SecurityService securityService;
 
-	public StudentStatsController(StudentStatsService statsService, SecurityService securityService) {
+	public StudentStatsController(StudentStatsService statsService) {
 		this.statsService = statsService;
-		this.securityService = securityService;
 	}
 
 	@GetMapping
 	@Operation(summary = "Get personal statistics for the connected student")
-	public ApiResponse<StudentStatsResponse> getStats() {
-		return ApiResponse.success(statsService.getStats(securityService.getCurrentUserId()));
+	public ApiResponse<StudentStatsResponse> getStats(@AuthenticationPrincipal User user) {
+		return ApiResponse.success(statsService.getStats(user.getId()));
 	}
 }

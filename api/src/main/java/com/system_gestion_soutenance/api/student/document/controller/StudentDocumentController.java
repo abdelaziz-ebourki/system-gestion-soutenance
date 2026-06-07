@@ -2,14 +2,15 @@ package com.system_gestion_soutenance.api.student.document.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
+import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,20 +21,17 @@ public class StudentDocumentController {
 
 	private final StudentDocumentService studentDocumentService;
 	private final StudentDocumentMapper mapper;
-	private final SecurityService securityService;
 
-	public StudentDocumentController(StudentDocumentService studentDocumentService, StudentDocumentMapper mapper,
-			SecurityService securityService) {
+	public StudentDocumentController(StudentDocumentService studentDocumentService, StudentDocumentMapper mapper) {
 		this.studentDocumentService = studentDocumentService;
 		this.mapper = mapper;
-		this.securityService = securityService;
 	}
 
 	@GetMapping
 	@Operation(summary = "List documents for the connected student")
-	public ApiResponse<List<StudentDocumentDto>> findByStudent() {
-		return ApiResponse.success(studentDocumentService.findByStudent(securityService.getCurrentUserId()).stream()
-				.map(mapper::toDto).toList());
+	public ApiResponse<List<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user) {
+		return ApiResponse
+				.success(studentDocumentService.findByStudent(user.getId()).stream().map(mapper::toDto).toList());
 	}
 
 	@PostMapping("/{id}/upload")

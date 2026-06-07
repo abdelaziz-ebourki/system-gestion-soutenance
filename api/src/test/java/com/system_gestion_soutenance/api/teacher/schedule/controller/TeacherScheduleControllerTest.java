@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.teacher.schedule.service.TeacherScheduleService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -33,8 +32,6 @@ class TeacherScheduleControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
-	@MockitoBean
-	private SecurityService securityService;
 
 	@BeforeEach
 	void setUp() {
@@ -42,7 +39,6 @@ class TeacherScheduleControllerTest {
 		user.setId(1L);
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-		when(securityService.getCurrentUserId()).thenReturn(1L);
 	}
 
 	@AfterEach

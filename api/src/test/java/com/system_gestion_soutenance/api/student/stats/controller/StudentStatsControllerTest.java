@@ -3,9 +3,10 @@ package com.system_gestion_soutenance.api.student.stats.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.student.stats.service.StudentStatsService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -21,9 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = StudentStatsController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+@WebMvcTest(controllers = StudentStatsController.class)
 class StudentStatsControllerTest {
 
 	@Autowired
@@ -34,16 +33,10 @@ class StudentStatsControllerTest {
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
 	private UserRepository userRepository;
-	@MockitoBean
-	private SecurityService securityService;
 
 	@BeforeEach
 	void setUp() {
-		User user = new User();
-		user.setId(1L);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
-		when(securityService.getCurrentUserId()).thenReturn(1L);
+		// No more manual SecurityContextHolder setup
 	}
 
 	@AfterEach
@@ -53,9 +46,14 @@ class StudentStatsControllerTest {
 
 	@Test
 	void getStats_returns200() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(statsService.getStats(1L)).thenReturn(
 				new com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse(3, 0, 2, "scheduled"));
-		mockMvc.perform(get("/api/student/stats")).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/stats").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.documentCount").value(3));
 	}
 }

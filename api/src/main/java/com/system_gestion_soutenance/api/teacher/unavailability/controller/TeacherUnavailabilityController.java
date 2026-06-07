@@ -1,17 +1,18 @@
 package com.system_gestion_soutenance.api.teacher.unavailability.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
-import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest;
 import com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityResponse;
 import com.system_gestion_soutenance.api.teacher.unavailability.service.TeacherUnavailabilityService;
+import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 public class TeacherUnavailabilityController {
 
 	private final TeacherUnavailabilityService service;
-	private final SecurityService securityService;
 
-	public TeacherUnavailabilityController(TeacherUnavailabilityService service, SecurityService securityService) {
+	public TeacherUnavailabilityController(TeacherUnavailabilityService service) {
 		this.service = service;
-		this.securityService = securityService;
 	}
 
 	private static TeacherUnavailabilityResponse toResponse(List<Unavailability> entities) {
@@ -37,13 +36,14 @@ public class TeacherUnavailabilityController {
 
 	@GetMapping
 	@Operation(summary = "Get unavailability for the connected teacher")
-	public ApiResponse<TeacherUnavailabilityResponse> get() {
-		return ApiResponse.success(toResponse(service.getByTeacher(securityService.getCurrentUserId())));
+	public ApiResponse<TeacherUnavailabilityResponse> get(@AuthenticationPrincipal User user) {
+		return ApiResponse.success(toResponse(service.getByTeacher(user.getId())));
 	}
 
 	@PostMapping
 	@Operation(summary = "Save unavailability slots for the connected teacher")
-	public ApiResponse<TeacherUnavailabilityResponse> save(@Valid @RequestBody TeacherUnavailabilityRequest request) {
-		return ApiResponse.success(toResponse(service.saveForTeacher(securityService.getCurrentUserId(), request)));
+	public ApiResponse<TeacherUnavailabilityResponse> save(@Valid @RequestBody TeacherUnavailabilityRequest request,
+			@AuthenticationPrincipal User user) {
+		return ApiResponse.success(toResponse(service.saveForTeacher(user.getId(), request)));
 	}
 }
