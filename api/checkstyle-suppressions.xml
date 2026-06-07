@@ -9,8 +9,5 @@
     <suppress files=".*[\\/]repository[\\/].*" checks="MethodName"/>
     <suppress files=".*[\\/]dto[\\/].*" checks="JavadocMethod"/>
     <suppress files=".*[\\/]entity[\\/].*" checks="JavadocMethod"/>
-    <suppress files=".*AuthController\.java" checks="LineLength"/>
-    <suppress files=".*OpenApiConfig\.java" checks="LineLength"/>
-    <suppress files=".*EmailService\.java" checks="LineLength"/>
     <suppress files=".*AuditAspect\.java" checks="EmptyCatchBlock"/>
 </suppressions>
