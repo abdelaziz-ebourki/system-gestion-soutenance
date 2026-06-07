@@ -9,7 +9,9 @@ import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepo
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
-import com.system_gestion_soutenance.api.user.entity.*;
+import com.system_gestion_soutenance.api.user.entity.Student;
+import com.system_gestion_soutenance.api.user.entity.Teacher;
+import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

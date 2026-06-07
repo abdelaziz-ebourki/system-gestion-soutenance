@@ -11,7 +11,11 @@ import com.system_gestion_soutenance.api.admin.department.repository.DepartmentR
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.dto.BulkCreateRequest;
 import com.system_gestion_soutenance.api.user.dto.CreateUserRequest;
-import com.system_gestion_soutenance.api.user.entity.*;
+import com.system_gestion_soutenance.api.user.entity.Coordinator;
+import com.system_gestion_soutenance.api.user.entity.Role;
+import com.system_gestion_soutenance.api.user.entity.Student;
+import com.system_gestion_soutenance.api.user.entity.Teacher;
+import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;

@@ -4,7 +4,13 @@ import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSett
 import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.coordinator.document.dto.*;
+import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceListResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
+import com.system_gestion_soutenance.api.coordinator.document.dto.EvaluationSheetResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.JuryConvocationResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.ProcesVerbalResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.ScheduleDocResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.SlotDetails;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;

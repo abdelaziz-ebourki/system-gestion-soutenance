@@ -1,6 +1,13 @@
 package com.system_gestion_soutenance.api.coordinator.document.controller;
 
-import com.system_gestion_soutenance.api.coordinator.document.dto.*;
+import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceListResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
+import com.system_gestion_soutenance.api.coordinator.document.dto.EvaluationSheetResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.JuryConvocationResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.ProcesVerbalResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.ProjectIdRequest;
+import com.system_gestion_soutenance.api.coordinator.document.dto.ScheduleDocResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.SessionRequest;
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

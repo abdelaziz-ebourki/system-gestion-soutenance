@@ -34,6 +34,7 @@
         <Or>
             <Class name="com.system_gestion_soutenance.api.auth.controller.AuthController"/>
             <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+            <Class name="com.system_gestion_soutenance.api.coordinator.document.controller.DocumentDataController"/>
         </Or>
     </Match>
     <Match>
