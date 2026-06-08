@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.coordinator.group.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -117,5 +118,31 @@ class GroupServiceTest {
 		when(groupRepository.existsById(99L)).thenReturn(false);
 
 		assertThrows(EntityNotFoundException.class, () -> service.delete(99L));
+	}
+
+	@Test
+	void create_exceedsMaxGroupSize_throws() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(10L);
+
+		Student s1 = mock(Student.class);
+		when(s1.getId()).thenReturn(1L);
+		Student s2 = mock(Student.class);
+		when(s2.getId()).thenReturn(2L);
+		Student s3 = mock(Student.class);
+		when(s3.getId()).thenReturn(3L);
+
+		DefenseSession session = mock(DefenseSession.class);
+		when(session.getMaxGroupSize()).thenReturn(2);
+
+		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
+		when(studentRepository.findAllById(List.of(1L, 2L, 3L))).thenReturn(List.of(s1, s2, s3));
+		when(defenseSessionRepository.findById(100L)).thenReturn(Optional.of(session));
+
+		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L, 2L, 3L), 100L);
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.create(request));
+		assertEquals("Le groupe a atteint sa taille maximale", ex.getMessage());
 	}
 }

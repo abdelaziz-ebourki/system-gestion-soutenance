@@ -66,7 +66,7 @@ public class DocumentDataController {
 
 	@PostMapping("/proces-verbal")
 	@Operation(summary = "Get proces-verbal (PV) data for a project")
-	public ResponseEntity<ApiResponse<MinutesResponse>> procesVerbal(@Valid @RequestBody ProjectIdRequest request) {
+	public ResponseEntity<ApiResponse<MinutesResponse>> minutes(@Valid @RequestBody ProjectIdRequest request) {
 		return ResponseEntity.ok(ApiResponse.success("Données du procès-verbal récupérées avec succès",
 				documentDataService.minutes(request.projectId())));
 	}
