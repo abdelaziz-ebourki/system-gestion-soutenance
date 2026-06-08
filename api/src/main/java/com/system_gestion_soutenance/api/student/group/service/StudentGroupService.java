@@ -70,7 +70,7 @@ public class StudentGroupService {
 				.orElseThrow(() -> new InvalidBusinessStateException("Étudiant introuvable"));
 
 		Group group = new Group();
-		group.setGroupName("Groupe de " + student.getFirstName() + " " + student.getLastName());
+		group.setGroupName(String.format("Groupe_%d", groupRepository.count() + 1));
 		group.setStudents(new ArrayList<>(List.of(student)));
 		group.setSessionId(null);
 		return groupRepository.save(group);

@@ -165,11 +165,27 @@ class StudentGroupServiceTest {
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(groupRepository.count()).thenReturn(0L);
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		Group result = service.createGroup(1L);
 
-		assertEquals("Groupe de Alice Test", result.getGroupName());
+		assertEquals("Groupe_1", result.getGroupName());
+	}
+
+	@Test
+	void createGroup_whenGroupsExist_appendsSequentialNumber() {
+		Student student = student(5L, "Bob", "Martin");
+		when(groupRepository.findByStudentId(5L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
+		when(groupRepository.count()).thenReturn(3L);
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.createGroup(5L);
+
+		assertEquals("Groupe_4", result.getGroupName());
 	}
 
 	@Test
