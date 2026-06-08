@@ -171,6 +171,7 @@ class StudentGroupServiceTest {
 		Group result = service.createGroup(1L);
 
 		assertEquals("Groupe_1", result.getGroupName());
+		assertEquals(1L, result.getLeaderId());
 	}
 
 	@Test

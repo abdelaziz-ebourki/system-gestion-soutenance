@@ -72,6 +72,7 @@ public class StudentGroupService {
 		Group group = new Group();
 		group.setGroupName(String.format("Groupe_%d", groupRepository.count() + 1));
 		group.setStudents(new ArrayList<>(List.of(student)));
+		group.setLeaderId(studentId);
 		group.setSessionId(null);
 		return groupRepository.save(group);
 	}

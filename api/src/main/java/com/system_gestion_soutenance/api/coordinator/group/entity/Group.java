@@ -34,4 +34,7 @@ public class Group {
 
 	@Column(name = "session_id")
 	private Long sessionId;
+
+	@Column(name = "leader_id")
+	private Long leaderId;
 }
