@@ -14,7 +14,7 @@ Multi-package project (not a monorepo workspace — each package has its own ins
 ### API (`system-gestion-soutenance-api/`)
 ```bash
 docker compose up --build          # recommended (includes Mailpit on :1025/:8025)
-cd api && ./mvnw spring-boot:run    # without Docker
+cd api && $env:JWT_SECRET="dev-secret-change-in-production"; ./mvnw spring-boot:run    # without Docker
 ```
 Swagger: `http://localhost:8080/swagger-ui/index.html`
 H2 console: `http://localhost:8080/h2-console` (`jdbc:h2:mem:defensedb`)

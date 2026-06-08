@@ -12,9 +12,8 @@ class PasswordValidatorTest {
 
 	@Test
 	void validateValidPassword() {
-		// 8+ chars, upper, lower, digit, special
-		assertDoesNotThrow(() -> validator.validate("Password123!"));
-		assertDoesNotThrow(() -> validator.validate("A1b2C3d#"));
+		assertEquals(new ValidationResult(true, null), validator.validate("Password123!"));
+		assertEquals(new ValidationResult(true, null), validator.validate("A1b2C3d#"));
 	}
 
 	@ParameterizedTest
@@ -27,13 +26,15 @@ class PasswordValidatorTest {
 			" Password123!" // Leading space
 	})
 	void validateInvalidPasswords(String password) {
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> validator.validate(password));
-		assertTrue(exception.getMessage().contains("Le mot de passe doit contenir"));
+		ValidationResult result = validator.validate(password);
+		assertFalse(result.valid());
+		assertTrue(result.errorMessage().contains("Le mot de passe doit contenir"));
 	}
 
 	@Test
 	void validateNullPassword() {
-		assertThrows(IllegalArgumentException.class, () -> validator.validate(null));
+		ValidationResult result = validator.validate(null);
+		assertFalse(result.valid());
+		assertNotNull(result.errorMessage());
 	}
 }

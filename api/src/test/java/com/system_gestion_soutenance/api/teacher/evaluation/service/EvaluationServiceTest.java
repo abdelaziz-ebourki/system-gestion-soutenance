@@ -64,7 +64,7 @@ class EvaluationServiceTest {
 	}
 
 	@Test
-	void submit_withNullScore_doesNotSetScore() {
+	void submit_withNullScore_setsScoreToNull() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, 10L, "president", null, null, EvaluationStatus.PENDING, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));

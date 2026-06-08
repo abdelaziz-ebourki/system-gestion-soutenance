@@ -13,6 +13,8 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - JWT_SECRET=s3cr3t-k3y-f0r-d3f3ns3-m4n4g3m3nt-syst3m-2026
       - SPRING_MAIL_HOST=mailpit
       - SPRING_MAIL_PORT=1025
       - SPRING_MAIL_USERNAME=

@@ -30,8 +30,16 @@ L'API est disponible sur `http://localhost:8080`.
 
 ```bash
 cd api
-./mvnw spring-boot:run
+JWT_SECRET="dev-secret-change-in-production" ./mvnw spring-boot:run
 ```
+
+## Variables d'environnement
+
+| Variable | Requise | Description |
+|---|---|---|
+| `JWT_SECRET` | ✓ | Clé de signature JWT (min. 256 bits). L'application refuse de démarrer si absente. |
+| `APP_ENCRYPTION_KEY` | | Clé de chiffrement des données sensibles (ex. mot de passe SMTP). Défaut : `change-me-in-production-use-a-64-char-hex-key!!` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | | Configuration SMTP pour les emails transactionnels. Absent = mode mock. |
 
 ### Consoles
 
