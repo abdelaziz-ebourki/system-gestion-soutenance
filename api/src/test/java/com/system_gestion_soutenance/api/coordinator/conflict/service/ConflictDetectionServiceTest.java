@@ -3,6 +3,8 @@ package com.system_gestion_soutenance.api.coordinator.conflict.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
+import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
@@ -33,9 +35,11 @@ class ConflictDetectionServiceTest {
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final UnavailabilityRepository unavailabilityRepository = mock(UnavailabilityRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
+	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
 
 	private final ConflictDetectionService service = new ConflictDetectionService(defenseRepository, roomRepository,
-			groupRepository, projectRepository, unavailabilityRepository, defenseSessionRepository);
+			groupRepository, projectRepository, unavailabilityRepository, defenseSessionRepository,
+			defenseSettingsRepository);
 
 	private ScheduleRequest singleSlot(String projectId, String roomId, String date, String time) {
 		return new ScheduleRequest(1L, List
@@ -198,18 +202,56 @@ class ConflictDetectionServiceTest {
 		when(defense2.getProject()).thenReturn(project2);
 		when(defense2.getMembers()).thenReturn(List.of(member));
 		when(defense2.getDate()).thenReturn(java.time.LocalDate.of(2025, 6, 1));
-		when(defense2.getTime()).thenReturn(java.time.LocalTime.of(10, 0));
+		when(defense2.getTime()).thenReturn(java.time.LocalTime.of(9, 30));
 
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense1, defense2));
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 1L));
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 1L));
 
 		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
 		assertTrue(result.stream().anyMatch(c -> "teacher_double_booked".equals(c.type())));
+	}
+
+	@Test
+	void checkTeacherDoubleBooked_sameDateDifferentTimes_noConflict() {
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
+
+		JuryMember member = mock(JuryMember.class);
+		when(member.getTeacher()).thenReturn(teacher);
+
+		Project project1 = mock(Project.class);
+		when(project1.getId()).thenReturn(1L);
+
+		Defense defense1 = mock(Defense.class);
+		when(defense1.getProject()).thenReturn(project1);
+		when(defense1.getMembers()).thenReturn(List.of(member));
+		when(defense1.getDate()).thenReturn(java.time.LocalDate.of(2025, 6, 1));
+		when(defense1.getTime()).thenReturn(java.time.LocalTime.of(9, 0));
+
+		Project project2 = mock(Project.class);
+		when(project2.getId()).thenReturn(2L);
+
+		Defense defense2 = mock(Defense.class);
+		when(defense2.getProject()).thenReturn(project2);
+		when(defense2.getMembers()).thenReturn(List.of(member));
+		when(defense2.getDate()).thenReturn(java.time.LocalDate.of(2025, 6, 1));
+		when(defense2.getTime()).thenReturn(java.time.LocalTime.of(15, 0));
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense1, defense2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "15:00", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "teacher_double_booked".equals(c.type())));
 	}
 
 	@Test
@@ -270,13 +312,38 @@ class ConflictDetectionServiceTest {
 		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 1L));
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 1L));
 
 		var schedule = new ScheduleRequest(1L, slots);
 
 		var result = service.validate(schedule, null);
 
 		assertTrue(result.stream().anyMatch(c -> "supervisor_conflict".equals(c.type())));
+	}
+
+	@Test
+	void checkSupervisorConflict_sameDateDifferentTimes_noConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getId()).thenReturn(5L);
+
+		Project project1 = mock(Project.class);
+		when(project1.getSupervisor()).thenReturn(supervisor);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+
+		Project project2 = mock(Project.class);
+		when(project2.getSupervisor()).thenReturn(supervisor);
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "15:00", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.type())));
 	}
 
 	@Test
