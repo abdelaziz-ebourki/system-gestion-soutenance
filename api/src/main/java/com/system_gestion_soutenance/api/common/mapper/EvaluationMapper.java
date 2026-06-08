@@ -16,7 +16,10 @@ public interface EvaluationMapper {
 	EvaluationResponse toDto(Evaluation evaluation, Map<Long, Project> projectMap);
 
 	default String resolveProjectTitle(Evaluation evaluation, Map<Long, Project> projectMap) {
-		Project p = projectMap.get(evaluation.getProjectId());
+		Long projectId = evaluation.getDefense() != null && evaluation.getDefense().getProject() != null
+				? evaluation.getDefense().getProject().getId()
+				: null;
+		Project p = projectId != null ? projectMap.get(projectId) : null;
 		return p != null ? p.getTitle() : "";
 	}
 }

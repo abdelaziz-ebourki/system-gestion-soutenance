@@ -5,13 +5,12 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
@@ -28,11 +27,10 @@ class ProjectServiceTest {
 	private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
 	private final StudentRepository studentRepository = mock(StudentRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
-	private final JuryRepository juryRepository = mock(JuryRepository.class);
-	private final SlotAssignmentRepository slotAssignmentRepository = mock(SlotAssignmentRepository.class);
+	private final DefenseRepository defenseRepository = mock(DefenseRepository.class);
 
 	private final ProjectService service = new ProjectService(projectRepository, teacherRepository, studentRepository,
-			groupRepository, juryRepository, slotAssignmentRepository);
+			groupRepository, defenseRepository);
 
 	@Test
 	void findAll_returnsAllProjects() {
@@ -153,9 +151,8 @@ class ProjectServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of());
 
 		service.delete(1L);
 
@@ -170,11 +167,11 @@ class ProjectServiceTest {
 	}
 
 	@Test
-	void delete_withJuryAttached_throwsException() {
+	void delete_withDefenseAttached_throwsException() {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(mock(Jury.class)));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(mock(Defense.class)));
 
 		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
 	}
@@ -184,20 +181,8 @@ class ProjectServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(mock(Group.class)));
-
-		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
-	}
-
-	@Test
-	void delete_withSlotAssigned_throwsException() {
-		Project project = mock(Project.class);
-		when(project.getId()).thenReturn(1L);
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
-		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
-		when(slotAssignmentRepository.existsByProjectId(1L)).thenReturn(true);
 
 		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
 	}

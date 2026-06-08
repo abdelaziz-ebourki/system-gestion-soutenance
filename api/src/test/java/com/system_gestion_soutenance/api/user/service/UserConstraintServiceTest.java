@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryMemberRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ class UserConstraintServiceTest {
 	@Mock
 	private DepartmentRepository departmentRepository;
 	@Mock
-	private JuryMemberRepository juryMemberRepository;
+	private DefenseRepository defenseRepository;
 	@Mock
 	private ProjectRepository projectRepository;
 
@@ -32,7 +32,7 @@ class UserConstraintServiceTest {
 	void checkTeacherDeletionConstraints_Success() {
 		Long teacherId = 1L;
 		when(departmentRepository.findByHead_Id(teacherId)).thenReturn(List.of());
-		when(juryMemberRepository.findByTeacher_Id(teacherId)).thenReturn(List.of());
+		when(defenseRepository.existsByMembers_Teacher_Id(teacherId)).thenReturn(false);
 		when(projectRepository.findBySupervisorId(teacherId)).thenReturn(List.of());
 
 		assertDoesNotThrow(() -> userConstraintService.checkTeacherDeletionConstraints(teacherId));
@@ -52,9 +52,9 @@ class UserConstraintServiceTest {
 	@Test
 	void checkTeacherDeletionConstraints_IsJuryMember_ThrowsException() {
 		Long teacherId = 1L;
+
 		when(departmentRepository.findByHead_Id(teacherId)).thenReturn(List.of());
-		when(juryMemberRepository.findByTeacher_Id(teacherId))
-				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember()));
+		when(defenseRepository.existsByMembers_Teacher_Id(teacherId)).thenReturn(true);
 
 		ResourceConflictException ex = assertThrows(ResourceConflictException.class,
 				() -> userConstraintService.checkTeacherDeletionConstraints(teacherId));
@@ -65,7 +65,7 @@ class UserConstraintServiceTest {
 	void checkTeacherDeletionConstraints_IsSupervisor_ThrowsException() {
 		Long teacherId = 1L;
 		when(departmentRepository.findByHead_Id(teacherId)).thenReturn(List.of());
-		when(juryMemberRepository.findByTeacher_Id(teacherId)).thenReturn(List.of());
+		when(defenseRepository.existsByMembers_Teacher_Id(teacherId)).thenReturn(false);
 		when(projectRepository.findBySupervisorId(teacherId))
 				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.project.entity.Project()));
 

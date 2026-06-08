@@ -3,14 +3,13 @@ package com.system_gestion_soutenance.api.teacher.stats.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryMemberRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +22,7 @@ class TeacherStatsServiceTest {
 	@Mock
 	private EvaluationRepository evaluationRepository;
 	@Mock
-	private JuryMemberRepository juryMemberRepository;
+	private DefenseRepository defenseRepository;
 	@Mock
 	private UnavailabilityRepository unavailabilityRepository;
 
@@ -41,7 +40,7 @@ class TeacherStatsServiceTest {
 
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(pending));
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
-		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
+		when(defenseRepository.countByMembers_Teacher_Id(1L)).thenReturn(0L);
 
 		com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse result = service.getStats(1L);
 
@@ -61,7 +60,7 @@ class TeacherStatsServiceTest {
 
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(pending, submitted));
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
-		when(juryMemberRepository.findByTeacher_Id(1L)).thenReturn(List.of());
+		when(defenseRepository.countByMembers_Teacher_Id(1L)).thenReturn(0L);
 
 		com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse result = service.getStats(1L);
 

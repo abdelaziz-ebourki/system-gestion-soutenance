@@ -2,7 +2,7 @@ package com.system_gestion_soutenance.api.common.mapper;
 
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import java.util.List;
 import java.util.Map;
 import org.mapstruct.Mapper;
@@ -11,24 +11,24 @@ import org.mapstruct.Mapping;
 @Mapper(config = CentralMapperConfig.class)
 public interface ScheduleMapper {
 
-	@Mapping(target = "roomId", source = "slot.room.id")
-	@Mapping(target = "roomName", source = "slot.room.name")
-	@Mapping(target = "projectTitle", expression = "java(resolveProjectTitle(slot, projectMap))")
-	@Mapping(target = "studentNames", expression = "java(resolveStudentNames(slot, studentNamesMap))")
+	@Mapping(target = "roomId", source = "defense.room.id")
+	@Mapping(target = "roomName", source = "defense.room.name")
+	@Mapping(target = "projectTitle", expression = "java(resolveProjectTitle(defense, projectMap))")
+	@Mapping(target = "studentNames", expression = "java(resolveStudentNames(defense, studentNamesMap))")
 	@Mapping(target = "role", constant = "")
 	@Mapping(target = "status", constant = "scheduled")
-	ScheduleResponse toDto(SlotAssignment slot, Map<Long, Project> projectMap, Map<Long, List<String>> studentNamesMap);
+	ScheduleResponse toDto(Defense defense, Map<Long, Project> projectMap, Map<Long, List<String>> studentNamesMap);
 
-	default String resolveProjectTitle(SlotAssignment slot, Map<Long, Project> projectMap) {
-		if (slot.getProjectId() == null || projectMap == null)
+	default String resolveProjectTitle(Defense defense, Map<Long, Project> projectMap) {
+		if (defense.getProject() == null || projectMap == null)
 			return "";
-		Project project = projectMap.get(slot.getProjectId());
+		Project project = projectMap.get(defense.getProject().getId());
 		return project != null ? project.getTitle() : "";
 	}
 
-	default List<String> resolveStudentNames(SlotAssignment slot, Map<Long, List<String>> studentNamesMap) {
-		if (slot.getProjectId() == null || studentNamesMap == null)
+	default List<String> resolveStudentNames(Defense defense, Map<Long, List<String>> studentNamesMap) {
+		if (defense.getProject() == null || studentNamesMap == null)
 			return List.of();
-		return studentNamesMap.getOrDefault(slot.getProjectId(), List.of());
+		return studentNamesMap.getOrDefault(defense.getProject().getId(), List.of());
 	}
 }

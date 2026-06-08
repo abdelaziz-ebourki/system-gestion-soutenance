@@ -1,14 +1,13 @@
 package com.system_gestion_soutenance.api.coordinator.project.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
@@ -28,18 +27,15 @@ public class ProjectService {
 	private final TeacherRepository teacherRepository;
 	private final StudentRepository studentRepository;
 	private final GroupRepository groupRepository;
-	private final JuryRepository juryRepository;
-	private final SlotAssignmentRepository slotAssignmentRepository;
+	private final DefenseRepository defenseRepository;
 
 	public ProjectService(ProjectRepository projectRepository, TeacherRepository teacherRepository,
-			StudentRepository studentRepository, GroupRepository groupRepository, JuryRepository juryRepository,
-			SlotAssignmentRepository slotAssignmentRepository) {
+			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository) {
 		this.projectRepository = projectRepository;
 		this.teacherRepository = teacherRepository;
 		this.studentRepository = studentRepository;
 		this.groupRepository = groupRepository;
-		this.juryRepository = juryRepository;
-		this.slotAssignmentRepository = slotAssignmentRepository;
+		this.defenseRepository = defenseRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -99,15 +95,12 @@ public class ProjectService {
 		Project project = projectRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
 
-		if (!juryRepository.findByProjectId(id).isEmpty()) {
-			throw new ResourceConflictException("Impossible de supprimer ce projet car des jurys y sont rattachés");
+		if (defenseRepository.findByProject(project).isPresent()) {
+			throw new ResourceConflictException(
+					"Impossible de supprimer ce projet car une soutenance lui est rattachée");
 		}
 		if (!groupRepository.findByProjectId(id).isEmpty()) {
 			throw new ResourceConflictException("Impossible de supprimer ce projet car des groupes y sont rattachés");
-		}
-		if (slotAssignmentRepository.existsByProjectId(id)) {
-			throw new ResourceConflictException(
-					"Impossible de supprimer ce projet car des soutenances sont planifiées");
 		}
 
 		projectRepository.delete(project);

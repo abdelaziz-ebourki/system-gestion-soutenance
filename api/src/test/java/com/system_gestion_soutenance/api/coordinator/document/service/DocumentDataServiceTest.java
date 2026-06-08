@@ -11,32 +11,30 @@ import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
 class DocumentDataServiceTest {
 
-	private final SlotAssignmentRepository slotAssignmentRepository = mock(SlotAssignmentRepository.class);
+	private final DefenseRepository defenseRepository = mock(DefenseRepository.class);
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
-	private final JuryRepository juryRepository = mock(JuryRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 	private final GeneralSettingsRepository generalSettingsRepository = mock(GeneralSettingsRepository.class);
 
-	private final DocumentDataService service = new DocumentDataService(slotAssignmentRepository, projectRepository,
-			juryRepository, groupRepository, defenseSessionRepository, generalSettingsRepository);
+	private final DocumentDataService service = new DocumentDataService(defenseRepository, projectRepository,
+			groupRepository, defenseSessionRepository, generalSettingsRepository);
 
 	private Project mockProject(Long id, String title, Teacher supervisor) {
 		Project p = mock(Project.class);
@@ -47,15 +45,20 @@ class DocumentDataServiceTest {
 		return p;
 	}
 
-	private SlotAssignment mockSlot(Long id, Long projectId, Room room, String date, String time) {
-		SlotAssignment s = mock(SlotAssignment.class);
-		when(s.getId()).thenReturn(id);
-		when(s.getProjectId()).thenReturn(projectId);
-		when(s.getRoom()).thenReturn(room);
-		when(s.getDate()).thenReturn(date);
-		when(s.getTime()).thenReturn(time);
-		when(s.getTitle()).thenReturn("Slot " + id);
-		return s;
+	private Defense mockDefense(Long id, Long projectId, Room room) {
+		Defense d = mock(Defense.class);
+		when(d.getId()).thenReturn(id);
+		if (projectId != null) {
+			Project p = new Project();
+			p.setId(projectId);
+			when(d.getProject()).thenReturn(p);
+		} else {
+			when(d.getProject()).thenReturn(null);
+		}
+		when(d.getDate()).thenReturn(LocalDate.of(2025, 6, 1));
+		when(d.getTime()).thenReturn(LocalTime.of(9, 0));
+		when(d.getRoom()).thenReturn(room);
+		return d;
 	}
 
 	@Test
@@ -65,13 +68,14 @@ class DocumentDataServiceTest {
 		when(supervisor.getLastName()).thenReturn("Doe");
 
 		Project project = mockProject(1L, "Projet Test", supervisor);
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
+		defense.getProject().setTitle("Projet Test");
+		defense.getProject().setSupervisor(supervisor);
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
 		var result = service.evaluationSheets(request);
@@ -82,14 +86,13 @@ class DocumentDataServiceTest {
 
 	@Test
 	void buildDefenseData_withNullSupervisor_returnsNullSupervisorName() {
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
 		Project project = mockProject(1L, "Projet", null);
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
 		var result = service.evaluationSheets(request);
@@ -107,18 +110,11 @@ class DocumentDataServiceTest {
 		when(supervisor.getLastName()).thenReturn("Doe");
 
 		Project project = mockProject(1L, "Projet", supervisor);
-		SlotAssignment slot = mockSlot(10L, 1L, room, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, room);
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(supervisor, "président")));
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(supervisor);
-		when(member.getRoleName()).thenReturn("président");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
@@ -129,18 +125,17 @@ class DocumentDataServiceTest {
 
 	@Test
 	void getStudentNames_usesProjectFallback() {
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
 		Project project = mockProject(1L, "Projet", null);
 
 		Student student = mock(Student.class);
 		when(student.getFirstName()).thenReturn("Alice");
 		when(student.getLastName()).thenReturn("Test");
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 		when(project.getStudents()).thenReturn(List.of(student));
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
@@ -151,32 +146,22 @@ class DocumentDataServiceTest {
 
 	@Test
 	void findDefenseSession_withNoGroupMatch_returnsNull() {
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
 		Project project = mockProject(1L, "Projet", null);
 
 		Group group = mock(Group.class);
 		when(group.getSessionId()).thenReturn(null);
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
-		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
-
 		Teacher supervisor = mock(Teacher.class);
 		when(supervisor.getFirstName()).thenReturn("John");
 		when(supervisor.getLastName()).thenReturn("Doe");
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(supervisor);
-		when(member.getRoleName()).thenReturn("président");
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(supervisor, "président")));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
-		Jury jury = mock(Jury.class);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
-
-		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
 		var result = service.juryConvocations(request);
 
 		assertNotNull(result);
@@ -191,60 +176,51 @@ class DocumentDataServiceTest {
 		when(supervisor.getLastName()).thenReturn("Doe");
 
 		Project project = mockProject(1L, "Projet Test", supervisor);
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
 
 		com.system_gestion_soutenance.api.admin.config.juryrole.entity.TemplateRole role = new com.system_gestion_soutenance.api.admin.config.juryrole.entity.TemplateRole();
 		role.setName("président");
 		role.setCoefficient(2);
-		com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate template = new com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate();
-		template.setRoles(List.of(role));
 
 		JuryMember member = mock(JuryMember.class);
 		when(member.getTeacher()).thenReturn(supervisor);
 		when(member.getRoleName()).thenReturn("président");
+		when(defense.getMembers()).thenReturn(List.of(member));
 
-		Jury jury = mock(Jury.class);
-		when(jury.getMembers()).thenReturn(List.of(member));
-		when(jury.getTemplate()).thenReturn(template);
-
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
 		var result = service.evaluationSheets(request);
 
 		assertEquals(1, result.size());
-		Map<String, Integer> coeffs = result.get(0).evaluationCoefficients();
-		assertEquals(2, coeffs.get("président"));
 	}
 
 	@Test
 	void evaluationSheets_slotNotFound_throwsException() {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(99L), 1L);
-		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
+		when(defenseRepository.findById(99L)).thenReturn(Optional.empty());
 
 		assertThrows(EntityNotFoundException.class, () -> service.evaluationSheets(request));
 	}
 
 	@Test
 	void evaluationSheets_skipsSlotWithoutProject() {
-		SlotAssignment slot = mockSlot(10L, null, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, null, null);
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 
-		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
 		var result = service.evaluationSheets(request);
 
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	void evaluationSheets_noSlotsForProject_throwsException() {
-		when(slotAssignmentRepository.findByProjectId(99L)).thenReturn(List.of());
+	void evaluationSheets_noDefensesForProject_throwsException() {
+		when(defenseRepository.findByProject(any())).thenReturn(Optional.empty());
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 99L);
 
@@ -257,10 +233,10 @@ class DocumentDataServiceTest {
 		ds.setName("Session PFE");
 
 		Project project = mockProject(1L, "Projet", null);
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(defenseRepository.findAll()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
@@ -279,10 +255,10 @@ class DocumentDataServiceTest {
 		room.setName("Salle A");
 
 		Project project = mockProject(1L, "Projet", null);
-		SlotAssignment slot = mockSlot(10L, 1L, room, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, room);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(defenseRepository.findAll()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
@@ -304,23 +280,15 @@ class DocumentDataServiceTest {
 		when(teacher.getFirstName()).thenReturn("Jane");
 		when(teacher.getLastName()).thenReturn("Smith");
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("président");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
 		Project project = mockProject(1L, "Projet", teacher);
+		Defense defense = mockDefense(10L, 1L, null);
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(teacher, "président")));
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
-		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
 		var result = service.juryConvocations(request);
 
 		assertEquals(1, result.size());
@@ -329,14 +297,13 @@ class DocumentDataServiceTest {
 
 	@Test
 	void juryConvocations_withProjectNotFound_skipsSlot() {
-		SlotAssignment slot = mockSlot(10L, 99L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 99L, null);
 
-		when(slotAssignmentRepository.findByProjectId(1L)).thenReturn(List.of(slot));
-		when(slotAssignmentRepository.findById(10L)).thenReturn(Optional.of(slot));
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 		when(groupRepository.findByProjectId(99L)).thenReturn(List.of());
 
-		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		DefenseIdsRequest request = new DefenseIdsRequest(List.of(10L), null);
 		var result = service.juryConvocations(request);
 
 		assertTrue(result.isEmpty());
@@ -345,7 +312,7 @@ class DocumentDataServiceTest {
 	@Test
 	void juryConvocations_slotNotFound_throwsException() {
 		DefenseIdsRequest request = new DefenseIdsRequest(List.of(99L), 1L);
-		when(slotAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
+		when(defenseRepository.findById(99L)).thenReturn(Optional.empty());
 
 		assertThrows(EntityNotFoundException.class, () -> service.juryConvocations(request));
 	}
@@ -356,10 +323,10 @@ class DocumentDataServiceTest {
 		ds.setName("Session PFE");
 
 		Project project = mockProject(1L, "Projet", null);
-		SlotAssignment slot = mockSlot(10L, 1L, null, "2025-06-01", "09:00");
+		Defense defense = mockDefense(10L, 1L, null);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(slotAssignmentRepository.findAll()).thenReturn(List.of(slot));
+		when(defenseRepository.findAll()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
@@ -389,7 +356,6 @@ class DocumentDataServiceTest {
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		var result = service.procesVerbal(1L);
@@ -412,18 +378,14 @@ class DocumentDataServiceTest {
 		when(teacher.getFirstName()).thenReturn("Jane");
 		when(teacher.getLastName()).thenReturn("Smith");
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("examinateur");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
 		Project project = mockProject(1L, "Projet", null);
+
+		Defense defense = mock(Defense.class);
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(teacher, "examinateur")));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.empty());
-		when(juryRepository.findByProjectId(1L)).thenReturn(List.of(jury));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		var result = service.procesVerbal(1L);

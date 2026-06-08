@@ -31,16 +31,15 @@ import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
+
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
@@ -59,6 +58,7 @@ import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -85,9 +85,8 @@ public class DataInitializer implements CommandLineRunner {
 	private final JuryRoleTemplateRepository juryRoleTemplateRepo;
 	private final DefenseSessionRepository defenseSessionRepo;
 	private final ProjectRepository projectRepo;
-	private final JuryRepository juryRepo;
+	private final DefenseRepository defenseRepo;
 	private final GroupRepository groupRepo;
-	private final SlotAssignmentRepository slotAssignmentRepo;
 	private final UnavailabilityRepository unavailabilityRepo;
 	private final EvaluationRepository evaluationRepo;
 	private final StudentDocumentRepository studentDocumentRepo;
@@ -103,12 +102,12 @@ public class DataInitializer implements CommandLineRunner {
 			FacultyRepository facultyRepo, DepartmentRepository departmentRepo, UserRepository userRepo,
 			TeacherRepository teacherRepo, StudentRepository studentRepo, RoomRepository roomRepo,
 			JuryRoleTemplateRepository juryRoleTemplateRepo, DefenseSessionRepository defenseSessionRepo,
-			ProjectRepository projectRepo, JuryRepository juryRepo, GroupRepository groupRepo,
-			SlotAssignmentRepository slotAssignmentRepo, UnavailabilityRepository unavailabilityRepo,
-			EvaluationRepository evaluationRepo, StudentDocumentRepository studentDocumentRepo,
-			NotificationRepository notificationRepo, AuditLogRepository auditLogRepo,
-			EmailConfigRepository emailConfigRepo, DocumentConfigRepository documentConfigRepo,
-			GeneralSettingsRepository generalSettingsRepo, DefenseSettingsRepository defenseSettingsRepo) {
+			ProjectRepository projectRepo, DefenseRepository defenseRepo, GroupRepository groupRepo,
+			UnavailabilityRepository unavailabilityRepo, EvaluationRepository evaluationRepo,
+			StudentDocumentRepository studentDocumentRepo, NotificationRepository notificationRepo,
+			AuditLogRepository auditLogRepo, EmailConfigRepository emailConfigRepo,
+			DocumentConfigRepository documentConfigRepo, GeneralSettingsRepository generalSettingsRepo,
+			DefenseSettingsRepository defenseSettingsRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
 		this.gradeRepo = gradeRepo;
@@ -121,9 +120,8 @@ public class DataInitializer implements CommandLineRunner {
 		this.juryRoleTemplateRepo = juryRoleTemplateRepo;
 		this.defenseSessionRepo = defenseSessionRepo;
 		this.projectRepo = projectRepo;
-		this.juryRepo = juryRepo;
+		this.defenseRepo = defenseRepo;
 		this.groupRepo = groupRepo;
-		this.slotAssignmentRepo = slotAssignmentRepo;
 		this.unavailabilityRepo = unavailabilityRepo;
 		this.evaluationRepo = evaluationRepo;
 		this.studentDocumentRepo = studentDocumentRepo;
@@ -423,7 +421,7 @@ public class DataInitializer implements CommandLineRunner {
 
 		List<Project> projects = new ArrayList<>();
 		for (ProjSeed ps : projSeeds) {
-			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, new ArrayList<>());
+			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, new ArrayList<>(), null);
 			projects.add(projectRepo.save(p));
 		}
 
@@ -441,38 +439,23 @@ public class DataInitializer implements CommandLineRunner {
 			projectRepo.save(p);
 		}
 
-		// Phase 15: Juries + JuryMembers
-		int[] juryProjectIds = {1, 3, 4, 6, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24};
-		List<Jury> juries = new ArrayList<>();
-		for (int jpi : juryProjectIds) {
-			juries.add(juryRepo.save(new Jury(null, projects.get(jpi), jrtPfe, new ArrayList<>())));
-		}
+		// Phase 15: Defenses (Unified Jury and Slots)
+		int[] defenseProjectIds = {1, 3, 4, 6, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24};
+		List<Defense> defenses = new ArrayList<>();
+		for (int i = 0; i < defenseProjectIds.length; i++) {
+			Project project = projects.get(defenseProjectIds[i]);
+			Defense d = new Defense();
+			d.setProject(project);
+			d.setDate(LocalDate.now());
+			d.setTime(LocalTime.of(9, 0));
+			d.setRoom(rooms.get(i % rooms.size()));
 
-		record JmSeed(int juryIdx, String role, int teacherIdx) {
-		}
-		JmSeed[] jmSeeds = {new JmSeed(0, "Président", 1), new JmSeed(0, "Rapporteur", 2),
-				new JmSeed(0, "Examinateur", 3), new JmSeed(1, "Président", 5), new JmSeed(1, "Rapporteur", 6),
-				new JmSeed(1, "Examinateur", 7), new JmSeed(2, "Président", 9), new JmSeed(2, "Rapporteur", 10),
-				new JmSeed(2, "Examinateur", 11), new JmSeed(3, "Président", 1), new JmSeed(3, "Rapporteur", 2),
-				new JmSeed(3, "Examinateur", 3), new JmSeed(4, "Président", 5), new JmSeed(4, "Rapporteur", 6),
-				new JmSeed(4, "Examinateur", 7), new JmSeed(5, "Président", 9), new JmSeed(5, "Rapporteur", 10),
-				new JmSeed(5, "Examinateur", 11), new JmSeed(6, "Président", 1), new JmSeed(6, "Rapporteur", 2),
-				new JmSeed(6, "Examinateur", 3), new JmSeed(7, "Président", 5), new JmSeed(7, "Rapporteur", 6),
-				new JmSeed(7, "Examinateur", 7), new JmSeed(8, "Président", 9), new JmSeed(8, "Rapporteur", 10),
-				new JmSeed(8, "Examinateur", 11), new JmSeed(8, "Examinateur", 0), new JmSeed(9, "Président", 2),
-				new JmSeed(9, "Rapporteur", 3), new JmSeed(9, "Examinateur", 4), new JmSeed(9, "Examinateur", 5),
-				new JmSeed(10, "Président", 7), new JmSeed(10, "Rapporteur", 8), new JmSeed(10, "Examinateur", 9),
-				new JmSeed(10, "Examinateur", 10), new JmSeed(11, "Président", 0), new JmSeed(11, "Rapporteur", 1),
-				new JmSeed(11, "Examinateur", 2), new JmSeed(11, "Examinateur", 3), new JmSeed(12, "Président", 5),
-				new JmSeed(12, "Rapporteur", 6), new JmSeed(12, "Examinateur", 7), new JmSeed(12, "Examinateur", 8),
-				new JmSeed(13, "Président", 10), new JmSeed(13, "Rapporteur", 11), new JmSeed(13, "Examinateur", 0),
-				new JmSeed(13, "Examinateur", 1), new JmSeed(14, "Président", 3), new JmSeed(14, "Rapporteur", 4),
-				new JmSeed(14, "Rapporteur", 5), new JmSeed(14, "Examinateur", 6), new JmSeed(14, "Examinateur", 7),};
-		for (JmSeed jms : jmSeeds) {
-			Jury jury = juries.get(jms.juryIdx);
-			JuryMember jm = new JuryMember(null, jury, jms.role, teachers.get(jms.teacherIdx));
-			jury.getMembers().add(jm);
-			juryRepo.save(jury);
+			List<JuryMember> members = new ArrayList<>();
+			members.add(new JuryMember(teachers.get(0), "Président"));
+			members.add(new JuryMember(teachers.get(1), "Rapporteur"));
+			d.setMembers(members);
+
+			defenses.add(defenseRepo.save(d));
 		}
 
 		// Phase 16: Groups
@@ -524,68 +507,6 @@ public class DataInitializer implements CommandLineRunner {
 				g.getStudents().add(studentsList.get(si));
 			}
 			groupRepo.save(g);
-		}
-
-		// Phase 17: Slot Assignments
-		Room r1 = rooms.get(0), r2 = rooms.get(1), r3 = rooms.get(2), r4 = rooms.get(3), r5 = rooms.get(4),
-				r6 = rooms.get(5), r7 = rooms.get(6), r8 = rooms.get(7), r9 = rooms.get(8), r10 = rooms.get(9),
-				r11 = rooms.get(10), r12 = rooms.get(11);
-
-		record SlotSeed(String title, String date, String time, int projIdx, Room room) {
-		}
-		SlotSeed[] slotSeeds = {new SlotSeed("Soutenance proj-1", "2026-06-15", "08:00", 0, r1),
-				new SlotSeed("Soutenance proj-2", "2026-06-16", "08:30", 1, r2),
-				new SlotSeed("Soutenance proj-3", "2026-06-17", "09:00", 2, r3),
-				new SlotSeed("Soutenance proj-4", "2026-06-18", "09:30", 3, r4),
-				new SlotSeed("Soutenance proj-5", "2026-06-19", "10:00", 4, r5),
-				new SlotSeed("Soutenance proj-6", "2026-06-22", "10:30", 5, r6),
-				new SlotSeed("Soutenance proj-7", "2026-06-23", "11:00", 6, r7),
-				new SlotSeed("Soutenance proj-8", "2026-06-24", "11:30", 7, r8),
-				new SlotSeed("Soutenance proj-9", "2026-06-25", "13:00", 8, r9),
-				new SlotSeed("Soutenance proj-10", "2026-06-26", "13:30", 9, r10),
-				new SlotSeed("Soutenance proj-11", "2026-06-15", "14:00", 10, r11),
-				new SlotSeed("Soutenance proj-12", "2026-06-16", "14:30", 11, r12),
-				new SlotSeed("Soutenance proj-13", "2026-06-17", "15:00", 12, r1),
-				new SlotSeed("Soutenance proj-14", "2026-06-18", "15:30", 13, r2),
-				new SlotSeed("Soutenance proj-15", "2026-06-19", "16:00", 14, r3),
-				new SlotSeed("Soutenance proj-16", "2026-06-22", "16:30", 15, r4),
-				new SlotSeed("Soutenance proj-17", "2026-06-23", "08:00", 16, r5),
-				new SlotSeed("Soutenance proj-18", "2026-06-24", "08:30", 17, r6),
-				new SlotSeed("Soutenance proj-19", "2026-06-25", "09:00", 18, r7),
-				new SlotSeed("Soutenance proj-20", "2026-06-26", "09:30", 19, r8),
-				new SlotSeed("Soutenance proj-21", "2026-06-15", "10:00", 20, r9),
-				new SlotSeed("Soutenance proj-22", "2026-06-16", "10:30", 21, r10),
-				new SlotSeed("Soutenance proj-23", "2026-06-17", "11:00", 22, r11),
-				new SlotSeed("Soutenance proj-24", "2026-06-18", "11:30", 23, r12),
-				new SlotSeed("Soutenance proj-25", "2026-06-19", "13:00", 24, r1),
-				new SlotSeed("Soutenance proj-1", "2026-06-22", "13:30", 0, r2),
-				new SlotSeed("Soutenance proj-2", "2026-06-23", "14:00", 1, r3),
-				new SlotSeed("Soutenance proj-3", "2026-06-24", "14:30", 2, r4),
-				new SlotSeed("Soutenance proj-4", "2026-06-25", "15:00", 3, r5),
-				new SlotSeed("Soutenance proj-5", "2026-06-26", "15:30", 4, r6),
-				new SlotSeed("Soutenance proj-6", "2026-06-15", "16:00", 5, r7),
-				new SlotSeed("Soutenance proj-7", "2026-06-16", "16:30", 6, r8),
-				new SlotSeed("Soutenance proj-8", "2026-06-17", "08:00", 7, r9),
-				new SlotSeed("Soutenance proj-9", "2026-06-18", "08:30", 8, r10),
-				new SlotSeed("Soutenance proj-10", "2026-06-19", "09:00", 9, r11),
-				new SlotSeed("Soutenance proj-11", "2026-06-22", "09:30", 10, r12),
-				new SlotSeed("Soutenance proj-12", "2026-06-23", "10:00", 11, r1),
-				new SlotSeed("Soutenance proj-13", "2026-06-24", "10:30", 12, r2),
-				new SlotSeed("Soutenance proj-14", "2026-06-25", "11:00", 13, r3),
-				new SlotSeed("Soutenance proj-15", "2026-06-26", "11:30", 14, r4),
-				new SlotSeed("Soutenance proj-16", "2026-06-15", "13:00", 15, r5),
-				new SlotSeed("Soutenance proj-17", "2026-06-16", "13:30", 16, r6),
-				new SlotSeed("Soutenance proj-18", "2026-06-17", "14:00", 17, r7),
-				new SlotSeed("Soutenance proj-19", "2026-06-18", "14:30", 18, r8),
-				new SlotSeed("Soutenance proj-20", "2026-06-19", "15:00", 19, r9),
-				new SlotSeed("Soutenance proj-21", "2026-06-22", "15:30", 20, r10),
-				new SlotSeed("Soutenance proj-22", "2026-06-23", "16:00", 21, r11),
-				new SlotSeed("Soutenance proj-23", "2026-06-24", "16:30", 22, r12),
-				new SlotSeed("Soutenance proj-24", "2026-06-25", "08:00", 23, r1),
-				new SlotSeed("Soutenance proj-25", "2026-06-26", "08:30", 24, r2),};
-		for (SlotSeed ss : slotSeeds) {
-			slotAssignmentRepo.save(
-					new SlotAssignment(null, ss.title, ss.date, ss.time, projects.get(ss.projIdx).getId(), ss.room));
 		}
 
 		// Phase 18: Unavailabilities
@@ -729,8 +650,12 @@ public class DataInitializer implements CommandLineRunner {
 				new EvalSeed(teachers.get(5).getId(), ds5.getId(), projects.get(4).getId(), "Examinateur", 13.4,
 						EvaluationStatus.SUBMITTED, LocalDateTime.of(2026, 6, 20, 10, 0)));
 		for (EvalSeed es : evalSeeds) {
-			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, es.pid, es.role, es.score, "Évaluation complète.",
-					es.status, es.submitted));
+			Defense defense = defenseRepo.findByProject(projectRepo.findById(es.pid).orElse(null)).orElse(null);
+			if (defense == null) {
+				continue;
+			}
+			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role, es.score,
+					"Évaluation complète.", es.status, es.submitted));
 		}
 
 		// Phase 20: Student Documents

@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
@@ -41,7 +42,11 @@ public class EvaluationService {
 	}
 
 	public Map<Long, Project> buildProjectMap(List<Evaluation> evaluations) {
-		List<Long> projectIds = evaluations.stream().map(Evaluation::getProjectId).distinct().toList();
+		List<Long> projectIds = evaluations.stream()
+				.map(e -> e.getDefense() != null && e.getDefense().getProject() != null
+						? e.getDefense().getProject().getId()
+						: null)
+				.filter(Objects::nonNull).distinct().toList();
 		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
 	}
 

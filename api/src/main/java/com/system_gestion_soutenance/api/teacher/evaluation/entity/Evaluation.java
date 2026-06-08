@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.teacher.evaluation.entity;
 
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -25,8 +26,9 @@ public class Evaluation {
 	@Column(name = "defense_session_id", nullable = false)
 	private Long defenseSessionId;
 
-	@Column(name = "project_id", nullable = false)
-	private Long projectId;
+	@ManyToOne
+	@JoinColumn(name = "defense_id", nullable = false)
+	private Defense defense;
 
 	@Column(nullable = false)
 	private String role;

@@ -2,12 +2,10 @@ package com.system_gestion_soutenance.api.student.defense.service;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.student.defense.dto.JuryMemberResponse;
 import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse;
 import java.util.*;
@@ -19,14 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudentDefenseService {
 
 	private final GroupRepository groupRepository;
-	private final JuryRepository juryRepository;
-	private final SlotAssignmentRepository slotAssignmentRepository;
+	private final DefenseRepository defenseRepository;
 
-	public StudentDefenseService(GroupRepository groupRepository, JuryRepository juryRepository,
-			SlotAssignmentRepository slotAssignmentRepository) {
+	public StudentDefenseService(GroupRepository groupRepository, DefenseRepository defenseRepository) {
 		this.groupRepository = groupRepository;
-		this.juryRepository = juryRepository;
-		this.slotAssignmentRepository = slotAssignmentRepository;
+		this.defenseRepository = defenseRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -41,27 +36,27 @@ public class StudentDefenseService {
 		Project project = group.getProject();
 
 		List<JuryMemberResponse> juryMembers = new ArrayList<>();
-		for (Jury jury : juryRepository.findByProjectId(project.getId())) {
-			for (JuryMember member : jury.getMembers()) {
+		defenseRepository.findByProject(project).ifPresent(defense -> {
+			for (JuryMember member : defense.getMembers()) {
 				if (member.getTeacher() != null) {
 					juryMembers.add(new JuryMemberResponse(
 							member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(),
 							member.getRoleName()));
 				}
 			}
-		}
+		});
 
 		String date = null;
 		String startTime = null;
 		String roomName = null;
 		String status = "pending";
 
-		List<SlotAssignment> slots = slotAssignmentRepository.findByProjectId(project.getId());
-		if (!slots.isEmpty()) {
-			SlotAssignment slot = slots.get(0);
-			date = slot.getDate();
-			startTime = slot.getTime();
-			roomName = slot.getRoom() != null ? slot.getRoom().getName() : "";
+		Optional<Defense> defenseOpt = defenseRepository.findByProject(project);
+		if (defenseOpt.isPresent()) {
+			Defense defense = defenseOpt.get();
+			date = defense.getDate().toString();
+			startTime = defense.getTime().toString();
+			roomName = defense.getRoom() != null ? defense.getRoom().getName() : "";
 			status = "scheduled";
 		}
 

@@ -3,8 +3,8 @@ package com.system_gestion_soutenance.api.coordinator.jury.controller;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.service.JuryService;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,11 +21,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Coordinator - Jury Management", description = "Endpoints for managing defense juries")
 public class JuryController {
 
-	private final JuryService juryService;
+	private final DefenseService defenseService;
 	private final JuryMapper juryMapper;
 
-	public JuryController(JuryService juryService, JuryMapper juryMapper) {
-		this.juryService = juryService;
+	public JuryController(DefenseService defenseService, JuryMapper juryMapper) {
+		this.defenseService = defenseService;
 		this.juryMapper = juryMapper;
 	}
 
@@ -34,9 +34,9 @@ public class JuryController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved juries")})
 	public ApiResponse<List<JuryResponse>> findAll() {
-		List<Jury> juries = juryService.findAll();
+		List<Defense> defenses = defenseService.getSchedule();
 		return ApiResponse.success("Liste des jurys récupérée avec succès",
-				juries.stream().map(juryMapper::toDto).toList());
+				defenses.stream().map(juryMapper::toDto).toList());
 	}
 
 	@PostMapping
@@ -45,9 +45,9 @@ public class JuryController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Jury created successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid jury data")})
 	public ResponseEntity<ApiResponse<JuryResponse>> create(@Valid @RequestBody CreateJuryRequest request) {
-		Jury jury = juryService.create(request);
+		Defense defense = defenseService.createJury(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ApiResponse.success("Jury créé avec succès", juryMapper.toDto(jury)));
+				.body(ApiResponse.success("Jury créé avec succès", juryMapper.toDto(defense)));
 	}
 
 	@PutMapping("/{id}")
@@ -57,7 +57,8 @@ public class JuryController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<JuryResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateJuryRequest updates) {
-		return ApiResponse.success("Jury mis à jour avec succès", juryMapper.toDto(juryService.update(id, updates)));
+		return ApiResponse.success("Jury mis à jour avec succès",
+				juryMapper.toDto(defenseService.updateJury(id, updates)));
 	}
 
 	@DeleteMapping("/{id}")
@@ -66,7 +67,7 @@ public class JuryController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-		juryService.delete(id);
+		defenseService.cancelDefense(id);
 		return ResponseEntity.ok(ApiResponse.success("Jury supprimé avec succès", null));
 	}
 }

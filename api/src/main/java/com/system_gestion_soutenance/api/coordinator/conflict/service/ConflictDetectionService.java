@@ -5,13 +5,11 @@ import com.system_gestion_soutenance.api.admin.defensesession.repository.Defense
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import java.time.LocalDate;
@@ -22,6 +20,7 @@ import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetail
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictSlot;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,22 +30,20 @@ public class ConflictDetectionService {
 
 	private static final Logger log = LoggerFactory.getLogger(ConflictDetectionService.class);
 
-	private final SlotAssignmentRepository slotAssignmentRepository;
+	private final DefenseRepository defenseRepository;
 	private final RoomRepository roomRepository;
 	private final GroupRepository groupRepository;
 	private final ProjectRepository projectRepository;
-	private final JuryRepository juryRepository;
 	private final UnavailabilityRepository unavailabilityRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
 
-	public ConflictDetectionService(SlotAssignmentRepository slotAssignmentRepository, RoomRepository roomRepository,
-			GroupRepository groupRepository, ProjectRepository projectRepository, JuryRepository juryRepository,
+	public ConflictDetectionService(DefenseRepository defenseRepository, RoomRepository roomRepository,
+			GroupRepository groupRepository, ProjectRepository projectRepository,
 			UnavailabilityRepository unavailabilityRepository, DefenseSessionRepository defenseSessionRepository) {
-		this.slotAssignmentRepository = slotAssignmentRepository;
+		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.groupRepository = groupRepository;
 		this.projectRepository = projectRepository;
-		this.juryRepository = juryRepository;
 		this.unavailabilityRepository = unavailabilityRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 	}
@@ -54,10 +51,12 @@ public class ConflictDetectionService {
 	public List<ConflictDetailResponse> validate(ScheduleRequest request, String defenseSessionId) {
 		Map<String, ConflictSlot> mergedSchedule = new LinkedHashMap<>();
 
-		for (SlotAssignment existing : slotAssignmentRepository.findAll()) {
+		for (Defense existing : defenseRepository.findAll()) {
 			mergedSchedule.put(String.valueOf(existing.getId()),
-					new ConflictSlot(String.valueOf(existing.getId()), existing.getTitle(), existing.getDate(),
-							existing.getTime(), String.valueOf(existing.getProjectId()),
+					new ConflictSlot(String.valueOf(existing.getId()),
+							existing.getProject() != null ? existing.getProject().getTitle() : "",
+							existing.getDate().toString(), existing.getTime().toString(),
+							String.valueOf(existing.getProjectId()),
 							existing.getRoom() != null ? String.valueOf(existing.getRoom().getId()) : null));
 		}
 
@@ -337,13 +336,14 @@ public class ConflictDetectionService {
 
 	private Set<String> getJuryTeacherIds(String projectId) {
 		Set<String> ids = new HashSet<>();
-		for (Jury jury : juryRepository.findByProjectId(Long.valueOf(projectId))) {
-			for (JuryMember member : jury.getMembers()) {
-				if (member.getTeacher() != null) {
-					ids.add(String.valueOf(member.getTeacher().getId()));
-				}
-			}
-		}
+		defenseRepository.findByProject(projectRepository.findById(Long.valueOf(projectId)).orElse(null))
+				.ifPresent(defense -> {
+					for (JuryMember member : defense.getMembers()) {
+						if (member.getTeacher() != null) {
+							ids.add(String.valueOf(member.getTeacher().getId()));
+						}
+					}
+				});
 		return ids;
 	}
 

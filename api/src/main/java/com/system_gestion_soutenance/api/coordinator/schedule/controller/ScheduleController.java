@@ -5,11 +5,11 @@ import com.system_gestion_soutenance.api.common.mapper.ScheduleMapper;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.DefenseSessionIdRequest;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Coordinator - Scheduling", description = "Endpoints for managing the defense schedule")
 public class ScheduleController {
 
-	private final ScheduleService scheduleService;
+	private final DefenseService defenseService;
 	private final ConflictDetectionService conflictDetectionService;
 	private final ScheduleMapper scheduleMapper;
 
-	public ScheduleController(ScheduleService scheduleService, ConflictDetectionService conflictDetectionService,
+	public ScheduleController(DefenseService defenseService, ConflictDetectionService conflictDetectionService,
 			ScheduleMapper scheduleMapper) {
-		this.scheduleService = scheduleService;
+		this.defenseService = defenseService;
 		this.conflictDetectionService = conflictDetectionService;
 		this.scheduleMapper = scheduleMapper;
 	}
@@ -40,11 +40,11 @@ public class ScheduleController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
 	public ApiResponse<List<ScheduleResponse>> get() {
-		List<SlotAssignment> slots = scheduleService.getSchedule();
-		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
-		Map<Long, List<String>> studentNamesMap = scheduleService.buildStudentNamesMap(projectMap);
-		List<ScheduleResponse> response = slots.stream().map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
-				.toList();
+		List<Defense> defenses = defenseService.getSchedule();
+		Map<Long, Project> projectMap = defenseService.buildProjectMap(defenses);
+		Map<Long, List<String>> studentNamesMap = defenseService.buildStudentNamesMap(projectMap);
+		List<ScheduleResponse> response = defenses.stream()
+				.map(d -> scheduleMapper.toDto(d, projectMap, studentNamesMap)).toList();
 		return ApiResponse.success(response);
 	}
 
@@ -63,11 +63,11 @@ public class ScheduleController {
 						ApiResponse.error("Conflicts detected", conflicts.stream().map(c -> c.message()).toList()));
 			}
 		}
-		List<SlotAssignment> slots = scheduleService.saveSchedule(request);
-		Map<Long, Project> projectMap = scheduleService.buildProjectMap(slots);
-		Map<Long, List<String>> studentNamesMap = scheduleService.buildStudentNamesMap(projectMap);
-		List<ScheduleResponse> response = slots.stream().map(s -> scheduleMapper.toDto(s, projectMap, studentNamesMap))
-				.toList();
+		List<Defense> defenses = defenseService.saveSchedule(request);
+		Map<Long, Project> projectMap = defenseService.buildProjectMap(defenses);
+		Map<Long, List<String>> studentNamesMap = defenseService.buildStudentNamesMap(projectMap);
+		List<ScheduleResponse> response = defenses.stream()
+				.map(d -> scheduleMapper.toDto(d, projectMap, studentNamesMap)).toList();
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
@@ -77,7 +77,7 @@ public class ScheduleController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule generated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid session ID")})
 	public ApiResponse<List<ScheduleResponse>> autoGenerate(@Valid @RequestBody DefenseSessionIdRequest request) {
-		List<ScheduleResponse> schedule = scheduleService.autoGenerate(request.defenseSessionId());
+		List<ScheduleResponse> schedule = defenseService.autoGenerate(request.defenseSessionId());
 		return ApiResponse.success(schedule);
 	}
 
@@ -87,7 +87,7 @@ public class ScheduleController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Schedule published successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Session not found")})
 	public ApiResponse<Void> publish(@Valid @RequestBody DefenseSessionIdRequest request) {
-		scheduleService.publish(request.defenseSessionId());
+		defenseService.publish(request.defenseSessionId());
 		return ApiResponse.success("Planning publié avec succès.", null);
 	}
 }

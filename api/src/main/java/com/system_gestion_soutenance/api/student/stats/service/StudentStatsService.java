@@ -2,7 +2,7 @@ package com.system_gestion_soutenance.api.student.stats.service;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
 import com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse;
@@ -15,13 +15,13 @@ public class StudentStatsService {
 
 	private final StudentDocumentRepository documentRepository;
 	private final GroupRepository groupRepository;
-	private final SlotAssignmentRepository slotAssignmentRepository;
+	private final DefenseRepository defenseRepository;
 
 	public StudentStatsService(StudentDocumentRepository documentRepository, GroupRepository groupRepository,
-			SlotAssignmentRepository slotAssignmentRepository) {
+			DefenseRepository defenseRepository) {
 		this.documentRepository = documentRepository;
 		this.groupRepository = groupRepository;
-		this.slotAssignmentRepository = slotAssignmentRepository;
+		this.defenseRepository = defenseRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -33,7 +33,7 @@ public class StudentStatsService {
 		int groupMembers = group != null ? group.getStudents().size() : 0;
 		Long projectId = (group != null && group.getProject() != null) ? group.getProject().getId() : null;
 
-		boolean hasSchedule = projectId != null && slotAssignmentRepository.existsByProjectId(projectId);
+		boolean hasSchedule = projectId != null && defenseRepository.existsByProject_Id(projectId);
 
 		return new StudentStatsResponse(docs.size(), missing, groupMembers, hasSchedule ? "scheduled" : "pending");
 	}

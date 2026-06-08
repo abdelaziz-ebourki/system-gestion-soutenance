@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.coordinator.schedule.service.ScheduleService;
+import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -27,7 +27,7 @@ class CoordinatorDefenseControllerTest {
 	private MockMvc mockMvc;
 
 	@MockitoBean
-	private ScheduleService scheduleService;
+	private DefenseService scheduleService;
 
 	@MockitoBean
 	private JwtTokenProvider jwtTokenProvider;

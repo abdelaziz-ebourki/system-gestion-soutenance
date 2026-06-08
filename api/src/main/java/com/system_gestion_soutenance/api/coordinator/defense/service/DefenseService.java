@@ -1,4 +1,4 @@
-package com.system_gestion_soutenance.api.coordinator.schedule.service;
+package com.system_gestion_soutenance.api.coordinator.defense.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
@@ -8,16 +8,18 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
+import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
@@ -32,39 +34,40 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ScheduleService {
+public class DefenseService {
 
-	private final SlotAssignmentRepository slotAssignmentRepository;
+	private final DefenseRepository defenseRepository;
 	private final RoomRepository roomRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final ProjectRepository projectRepository;
-	private final JuryRepository juryRepository;
 	private final GroupRepository groupRepository;
 	private final NotificationRepository notificationRepository;
+	private final com.system_gestion_soutenance.api.user.repository.TeacherRepository teacherRepository;
 
-	public ScheduleService(SlotAssignmentRepository slotAssignmentRepository, RoomRepository roomRepository,
+	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
 			DefenseSessionRepository defenseSessionRepository, DefenseSettingsRepository defenseSettingsRepository,
-			ProjectRepository projectRepository, JuryRepository juryRepository, GroupRepository groupRepository,
-			NotificationRepository notificationRepository) {
-		this.slotAssignmentRepository = slotAssignmentRepository;
+			ProjectRepository projectRepository, GroupRepository groupRepository,
+			NotificationRepository notificationRepository,
+			com.system_gestion_soutenance.api.user.repository.TeacherRepository teacherRepository) {
+		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.projectRepository = projectRepository;
-		this.juryRepository = juryRepository;
 		this.groupRepository = groupRepository;
 		this.notificationRepository = notificationRepository;
+		this.teacherRepository = teacherRepository;
 	}
 
 	@Transactional(readOnly = true)
-	public List<SlotAssignment> getSchedule() {
-		return slotAssignmentRepository.findAllWithRoom();
+	public List<Defense> getSchedule() {
+		return defenseRepository.findAll();
 	}
 
-	public Map<Long, Project> buildProjectMap(List<SlotAssignment> slots) {
-		List<Long> projectIds = slots.stream().map(SlotAssignment::getProjectId).filter(Objects::nonNull).distinct()
-				.toList();
+	public Map<Long, Project> buildProjectMap(List<Defense> defenses) {
+		List<Long> projectIds = defenses.stream().filter(d -> d.getProject() != null).map(d -> d.getProject().getId())
+				.distinct().toList();
 		return projectRepository.findAllById(projectIds).stream().collect(Collectors.toMap(Project::getId, p -> p));
 	}
 
@@ -84,41 +87,103 @@ public class ScheduleService {
 		return namesMap;
 	}
 
-	private List<String> resolveStudentNames(Project project, List<Group> projectGroups) {
-		if (projectGroups != null && !projectGroups.isEmpty()) {
-			var g = projectGroups.get(0);
-			if (g.getStudents() != null)
-				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
-		}
-		if (project.getStudents() != null)
-			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
-		return List.of();
-	}
-
-	@Audited(action = "BULK_CREATE", entity = "SlotAssignment")
+	@Audited(action = "BULK_CREATE", entity = "Defense")
 	@Transactional
-	public List<SlotAssignment> saveSchedule(ScheduleRequest request) {
-		slotAssignmentRepository.deleteAll();
+	public List<Defense> saveSchedule(ScheduleRequest request) {
+		defenseRepository.deleteAll();
 
 		for (var slotReq : request.slots()) {
-			SlotAssignment slot = new SlotAssignment();
-			slot.setTitle(slotReq.title());
-			slot.setDate(slotReq.date());
-			slot.setTime(slotReq.time());
+			Defense defense = new Defense();
+			defense.setDate(LocalDate.parse(slotReq.date()));
+			defense.setTime(LocalTime.parse(slotReq.time()));
 
-			if (slotReq.projectId() != null)
-				slot.setProjectId(slotReq.projectId());
+			if (slotReq.projectId() != null) {
+				Project project = projectRepository.findById(slotReq.projectId()).orElseThrow(
+						() -> new InvalidBusinessStateException("Projet introuvable: " + slotReq.projectId()));
+				defense.setProject(project);
+				project.setDefense(defense);
+			}
 
 			if (slotReq.roomId() != null) {
 				Room room = roomRepository.findById(slotReq.roomId())
 						.orElseThrow(() -> new InvalidBusinessStateException("Salle introuvable: " + slotReq.roomId()));
-				slot.setRoom(room);
+				defense.setRoom(room);
 			}
 
-			slotAssignmentRepository.save(slot);
+			defenseRepository.save(defense);
 		}
 
 		return getSchedule();
+	}
+
+	@Transactional
+	public Defense createJury(CreateJuryRequest request) {
+		Project project = projectRepository.findById(request.projectId())
+				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
+
+		Defense defense = defenseRepository.findByProject(project).orElseThrow(
+				() -> new InvalidBusinessStateException("Aucun créneau de soutenance assigné à ce projet"));
+
+		validateNoDuplicateTeachers(request.members());
+
+		List<JuryMember> members = request.members().stream().map(m -> {
+			var teacher = teacherRepository.findById(m.teacherId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
+			return new JuryMember(teacher, m.roleName());
+		}).toList();
+
+		defense.setMembers(members);
+		return defenseRepository.save(defense);
+	}
+
+	@Transactional
+	public Defense updateJury(Long defenseId, UpdateJuryRequest updates) {
+		Defense defense = defenseRepository.findById(defenseId)
+				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
+
+		if (updates.projectId() != null) {
+			Project project = projectRepository.findById(updates.projectId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
+			defense.setProject(project);
+			project.setDefense(defense);
+		}
+
+		if (updates.members() != null) {
+			validateNoDuplicateTeachers(updates.members());
+			List<JuryMember> members = updates.members().stream().map(m -> {
+				var teacher = teacherRepository.findById(m.teacherId()).orElseThrow(
+						() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
+				return new JuryMember(teacher, m.roleName());
+			}).toList();
+			defense.setMembers(members);
+		}
+
+		return defenseRepository.save(defense);
+	}
+
+	@Audited(action = "DELETE", entity = "Defense")
+	@Transactional
+	public void cancelDefense(Long defenseId) {
+		Defense defense = defenseRepository.findById(defenseId)
+				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
+
+		defenseRepository.delete(defense);
+
+		createNotification(NotificationType.WARNING, "Soutenance annulée",
+				"La soutenance du " + defense.getDate() + " à " + defense.getTime() + " a été annulée.",
+				"/coordinator/schedule");
+	}
+
+	@Transactional
+	public void publish(Long defenseSessionId) {
+		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		if (ds.getStatus() == DefenseSessionStatus.ACTIVE) {
+			ds.setStatus(DefenseSessionStatus.SCHEDULED);
+			defenseSessionRepository.save(ds);
+			createNotification(NotificationType.SUCCESS, "Session publiée",
+					"La session \"" + ds.getName() + "\" a été publiée.", "/admin/sessions");
+		}
 	}
 
 	@Transactional(readOnly = true)
@@ -140,7 +205,10 @@ public class ScheduleService {
 		int breakMinutes = ds.getBreakDuration();
 
 		List<Project> allProjects = projectRepository.findAll();
-		Set<Long> projectsWithJuries = juryRepository.findAll().stream().map(jury -> jury.getProject().getId())
+
+		// We now use DefenseRepository to check for juries (defenses with members)
+		Set<Long> projectsWithJuries = defenseRepository.findAll().stream()
+				.filter(d -> d.getMembers() != null && !d.getMembers().isEmpty()).map(d -> d.getProject().getId())
 				.collect(Collectors.toSet());
 
 		Map<Long, Integer> projectStudentCounts = new HashMap<>();
@@ -181,7 +249,6 @@ public class ScheduleService {
 				LocalTime time = startTime;
 				while (time.plusMinutes(slotDuration).isBefore(endTime)
 						|| time.plusMinutes(slotDuration).equals(endTime)) {
-
 					LocalDate currentDate = current;
 					LocalTime currentTime = time;
 
@@ -189,15 +256,14 @@ public class ScheduleService {
 						if (!assignedProjects.contains(project.getId())
 								&& projectStudentCounts.getOrDefault(project.getId(), 0) <= room.getCapacity()) {
 
-							result.add(new ScheduleResponse(null, // Temporary ID
-									project.getTitle(), currentDate.toString(), currentTime.toString(), project.getId(),
-									room.getId(), room.getName(), project.getTitle(),
-									studentNamesByProject.getOrDefault(project.getId(), List.of()), "", "scheduled"));
+							result.add(new ScheduleResponse(null, project.getTitle(), currentDate.toString(),
+									currentTime.toString(), project.getId(), room.getId(), room.getName(),
+									project.getTitle(), studentNamesByProject.getOrDefault(project.getId(), List.of()),
+									"", "scheduled"));
 							assignedProjects.add(project.getId());
 							break;
 						}
 					}
-
 					time = time.plusMinutes(slotDuration + breakMinutes);
 				}
 			}
@@ -207,31 +273,33 @@ public class ScheduleService {
 		return result;
 	}
 
-	@Audited(action = "UPDATE", entity = "DefenseSession")
-	@Transactional
-	public void publish(Long defenseSessionId) {
-		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
-				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
-
-		if (ds.getStatus() == DefenseSessionStatus.ACTIVE) {
-			ds.setStatus(DefenseSessionStatus.SCHEDULED);
-			defenseSessionRepository.save(ds);
+	private List<String> resolveStudentNames(Project project, List<Group> projectGroups) {
+		if (projectGroups != null && !projectGroups.isEmpty()) {
+			var g = projectGroups.get(0);
+			if (g.getStudents() != null)
+				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 		}
-
-		createNotification(NotificationType.SUCCESS, "Soutenance publiée",
-				"Le planning des soutenances pour " + ds.getName() + " a été publié.", "/coordinator/schedule");
+		if (project.getStudents() != null)
+			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
+		return List.of();
 	}
 
-	@Audited(action = "DELETE", entity = "SlotAssignment")
-	@Transactional
-	public void cancelDefense(Long slotId) {
-		SlotAssignment slot = slotAssignmentRepository.findById(slotId)
-				.orElseThrow(() -> new EntityNotFoundException("Créneau de soutenance non trouvé"));
-
-		slotAssignmentRepository.delete(slot);
-
-		createNotification(NotificationType.WARNING, "Soutenance annulée", "La soutenance \"" + slot.getTitle()
-				+ "\" du " + slot.getDate() + " à " + slot.getTime() + " a été annulée.", "/coordinator/schedule");
+	private void validateNoDuplicateTeachers(List<?> members) {
+		Set<Long> teacherIds = new HashSet<>();
+		for (Object m : members) {
+			Long tid;
+			if (m instanceof CreateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
+			} else if (m instanceof UpdateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
+			} else {
+				continue;
+			}
+			if (!teacherIds.add(tid)) {
+				throw new InvalidBusinessStateException(
+						"Un enseignant ne peut être assigné qu'à un seul rôle dans un même jury");
+			}
+		}
 	}
 
 	private void createNotification(NotificationType type, String title, String message, String actionLink) {
@@ -244,5 +312,4 @@ public class ScheduleService {
 		notification.setActionLink(actionLink);
 		notificationRepository.save(notification);
 	}
-
 }

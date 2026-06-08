@@ -2,13 +2,11 @@ package com.system_gestion_soutenance.api.teacher.schedule.service;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.teacher.schedule.dto.TeacherScheduleResponse;
 import com.system_gestion_soutenance.api.teacher.schedule.dto.SlotDetails;
 import java.util.*;
@@ -18,15 +16,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class TeacherScheduleService {
 
-	private final SlotAssignmentRepository slotAssignmentRepository;
-	private final JuryRepository juryRepository;
+	private final DefenseRepository defenseRepository;
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
 
-	public TeacherScheduleService(SlotAssignmentRepository slotAssignmentRepository, JuryRepository juryRepository,
-			ProjectRepository projectRepository, GroupRepository groupRepository) {
-		this.slotAssignmentRepository = slotAssignmentRepository;
-		this.juryRepository = juryRepository;
+	public TeacherScheduleService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
+			GroupRepository groupRepository) {
+		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
 	}
@@ -35,10 +31,10 @@ public class TeacherScheduleService {
 		Set<Long> projectIdsForTeacher = new HashSet<>();
 		Map<Long, String> projectRoles = new HashMap<>();
 
-		for (Jury jury : juryRepository.findAll()) {
-			for (JuryMember member : jury.getMembers()) {
+		for (Defense defense : defenseRepository.findAll()) {
+			for (JuryMember member : defense.getMembers()) {
 				if (member.getTeacher() != null && member.getTeacher().getId().equals(teacherId)) {
-					Long pid = jury.getProject().getId();
+					Long pid = defense.getProject().getId();
 					projectIdsForTeacher.add(pid);
 					projectRoles.put(pid, member.getRoleName());
 				}
@@ -76,19 +72,19 @@ public class TeacherScheduleService {
 		}
 
 		List<SlotDetails> result = new ArrayList<>();
-		for (SlotAssignment slot : slotAssignmentRepository.findAll()) {
-			Long pid = slot.getProjectId();
-			if (pid == null || !projectIdsForTeacher.contains(pid))
+		for (Defense defense : defenseRepository.findAll()) {
+			Long pid = defense.getProject().getId();
+			if (!projectIdsForTeacher.contains(pid))
 				continue;
 
 			Project project = projectRepository.findById(pid).orElse(null);
 			if (project == null)
 				continue;
 
-			result.add(
-					new SlotDetails(slot.getId(), pid, project.getTitle(), projectStudents.getOrDefault(pid, List.of()),
-							slot.getDate(), slot.getTime(), "", slot.getRoom() != null ? slot.getRoom().getName() : "",
-							projectRoles.getOrDefault(pid, ""), "scheduled"));
+			result.add(new SlotDetails(defense.getId(), pid, project.getTitle(),
+					projectStudents.getOrDefault(pid, List.of()), defense.getDate().toString(),
+					defense.getTime().toString(), "", defense.getRoom() != null ? defense.getRoom().getName() : "",
+					projectRoles.getOrDefault(pid, ""), "scheduled"));
 		}
 
 		return new TeacherScheduleResponse(result);
