@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.coordinator.group.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
@@ -21,8 +22,10 @@ class GroupServiceTest {
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final StudentRepository studentRepository = mock(StudentRepository.class);
+	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 
-	private final GroupService service = new GroupService(groupRepository, projectRepository, studentRepository);
+	private final GroupService service = new GroupService(groupRepository, projectRepository, studentRepository,
+			defenseSessionRepository);
 
 	@Test
 	void findAll_returnsAllGroups() {

@@ -1,5 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.group.service;
 
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
+import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -21,12 +23,14 @@ public class GroupService {
 	private final GroupRepository groupRepository;
 	private final ProjectRepository projectRepository;
 	private final StudentRepository studentRepository;
+	private final DefenseSessionRepository defenseSessionRepository;
 
 	public GroupService(GroupRepository groupRepository, ProjectRepository projectRepository,
-			StudentRepository studentRepository) {
+			StudentRepository studentRepository, DefenseSessionRepository defenseSessionRepository) {
 		this.groupRepository = groupRepository;
 		this.projectRepository = projectRepository;
 		this.studentRepository = studentRepository;
+		this.defenseSessionRepository = defenseSessionRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -43,6 +47,13 @@ public class GroupService {
 		List<Student> students = Collections.emptyList();
 		if (request.studentIds() != null) {
 			students = studentRepository.findAllById(request.studentIds());
+		}
+
+		if (request.sessionId() != null) {
+			DefenseSession ds = defenseSessionRepository.findById(request.sessionId()).orElse(null);
+			if (ds != null && ds.getMaxGroupSize() > 0 && students.size() > ds.getMaxGroupSize()) {
+				throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");
+			}
 		}
 
 		Group group = new Group();
