@@ -8,7 +8,7 @@ import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceList
 import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
 import com.system_gestion_soutenance.api.coordinator.document.dto.EvaluationSheetResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.JuryConvocationResponse;
-import com.system_gestion_soutenance.api.coordinator.document.dto.ProcesVerbalResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.MinutesResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.ScheduleDocResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.SlotDetails;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -107,29 +107,29 @@ public class DocumentDataService {
 		return new ScheduleDocResponse(ds.getName(), slots);
 	}
 
-	public ProcesVerbalResponse procesVerbal(Long projectId) {
+	public MinutesResponse minutes(Long projectId) {
 		Project project = projectRepository.findById(projectId)
 				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé: " + projectId));
 
 		GeneralSettings generalSettings = generalSettingsRepository.findById(1L).orElse(null);
-		ProcesVerbalResponse.Settings settings = generalSettings != null
-				? new ProcesVerbalResponse.Settings(generalSettings.getInstitutionName(),
+		MinutesResponse.Settings settings = generalSettings != null
+				? new MinutesResponse.Settings(generalSettings.getInstitutionName(),
 						generalSettings.getInstitutionLogoUrl(), generalSettings.getTimezone(),
 						generalSettings.getDateFormat())
-				: new ProcesVerbalResponse.Settings(null, null, null, null);
+				: new MinutesResponse.Settings(null, null, null, null);
 
-		ProcesVerbalResponse.GradeDetails grade = new ProcesVerbalResponse.GradeDetails(project.getId(),
-				project.getTitle(), 0.0, "En attente");
+		MinutesResponse.GradeDetails grade = new MinutesResponse.GradeDetails(project.getId(), project.getTitle(), 0.0,
+				"En attente");
 
-		List<ProcesVerbalResponse.JuryMemberDetails> juryMembers = new ArrayList<>();
+		List<MinutesResponse.JuryMemberDetails> juryMembers = new ArrayList<>();
 		defenseRepository.findByProject(project).ifPresent(defense -> {
 			for (JuryMember member : defense.getMembers()) {
-				juryMembers.add(new ProcesVerbalResponse.JuryMemberDetails(member.getRoleName(),
+				juryMembers.add(new MinutesResponse.JuryMemberDetails(member.getRoleName(),
 						member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName()));
 			}
 		});
 
-		return new ProcesVerbalResponse(settings, grade, getStudentNames(projectId),
+		return new MinutesResponse(settings, grade, getStudentNames(projectId),
 				project.getSupervisor() != null
 						? project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName()
 						: null,
