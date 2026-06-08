@@ -23,6 +23,7 @@ import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
+import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -43,13 +44,12 @@ public class DefenseService {
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
 	private final NotificationRepository notificationRepository;
-	private final com.system_gestion_soutenance.api.user.repository.TeacherRepository teacherRepository;
+	private final TeacherRepository teacherRepository;
 
 	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
 			DefenseSessionRepository defenseSessionRepository, DefenseSettingsRepository defenseSettingsRepository,
 			ProjectRepository projectRepository, GroupRepository groupRepository,
-			NotificationRepository notificationRepository,
-			com.system_gestion_soutenance.api.user.repository.TeacherRepository teacherRepository) {
+			NotificationRepository notificationRepository, TeacherRepository teacherRepository) {
 		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
@@ -62,7 +62,7 @@ public class DefenseService {
 
 	@Transactional(readOnly = true)
 	public List<Defense> getSchedule() {
-		return defenseRepository.findAll();
+		return defenseRepository.findAllWithMembers();
 	}
 
 	public Map<Long, Project> buildProjectMap(List<Defense> defenses) {
@@ -101,7 +101,6 @@ public class DefenseService {
 				Project project = projectRepository.findById(slotReq.projectId()).orElseThrow(
 						() -> new InvalidBusinessStateException("Projet introuvable: " + slotReq.projectId()));
 				defense.setProject(project);
-				project.setDefense(defense);
 			}
 
 			if (slotReq.roomId() != null) {
@@ -116,6 +115,7 @@ public class DefenseService {
 		return getSchedule();
 	}
 
+	@Audited(action = "CREATE", entity = "Jury")
 	@Transactional
 	public Defense createJury(CreateJuryRequest request) {
 		Project project = projectRepository.findById(request.projectId())
@@ -136,6 +136,7 @@ public class DefenseService {
 		return defenseRepository.save(defense);
 	}
 
+	@Audited(action = "UPDATE", entity = "Jury")
 	@Transactional
 	public Defense updateJury(Long defenseId, UpdateJuryRequest updates) {
 		Defense defense = defenseRepository.findById(defenseId)
@@ -145,7 +146,6 @@ public class DefenseService {
 			Project project = projectRepository.findById(updates.projectId())
 					.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 			defense.setProject(project);
-			project.setDefense(defense);
 		}
 
 		if (updates.members() != null) {
@@ -172,6 +172,15 @@ public class DefenseService {
 		createNotification(NotificationType.WARNING, "Soutenance annulée",
 				"La soutenance du " + defense.getDate() + " à " + defense.getTime() + " a été annulée.",
 				"/coordinator/schedule");
+	}
+
+	@Audited(action = "UPDATE", entity = "Jury")
+	@Transactional
+	public Defense clearJuryMembers(Long defenseId) {
+		Defense defense = defenseRepository.findById(defenseId)
+				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
+		defense.setMembers(new ArrayList<>());
+		return defenseRepository.save(defense);
 	}
 
 	@Transactional
@@ -207,9 +216,9 @@ public class DefenseService {
 		List<Project> allProjects = projectRepository.findAll();
 
 		// We now use DefenseRepository to check for juries (defenses with members)
-		Set<Long> projectsWithJuries = defenseRepository.findAll().stream()
-				.filter(d -> d.getMembers() != null && !d.getMembers().isEmpty()).map(d -> d.getProject().getId())
-				.collect(Collectors.toSet());
+		Set<Long> projectsWithJuries = defenseRepository.findAllWithMembers().stream()
+				.filter(d -> d.getProject() != null && d.getMembers() != null && !d.getMembers().isEmpty())
+				.map(d -> d.getProject().getId()).collect(Collectors.toSet());
 
 		Map<Long, Integer> projectStudentCounts = new HashMap<>();
 		List<Group> allGroups = groupRepository.findAll();

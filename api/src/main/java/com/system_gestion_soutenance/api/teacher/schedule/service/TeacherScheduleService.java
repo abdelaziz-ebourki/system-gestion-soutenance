@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.teacher.schedule.dto.TeacherScheduleResponse;
 import com.system_gestion_soutenance.api.teacher.schedule.dto.SlotDetails;
+import com.system_gestion_soutenance.api.user.entity.Student;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,12 @@ public class TeacherScheduleService {
 		Set<Long> projectIdsForTeacher = new HashSet<>();
 		Map<Long, String> projectRoles = new HashMap<>();
 
-		for (Defense defense : defenseRepository.findAll()) {
+		List<Defense> allDefenses = defenseRepository.findAllWithMembers();
+
+		for (Defense defense : allDefenses) {
+			if (defense.getProject() == null) {
+				continue;
+			}
 			for (JuryMember member : defense.getMembers()) {
 				if (member.getTeacher() != null && member.getTeacher().getId().equals(teacherId)) {
 					Long pid = defense.getProject().getId();
@@ -41,7 +47,8 @@ public class TeacherScheduleService {
 			}
 		}
 
-		for (Project project : projectRepository.findAll()) {
+		List<Project> allProjects = projectRepository.findAll();
+		for (Project project : allProjects) {
 			if (project.getSupervisor() != null && project.getSupervisor().getId().equals(teacherId)) {
 				Long pid = project.getId();
 				projectIdsForTeacher.add(pid);
@@ -53,40 +60,38 @@ public class TeacherScheduleService {
 		for (Group group : groupRepository.findAll()) {
 			Long pid = group.getProject().getId();
 			if (projectIdsForTeacher.contains(pid)) {
-				List<String> names = group.getStudents() != null
-						? group.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-								.collect(Collectors.toList())
-						: List.of();
-				projectStudents.put(pid, names);
+				projectStudents.put(pid, extractStudentNames(group.getStudents()));
 			}
 		}
-		for (Project project : projectRepository.findAll()) {
+		for (Project project : allProjects) {
 			Long pid = project.getId();
 			if (projectIdsForTeacher.contains(pid) && !projectStudents.containsKey(pid)) {
-				List<String> names = project.getStudents() != null
-						? project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-								.collect(Collectors.toList())
-						: List.of();
-				projectStudents.put(pid, names);
+				projectStudents.put(pid, extractStudentNames(project.getStudents()));
 			}
 		}
 
 		List<SlotDetails> result = new ArrayList<>();
-		for (Defense defense : defenseRepository.findAll()) {
+		for (Defense defense : allDefenses) {
+			if (defense.getProject() == null) {
+				continue;
+			}
 			Long pid = defense.getProject().getId();
 			if (!projectIdsForTeacher.contains(pid))
 				continue;
 
-			Project project = projectRepository.findById(pid).orElse(null);
-			if (project == null)
-				continue;
-
-			result.add(new SlotDetails(defense.getId(), pid, project.getTitle(),
+			result.add(new SlotDetails(defense.getId(), pid, defense.getProject().getTitle(),
 					projectStudents.getOrDefault(pid, List.of()), defense.getDate().toString(),
 					defense.getTime().toString(), "", defense.getRoom() != null ? defense.getRoom().getName() : "",
 					projectRoles.getOrDefault(pid, ""), "scheduled"));
 		}
 
 		return new TeacherScheduleResponse(result);
+	}
+
+	private List<String> extractStudentNames(List<Student> students) {
+		if (students == null) {
+			return List.of();
+		}
+		return students.stream().map(s -> s.getFirstName() + " " + s.getLastName()).collect(Collectors.toList());
 	}
 }

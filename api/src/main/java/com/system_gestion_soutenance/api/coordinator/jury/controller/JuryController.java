@@ -67,7 +67,7 @@ public class JuryController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury not found")})
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-		defenseService.cancelDefense(id);
+		defenseService.clearJuryMembers(id);
 		return ResponseEntity.ok(ApiResponse.success("Jury supprimé avec succès", null));
 	}
 }

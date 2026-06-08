@@ -44,7 +44,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void validate_noExistingSchedule_returnsEmptyConflicts() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
 
@@ -55,7 +55,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkProjectAlreadyScheduled_detectsDuplicate() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 1L, 1L));
@@ -69,7 +69,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkSlotOccupied_detectsOverlap() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:00", 2L, 10L));
@@ -83,7 +83,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkRoomCapacity_detectsOverflow() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Room room = mock(Room.class);
 		when(room.getCapacity()).thenReturn(2);
@@ -107,7 +107,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkRoomCapacity_withSufficientCapacity_noConflict() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Room room = mock(Room.class);
 		when(room.getCapacity()).thenReturn(10);
@@ -126,7 +126,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkDateOutOfBounds_detectsInvalidDate() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setStartDate(LocalDate.of(2025, 6, 1));
@@ -143,7 +143,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherDoubleBooked_noConflict_returnsEmpty() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getId()).thenReturn(5L);
@@ -176,26 +176,31 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherDoubleBooked_detectsConflict() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
-
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getId()).thenReturn(5L);
 
 		JuryMember member = mock(JuryMember.class);
 		when(member.getTeacher()).thenReturn(teacher);
 
-		Defense defense = mock(Defense.class);
-		when(defense.getMembers()).thenReturn(List.of(member));
-
 		Project project1 = mock(Project.class);
 		when(project1.getId()).thenReturn(1L);
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
-		when(defenseRepository.findByProject(project1)).thenReturn(Optional.of(defense));
+
+		Defense defense1 = mock(Defense.class);
+		when(defense1.getProject()).thenReturn(project1);
+		when(defense1.getMembers()).thenReturn(List.of(member));
+		when(defense1.getDate()).thenReturn(java.time.LocalDate.of(2025, 6, 1));
+		when(defense1.getTime()).thenReturn(java.time.LocalTime.of(9, 0));
 
 		Project project2 = mock(Project.class);
 		when(project2.getId()).thenReturn(2L);
-		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
-		when(defenseRepository.findByProject(project2)).thenReturn(Optional.of(defense));
+
+		Defense defense2 = mock(Defense.class);
+		when(defense2.getProject()).thenReturn(project2);
+		when(defense2.getMembers()).thenReturn(List.of(member));
+		when(defense2.getDate()).thenReturn(java.time.LocalDate.of(2025, 6, 1));
+		when(defense2.getTime()).thenReturn(java.time.LocalTime.of(10, 0));
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense1, defense2));
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 1L));
@@ -209,7 +214,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkSupervisorConflict_noSupervisor_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Project project = mock(Project.class);
 		when(project.getSupervisor()).thenReturn(null);
@@ -223,7 +228,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkSupervisorConflict_noConflict_returnsEmpty() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Teacher sup1 = mock(Teacher.class);
 		when(sup1.getId()).thenReturn(5L);
@@ -251,7 +256,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkSupervisorConflict_detectsConflict() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Teacher supervisor = mock(Teacher.class);
 		when(supervisor.getId()).thenReturn(5L);
@@ -276,7 +281,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkBreakInterval_detectsViolation() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		DefenseSession ds = mock(DefenseSession.class);
 		when(ds.getBreakDuration()).thenReturn(30);
@@ -296,7 +301,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherUnavailable_teacherAvailable_noConflict() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getId()).thenReturn(5L);
@@ -323,21 +328,22 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherUnavailable_detectsConflict() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
-
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getId()).thenReturn(5L);
 
 		JuryMember member = mock(JuryMember.class);
 		when(member.getTeacher()).thenReturn(teacher);
 
-		Defense defense = mock(Defense.class);
-		when(defense.getMembers()).thenReturn(List.of(member));
-
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
+
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers()).thenReturn(List.of(member));
+		when(defense.getDate()).thenReturn(java.time.LocalDate.of(2025, 6, 1));
+		when(defense.getTime()).thenReturn(java.time.LocalTime.of(9, 0));
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 
 		Unavailability ua = new Unavailability(1L, 5L, "2025-06-01", List.of("09:00"));
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
@@ -351,7 +357,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkProjectAlreadyScheduled_nullProjectId_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var schedule = new ScheduleRequest(1L,
 				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
@@ -361,7 +367,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkRoomCapacity_nullProjectIdOrRoomId_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var schedule = new ScheduleRequest(1L,
 				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
@@ -371,7 +377,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkRoomCapacity_roomNotFound_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
 		var result = service.validate(singleSlot("1", "99", "2025-06-01", "09:00"), null);
@@ -380,7 +386,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void getStudentCountForProject_fromGroupOrProjectFallback() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Room room = mock(Room.class);
 		when(room.getCapacity()).thenReturn(0);
@@ -406,7 +412,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void getJuryTeacherIds_nullTeacher_skipsMember() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		JuryMember member = mock(JuryMember.class);
 		when(member.getTeacher()).thenReturn(null);
@@ -426,7 +432,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherDoubleBooked_nullProjectId_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var schedule = new ScheduleRequest(1L,
 				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
@@ -436,7 +442,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkSupervisorConflict_projectNotFound_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 		when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
 		var result = service.validate(singleSlot("1", "1", "2025-06-01", "09:00"), null);
@@ -445,7 +451,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkBreakInterval_invalidTimeFormat_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "not-a-time", 1L, 10L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:00", 2L, 10L));
@@ -457,7 +463,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherUnavailable_nullFields_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var schedule = new ScheduleRequest(1L, List.of(new SlotAssignmentRequest("Slot 1", null, null, null, 1L)));
 		var result = service.validate(schedule, null);
@@ -466,7 +472,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkTeacherUnavailable_slotsFieldNull_skipsMatch() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getId()).thenReturn(5L);
@@ -503,7 +509,7 @@ class ConflictDetectionServiceTest {
 		when(existing.getProjectId()).thenReturn(99L);
 		when(existing.getRoom()).thenReturn(null);
 
-		when(defenseRepository.findAll()).thenReturn(List.of(existing));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(existing));
 
 		var schedule = singleSlot("1", "1", "2025-06-02", "09:00");
 
@@ -514,7 +520,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkDateOutOfBounds_withinBounds_noConflict() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		DefenseSession ds = new DefenseSession();
 		ds.setStartDate(LocalDate.of(2025, 6, 1));
@@ -529,7 +535,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkDateOutOfBounds_nullSessionId_skipsCheck() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var schedule = singleSlot("1", "1", "2025-07-01", "09:00");
 
@@ -540,7 +546,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkBreakInterval_sufficientGap_noViolation() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 10L));
@@ -552,7 +558,7 @@ class ConflictDetectionServiceTest {
 
 	@Test
 	void checkBreakInterval_nullSessionId_usesDefaultBreak() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:10", 2L, 10L));

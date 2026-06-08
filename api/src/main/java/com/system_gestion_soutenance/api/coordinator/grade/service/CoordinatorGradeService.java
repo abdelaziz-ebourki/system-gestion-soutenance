@@ -35,7 +35,7 @@ public class CoordinatorGradeService {
 
 	@Transactional(readOnly = true)
 	public List<GradeWeightedAverageResponse> getGrades() {
-		List<Defense> defenses = defenseRepository.findAll();
+		List<Defense> defenses = defenseRepository.findAllWithMembers();
 		if (defenses.isEmpty())
 			return List.of();
 

@@ -138,8 +138,12 @@ public class DocumentDataService {
 
 	private List<Long> resolveDefenseIds(DefenseIdsRequest request) {
 		if (request.projectId() != null) {
-			return defenseRepository.findByProject(projectRepository.findById(request.projectId()).orElse(null))
-					.map(d -> List.of(d.getId())).orElseThrow(() -> new EntityNotFoundException(
+			Project project = projectRepository.findById(request.projectId()).orElse(null);
+			if (project == null) {
+				throw new EntityNotFoundException("Projet introuvable: " + request.projectId());
+			}
+			return defenseRepository.findByProject(project).map(d -> List.of(d.getId()))
+					.orElseThrow(() -> new EntityNotFoundException(
 							"Aucune soutenance trouvée pour le projet: " + request.projectId()));
 		}
 		return request.defenseIds();
@@ -154,8 +158,6 @@ public class DocumentDataService {
 			juryMembers.add(new EvaluationSheetResponse.JuryMemberResponse(member.getRoleName(),
 					member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(), 0));
 		}
-		// Note: JuryRoleTemplate logic is being moved/removed as per plan.
-		// For now, coefficients are empty or we can implement a default.
 
 		return new EvaluationSheetResponse(project.getId(), project.getTitle(), getStudentNames(project.getId()),
 				project.getSupervisor() != null
@@ -168,7 +170,7 @@ public class DocumentDataService {
 	private List<SlotDetails> buildGroupedSlots() {
 		List<SlotDetails> slots = new ArrayList<>();
 
-		for (Defense defense : defenseRepository.findAll()) {
+		for (Defense defense : defenseRepository.findAllWithMembers()) {
 			if (defense.getProject() == null)
 				continue;
 

@@ -55,7 +55,7 @@ class TeacherScheduleServiceTest {
 
 	@Test
 	void getSchedule_noData_returnsEmpty() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 		when(projectRepository.findAll()).thenReturn(List.of());
 		when(groupRepository.findAll()).thenReturn(List.of());
 
@@ -69,7 +69,7 @@ class TeacherScheduleServiceTest {
 
 		Defense def = defense(10L, "2026-06-01", "09:00");
 
-		when(defenseRepository.findAll()).thenReturn(List.of(def));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(def));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(groupRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -91,7 +91,7 @@ class TeacherScheduleServiceTest {
 
 		Defense def = defense(10L, "2026-06-01", "09:00");
 
-		when(defenseRepository.findAll()).thenReturn(List.of(def));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(def));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(groupRepository.findAll()).thenReturn(List.of(group));
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -110,7 +110,7 @@ class TeacherScheduleServiceTest {
 		Defense def = defense(10L, "2026-06-01", "09:00");
 		def.setRoom(null);
 
-		when(defenseRepository.findAll()).thenReturn(List.of(def));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(def));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(groupRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -128,7 +128,7 @@ class TeacherScheduleServiceTest {
 
 		Defense def = defense(10L, "2026-06-01", "09:00");
 
-		when(defenseRepository.findAll()).thenReturn(List.of(def));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(def));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(groupRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -149,7 +149,7 @@ class TeacherScheduleServiceTest {
 		room.setName("Salle C");
 		def.setRoom(room);
 
-		when(defenseRepository.findAll()).thenReturn(List.of(def));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(def));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(groupRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -195,7 +195,7 @@ class TeacherScheduleServiceTest {
 		when(defenseSup.getTime()).thenReturn(LocalTime.of(9, 0));
 		when(defenseSup.getMembers()).thenReturn(List.of());
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defenseJury, defenseSup));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defenseJury, defenseSup));
 		when(projectRepository.findAll()).thenReturn(List.of(project, supervisedProject));
 		when(groupRepository.findAll()).thenReturn(List.of());
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -226,7 +226,7 @@ class TeacherScheduleServiceTest {
 		when(defense.getTime()).thenReturn(LocalTime.of(9, 0));
 		when(defense.getMembers()).thenReturn(List.of(member));
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
 		when(groupRepository.findAll()).thenReturn(List.of());

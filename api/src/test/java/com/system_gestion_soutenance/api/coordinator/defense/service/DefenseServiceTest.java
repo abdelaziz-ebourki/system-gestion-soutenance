@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
@@ -47,12 +48,12 @@ class DefenseServiceTest {
 	@Test
 	void getSchedule_returnsAllDefenses() {
 		Defense defense = mock(Defense.class);
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 
 		var result = service.getSchedule();
 
 		assertEquals(1, result.size());
-		verify(defenseRepository).findAll();
+		verify(defenseRepository).findAllWithMembers();
 	}
 
 	@Test
@@ -63,7 +64,7 @@ class DefenseServiceTest {
 		when(projectRepository.findById(5L)).thenReturn(Optional.of(project));
 
 		when(defenseRepository.save(any(Defense.class))).thenAnswer(i -> i.getArguments()[0]);
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		ScheduleRequest request = new ScheduleRequest(1L,
 				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
@@ -91,7 +92,7 @@ class DefenseServiceTest {
 		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
-		CreateJuryRequest request = new CreateJuryRequest(1L, null, List.of(member));
+		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 
 		var result = service.createJury(request);
 
@@ -103,7 +104,7 @@ class DefenseServiceTest {
 	void createJury_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		CreateJuryRequest request = new CreateJuryRequest(99L, null, List.of());
+		CreateJuryRequest request = new CreateJuryRequest(99L, List.of());
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
 	}
@@ -116,7 +117,7 @@ class DefenseServiceTest {
 
 		CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président");
 		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
-		CreateJuryRequest request = new CreateJuryRequest(1L, null, List.of(m1, m2));
+		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(m1, m2));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
 	}
@@ -131,7 +132,7 @@ class DefenseServiceTest {
 
 		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 
-		UpdateJuryRequest request = new UpdateJuryRequest(2L, null, null);
+		UpdateJuryRequest request = new UpdateJuryRequest(2L, null);
 		var result = service.updateJury(1L, request);
 
 		assertNotNull(result);
@@ -188,7 +189,7 @@ class DefenseServiceTest {
 		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(room));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(groupRepository.findAll()).thenReturn(List.of());
 
 		var result = service.autoGenerate(1L);
@@ -202,5 +203,207 @@ class DefenseServiceTest {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
 		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(99L));
+	}
+
+	@Test
+	void publish_activeSession_transitionsToScheduled() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session Test");
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
+		service.publish(1L);
+
+		assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
+		verify(defenseSessionRepository).save(ds);
+		verify(notificationRepository).save(any());
+	}
+
+	@Test
+	void publish_nonActiveSession_doesNotChangeStatus() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session Test");
+		ds.setStatus(DefenseSessionStatus.SCHEDULED);
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		service.publish(1L);
+
+		assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
+		verify(defenseSessionRepository, never()).save(any());
+	}
+
+	@Test
+	void publish_sessionNotFound_throwsException() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.publish(99L));
+	}
+
+	@Test
+	void createJury_noDefenseForProject_throwsException() {
+		Project project = mock(Project.class);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
+
+		CreateJuryRequest request = new CreateJuryRequest(1L, List.of());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
+	}
+
+	@Test
+	void createJury_teacherNotFound_throwsException() {
+		Project project = mock(Project.class);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(mock(Defense.class)));
+		when(teacherRepository.findById(5L)).thenReturn(Optional.empty());
+
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
+	}
+
+	@Test
+	void updateJury_defenseNotFound_throwsException() {
+		when(defenseRepository.findById(99L)).thenReturn(Optional.empty());
+
+		UpdateJuryRequest request = new UpdateJuryRequest(null, null);
+
+		assertThrows(EntityNotFoundException.class, () -> service.updateJury(99L, request));
+	}
+
+	@Test
+	void updateJury_projectNotFound_throwsException() {
+		Defense defense = mock(Defense.class);
+		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
+
+		UpdateJuryRequest request = new UpdateJuryRequest(99L, null);
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.updateJury(1L, request));
+	}
+
+	@Test
+	void updateJury_teacherNotFound_throwsException() {
+		Defense defense = mock(Defense.class);
+		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+
+		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "président");
+		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
+
+		when(teacherRepository.findById(5L)).thenReturn(Optional.empty());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.updateJury(1L, request));
+	}
+
+	@Test
+	void updateJury_duplicateTeachers_throwsException() {
+		Defense defense = mock(Defense.class);
+		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+
+		UpdateJuryRequest.MemberEntry m1 = new UpdateJuryRequest.MemberEntry(5L, "président");
+		UpdateJuryRequest.MemberEntry m2 = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
+		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(m1, m2));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.updateJury(1L, request));
+	}
+
+	@Test
+	void saveSchedule_projectNotFound_throwsException() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+		when(projectRepository.findById(5L)).thenReturn(Optional.empty());
+
+		ScheduleRequest request = new ScheduleRequest(1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, 10L)));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.saveSchedule(request));
+	}
+
+	@Test
+	void saveSchedule_roomNotFound_throwsException() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+		when(projectRepository.findById(5L)).thenReturn(Optional.of(mock(Project.class)));
+		when(roomRepository.findById(10L)).thenReturn(Optional.empty());
+
+		ScheduleRequest request = new ScheduleRequest(1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", 5L, 10L)));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.saveSchedule(request));
+	}
+
+	@Test
+	void clearJuryMembers_existingDefense_clearsMembers() {
+		Defense defense = mock(Defense.class);
+		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
+
+		var result = service.clearJuryMembers(1L);
+
+		assertNotNull(result);
+		verify(defense).setMembers(any());
+		verify(defenseRepository).save(defense);
+	}
+
+	@Test
+	void clearJuryMembers_notFound_throwsException() {
+		when(defenseRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.clearJuryMembers(99L));
+	}
+
+	@Test
+	void autoGenerate_noRooms_throwsException() {
+		DefenseSession ds = new DefenseSession();
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+
+		DefenseSettings settings = new DefenseSettings();
+		settings.setStartTime("09:00");
+		settings.setEndTime("12:00");
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
+	}
+
+	@Test
+	void autoGenerate_noApprovedProjectsWithJuries_throwsException() {
+		DefenseSession ds = new DefenseSession();
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+
+		DefenseSettings settings = new DefenseSettings();
+		settings.setStartTime("09:00");
+		settings.setEndTime("12:00");
+
+		Room room = new Room();
+		room.setId(1L);
+		room.setCapacity(10);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of(room));
+		when(projectRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+		when(groupRepository.findAll()).thenReturn(List.of());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
+	}
+
+	@Test
+	void autoGenerate_settingsNotFound_throwsException() {
+		DefenseSession ds = new DefenseSession();
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(1L));
 	}
 }

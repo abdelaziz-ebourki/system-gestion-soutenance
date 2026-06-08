@@ -441,6 +441,14 @@ public class DataInitializer implements CommandLineRunner {
 
 		// Phase 15: Defenses (Unified Jury and Slots)
 		int[] defenseProjectIds = {1, 3, 4, 6, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24};
+		String[][] juryCompositions = {{"Président", "Rapporteur", "Examinateur"}, {"Président", "Examinateur"},
+				{"Président", "Rapporteur", "Examinateur", "Membre"}, {"Président", "Rapporteur"},
+				{"Président", "Examinateur", "Membre"}, {"Président", "Rapporteur", "Examinateur"},
+				{"Président", "Examinateur"}, {"Président", "Rapporteur", "Examinateur", "Membre"},
+				{"Président", "Rapporteur"}, {"Président", "Examinateur", "Membre"},
+				{"Président", "Rapporteur", "Examinateur"}, {"Président", "Examinateur"},
+				{"Président", "Rapporteur", "Examinateur", "Membre"}, {"Président", "Rapporteur"},
+				{"Président", "Examinateur", "Membre"}};
 		List<Defense> defenses = new ArrayList<>();
 		for (int i = 0; i < defenseProjectIds.length; i++) {
 			Project project = projects.get(defenseProjectIds[i]);
@@ -451,8 +459,10 @@ public class DataInitializer implements CommandLineRunner {
 			d.setRoom(rooms.get(i % rooms.size()));
 
 			List<JuryMember> members = new ArrayList<>();
-			members.add(new JuryMember(teachers.get(0), "Président"));
-			members.add(new JuryMember(teachers.get(1), "Rapporteur"));
+			String[] roles = juryCompositions[i % juryCompositions.length];
+			for (int j = 0; j < roles.length; j++) {
+				members.add(new JuryMember(teachers.get((i + j) % teachers.size()), roles[j]));
+			}
 			d.setMembers(members);
 
 			defenses.add(defenseRepo.save(d));

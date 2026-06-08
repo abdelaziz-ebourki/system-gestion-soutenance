@@ -236,7 +236,7 @@ class DocumentDataServiceTest {
 		Defense defense = mockDefense(10L, 1L, null);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
@@ -258,7 +258,7 @@ class DocumentDataServiceTest {
 		Defense defense = mockDefense(10L, 1L, room);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
@@ -326,7 +326,7 @@ class DocumentDataServiceTest {
 		Defense defense = mockDefense(10L, 1L, null);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 

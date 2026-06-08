@@ -35,8 +35,10 @@ public class StudentDefenseService {
 
 		Project project = group.getProject();
 
+		Optional<Defense> defenseOpt = defenseRepository.findByProject(project);
+
 		List<JuryMemberResponse> juryMembers = new ArrayList<>();
-		defenseRepository.findByProject(project).ifPresent(defense -> {
+		defenseOpt.ifPresent(defense -> {
 			for (JuryMember member : defense.getMembers()) {
 				if (member.getTeacher() != null) {
 					juryMembers.add(new JuryMemberResponse(
@@ -51,7 +53,6 @@ public class StudentDefenseService {
 		String roomName = null;
 		String status = "pending";
 
-		Optional<Defense> defenseOpt = defenseRepository.findByProject(project);
 		if (defenseOpt.isPresent()) {
 			Defense defense = defenseOpt.get();
 			date = defense.getDate().toString();

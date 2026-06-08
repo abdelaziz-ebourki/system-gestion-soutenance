@@ -74,7 +74,7 @@ class JuryControllerTest {
 	@Test
 	void create_returnsCreated() throws Exception {
 		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
-		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
+		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 		Defense defense = mock(Defense.class);
 		when(defense.getId()).thenReturn(1L);
 		when(defenseService.createJury(any())).thenReturn(defense);
@@ -87,7 +87,7 @@ class JuryControllerTest {
 
 	@Test
 	void update_returnsJury() throws Exception {
-		UpdateJuryRequest updates = new UpdateJuryRequest(2L, null, List.of());
+		UpdateJuryRequest updates = new UpdateJuryRequest(2L, List.of());
 		Defense defense = mock(Defense.class);
 		when(defense.getId()).thenReturn(1L);
 		when(defenseService.updateJury(eq(1L), any())).thenReturn(defense);
@@ -100,7 +100,9 @@ class JuryControllerTest {
 
 	@Test
 	void delete_returns200() throws Exception {
-		doNothing().when(defenseService).cancelDefense(1L);
+		Defense defense = mock(Defense.class);
+		when(defense.getId()).thenReturn(1L);
+		when(defenseService.clearJuryMembers(1L)).thenReturn(defense);
 
 		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));

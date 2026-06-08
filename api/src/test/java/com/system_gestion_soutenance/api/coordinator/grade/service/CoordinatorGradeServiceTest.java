@@ -48,7 +48,7 @@ class CoordinatorGradeServiceTest {
 
 	@Test
 	void getGrades_noDefenses_returnsEmpty() {
-		when(defenseRepository.findAll()).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		assertTrue(service.getGrades().isEmpty());
 	}
@@ -63,7 +63,7 @@ class CoordinatorGradeServiceTest {
 		when(defense.getMembers()).thenReturn(List.of(new JuryMember(teacher, "président")));
 		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
@@ -94,7 +94,7 @@ class CoordinatorGradeServiceTest {
 		when(eval.getDefenseSessionId()).thenReturn(1L);
 		when(eval.getDefense()).thenReturn(defense);
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
 		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
 
@@ -115,7 +115,7 @@ class CoordinatorGradeServiceTest {
 		when(defense.getMembers()).thenReturn(List.of(new JuryMember(teacher, "président")));
 		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
@@ -141,7 +141,7 @@ class CoordinatorGradeServiceTest {
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getDefense()).thenReturn(defense);
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
 
 		var result = service.getGrades();
@@ -169,7 +169,7 @@ class CoordinatorGradeServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setEvaluationCoefficients(Map.of());
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
 		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
 
@@ -191,7 +191,7 @@ class CoordinatorGradeServiceTest {
 		Group group = mock(Group.class);
 		when(group.getSessionId()).thenReturn(5L);
 
-		when(defenseRepository.findAll()).thenReturn(List.of(defense));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 
