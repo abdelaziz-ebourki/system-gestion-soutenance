@@ -29,12 +29,12 @@ public interface StudentGroupMapper {
 		List<Student> students = group.getStudents();
 		if (students == null)
 			return List.of();
+		Long leaderId = group.getLeaderId();
 		List<GroupMemberResponse> members = new ArrayList<>();
-		boolean first = true;
 		for (Student s : students) {
-			members.add(new GroupMemberResponse(s.getId(), s.getFirstName() + " " + s.getLastName(), s.getEmail(),
-					s.getId().equals(currentStudentId) && first ? "leader" : "member"));
-			first = false;
+			String role = s.getId().equals(leaderId) ? "leader" : "member";
+			members.add(
+					new GroupMemberResponse(s.getId(), s.getFirstName() + " " + s.getLastName(), s.getEmail(), role));
 		}
 		return members;
 	}

@@ -74,7 +74,7 @@ class GroupControllerTest {
 
 	@Test
 	void create_returnsCreated() throws Exception {
-		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 1L, List.of(1L, 2L), null);
+		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 1L, List.of(1L, 2L), null, 1L);
 		Group group = new Group();
 		group.setId(1L);
 		group.setGroupName("Groupe A");

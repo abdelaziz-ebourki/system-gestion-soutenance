@@ -512,7 +512,7 @@ public class DataInitializer implements CommandLineRunner {
 				new GrpSeed("Groupe H2", 14, 3, new int[]{55, 56}),};
 		for (GrpSeed gs : grpSeeds) {
 			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(),
-					dsArr[gs.sessionIdx].getId());
+					dsArr[gs.sessionIdx].getId(), studentsList.get(gs.studentIdxs[0]).getId());
 			for (int si : gs.studentIdxs) {
 				g.getStudents().add(studentsList.get(si));
 			}

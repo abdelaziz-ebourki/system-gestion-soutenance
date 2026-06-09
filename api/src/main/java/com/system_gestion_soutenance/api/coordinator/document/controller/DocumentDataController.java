@@ -4,7 +4,7 @@ import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceList
 import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
 import com.system_gestion_soutenance.api.coordinator.document.dto.EvaluationSheetResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.JuryConvocationResponse;
-import com.system_gestion_soutenance.api.coordinator.document.dto.ProcesVerbalResponse;
+import com.system_gestion_soutenance.api.coordinator.document.dto.MinutesResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.ProjectIdRequest;
 import com.system_gestion_soutenance.api.coordinator.document.dto.ScheduleDocResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.SessionRequest;
@@ -66,9 +66,8 @@ public class DocumentDataController {
 
 	@PostMapping("/proces-verbal")
 	@Operation(summary = "Get proces-verbal (PV) data for a project")
-	public ResponseEntity<ApiResponse<ProcesVerbalResponse>> procesVerbal(
-			@Valid @RequestBody ProjectIdRequest request) {
+	public ResponseEntity<ApiResponse<MinutesResponse>> minutes(@Valid @RequestBody ProjectIdRequest request) {
 		return ResponseEntity.ok(ApiResponse.success("Données du procès-verbal récupérées avec succès",
-				documentDataService.procesVerbal(request.projectId())));
+				documentDataService.minutes(request.projectId())));
 	}
 }

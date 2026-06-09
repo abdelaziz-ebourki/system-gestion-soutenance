@@ -5,6 +5,8 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
+import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
@@ -30,6 +32,8 @@ class StudentGroupServiceTest {
 	private StudentRepository studentRepository;
 	@Mock
 	private DefenseSettingsRepository defenseSettingsRepository;
+	@Mock
+	private DefenseSessionRepository defenseSessionRepository;
 	@Mock
 	private StudentGroupMapper studentGroupMapper;
 
@@ -165,11 +169,28 @@ class StudentGroupServiceTest {
 		when(defenseSettingsRepository.findById(1L))
 				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(groupRepository.count()).thenReturn(0L);
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		Group result = service.createGroup(1L);
 
-		assertEquals("Groupe de Alice Test", result.getGroupName());
+		assertEquals("Groupe_1", result.getGroupName());
+		assertEquals(1L, result.getLeaderId());
+	}
+
+	@Test
+	void createGroup_whenGroupsExist_appendsSequentialNumber() {
+		Student student = student(5L, "Bob", "Martin");
+		when(groupRepository.findByStudentId(5L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
+		when(groupRepository.count()).thenReturn(3L);
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.createGroup(5L);
+
+		assertEquals("Groupe_4", result.getGroupName());
 	}
 
 	@Test
@@ -251,6 +272,119 @@ class StudentGroupServiceTest {
 		when(groupRepository.findById(99L)).thenReturn(Optional.empty());
 
 		assertThrows(EntityNotFoundException.class, () -> service.joinGroup(99L, 1L));
+	}
+
+	@Test
+	void joinGroup_atMaxSize_throws() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setSessionId(20L);
+		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "T"), student(3L, "Carol", "T"))));
+
+		DefenseSession session = new DefenseSession();
+		session.setId(20L);
+		session.setMaxGroupSize(2);
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(defenseSessionRepository.findById(20L)).thenReturn(Optional.of(session));
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.joinGroup(10L, 1L));
+		assertEquals("Le groupe a atteint sa taille maximale", ex.getMessage());
+	}
+
+	@Test
+	void joinGroup_belowMaxSize_succeeds() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setSessionId(20L);
+		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "T"))));
+
+		DefenseSession session = new DefenseSession();
+		session.setId(20L);
+		session.setMaxGroupSize(3);
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(defenseSessionRepository.findById(20L)).thenReturn(Optional.of(session));
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.joinGroup(10L, 1L);
+
+		assertEquals(2, result.getStudents().size());
+	}
+
+	@Test
+	void joinGroup_zeroMaxSize_allowsJoin() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setSessionId(20L);
+		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "T"))));
+
+		DefenseSession session = new DefenseSession();
+		session.setId(20L);
+		session.setMaxGroupSize(0);
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(defenseSessionRepository.findById(20L)).thenReturn(Optional.of(session));
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.joinGroup(10L, 1L);
+
+		assertEquals(2, result.getStudents().size());
+	}
+
+	@Test
+	void createGroup_withActiveSession_setsSessionId() {
+		Student student = student(1L, "Alice", "Test");
+		DefenseSession session = new DefenseSession();
+		session.setId(20L);
+		session.setMaxGroupSize(4);
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(defenseSessionRepository.findActiveSession(any())).thenReturn(Optional.of(session));
+		when(groupRepository.count()).thenReturn(0L);
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.createGroup(1L);
+
+		assertEquals(20L, result.getSessionId());
+		assertEquals("Groupe_1", result.getGroupName());
+		assertEquals(1L, result.getLeaderId());
+	}
+
+	@Test
+	void createGroup_noActiveSession_setsNullSessionId() {
+		Student student = student(1L, "Alice", "Test");
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(defenseSettingsRepository.findById(1L))
+				.thenReturn(Optional.of(new DefenseSettings(1L, null, null, 0, 0, "2000-01-01", "2099-12-31")));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(defenseSessionRepository.findActiveSession(any())).thenReturn(Optional.empty());
+		when(groupRepository.count()).thenReturn(0L);
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.createGroup(1L);
+
+		assertNull(result.getSessionId());
 	}
 
 	private static Student student(Long id, String firstName, String lastName) {

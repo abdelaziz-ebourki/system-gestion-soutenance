@@ -21,7 +21,7 @@ public class Group {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "group_name")
+	@Column(name = "group_name", unique = true)
 	private String groupName;
 
 	@ManyToOne
@@ -34,4 +34,7 @@ public class Group {
 
 	@Column(name = "session_id")
 	private Long sessionId;
+
+	@Column(name = "leader_id")
+	private Long leaderId;
 }

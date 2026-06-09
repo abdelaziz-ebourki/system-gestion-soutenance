@@ -344,7 +344,7 @@ class DocumentDataServiceTest {
 	}
 
 	@Test
-	void procesVerbal_withValidProject_returnsData() {
+	void minutes_withValidProject_returnsData() {
 		Teacher supervisor = mock(Teacher.class);
 		when(supervisor.getFirstName()).thenReturn("John");
 		when(supervisor.getLastName()).thenReturn("Doe");
@@ -358,7 +358,7 @@ class DocumentDataServiceTest {
 		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
-		var result = service.procesVerbal(1L);
+		var result = service.minutes(1L);
 
 		assertNotNull(result.settings());
 		assertEquals("Projet Test", result.grade().projectTitle());
@@ -366,14 +366,14 @@ class DocumentDataServiceTest {
 	}
 
 	@Test
-	void procesVerbal_projectNotFound_throwsException() {
+	void minutes_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(EntityNotFoundException.class, () -> service.procesVerbal(99L));
+		assertThrows(EntityNotFoundException.class, () -> service.minutes(99L));
 	}
 
 	@Test
-	void procesVerbal_withJuryMembers_includesThem() {
+	void minutes_withJuryMembers_includesThem() {
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getFirstName()).thenReturn("Jane");
 		when(teacher.getLastName()).thenReturn("Smith");
@@ -388,7 +388,7 @@ class DocumentDataServiceTest {
 		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
-		var result = service.procesVerbal(1L);
+		var result = service.minutes(1L);
 
 		assertEquals(1, result.juryMembers().size());
 	}
