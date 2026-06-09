@@ -58,7 +58,7 @@ class ConvocationControllerTest {
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "scheduled", null, null));
-		when(documentGenerationService.generatePdf(anyString(), any())).thenReturn(new byte[] { 1, 2, 3 });
+		when(documentGenerationService.generatePdf(anyString(), any())).thenReturn(new byte[]{1, 2, 3});
 		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(content().contentType("application/pdf"));
 	}
