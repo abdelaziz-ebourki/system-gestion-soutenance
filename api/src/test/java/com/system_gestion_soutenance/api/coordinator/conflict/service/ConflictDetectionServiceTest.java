@@ -634,4 +634,71 @@ class ConflictDetectionServiceTest {
 		var result = service.validate(schedule, null);
 		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.type())));
 	}
+
+	@Test
+	void checkTeacherDoubleBooked_sharedTeachers_producesSingleConflict() {
+		Teacher teacher1 = mock(Teacher.class);
+		when(teacher1.getId()).thenReturn(5L);
+		Teacher teacher2 = mock(Teacher.class);
+		when(teacher2.getId()).thenReturn(6L);
+
+		JuryMember member1 = mock(JuryMember.class);
+		when(member1.getTeacher()).thenReturn(teacher1);
+		JuryMember member2 = mock(JuryMember.class);
+		when(member2.getTeacher()).thenReturn(teacher2);
+
+		Project project1 = mock(Project.class);
+		when(project1.getId()).thenReturn(1L);
+		Defense defense1 = mock(Defense.class);
+		when(defense1.getProject()).thenReturn(project1);
+		when(defense1.getMembers()).thenReturn(List.of(member1, member2));
+		when(defense1.getDate()).thenReturn(LocalDate.of(2025, 6, 1));
+		when(defense1.getTime()).thenReturn(LocalTime.of(9, 0));
+
+		Project project2 = mock(Project.class);
+		when(project2.getId()).thenReturn(2L);
+		Defense defense2 = mock(Defense.class);
+		when(defense2.getProject()).thenReturn(project2);
+		when(defense2.getMembers()).thenReturn(List.of(member1, member2));
+		when(defense2.getDate()).thenReturn(LocalDate.of(2025, 6, 1));
+		when(defense2.getTime()).thenReturn(LocalTime.of(9, 30));
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense1, defense2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		long doubleBookedCount = result.stream().filter(c -> "teacher_double_booked".equals(c.type())).count();
+		assertEquals(1, doubleBookedCount,
+				"Should produce exactly one teacher_double_booked conflict for overlapping slots sharing multiple teachers");
+	}
+
+	@Test
+	void checkSlotOccupied_overlappingTimes_detectsConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 10L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().anyMatch(c -> "slot_occupied".equals(c.type())));
+	}
+
+	@Test
+	void checkSlotOccupied_nonOverlappingTimes_noConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 10L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "slot_occupied".equals(c.type())));
+	}
 }

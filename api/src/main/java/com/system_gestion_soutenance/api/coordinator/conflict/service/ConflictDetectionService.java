@@ -140,7 +140,7 @@ public class ConflictDetectionService {
 
 	private List<ConflictDetailResponse> checkSlotOccupied(Map<String, ConflictSlot> schedule) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
-		Set<String> seen = new HashSet<>();
+		Map<String, List<Map.Entry<String, ConflictSlot>>> byDateRoom = new HashMap<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
@@ -148,15 +148,24 @@ public class ConflictDetectionService {
 			String date = data.date();
 			String roomId = data.roomId();
 			String time = data.time();
-			String key = date + "|" + roomId + "|" + time;
+			String endTime = data.endTime();
+			if (date == null || roomId == null || time == null)
+				continue;
 
-			if (seen.contains(key)) {
-				conflicts.add(createConflict(
-						"slot_occupied", "error", "Un autre projet occupe deja ce creneau (date: " + date + ", salle: "
-								+ roomId + ", horaire: " + time + ")",
-						slotId, "Choisissez une autre date, salle ou horaire"));
+			String key = date + "|" + roomId;
+			List<Map.Entry<String, ConflictSlot>> existing = byDateRoom.getOrDefault(key, new ArrayList<>());
+			for (Map.Entry<String, ConflictSlot> prev : existing) {
+				ConflictSlot prevData = prev.getValue();
+				if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+					conflicts.add(createConflict("slot_occupied", "error",
+							"Un autre projet occupe deja ce creneau (date: " + date + ", salle: " + roomId
+									+ ", horaire: " + time + ")",
+							slotId, "Choisissez une autre date, salle ou horaire"));
+					break;
+				}
 			}
-			seen.add(key);
+			existing.add(entry);
+			byDateRoom.put(key, existing);
 		}
 		return conflicts;
 	}
@@ -223,6 +232,7 @@ public class ConflictDetectionService {
 			Map<Long, Set<String>> juryTeacherIdsByProject) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		Map<String, List<Map.Entry<String, ConflictSlot>>> dateTeacherSlots = new HashMap<>();
+		Set<String> reportedSlotIds = new HashSet<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
@@ -241,10 +251,14 @@ public class ConflictDetectionService {
 				for (Map.Entry<String, ConflictSlot> prev : existing) {
 					ConflictSlot prevData = prev.getValue();
 					if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
-						conflicts.add(createConflict(
-								"teacher_double_booked", "error", "Un enseignant est deja assigne a un autre projet le "
-										+ date + " de " + time + " a " + endTime,
-								slotId, "Verifiez la disponibilite des enseignants"));
+						if (!reportedSlotIds.contains(slotId)) {
+							conflicts
+									.add(createConflict("teacher_double_booked", "error",
+											"Un enseignant est deja assigne a un autre projet le " + date + " de "
+													+ time + " a " + endTime,
+											slotId, "Verifiez la disponibilite des enseignants"));
+							reportedSlotIds.add(slotId);
+						}
 						break;
 					}
 				}
