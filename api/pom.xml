@@ -89,6 +89,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xhtmlrenderer</groupId>
+			<artifactId>flying-saucer-pdf</artifactId>
+			<version>9.9.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
@@ -231,11 +240,12 @@
 					<failOnViolation>true</failOnViolation>
 					<targetJdk>17</targetJdk>
 					<rulesets>
-						<ruleset>pmd-ruleset-default.xml</ruleset>
+						<ruleset>pmd-ruleset.xml</ruleset>
 					</rulesets>
-					<excludes>
-						<exclude>**/seed/**</exclude>
-					</excludes>
+				<excludes>
+					<exclude>**/seed/**</exclude>
+					<exclude>**/*MapperImpl.java</exclude>
+				</excludes>
 				</configuration>
 				<executions>
 					<execution>

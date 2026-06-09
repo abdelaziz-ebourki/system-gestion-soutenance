@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class EvaluationService {

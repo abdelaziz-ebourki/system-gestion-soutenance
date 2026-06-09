@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/notifications")

@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSett
 import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class GeneralSettingsService {

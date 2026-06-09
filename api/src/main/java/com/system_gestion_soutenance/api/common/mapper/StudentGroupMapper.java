@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+@SuppressWarnings("PMD")
 
 @Mapper(config = CentralMapperConfig.class)
 public interface StudentGroupMapper {

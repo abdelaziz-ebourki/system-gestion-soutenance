@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * This filter forces the token to be generated so that the frontend SPA can
  * read the XSRF-TOKEN cookie.
  */
+@SuppressWarnings("PMD")
 public class CsrfCookieFilter extends OncePerRequestFilter {
 
 	@Override

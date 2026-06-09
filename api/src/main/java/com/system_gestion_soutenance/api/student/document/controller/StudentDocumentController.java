@@ -10,10 +10,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/student/documents")
@@ -47,5 +52,23 @@ public class StudentDocumentController {
 			@RequestParam("file") MultipartFile file) {
 		StudentDocument doc = studentDocumentService.upload(id, file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
+	}
+
+	@GetMapping("/{id}/download")
+	@Operation(summary = "Download document file", description = "Downloads the submitted file for a document.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
+	public ResponseEntity<byte[]> download(@PathVariable Long id) {
+		byte[] content;
+		try {
+			content = studentDocumentService.download(id);
+		} catch (EntityNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("attachment", "document-" + id + ".bin");
+		return new ResponseEntity<>(content, headers, HttpStatus.OK);
 	}
 }

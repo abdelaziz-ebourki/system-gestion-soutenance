@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService;
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -41,6 +42,9 @@ class DocumentDataControllerTest {
 
 	@MockitoBean
 	private UserRepository userRepository;
+
+	@MockitoBean
+	private DocumentGenerationService documentGenerationService;
 
 	@BeforeEach
 	void setUp() {

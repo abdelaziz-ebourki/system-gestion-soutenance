@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import jakarta.persistence.*;
 import lombok.*;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "room")

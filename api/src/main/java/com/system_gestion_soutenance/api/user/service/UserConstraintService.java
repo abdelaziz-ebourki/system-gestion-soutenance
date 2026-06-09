@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseR
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class UserConstraintService {

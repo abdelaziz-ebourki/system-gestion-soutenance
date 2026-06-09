@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+@SuppressWarnings("PMD")
 
 @Mapper(config = CentralMapperConfig.class)
 public interface DefenseSessionMapper {

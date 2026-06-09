@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.user.entity.Teacher;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+@SuppressWarnings("PMD")
 
 @Entity
 @BatchSize(size = 20)

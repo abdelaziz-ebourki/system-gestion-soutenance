@@ -16,11 +16,12 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class EmailService {
 
-	private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 	private static final String FROM = "noreply@soutenance-univ.ma";
 
 	private final EmailConfigRepository configRepository;
@@ -100,7 +101,7 @@ public class EmailService {
 	public void sendEmail(String to, String subject, String body) {
 		JavaMailSender sender = getMailSender();
 		if (sender == null) {
-			log.info("[Mock Email] To: {} | Subject: {} | Body: {}", to, subject, body);
+			LOG.info("[Mock Email] To: {} | Subject: {} | Body: {}", to, subject, body);
 			return;
 		}
 		try {
@@ -111,9 +112,9 @@ public class EmailService {
 			helper.setText(body, true);
 			helper.setFrom(FROM);
 			sender.send(message);
-			log.info("Email sent successfully to {}", to);
+			LOG.info("Email sent successfully to {}", to);
 		} catch (MessagingException | MailException e) {
-			log.error("Failed to send email to {}: {}", to, e.getMessage());
+			LOG.error("Failed to send email to {}: {}", to, e.getMessage());
 		}
 	}
 

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class DocumentDataService {

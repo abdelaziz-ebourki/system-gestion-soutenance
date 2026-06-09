@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "student_document")

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title>Convocation</title>
+<style>
+  @page { margin: 2.5cm 2cm; size: A4; }
+  body { font-family: 'DejaVu Sans', sans-serif; font-size: 11pt; line-height: 1.5; color: #222; }
+  .header { text-align: center; margin-bottom: 2em; }
+  .header h1 { font-size: 16pt; margin-bottom: 0.3em; text-transform: uppercase; }
+  .header .institution { font-size: 13pt; font-weight: bold; }
+  .header .session-name { font-size: 10pt; color: #555; margin-top: 0.5em; }
+  .subject { text-align: center; font-weight: bold; font-size: 12pt; margin: 1.5em 0; }
+  .greeting { margin-bottom: 1em; }
+  .content { text-align: justify; margin-bottom: 1.5em; }
+  .details { width: 100%; border-collapse: collapse; margin: 1em 0; }
+  .details td { padding: 0.4em 0; }
+  .details td:first-child { width: 35%; font-weight: bold; }
+  .details td:last-child { width: 65%; }
+  .footer { margin-top: 3em; }
+  .signature-line { margin-top: 0.5em; width: 200px; border-top: 1px solid #222; padding-top: 0.3em; text-align: center; font-size: 10pt; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="institution" th:text="${institutionName} ?: 'Université'">Université</div>
+    <h1>Convocation à la soutenance</h1>
+    <div class="session-name" th:if="${sessionName}" th:text="${sessionName}">Session 2025</div>
+  </div>
+
+  <div class="subject">Objet : Convocation à la soutenance de projet de fin d'études</div>
+
+  <div class="greeting">
+    <p th:text="'Madame, Monsieur ' + ${studentName} + ','">Madame, Monsieur Dupont,</p>
+  </div>
+
+  <div class="content">
+    <p>Nous avons l'honneur de vous informer que votre soutenance de projet de fin d'études est programmée selon les détails suivants :</p>
+  </div>
+
+  <table class="details">
+    <tr><td>Projet :</td><td th:text="${projectTitle}">Titre du projet</td></tr>
+    <tr><td>Date :</td><td th:text="${date}">01/01/2025</td></tr>
+    <tr><td>Heure :</td><td th:text="${time}">09:00</td></tr>
+    <tr><td>Salle :</td><td th:text="${room} ?: 'À déterminer'">Salle A</td></tr>
+    <tr><td>Encadrant :</td><td th:text="${supervisorName} ?: '—'">M. Dupont</td></tr>
+  </table>
+
+  <div class="content">
+    <p>Nous vous prions de bien vouloir vous présenter <strong>15 minutes avant l'heure prévue</strong> et de vous munir de tous les documents nécessaires à votre présentation.</p>
+  </div>
+
+  <div class="footer">
+    <p>Fait à <span th:text="${city} ?: 'Casablanca'">Casablanca</span>, le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">01/01/2025</span></p>
+    <br/>
+    <div class="signature-line">Le Président du Jury</div>
+  </div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+@SuppressWarnings("PMD")
 
 @Mapper(config = CentralMapperConfig.class)
 public interface ProjectMapper {

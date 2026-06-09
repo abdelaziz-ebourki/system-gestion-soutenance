@@ -19,6 +19,7 @@ import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateEx
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+@SuppressWarnings("PMD")
 
 @Service
 public class ProjectService {

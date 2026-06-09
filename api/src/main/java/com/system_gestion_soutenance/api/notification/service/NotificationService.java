@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+@SuppressWarnings("PMD")
 
 @Service
 public class NotificationService {

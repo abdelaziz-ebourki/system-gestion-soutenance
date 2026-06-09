@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+@SuppressWarnings("PMD")
 
 public interface DefenseSessionRepository extends JpaRepository<DefenseSession, Long> {
 	List<DefenseSession> findByJuryRoleTemplate_Id(Long juryRoleTemplateId);

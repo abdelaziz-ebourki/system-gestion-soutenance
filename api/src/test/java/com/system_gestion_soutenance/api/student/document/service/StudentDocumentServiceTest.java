@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.student.document.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
 import java.util.List;
@@ -20,6 +21,9 @@ class StudentDocumentServiceTest {
 
 	@Mock
 	private StudentDocumentRepository repository;
+
+	@Mock
+	private DocumentConfigRepository configRepository;
 
 	@InjectMocks
 	private StudentDocumentService service;
