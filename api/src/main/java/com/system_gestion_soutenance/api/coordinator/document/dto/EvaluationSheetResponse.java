@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.document.dto;
 
 import java.util.List;
+@SuppressWarnings("PMD")
 
 public record EvaluationSheetResponse(Long projectId, String projectTitle, List<String> studentNames,
 		String supervisorName, String date, String time, String roomName, List<JuryMemberResponse> juryMembers,

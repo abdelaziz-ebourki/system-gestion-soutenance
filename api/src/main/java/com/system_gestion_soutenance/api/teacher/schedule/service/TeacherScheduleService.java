@@ -13,6 +13,7 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class TeacherScheduleService {

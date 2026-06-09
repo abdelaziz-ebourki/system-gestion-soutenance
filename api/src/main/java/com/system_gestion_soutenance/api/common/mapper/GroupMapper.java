@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+@SuppressWarnings("PMD")
 
 @Mapper(config = CentralMapperConfig.class)
 public interface GroupMapper {

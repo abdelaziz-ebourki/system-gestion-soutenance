@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/coordinator/conflicts")

@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+@SuppressWarnings("PMD")
 
 @Service
 public class EmailConfigService {

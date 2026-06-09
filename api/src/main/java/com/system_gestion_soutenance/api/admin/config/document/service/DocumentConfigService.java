@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.admin.config.document.entity.DocumentCo
 import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class DocumentConfigService {

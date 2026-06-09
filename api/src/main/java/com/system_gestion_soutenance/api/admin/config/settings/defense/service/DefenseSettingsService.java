@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.De
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class DefenseSettingsService {

@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.*;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "defense_session")

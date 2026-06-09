@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.common.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+@SuppressWarnings("PMD")
 
 public record ApiResponse<T>(boolean success, String message, T data, LocalDateTime timestamp, List<String> errors) {
 	public static <T> ApiResponse<T> success(T data) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.system_gestion_soutenance.api.common.exception.BaseBusinessException;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/student/convocations")

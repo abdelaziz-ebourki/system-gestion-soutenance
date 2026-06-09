@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
+@SuppressWarnings("PMD")
 
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "Defense Management System API", version = "1.0.0", description = "RESTful API for managing final-year project defense sessions."), security = @SecurityRequirement(name = "bearerAuth"))

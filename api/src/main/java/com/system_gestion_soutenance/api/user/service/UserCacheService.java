@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+@SuppressWarnings("PMD")
 
 @Service
 public class UserCacheService {

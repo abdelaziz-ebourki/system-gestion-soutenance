@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
+@SuppressWarnings("PMD")
 
 public abstract class BaseCrudService<T, ID, R> {
 

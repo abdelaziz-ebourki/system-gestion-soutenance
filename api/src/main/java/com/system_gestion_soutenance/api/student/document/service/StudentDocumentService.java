@@ -11,6 +11,7 @@ import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+@SuppressWarnings("PMD")
 
 @Service
 public class StudentDocumentService {

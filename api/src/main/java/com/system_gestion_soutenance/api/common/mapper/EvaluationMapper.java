@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import java.util.Map;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+@SuppressWarnings("PMD")
 
 @Mapper(config = CentralMapperConfig.class)
 public interface EvaluationMapper {

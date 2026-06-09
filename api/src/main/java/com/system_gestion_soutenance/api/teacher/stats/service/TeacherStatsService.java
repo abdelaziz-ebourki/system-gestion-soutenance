@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationSta
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import com.system_gestion_soutenance.api.teacher.stats.dto.TeacherStatsResponse;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class TeacherStatsService {

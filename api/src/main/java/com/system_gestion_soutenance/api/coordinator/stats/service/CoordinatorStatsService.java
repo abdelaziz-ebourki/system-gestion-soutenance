@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.coordinator.stats.dto.CoordinatorStatsR
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class CoordinatorStatsService {

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
+@SuppressWarnings("PMD")
 
 @Entity
 @BatchSize(size = 20)

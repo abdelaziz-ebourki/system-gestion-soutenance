@@ -231,7 +231,7 @@
 					<failOnViolation>true</failOnViolation>
 					<targetJdk>17</targetJdk>
 					<rulesets>
-						<ruleset>pmd-ruleset-default.xml</ruleset>
+						<ruleset>pmd-ruleset.xml</ruleset>
 					</rulesets>
 					<excludes>
 						<exclude>**/seed/**</exclude>

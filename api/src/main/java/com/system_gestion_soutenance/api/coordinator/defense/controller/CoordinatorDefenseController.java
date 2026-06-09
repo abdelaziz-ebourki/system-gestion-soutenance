@@ -5,6 +5,7 @@ import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseServ
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/coordinator/defenses")

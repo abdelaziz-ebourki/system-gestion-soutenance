@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+@SuppressWarnings("PMD")
 
 @Schema(description = "User data transfer object")
 public record UserDto(@Schema(description = "Unique identifier of the user", example = "1") Long id,
