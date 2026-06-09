@@ -55,9 +55,9 @@ class ConvocationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
-		when(studentDefenseService.getDefense(1L))
-				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse("Projet Test",
-						null, "Supervisor", List.of(), "2025-06-01", "09:00", null, "Room 1", "scheduled", null, null));
+		when(studentDefenseService.getDefense(1L)).thenReturn(
+				new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse("Projet Test", null,
+						"Supervisor", List.of(), "2025-06-01", "09:00", null, "Room 1", "scheduled", null, null));
 		when(documentGenerationService.generatePdf(anyString(), any())).thenReturn(new byte[]{1, 2, 3});
 		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(content().contentType("application/pdf"));
