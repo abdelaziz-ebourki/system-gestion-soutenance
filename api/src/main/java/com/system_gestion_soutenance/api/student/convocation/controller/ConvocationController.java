@@ -53,7 +53,9 @@ public class ConvocationController {
 		}
 
 		Map<String, Object> data = Map.of("studentName", user.getFirstName() + " " + user.getLastName(), "projectTitle",
-				defense.projectTitle(), "date", defense.date(), "time", defense.startTime(), "room",
+				defense.projectTitle() != null ? defense.projectTitle() : "", "date",
+				defense.date() != null ? defense.date() : "", "time",
+				defense.startTime() != null ? defense.startTime() : "", "room",
 				defense.roomName() != null ? defense.roomName() : "", "supervisorName",
 				defense.supervisorName() != null ? defense.supervisorName() : "", "sessionName", "");
 

@@ -58,7 +58,8 @@ public class DocumentDataController {
 			return ResponseEntity.notFound().build();
 		}
 		EvaluationSheetResponse s = sheets.get(0);
-		Map<String, Object> data = Map.of("projectTitle", s.projectTitle(), "studentNames",
+		Map<String, Object> data = Map.of("projectTitle",
+				s.projectTitle() != null ? s.projectTitle() : "", "studentNames",
 				s.studentNames() != null ? s.studentNames() : List.of(), "supervisorName",
 				s.supervisorName() != null ? s.supervisorName() : "", "date", s.date() != null ? s.date() : "", "time",
 				s.time() != null ? s.time() : "", "room", s.roomName() != null ? s.roomName() : "", "juryMembers",
@@ -104,8 +105,10 @@ public class DocumentDataController {
 			return ResponseEntity.notFound().build();
 		}
 		JuryConvocationResponse c = convocations.get(0);
-		Map<String, Object> data = Map.of("teacherName", c.teacherName(), "role", c.role(), "projectTitle",
-				c.projectTitle(), "studentNames", c.studentNames() != null ? c.studentNames() : List.of(), "date",
+		Map<String, Object> data = Map.of("teacherName",
+				c.teacherName() != null ? c.teacherName() : "", "role", c.role() != null ? c.role() : "", "projectTitle",
+				c.projectTitle() != null ? c.projectTitle() : "", "studentNames",
+				c.studentNames() != null ? c.studentNames() : List.of(), "date",
 				c.date() != null ? c.date() : "", "time", c.time() != null ? c.time() : "", "room",
 				c.roomName() != null ? c.roomName() : "", "sessionName",
 				c.defenseSessionName() != null ? c.defenseSessionName() : "");
@@ -135,7 +138,8 @@ public class DocumentDataController {
 	@Operation(summary = "Download proces-verbal (PV) PDF for a project")
 	public ResponseEntity<byte[]> minutesPdf(@Valid @RequestBody ProjectIdRequest request) {
 		MinutesResponse minutes = documentDataService.minutes(request.projectId());
-		Map<String, Object> data = Map.of("settings", minutes.settings(), "grade", minutes.grade(), "studentNames",
+		Map<String, Object> data = Map.of("settings", minutes.settings() != null ? minutes.settings() : "",
+				"grade", minutes.grade() != null ? minutes.grade() : "", "studentNames",
 				minutes.studentNames() != null ? minutes.studentNames() : List.of(), "supervisorName",
 				minutes.supervisorName() != null ? minutes.supervisorName() : "", "juryMembers",
 				minutes.juryMembers() != null ? minutes.juryMembers() : List.of());
