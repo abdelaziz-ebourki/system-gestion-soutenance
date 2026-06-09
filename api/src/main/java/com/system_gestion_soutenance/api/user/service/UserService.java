@@ -12,14 +12,16 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-@SuppressWarnings("PMD")
 
 @Service
+@SuppressWarnings({"PMD.MethodArgumentCouldBeFinal", "PMD.LocalVariableCouldBeFinal", "PMD.OnlyOneReturn",
+		"PMD.AvoidDuplicateLiterals", "PMD.ShortVariable"})
 public class UserService {
 
 	private final UserRepository userRepository;
@@ -110,9 +112,9 @@ public class UserService {
 			throw new InvalidBusinessStateException("Le rôle est requis");
 		}
 		try {
-			return Role.valueOf(role.toUpperCase());
+			return Role.valueOf(role.toUpperCase(Locale.ROOT));
 		} catch (IllegalArgumentException e) {
-			throw new InvalidBusinessStateException("Rôle invalide: " + role);
+			throw new InvalidBusinessStateException("Rôle invalide: " + role, e);
 		}
 	}
 }
