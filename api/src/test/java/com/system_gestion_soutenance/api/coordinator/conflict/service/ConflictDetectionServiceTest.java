@@ -616,7 +616,7 @@ class ConflictDetectionServiceTest {
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:00", 2L, 10L));
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:15", 2L, 10L));
 
 		var schedule = new ScheduleRequest(1L, slots);
 		var result = service.validate(schedule, null);

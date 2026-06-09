@@ -63,7 +63,8 @@ public class GroupService {
 		group.setSessionId(request.sessionId());
 		group.setLeaderId(request.leaderId());
 
-		if (request.leaderId() != null && request.studentIds() != null && !request.studentIds().contains(request.leaderId())) {
+		if (request.leaderId() != null && request.studentIds() != null
+				&& !request.studentIds().contains(request.leaderId())) {
 			throw new InvalidBusinessStateException("Le leader doit être membre du groupe");
 		}
 

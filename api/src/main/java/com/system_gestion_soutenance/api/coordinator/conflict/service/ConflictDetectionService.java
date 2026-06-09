@@ -317,13 +317,13 @@ public class ConflictDetectionService {
 			slots.sort(Comparator.comparing(e -> e.getValue().time()));
 
 			for (int i = 1; i < slots.size(); i++) {
-				String prevTime = slots.get(i - 1).getValue().time();
+				String prevEndTime = slots.get(i - 1).getValue().endTime();
 				String currTime = slots.get(i).getValue().time();
-				if (prevTime == null || currTime == null)
+				if (prevEndTime == null || currTime == null)
 					continue;
 
 				try {
-					long gap = ChronoUnit.MINUTES.between(LocalTime.parse(prevTime), LocalTime.parse(currTime));
+					long gap = ChronoUnit.MINUTES.between(LocalTime.parse(prevEndTime), LocalTime.parse(currTime));
 					if (gap < breakDuration) {
 						conflicts.add(createConflict("break_violation", "warning",
 								"Intervalle insuffisant entre les creneaux: " + gap + " min au lieu de " + breakDuration
@@ -331,7 +331,7 @@ public class ConflictDetectionService {
 								slots.get(i).getKey(), "Ajoutez un ecart d'au moins " + breakDuration + " minutes"));
 					}
 				} catch (DateTimeParseException e) {
-					log.warn("Invalid time format: prev={}, curr={}", prevTime, currTime, e);
+					log.warn("Invalid time format: prevEndTime={}, currTime={}", prevEndTime, currTime, e);
 				}
 			}
 		}
