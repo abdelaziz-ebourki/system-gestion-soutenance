@@ -5,5 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record CreateGroupRequest(@NotBlank(message = "Le nom du groupe est obligatoire") String groupName,
-		@NotNull(message = "Le projet est obligatoire") Long projectId, List<Long> studentIds, Long sessionId) {
+		@NotNull(message = "Le projet est obligatoire") Long projectId, List<Long> studentIds, Long sessionId,
+		Long leaderId) {
 }

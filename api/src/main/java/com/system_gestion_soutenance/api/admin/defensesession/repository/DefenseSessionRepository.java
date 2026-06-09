@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface DefenseSessionRepository extends JpaRepository<DefenseSession, Long> {
 	List<DefenseSession> findByJuryRoleTemplate_Id(Long juryRoleTemplateId);
 
-	@Query("SELECT ds FROM DefenseSession ds WHERE :today BETWEEN ds.startDate AND ds.endDate")
+	@Query("SELECT ds FROM DefenseSession ds WHERE ds.status = com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus.ACTIVE AND :today BETWEEN ds.startDate AND ds.endDate")
 	Optional<DefenseSession> findActiveSession(LocalDate today);
 }

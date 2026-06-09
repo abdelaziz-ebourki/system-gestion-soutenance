@@ -61,6 +61,11 @@ public class GroupService {
 		group.setProject(project);
 		group.setStudents(students);
 		group.setSessionId(request.sessionId());
+		group.setLeaderId(request.leaderId());
+
+		if (request.leaderId() != null && request.studentIds() != null && !request.studentIds().contains(request.leaderId())) {
+			throw new InvalidBusinessStateException("Le leader doit être membre du groupe");
+		}
 
 		return groupRepository.save(group);
 	}

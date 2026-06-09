@@ -61,23 +61,25 @@ class GroupServiceTest {
 		when(savedGroup.getProject()).thenReturn(project);
 		when(savedGroup.getStudents()).thenReturn(List.of(student));
 		when(savedGroup.getSessionId()).thenReturn(100L);
+		when(savedGroup.getLeaderId()).thenReturn(1L);
 
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
 		when(studentRepository.findAllById(List.of(1L))).thenReturn(List.of(student));
 		when(groupRepository.save(any(Group.class))).thenReturn(savedGroup);
 
-		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L), 100L);
+		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L), 100L, 1L);
 		var result = service.create(request);
 
 		assertEquals("Groupe A", result.getGroupName());
 		assertEquals(Long.valueOf(10L), result.getProject().getId());
+		assertEquals(1L, result.getLeaderId());
 	}
 
 	@Test
 	void create_projectNotFound_throwsException() {
 		when(projectRepository.findById(99L)).thenReturn(Optional.empty());
 
-		CreateGroupRequest request = new CreateGroupRequest("Groupe", 99L, List.of(), null);
+		CreateGroupRequest request = new CreateGroupRequest("Groupe", 99L, List.of(), null, null);
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
@@ -98,7 +100,7 @@ class GroupServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.save(any(Group.class))).thenReturn(savedGroup);
 
-		CreateGroupRequest request = new CreateGroupRequest("Groupe", 1L, null, null);
+		CreateGroupRequest request = new CreateGroupRequest("Groupe", 1L, null, null, null);
 		var result = service.create(request);
 
 		assertEquals("Groupe", result.getGroupName());
@@ -121,6 +123,24 @@ class GroupServiceTest {
 	}
 
 	@Test
+	void create_leaderNotInStudentIds_throws() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(10L);
+
+		Student s1 = mock(Student.class);
+		when(s1.getId()).thenReturn(1L);
+
+		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
+		when(studentRepository.findAllById(List.of(1L))).thenReturn(List.of(s1));
+
+		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L), null, 99L);
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.create(request));
+		assertEquals("Le leader doit être membre du groupe", ex.getMessage());
+	}
+
+	@Test
 	void create_exceedsMaxGroupSize_throws() {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(10L);
@@ -139,7 +159,7 @@ class GroupServiceTest {
 		when(studentRepository.findAllById(List.of(1L, 2L, 3L))).thenReturn(List.of(s1, s2, s3));
 		when(defenseSessionRepository.findById(100L)).thenReturn(Optional.of(session));
 
-		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L, 2L, 3L), 100L);
+		CreateGroupRequest request = new CreateGroupRequest("Groupe A", 10L, List.of(1L, 2L, 3L), 100L, null);
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> service.create(request));
