@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title>Fiche d'Évaluation</title>
+<style>
+  @page { margin: 2cm; size: A4 portrait; }
+  body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; color: #222; }
+  .header { text-align: center; margin-bottom: 1.5em; }
+  .header h1 { font-size: 14pt; margin-bottom: 0.3em; text-transform: uppercase; }
+  .header .institution { font-size: 12pt; font-weight: bold; }
+  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5em; }
+  .info-table td { padding: 0.3em 0.5em; border: 1px solid #222; }
+  .info-table td:first-child { width: 30%; font-weight: bold; background: #f0f0f0; }
+  .info-table td:last-child { width: 70%; }
+  .jury-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5em; }
+  .jury-table th { background: #222; color: #fff; padding: 0.4em 0.5em; text-align: left; font-size: 10pt; }
+  .jury-table td { padding: 0.4em 0.5em; border-bottom: 1px solid #ccc; }
+  .jury-table tr:last-child td { border-bottom: none; }
+  .score-section { margin-top: 2em; }
+  .score-row { display: block; margin: 0.5em 0; }
+  .score-label { font-weight: bold; }
+  .signature-section { margin-top: 3em; }
+  .signature-line { display: inline-block; margin-top: 1em; width: 200px; border-top: 1px solid #222; padding-top: 0.3em; text-align: center; font-size: 9pt; margin-right: 3em; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="institution" th:text="${institutionName} ?: 'Université'">Université</div>
+    <h1>Fiche d'Évaluation</h1>
+  </div>
+
+  <table class="info-table">
+    <tr><td>Projet</td><td th:text="${projectTitle}">Titre du projet</td></tr>
+    <tr><td>Étudiants</td><td th:text="${#strings.listJoin(studentNames, ', ')}">Dupont, Martin</td></tr>
+    <tr><td>Encadrant</td><td th:text="${supervisorName} ?: '—'">M. Dupont</td></tr>
+    <tr><td>Date</td><td th:text="${date}">01/01/2025</td></tr>
+    <tr><td>Horaire</td><td th:text="${time}">09:00</td></tr>
+    <tr><td>Salle</td><td th:text="${room} ?: 'À déterminer'">Salle A</td></tr>
+  </table>
+
+  <table class="jury-table">
+    <thead><tr><th>Rôle</th><th>Membre du Jury</th><th>Note</th><th>Signature</th></tr></thead>
+    <tbody>
+      <tr th:each="member : ${juryMembers}">
+        <td th:text="${member.roleName}">Président</td>
+        <td th:text="${member.teacherName}">M. Dupont</td>
+        <td>/20</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="score-section">
+    <div class="score-row"><span class="score-label">Note Finale :</span> /20</div>
+    <div class="score-row"><span class="score-label">Décision :</span> Admis(e) / Ajourné(e)</div>
+    <div class="score-row"><span class="score-label">Observations :</span></div>
+    <div style="height:60px; border-bottom:1px solid #ccc; margin-top:0.5em;"></div>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-line">Le Président du Jury</div>
+    <div class="signature-line">Les Membres</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title>Planning des Soutenances</title>
+<style>
+  @page { margin: 2cm; size: A4 landscape; }
+  body { font-family: 'DejaVu Sans', sans-serif; font-size: 9pt; color: #222; }
+  .header { text-align: center; margin-bottom: 1em; }
+  .header h1 { font-size: 14pt; margin-bottom: 0.3em; text-transform: uppercase; }
+  .header .institution { font-size: 12pt; font-weight: bold; }
+  .header .session-name { font-size: 10pt; color: #555; margin-top: 0.3em; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #222; color: #fff; padding: 0.4em 0.5em; text-align: left; font-size: 9pt; }
+  td { padding: 0.3em 0.5em; border: 1px solid #ccc; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="institution" th:text="${institutionName} ?: 'Université'">Université</div>
+    <h1>Planning des Soutenances</h1>
+    <div class="session-name" th:if="${sessionName}" th:text="${sessionName}">Session 2025</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>N°</th>
+        <th>Date</th>
+        <th>Horaire</th>
+        <th>Salle</th>
+        <th>Projet</th>
+        <th>Étudiants</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="slot, iter : ${slots}">
+        <td th:text="${iter.index + 1}">1</td>
+        <td th:text="${slot.date}">01/01/2025</td>
+        <td th:text="${slot.time}">09:00</td>
+        <td th:text="${slot.roomName} ?: '—'">Salle A</td>
+        <td th:text="${slot.projectTitle}">Titre du projet</td>
+        <td th:text="${#strings.listJoin(slot.studentNames, ', ')}">Dupont, Martin</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
