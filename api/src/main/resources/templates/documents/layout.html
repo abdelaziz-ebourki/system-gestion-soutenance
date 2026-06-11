@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #1a237e;
+        }
+        h2 {
+            font-size: 15px;
+            color: #1a237e;
+            border-bottom: 2px solid #1a237e;
+            padding-bottom: 4px;
+            margin-top: 20px;
+        }
+        h3 {
+            font-size: 13px;
+            color: #333;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #999;
+        }
+        th, td {
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 11px;
+        }
+        th {
+            background-color: #e8eaf6;
+            font-weight: bold;
+            color: #1a237e;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1a237e;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .signature-block {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-box {
+            width: 200px;
+            text-align: center;
+            font-size: 11px;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            margin-top: 50px;
+            padding-top: 5px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 4px;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 160px;
+        }
+    </style>
+</head>
+<body>
+    <th:block th:replace="${content}" />
+</body>
+</html>
