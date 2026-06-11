@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.common.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import com.system_gestion_soutenance.api.common.exception.PdfGenerationException;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -32,7 +33,7 @@ public class PdfGenerationService {
 			builder.run();
 			return outputStream.toByteArray();
 		} catch (IOException e) {
-			throw new RuntimeException("Failed to generate PDF document", e);
+			throw new PdfGenerationException("Échec de la génération du document PDF");
 		}
 	}
 }

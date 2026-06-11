@@ -70,7 +70,7 @@ public class DocumentDataService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		List<SlotDetails> slots = buildGroupedSlots();
+		List<SlotDetails> slots = buildGroupedSlots(defenseSessionId);
 
 		return new AttendanceListResponse(ds.getName(), slots);
 	}
@@ -104,7 +104,7 @@ public class DocumentDataService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		List<SlotDetails> slots = buildGroupedSlots();
+		List<SlotDetails> slots = buildGroupedSlots(defenseSessionId);
 
 		return new ScheduleDocResponse(ds.getName(), slots);
 	}
@@ -150,12 +150,16 @@ public class DocumentDataService {
 	private EvaluationSheetResponse buildDefenseData(Defense defense, Project project) {
 		List<JuryMember> members = defense.getMembers();
 		List<EvaluationSheetResponse.JuryMemberResponse> juryMembers = new ArrayList<>();
-		Map<String, Integer> coefficients = new LinkedHashMap<>();
 
 		for (JuryMember member : members) {
 			juryMembers.add(new EvaluationSheetResponse.JuryMemberResponse(member.getRoleName(),
 					member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(), 0));
 		}
+
+		DefenseSession ds = findDefenseSession(project.getId());
+		Map<String, Integer> coefficients = ds != null && ds.getEvaluationCoefficients() != null
+				? new LinkedHashMap<>(ds.getEvaluationCoefficients())
+				: new LinkedHashMap<>();
 
 		return new EvaluationSheetResponse(project.getId(), project.getTitle(), getStudentNames(project.getId()),
 				project.getSupervisor() != null
@@ -165,11 +169,17 @@ public class DocumentDataService {
 				defense.getRoom() != null ? defense.getRoom().getName() : null, juryMembers, coefficients);
 	}
 
-	private List<SlotDetails> buildGroupedSlots() {
+	private List<SlotDetails> buildGroupedSlots(Long defenseSessionId) {
+		List<Long> projectIds = groupRepository.findBySessionId(defenseSessionId).stream()
+				.filter(g -> g.getProject() != null).map(g -> g.getProject().getId()).distinct().toList();
+
 		List<SlotDetails> slots = new ArrayList<>();
 
 		for (Defense defense : defenseRepository.findAllWithMembers()) {
 			if (defense.getProject() == null)
+				continue;
+
+			if (!projectIds.contains(defense.getProject().getId()))
 				continue;
 
 			Project project = defense.getProject();
