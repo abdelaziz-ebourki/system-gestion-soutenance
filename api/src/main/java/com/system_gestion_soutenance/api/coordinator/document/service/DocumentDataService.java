@@ -1,7 +1,5 @@
 package com.system_gestion_soutenance.api.coordinator.document.service;
 
-import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
-import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceListResponse;
@@ -25,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-@SuppressWarnings("PMD")
 
 @Service
 public class DocumentDataService {
@@ -35,16 +33,19 @@ public class DocumentDataService {
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
-	private final GeneralSettingsRepository generalSettingsRepository;
+
+	@Value("${app.institution.name:}")
+	private String institutionName;
+
+	@Value("${app.institution.logo-url:}")
+	private String institutionLogoUrl;
 
 	public DocumentDataService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
-			GroupRepository groupRepository, DefenseSessionRepository defenseSessionRepository,
-			GeneralSettingsRepository generalSettingsRepository) {
+			GroupRepository groupRepository, DefenseSessionRepository defenseSessionRepository) {
 		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
-		this.generalSettingsRepository = generalSettingsRepository;
 	}
 
 	public List<EvaluationSheetResponse> evaluationSheets(DefenseIdsRequest request) {
@@ -69,7 +70,7 @@ public class DocumentDataService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		List<SlotDetails> slots = buildGroupedSlots();
+		List<SlotDetails> slots = buildGroupedSlots(defenseSessionId);
 
 		return new AttendanceListResponse(ds.getName(), slots);
 	}
@@ -103,7 +104,7 @@ public class DocumentDataService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		List<SlotDetails> slots = buildGroupedSlots();
+		List<SlotDetails> slots = buildGroupedSlots(defenseSessionId);
 
 		return new ScheduleDocResponse(ds.getName(), slots);
 	}
@@ -112,12 +113,8 @@ public class DocumentDataService {
 		Project project = projectRepository.findById(projectId)
 				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé: " + projectId));
 
-		GeneralSettings generalSettings = generalSettingsRepository.findById(1L).orElse(null);
-		MinutesResponse.Settings settings = generalSettings != null
-				? new MinutesResponse.Settings(generalSettings.getInstitutionName(),
-						generalSettings.getInstitutionLogoUrl(), generalSettings.getTimezone(),
-						generalSettings.getDateFormat())
-				: new MinutesResponse.Settings(null, null, null, null);
+		MinutesResponse.Settings settings = new MinutesResponse.Settings(institutionName, institutionLogoUrl, null,
+				null);
 
 		MinutesResponse.GradeDetails grade = new MinutesResponse.GradeDetails(project.getId(), project.getTitle(), 0.0,
 				"En attente");
@@ -153,12 +150,16 @@ public class DocumentDataService {
 	private EvaluationSheetResponse buildDefenseData(Defense defense, Project project) {
 		List<JuryMember> members = defense.getMembers();
 		List<EvaluationSheetResponse.JuryMemberResponse> juryMembers = new ArrayList<>();
-		Map<String, Integer> coefficients = new LinkedHashMap<>();
 
 		for (JuryMember member : members) {
 			juryMembers.add(new EvaluationSheetResponse.JuryMemberResponse(member.getRoleName(),
 					member.getTeacher().getFirstName() + " " + member.getTeacher().getLastName(), 0));
 		}
+
+		DefenseSession ds = findDefenseSession(project.getId());
+		Map<String, Integer> coefficients = ds != null && ds.getEvaluationCoefficients() != null
+				? new LinkedHashMap<>(ds.getEvaluationCoefficients())
+				: new LinkedHashMap<>();
 
 		return new EvaluationSheetResponse(project.getId(), project.getTitle(), getStudentNames(project.getId()),
 				project.getSupervisor() != null
@@ -168,11 +169,17 @@ public class DocumentDataService {
 				defense.getRoom() != null ? defense.getRoom().getName() : null, juryMembers, coefficients);
 	}
 
-	private List<SlotDetails> buildGroupedSlots() {
+	private List<SlotDetails> buildGroupedSlots(Long defenseSessionId) {
+		List<Long> projectIds = groupRepository.findBySessionId(defenseSessionId).stream()
+				.filter(g -> g.getProject() != null).map(g -> g.getProject().getId()).distinct().toList();
+
 		List<SlotDetails> slots = new ArrayList<>();
 
 		for (Defense defense : defenseRepository.findAllWithMembers()) {
 			if (defense.getProject() == null)
+				continue;
+
+			if (!projectIds.contains(defense.getProject().getId()))
 				continue;
 
 			Project project = defense.getProject();

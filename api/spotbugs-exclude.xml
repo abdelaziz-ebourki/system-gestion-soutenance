@@ -46,6 +46,7 @@
         <Or>
             <Class name="com.system_gestion_soutenance.api.admin.stats.service.StatsService"/>
             <Class name="com.system_gestion_soutenance.api.coordinator.stats.service.CoordinatorStatsService"/>
+            <Class name="com.system_gestion_soutenance.api.common.service.PdfGenerationService"/>
         </Or>
     </Match>
     <Match>

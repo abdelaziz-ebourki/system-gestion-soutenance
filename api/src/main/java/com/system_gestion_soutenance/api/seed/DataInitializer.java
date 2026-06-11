@@ -2,12 +2,7 @@ package com.system_gestion_soutenance.api.seed;
 
 import com.system_gestion_soutenance.api.admin.audit.entity.AuditLog;
 import com.system_gestion_soutenance.api.admin.audit.repository.AuditLogRepository;
-import com.system_gestion_soutenance.api.admin.config.document.entity.DocumentConfig;
-import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
-import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
-import com.system_gestion_soutenance.api.admin.config.email.repository.EmailConfigRepository;
-import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
-import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
+
 import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
 import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
@@ -92,9 +87,6 @@ public class DataInitializer implements CommandLineRunner {
 	private final StudentDocumentRepository studentDocumentRepo;
 	private final NotificationRepository notificationRepo;
 	private final AuditLogRepository auditLogRepo;
-	private final EmailConfigRepository emailConfigRepo;
-	private final DocumentConfigRepository documentConfigRepo;
-	private final GeneralSettingsRepository generalSettingsRepo;
 	private final DefenseSettingsRepository defenseSettingsRepo;
 
 	@SuppressWarnings("checkstyle:ParameterNumber")
@@ -105,9 +97,7 @@ public class DataInitializer implements CommandLineRunner {
 			ProjectRepository projectRepo, DefenseRepository defenseRepo, GroupRepository groupRepo,
 			UnavailabilityRepository unavailabilityRepo, EvaluationRepository evaluationRepo,
 			StudentDocumentRepository studentDocumentRepo, NotificationRepository notificationRepo,
-			AuditLogRepository auditLogRepo, EmailConfigRepository emailConfigRepo,
-			DocumentConfigRepository documentConfigRepo, GeneralSettingsRepository generalSettingsRepo,
-			DefenseSettingsRepository defenseSettingsRepo) {
+			AuditLogRepository auditLogRepo, DefenseSettingsRepository defenseSettingsRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
 		this.gradeRepo = gradeRepo;
@@ -127,9 +117,6 @@ public class DataInitializer implements CommandLineRunner {
 		this.studentDocumentRepo = studentDocumentRepo;
 		this.notificationRepo = notificationRepo;
 		this.auditLogRepo = auditLogRepo;
-		this.emailConfigRepo = emailConfigRepo;
-		this.documentConfigRepo = documentConfigRepo;
-		this.generalSettingsRepo = generalSettingsRepo;
 		this.defenseSettingsRepo = defenseSettingsRepo;
 	}
 
@@ -140,11 +127,6 @@ public class DataInitializer implements CommandLineRunner {
 			return;
 
 		// Phase 1: Singleton configs
-		emailConfigRepo
-				.save(new EmailConfig(1L, "", 587, "", "", "FSBM Soutenance", "noreply@soutenance.univh2c.ma", "tls"));
-		documentConfigRepo.save(new DocumentConfig(1L, 10, "pdf,doc,docx", 5));
-		generalSettingsRepo
-				.save(new GeneralSettings(1L, "Université Hassan II", "", "Africa/Casablanca", "DD/MM/YYYY", true));
 		defenseSettingsRepo.save(new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-03-01", "2026-05-01"));
 
 		// Phase 2: Reference data

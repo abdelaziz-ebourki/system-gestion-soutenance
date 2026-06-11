@@ -1,66 +1,111 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"/>
-<title>Fiche d'Évaluation</title>
-<style>
-  @page { margin: 2cm; size: A4 portrait; }
-  body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; color: #222; }
-  .header { text-align: center; margin-bottom: 1.5em; }
-  .header h1 { font-size: 14pt; margin-bottom: 0.3em; text-transform: uppercase; }
-  .header .institution { font-size: 12pt; font-weight: bold; }
-  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5em; }
-  .info-table td { padding: 0.3em 0.5em; border: 1px solid #222; }
-  .info-table td:first-child { width: 30%; font-weight: bold; background: #f0f0f0; }
-  .info-table td:last-child { width: 70%; }
-  .jury-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5em; }
-  .jury-table th { background: #222; color: #fff; padding: 0.4em 0.5em; text-align: left; font-size: 10pt; }
-  .jury-table td { padding: 0.4em 0.5em; border-bottom: 1px solid #ccc; }
-  .jury-table tr:last-child td { border-bottom: none; }
-  .score-section { margin-top: 2em; }
-  .score-row { display: block; margin: 0.5em 0; }
-  .score-label { font-weight: bold; }
-  .signature-section { margin-top: 3em; }
-  .signature-line { display: inline-block; margin-top: 1em; width: 200px; border-top: 1px solid #222; padding-top: 0.3em; text-align: center; font-size: 9pt; margin-right: 3em; }
-</style>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.5; }
+        h1 { font-size: 18px; text-align: center; color: #1a237e; margin-bottom: 5px; }
+        h2 { font-size: 14px; color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 4px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table, th, td { border: 1px solid #999; }
+        th, td { padding: 6px 8px; text-align: left; font-size: 11px; }
+        th { background-color: #e8eaf6; font-weight: bold; color: #1a237e; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #1a237e; padding-bottom: 15px; }
+        .info-row { margin-bottom: 4px; }
+        .info-label { font-weight: bold; display: inline-block; width: 160px; }
+        .page-break { page-break-before: always; }
+        .signature-block { margin-top: 40px; display: flex; justify-content: space-between; }
+        .signature-box { width: 200px; text-align: center; font-size: 11px; }
+        .signature-line { border-top: 1px solid #333; margin-top: 50px; padding-top: 5px; }
+        .coeff-badge { background-color: #e8eaf6; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <div class="institution" th:text="${institutionName} ?: 'Université'">Université</div>
-    <h1>Fiche d'Évaluation</h1>
-  </div>
+    <div class="header">
+        <h1>Fiche d'&#201;valuation</h1>
+    </div>
 
-  <table class="info-table">
-    <tr><td>Projet</td><td th:text="${projectTitle}">Titre du projet</td></tr>
-    <tr><td>Étudiants</td><td th:text="${#strings.listJoin(studentNames, ', ')}">Dupont, Martin</td></tr>
-    <tr><td>Encadrant</td><td th:text="${supervisorName} ?: '—'">M. Dupont</td></tr>
-    <tr><td>Date</td><td th:text="${date}">01/01/2025</td></tr>
-    <tr><td>Horaire</td><td th:text="${time}">09:00</td></tr>
-    <tr><td>Salle</td><td th:text="${room} ?: 'À déterminer'">Salle A</td></tr>
-  </table>
+    <th:block th:each="sheet, iterStat : ${sheets}">
+        <div th:classappend="${not iterStat.last} ? 'page-break' : ''">
+            <div style="margin-bottom: 10px;">
+                <div class="info-row">
+                    <span class="info-label">Projet :</span>
+                    <span th:text="${sheet.projectTitle}">Titre du projet</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">&#201;tudiant(s) :</span>
+                    <span th:text="${#strings.listJoin(sheet.studentNames, ', ')}">Noms des &#233;tudiants</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Encadrant :</span>
+                    <span th:text="${sheet.supervisorName}">Nom de l'encadrant</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date :</span>
+                    <span th:text="${sheet.date}">JJ/MM/AAAA</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Heure :</span>
+                    <span th:text="${sheet.time}">HH:MM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Salle :</span>
+                    <span th:text="${sheet.roomName}">Nom de la salle</span>
+                </div>
+            </div>
 
-  <table class="jury-table">
-    <thead><tr><th>Rôle</th><th>Membre du Jury</th><th>Note</th><th>Signature</th></tr></thead>
-    <tbody>
-      <tr th:each="member : ${juryMembers}">
-        <td th:text="${member.roleName}">Président</td>
-        <td th:text="${member.teacherName}">M. Dupont</td>
-        <td>/20</td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
+            <h2>Composition du Jury</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>R&#244;le</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="member : ${sheet.juryMembers}">
+                        <td th:text="${member.teacherName}">Nom du membre</td>
+                        <td th:text="${member.roleName}">R&#244;le</td>
+                    </tr>
+                </tbody>
+            </table>
 
-  <div class="score-section">
-    <div class="score-row"><span class="score-label">Note Finale :</span> /20</div>
-    <div class="score-row"><span class="score-label">Décision :</span> Admis(e) / Ajourné(e)</div>
-    <div class="score-row"><span class="score-label">Observations :</span></div>
-    <div style="height:60px; border-bottom:1px solid #ccc; margin-top:0.5em;"></div>
-  </div>
+            <h2>Grille d'&#201;valuation</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Crit&#232;re</th>
+                        <th style="width: 80px; text-align: center;">Note /20</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="entry : ${sheet.evaluationCoefficients}">
+                        <td>
+                            <span th:text="${entry.key}">Crit&#232;re</span>
+                            <span class="coeff-badge" th:text="'coefficient ' + ${entry.value}">coefficient</span>
+                        </td>
+                        <td style="text-align: center;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">Note Finale</td>
+                        <td style="text-align: center; font-weight: bold;">&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
 
-  <div class="signature-section">
-    <div class="signature-line">Le Président du Jury</div>
-    <div class="signature-line">Les Membres</div>
-  </div>
+            <div class="signature-block">
+                <div class="signature-box">
+                    <div class="signature-line">Le/La Pr&#233;sident(e)</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">Le/La Rapporteur</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">L'Examinateur</div>
+                </div>
+            </div>
+        </div>
+    </th:block>
 </body>
 </html>

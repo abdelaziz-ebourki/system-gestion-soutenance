@@ -1,57 +1,59 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"/>
-<title>Liste de Présence</title>
-<style>
-  @page { margin: 2cm; size: A4 landscape; }
-  body { font-family: 'DejaVu Sans', sans-serif; font-size: 9pt; color: #222; }
-  .header { text-align: center; margin-bottom: 1em; }
-  .header h1 { font-size: 14pt; margin-bottom: 0.3em; text-transform: uppercase; }
-  .header .institution { font-size: 12pt; font-weight: bold; }
-  .header .session-name { font-size: 10pt; color: #555; margin-top: 0.3em; }
-  table { width: 100%; border-collapse: collapse; }
-  th { background: #222; color: #fff; padding: 0.4em 0.5em; text-align: left; font-size: 9pt; }
-  td { padding: 0.3em 0.5em; border: 1px solid #ccc; }
-  tr:nth-child(even) td { background: #f9f9f9; }
-  .signature-col { width: 120px; }
-  .note-footer { margin-top: 2em; font-size: 9pt; }
-</style>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4 landscape; margin: 15mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #333; line-height: 1.4; }
+        h1 { font-size: 18px; text-align: center; color: #1a237e; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table, th, td { border: 1px solid #999; }
+        th, td { padding: 5px 6px; text-align: left; font-size: 10px; }
+        th { background-color: #e8eaf6; font-weight: bold; color: #1a237e; }
+        .header { text-align: center; margin-bottom: 15px; border-bottom: 3px solid #1a237e; padding-bottom: 10px; }
+        .session-name { font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+        .empty-cell { height: 30px; }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <div class="institution" th:text="${institutionName} ?: 'Université'">Université</div>
-    <h1>Liste de Présence</h1>
-    <div class="session-name" th:if="${sessionName}" th:text="${sessionName}">Session 2025</div>
-  </div>
+    <div class="header">
+        <h1>Liste de Pr&#233;sence</h1>
+    </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>N°</th>
-        <th>Projet</th>
-        <th>Étudiants</th>
-        <th>Date</th>
-        <th>Horaire</th>
-        <th>Salle</th>
-        <th class="signature-col">Signature</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr th:each="slot, iter : ${slots}">
-        <td th:text="${iter.index + 1}">1</td>
-        <td th:text="${slot.projectTitle}">Titre</td>
-        <td th:text="${#strings.listJoin(slot.studentNames, ', ')}">Dupont, Martin</td>
-        <td th:text="${slot.date}">01/01/2025</td>
-        <td th:text="${slot.time}">09:00</td>
-        <td th:text="${slot.roomName} ?: '—'">Salle A</td>
-        <td class="signature-col"></td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="session-name" th:text="${attendance.defenseSessionName}">Session de Soutenance</div>
 
-  <div class="note-footer">
-    <p><em>Signature de chaque étudiant avant le début de sa soutenance.</em></p>
-  </div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 80px;">Date</th>
+                <th style="width: 70px;">Heure</th>
+                <th style="width: 90px;">Salle</th>
+                <th>Projet</th>
+                <th>&#201;tudiant(s)</th>
+                <th style="width: 120px;">Signature</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="slot, iterStat : ${attendance.slots}">
+                <td th:text="${iterStat.index + 1}">1</td>
+                <td th:text="${slot.date}">JJ/MM/AAAA</td>
+                <td th:text="${slot.time}">HH:MM</td>
+                <td th:text="${slot.roomName}">Salle</td>
+                <td th:text="${slot.projectTitle}">Titre du projet</td>
+                <td th:text="${#strings.listJoin(slot.studentNames, ', ')}">Noms</td>
+                <td class="empty-cell"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px;">
+        <div style="width: 200px; text-align: center;">
+            <div style="border-top: 1px solid #333; margin-top: 50px; padding-top: 5px;">Le/La Coordonnateur(trice)</div>
+        </div>
+        <div style="width: 200px; text-align: center;">
+            <div style="border-top: 1px solid #333; margin-top: 50px; padding-top: 5px;">Le/La Doyen(e)</div>
+        </div>
+    </div>
 </body>
 </html>

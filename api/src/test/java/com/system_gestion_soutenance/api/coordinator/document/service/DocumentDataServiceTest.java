@@ -3,8 +3,6 @@ package com.system_gestion_soutenance.api.coordinator.document.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
-import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
@@ -21,6 +19,7 @@ import com.system_gestion_soutenance.api.user.entity.Teacher;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
@@ -31,10 +30,9 @@ class DocumentDataServiceTest {
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
-	private final GeneralSettingsRepository generalSettingsRepository = mock(GeneralSettingsRepository.class);
 
 	private final DocumentDataService service = new DocumentDataService(defenseRepository, projectRepository,
-			groupRepository, defenseSessionRepository, generalSettingsRepository);
+			groupRepository, defenseSessionRepository);
 
 	private Project mockProject(Long id, String title, Teacher supervisor) {
 		Project p = mock(Project.class);
@@ -235,7 +233,11 @@ class DocumentDataServiceTest {
 		Project project = mockProject(1L, "Projet", null);
 		Defense defense = mockDefense(10L, 1L, null);
 
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
@@ -243,6 +245,7 @@ class DocumentDataServiceTest {
 		var result = service.attendanceList(1L);
 
 		assertEquals("Session PFE", result.defenseSessionName());
+		assertEquals(1, result.slots().size());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -257,7 +260,11 @@ class DocumentDataServiceTest {
 		Project project = mockProject(1L, "Projet", null);
 		Defense defense = mockDefense(10L, 1L, room);
 
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
@@ -325,7 +332,11 @@ class DocumentDataServiceTest {
 		Project project = mockProject(1L, "Projet", null);
 		Defense defense = mockDefense(10L, 1L, null);
 
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
@@ -344,6 +355,68 @@ class DocumentDataServiceTest {
 	}
 
 	@Test
+	void attendanceList_filtersBySession_excludesOtherSessions() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session PFE");
+
+		Project projectInSession = mockProject(1L, "Projet In Session", null);
+		Project projectOther = mockProject(2L, "Projet Other", null);
+
+		Defense defenseInSession = mockDefense(10L, 1L, null);
+		when(defenseInSession.getProject()).thenReturn(projectInSession);
+
+		Defense defenseOther = mockDefense(20L, 2L, null);
+		when(defenseOther.getProject()).thenReturn(projectOther);
+
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(projectInSession);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defenseInSession, defenseOther));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(projectInSession));
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(projectOther));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(groupRepository.findByProjectId(2L)).thenReturn(List.of());
+
+		var result = service.attendanceList(1L);
+
+		assertEquals(1, result.slots().size());
+		assertEquals("Projet In Session", result.slots().get(0).projectTitle());
+	}
+
+	@Test
+	void evaluationSheets_populatesCoefficientsFromDefenseSession() {
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getFirstName()).thenReturn("John");
+		when(supervisor.getLastName()).thenReturn("Doe");
+
+		Project project = mockProject(1L, "Projet Test", supervisor);
+		Defense defense = mockDefense(10L, 1L, null);
+
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session PFE");
+		ds.setEvaluationCoefficients(new java.util.LinkedHashMap<>(Map.of("Présentation", 3, "Code", 2)));
+
+		Group group = mock(Group.class);
+		when(group.getSessionId()).thenReturn(1L);
+
+		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
+
+		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
+		var result = service.evaluationSheets(request);
+
+		assertEquals(1, result.size());
+		assertEquals(2, result.get(0).evaluationCoefficients().size());
+		assertEquals(Integer.valueOf(3), result.get(0).evaluationCoefficients().get("Présentation"));
+		assertEquals(Integer.valueOf(2), result.get(0).evaluationCoefficients().get("Code"));
+	}
+
+	@Test
 	void minutes_withValidProject_returnsData() {
 		Teacher supervisor = mock(Teacher.class);
 		when(supervisor.getFirstName()).thenReturn("John");
@@ -351,11 +424,7 @@ class DocumentDataServiceTest {
 
 		Project project = mockProject(1L, "Projet Test", supervisor);
 
-		GeneralSettings settings = new GeneralSettings();
-		settings.setInstitutionName("UnivH2C");
-
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		var result = service.minutes(1L);
@@ -385,7 +454,6 @@ class DocumentDataServiceTest {
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		var result = service.minutes(1L);

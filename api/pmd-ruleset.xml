@@ -1,25 +1,83 @@
 <?xml version="1.0"?>
-<ruleset name="Custom ruleset"
+<ruleset name="Strict Project Ruleset"
     xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-    <description>Custom PMD ruleset excluding overly strict rules</description>
+    <description>Strict PMD ruleset for the system-gestion-soutenance project</description>
 
     <exclude-pattern>.*/seed/.*</exclude-pattern>
 
+    <!-- Best Practices: Strict -->
     <rule ref="category/java/bestpractices.xml">
         <exclude name="UnusedLocalVariable"/>
         <exclude name="UnusedFormalParameter"/>
+        <exclude name="ImplicitFunctionalInterface"/>
+        <exclude name="PreserveStackTrace"/>
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
+        <exclude name="LiteralsFirstInComparisons"/>
+        <exclude name="LooseCoupling"/>
+        <exclude name="GuardLogStatement"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="UnnecessaryWarningSuppression"/>
     </rule>
+
+    <!-- Code Style: Strict -->
     <rule ref="category/java/codestyle.xml">
         <exclude name="UselessParentheses"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ControlStatementBraces"/>
+        <exclude name="MethodNamingConventions"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="UseExplicitTypes"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="VariableCanBeInlined"/>
+        <exclude name="UseDiamondOperator"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="LambdaCanBeMethodReference"/>
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="ConfusingTernary"/>
+        <exclude name="FieldNamingConventions"/>
+        <exclude name="TypeParameterNamingConventions"/>
     </rule>
+
+    <!-- Design: Strict -->
     <rule ref="category/java/design.xml">
         <exclude name="CollapsibleIfStatements"/>
+        <exclude name="LawOfDemeter"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="CognitiveComplexity"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="CouplingBetweenObjects"/>
+        <exclude name="ExcessiveImports"/>
+        <exclude name="GodClass"/>
+        <exclude name="AvoidCatchingGenericException"/>
+        <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <exclude name="FinalFieldCouldBeStatic"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="SimplifyBooleanReturns"/>
+        <exclude name="ClassWithOnlyPrivateConstructorsShouldBeFinal"/>
     </rule>
+
+    <!-- Error Prone: Strict -->
     <rule ref="category/java/errorprone.xml">
         <exclude name="EmptyCatchBlock"/>
         <exclude name="AvoidBranchingStatementAsLastInLoop"/>
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="UseLocaleWithCaseConversions"/>
+        <exclude name="MissingSerialVersionUID"/>
+        <exclude name="ReplaceJavaUtilDate"/>
+        <exclude name="AvoidCatchingThrowable"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="NullAssignment"/>
     </rule>
-    <rule ref="category/java/performance.xml"/>
+
+    <!-- Performance: Strict -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
 </ruleset>

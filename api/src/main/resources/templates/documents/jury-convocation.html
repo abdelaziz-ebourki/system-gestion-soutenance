@@ -1,59 +1,82 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"/>
-<title>Convocation Jury</title>
-<style>
-  @page { margin: 2.5cm 2cm; size: A4; }
-  body { font-family: 'DejaVu Sans', sans-serif; font-size: 11pt; line-height: 1.5; color: #222; }
-  .header { text-align: center; margin-bottom: 2em; }
-  .header h1 { font-size: 16pt; margin-bottom: 0.3em; text-transform: uppercase; }
-  .header .institution { font-size: 13pt; font-weight: bold; }
-  .header .session-name { font-size: 10pt; color: #555; margin-top: 0.5em; }
-  .subject { text-align: center; font-weight: bold; font-size: 12pt; margin: 1.5em 0; }
-  .greeting { margin-bottom: 1em; }
-  .content { text-align: justify; margin-bottom: 1.5em; }
-  .details { width: 100%; border-collapse: collapse; margin: 1em 0; }
-  .details td { padding: 0.4em 0; }
-  .details td:first-child { width: 35%; font-weight: bold; }
-  .details td:last-child { width: 65%; }
-  .footer { margin-top: 3em; }
-  .signature-line { margin-top: 0.5em; width: 200px; border-top: 1px solid #222; padding-top: 0.3em; text-align: center; font-size: 10pt; }
-</style>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.5; }
+        h1 { font-size: 18px; text-align: center; color: #1a237e; margin-bottom: 5px; }
+        h2 { font-size: 14px; color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 4px; margin-top: 20px; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #1a237e; padding-bottom: 15px; }
+        .info-row { margin-bottom: 4px; }
+        .info-label { font-weight: bold; display: inline-block; width: 160px; }
+        .page-break { page-break-before: always; }
+        .signature-block { margin-top: 50px; display: flex; justify-content: space-between; }
+        .signature-box { width: 200px; text-align: center; font-size: 11px; }
+        .signature-line { border-top: 1px solid #333; margin-top: 50px; padding-top: 5px; }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <div class="institution" th:text="${institutionName} ?: 'Université'">Université</div>
-    <h1>Convocation à la soutenance</h1>
-    <div class="session-name" th:if="${sessionName}" th:text="${sessionName}">Session 2025</div>
-  </div>
+    <th:block th:each="conv, iterStat : ${convocations}">
+        <div th:classappend="${not iterStat.last} ? 'page-break' : ''">
+            <div class="header">
+                <h1>Universit&#233; Hassan II</h1>
+                <h1>Convocation de Jur&#233;</h1>
+            </div>
 
-  <div class="subject">Objet : Convocation à la soutenance de projet de fin d'études</div>
+            <div style="margin-top: 20px;">
+                <div class="info-row">
+                    <span class="info-label">Membre du jury :</span>
+                    <span th:text="${conv.teacherName}">Nom du professeur</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">R&#244;le :</span>
+                    <span th:text="${conv.role}">R&#244;le</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Session :</span>
+                    <span th:text="${conv.defenseSessionName}">Nom de la session</span>
+                </div>
+            </div>
 
-  <div class="greeting">
-    <p th:text="'Madame, Monsieur ' + ${teacherName} + ','">Madame, Monsieur Dupont,</p>
-  </div>
+            <h2>D&#233;tails de la Soutenance</h2>
+            <div style="margin-top: 10px;">
+                <div class="info-row">
+                    <span class="info-label">Projet :</span>
+                    <span th:text="${conv.projectTitle}">Titre du projet</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">&#201;tudiant(s) :</span>
+                    <span th:text="${#strings.listJoin(conv.studentNames, ', ')}">Noms des &#233;tudiants</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date :</span>
+                    <span th:text="${conv.date}">JJ/MM/AAAA</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Heure :</span>
+                    <span th:text="${conv.time}">HH:MM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Salle :</span>
+                    <span th:text="${conv.roomName}">Nom de la salle</span>
+                </div>
+            </div>
 
-  <div class="content">
-    <p>Nous avons l'honneur de vous convier à la soutenance du projet de fin d'études en votre qualité de <strong th:text="${role}">membre du jury</strong>, selon les détails suivants :</p>
-  </div>
+            <div style="margin-top: 30px; font-size: 11px; color: #666;">
+                <p>Vous &#234;tes invit&#233;(e) &#224; participer en tant que membre du jury pour la soutenance susmentionn&#233;e.</p>
+                <p>Veuillez vous pr&#233;senter &#224; l'heure indiqu&#233;e avec les supports n&#233;cessaires.</p>
+            </div>
 
-  <table class="details">
-    <tr><td>Projet :</td><td th:text="${projectTitle}">Titre du projet</td></tr>
-    <tr><td>Étudiants :</td><td th:text="${#strings.listJoin(studentNames, ', ')}">Dupont, Martin</td></tr>
-    <tr><td>Date :</td><td th:text="${date}">01/01/2025</td></tr>
-    <tr><td>Heure :</td><td th:text="${time}">09:00</td></tr>
-    <tr><td>Salle :</td><td th:text="${room} ?: 'À déterminer'">Salle A</td></tr>
-  </table>
-
-  <div class="content">
-    <p>Nous vous prions de bien vouloir nous honorer de votre présence et de votre expertise pour l'évaluation de ce travail.</p>
-  </div>
-
-  <div class="footer">
-    <p>Fait à <span th:text="${city} ?: 'Casablanca'">Casablanca</span>, le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">01/01/2025</span></p>
-    <br/>
-    <div class="signature-line">Le Coordinateur</div>
-  </div>
+            <div class="signature-block">
+                <div class="signature-box">
+                    <div class="signature-line">Le/La Coordonnateur(trice)</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">Le/La Doyen(e)</div>
+                </div>
+            </div>
+        </div>
+    </th:block>
 </body>
 </html>

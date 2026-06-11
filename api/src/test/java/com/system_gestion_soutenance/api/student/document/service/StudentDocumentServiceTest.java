@@ -3,16 +3,17 @@ package com.system_gestion_soutenance.api.student.document.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
@@ -22,11 +23,15 @@ class StudentDocumentServiceTest {
 	@Mock
 	private StudentDocumentRepository repository;
 
-	@Mock
-	private DocumentConfigRepository configRepository;
-
 	@InjectMocks
 	private StudentDocumentService service;
+
+	@BeforeEach
+	void setUp() {
+		ReflectionTestUtils.setField(service, "maxFileSizeMb", 10L);
+		ReflectionTestUtils.setField(service, "allowedExtensions", "pdf,doc,docx");
+		ReflectionTestUtils.setField(service, "versionLimit", 5);
+	}
 
 	@Test
 	void findByStudent_returnsDocuments() {

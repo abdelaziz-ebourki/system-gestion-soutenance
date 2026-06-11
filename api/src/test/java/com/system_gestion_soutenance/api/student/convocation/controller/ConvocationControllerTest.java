@@ -7,7 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService;
+import com.system_gestion_soutenance.api.common.service.PdfGenerationService;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -34,9 +34,9 @@ class ConvocationControllerTest {
 	@MockitoBean
 	private JwtTokenProvider jwtTokenProvider;
 	@MockitoBean
-	private UserRepository userRepository;
+	private PdfGenerationService pdfGenerationService;
 	@MockitoBean
-	private DocumentGenerationService documentGenerationService;
+	private UserRepository userRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -56,9 +56,9 @@ class ConvocationControllerTest {
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		when(studentDefenseService.getDefense(1L)).thenReturn(
-				new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse("Projet Test", null,
-						"Supervisor", List.of(), "2025-06-01", "09:00", null, "Room 1", "scheduled", null, null));
-		when(documentGenerationService.generatePdf(anyString(), any())).thenReturn(new byte[]{1, 2, 3});
+				new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse("Project Title",
+						"Description", "Supervisor", List.of(), "2026-06-15", "10:00", "12:00", "Room 1", "scheduled",
+						null, null));
 		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isOk())
 				.andExpect(content().contentType("application/pdf"));
 	}

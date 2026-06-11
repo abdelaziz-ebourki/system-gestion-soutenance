@@ -1,7 +1,5 @@
 package com.system_gestion_soutenance.api.student.document.service;
 
-import com.system_gestion_soutenance.api.admin.config.document.entity.DocumentConfig;
-import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
 import java.io.IOException;
@@ -11,6 +9,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 @SuppressWarnings("PMD")
@@ -19,12 +18,19 @@ import org.springframework.web.multipart.MultipartFile;
 public class StudentDocumentService {
 
 	private final StudentDocumentRepository repository;
-	private final DocumentConfigRepository configRepository;
 	private final Path uploadDir = Paths.get("uploads");
 
-	public StudentDocumentService(StudentDocumentRepository repository, DocumentConfigRepository configRepository) {
+	@Value("${app.document.max-file-size-mb:10}")
+	private long maxFileSizeMb;
+
+	@Value("${app.document.allowed-extensions:pdf,doc,docx}")
+	private String allowedExtensions;
+
+	@Value("${app.document.version-limit:5}")
+	private int versionLimit;
+
+	public StudentDocumentService(StudentDocumentRepository repository) {
 		this.repository = repository;
-		this.configRepository = configRepository;
 	}
 
 	public List<StudentDocument> findByStudent(Long studentId) {
@@ -35,36 +41,32 @@ public class StudentDocumentService {
 		StudentDocument doc = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Document non trouve"));
 
-		DocumentConfig config = configRepository.findById(1L).orElse(null);
-		if (config != null) {
-			long maxBytes = config.getMaxFileSizeMb() * 1024L * 1024L;
-			if (file.getSize() > maxBytes) {
+		long maxBytes = maxFileSizeMb * 1024L * 1024L;
+		if (file.getSize() > maxBytes) {
+			throw new IllegalArgumentException("Fichier trop volumineux. Taille maximale: " + maxFileSizeMb + " Mo");
+		}
+		String originalName = file.getOriginalFilename();
+		if (originalName != null) {
+			String ext = originalName.contains(".")
+					? originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase()
+					: "";
+			String allowed = allowedExtensions.toLowerCase();
+			if (!List.of(allowed.split(",")).contains(ext)) {
 				throw new IllegalArgumentException(
-						"Fichier trop volumineux. Taille maximale: " + config.getMaxFileSizeMb() + " Mo");
+						"Extension non autorisee. Extensions acceptees: " + allowedExtensions);
 			}
-			String originalName = file.getOriginalFilename();
-			if (originalName != null) {
-				String ext = originalName.contains(".")
-						? originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase()
-						: "";
-				String allowed = config.getAllowedExtensions().toLowerCase();
-				if (!List.of(allowed.split(",")).contains(ext)) {
-					throw new IllegalArgumentException(
-							"Extension non autorisee. Extensions acceptees: " + config.getAllowedExtensions());
+		}
+		if (doc.getFilePath() != null) {
+			String[] parts = doc.getFilePath().split("[\\\\/]");
+			int currentVersion = 1;
+			for (String p : parts) {
+				if (p.matches("^v\\d+$")) {
+					currentVersion = Integer.parseInt(p.substring(1)) + 1;
 				}
 			}
-			if (doc.getFilePath() != null) {
-				String[] parts = doc.getFilePath().split("[\\\\/]");
-				int currentVersion = 1;
-				for (String p : parts) {
-					if (p.matches("^v\\d+$")) {
-						currentVersion = Integer.parseInt(p.substring(1)) + 1;
-					}
-				}
-				if (currentVersion > config.getVersionLimit()) {
-					throw new IllegalArgumentException(
-							"Limite de versions atteinte. Nombre maximal de versions: " + config.getVersionLimit());
-				}
+			if (currentVersion > versionLimit) {
+				throw new IllegalArgumentException(
+						"Limite de versions atteinte. Nombre maximal de versions: " + versionLimit);
 			}
 		}
 
