@@ -1,7 +1,5 @@
 package com.system_gestion_soutenance.api.coordinator.document.service;
 
-import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
-import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceListResponse;
@@ -25,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,16 +33,19 @@ public class DocumentDataService {
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
-	private final GeneralSettingsRepository generalSettingsRepository;
+
+	@Value("${app.institution.name:}")
+	private String institutionName;
+
+	@Value("${app.institution.logo-url:}")
+	private String institutionLogoUrl;
 
 	public DocumentDataService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
-			GroupRepository groupRepository, DefenseSessionRepository defenseSessionRepository,
-			GeneralSettingsRepository generalSettingsRepository) {
+			GroupRepository groupRepository, DefenseSessionRepository defenseSessionRepository) {
 		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
-		this.generalSettingsRepository = generalSettingsRepository;
 	}
 
 	public List<EvaluationSheetResponse> evaluationSheets(DefenseIdsRequest request) {
@@ -111,12 +113,8 @@ public class DocumentDataService {
 		Project project = projectRepository.findById(projectId)
 				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé: " + projectId));
 
-		GeneralSettings generalSettings = generalSettingsRepository.findById(1L).orElse(null);
-		ProcesVerbalResponse.Settings settings = generalSettings != null
-				? new ProcesVerbalResponse.Settings(generalSettings.getInstitutionName(),
-						generalSettings.getInstitutionLogoUrl(), generalSettings.getTimezone(),
-						generalSettings.getDateFormat())
-				: new ProcesVerbalResponse.Settings(null, null, null, null);
+		ProcesVerbalResponse.Settings settings = new ProcesVerbalResponse.Settings(institutionName, institutionLogoUrl,
+				null, null);
 
 		ProcesVerbalResponse.GradeDetails grade = new ProcesVerbalResponse.GradeDetails(project.getId(),
 				project.getTitle(), 0.0, "En attente");

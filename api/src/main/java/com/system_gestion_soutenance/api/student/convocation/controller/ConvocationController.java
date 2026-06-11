@@ -22,15 +22,15 @@ import java.util.Map;
 @RequestMapping("/api/student/convocations")
 @Tag(name = "Student - Convocation Management", description = "Endpoints for generating the convocation PDF")
 public class ConvocationController {
- 
- 	private final StudentDefenseService studentDefenseService;
- 	private final PdfGenerationService pdfGenerationService;
- 
- 	public ConvocationController(StudentDefenseService studentDefenseService, PdfGenerationService pdfGenerationService) {
- 		this.studentDefenseService = studentDefenseService;
- 		this.pdfGenerationService = pdfGenerationService;
- 	}
 
+	private final StudentDefenseService studentDefenseService;
+	private final PdfGenerationService pdfGenerationService;
+
+	public ConvocationController(StudentDefenseService studentDefenseService,
+			PdfGenerationService pdfGenerationService) {
+		this.studentDefenseService = studentDefenseService;
+		this.pdfGenerationService = pdfGenerationService;
+	}
 
 	@GetMapping
 	@Operation(summary = "Get convocation PDF", description = "Generates and returns the convocation PDF for the connected student.")
@@ -50,17 +50,13 @@ public class ConvocationController {
 		if (!"scheduled".equals(defense.status())) {
 			return ResponseEntity.notFound().build();
 		}
- 
-		Map<String, Object> data = Map.of(
-				"studentName", user.getFirstName() + " " + user.getLastName(),
-				"defenseDate", defense.date(),
-				"defenseTime", defense.startTime(),
-				"room", defense.roomName(),
-				"juryMembers", defense.juryMembers()
-		);
- 
+
+		Map<String, Object> data = Map.of("studentName", user.getFirstName() + " " + user.getLastName(), "defenseDate",
+				defense.date(), "defenseTime", defense.startTime(), "room", defense.roomName(), "juryMembers",
+				defense.juryMembers());
+
 		byte[] content = pdfGenerationService.generatePdf("student-convocation", data);
- 
+
 		HttpHeaders headers = new HttpHeaders();
 
 		headers.setContentType(MediaType.APPLICATION_PDF);

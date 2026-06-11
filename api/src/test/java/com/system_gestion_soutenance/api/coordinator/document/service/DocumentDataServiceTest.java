@@ -3,8 +3,6 @@ package com.system_gestion_soutenance.api.coordinator.document.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
-import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
@@ -31,10 +29,9 @@ class DocumentDataServiceTest {
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
-	private final GeneralSettingsRepository generalSettingsRepository = mock(GeneralSettingsRepository.class);
 
 	private final DocumentDataService service = new DocumentDataService(defenseRepository, projectRepository,
-			groupRepository, defenseSessionRepository, generalSettingsRepository);
+			groupRepository, defenseSessionRepository);
 
 	private Project mockProject(Long id, String title, Teacher supervisor) {
 		Project p = mock(Project.class);
@@ -351,11 +348,7 @@ class DocumentDataServiceTest {
 
 		Project project = mockProject(1L, "Projet Test", supervisor);
 
-		GeneralSettings settings = new GeneralSettings();
-		settings.setInstitutionName("UnivH2C");
-
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.of(settings));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		var result = service.procesVerbal(1L);
@@ -385,7 +378,6 @@ class DocumentDataServiceTest {
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(generalSettingsRepository.findById(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
 
 		var result = service.procesVerbal(1L);

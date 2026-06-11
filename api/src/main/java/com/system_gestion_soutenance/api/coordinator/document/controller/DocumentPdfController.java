@@ -41,11 +41,12 @@ public class DocumentPdfController {
 	@PostMapping("/evaluation-sheets")
 	@Operation(summary = "Generate evaluation sheets PDF for a project")
 	public ResponseEntity<byte[]> evaluationSheets(@Valid @RequestBody ProjectIdRequest request) {
-		List<EvaluationSheetResponse> data = documentDataService.evaluationSheets(new DefenseIdsRequest(null, request.projectId()));
-		
+		List<EvaluationSheetResponse> data = documentDataService
+				.evaluationSheets(new DefenseIdsRequest(null, request.projectId()));
+
 		Map<String, Object> templateData = Map.of("sheets", data);
 		byte[] pdf = pdfGenerationService.generatePdf("evaluation-sheet", templateData);
-		
+
 		return createPdfResponse("evaluation-sheets.pdf", pdf);
 	}
 
@@ -53,21 +54,22 @@ public class DocumentPdfController {
 	@Operation(summary = "Generate attendance list PDF")
 	public ResponseEntity<byte[]> attendanceList(@Valid @RequestBody SessionRequest request) {
 		AttendanceListResponse data = documentDataService.attendanceList(request.defenseSessionId());
-		
+
 		Map<String, Object> templateData = Map.of("attendance", data);
 		byte[] pdf = pdfGenerationService.generatePdf("attendance-list", templateData);
-		
+
 		return createPdfResponse("attendance-list.pdf", pdf);
 	}
 
 	@PostMapping("/jury-convocations")
 	@Operation(summary = "Generate jury convocations PDF for a project")
 	public ResponseEntity<byte[]> juryConvocations(@Valid @RequestBody ProjectIdRequest request) {
-		List<JuryConvocationResponse> data = documentDataService.juryConvocations(new DefenseIdsRequest(null, request.projectId()));
-		
+		List<JuryConvocationResponse> data = documentDataService
+				.juryConvocations(new DefenseIdsRequest(null, request.projectId()));
+
 		Map<String, Object> templateData = Map.of("convocations", data);
 		byte[] pdf = pdfGenerationService.generatePdf("jury-convocation", templateData);
-		
+
 		return createPdfResponse("jury-convocations.pdf", pdf);
 	}
 
@@ -75,10 +77,10 @@ public class DocumentPdfController {
 	@Operation(summary = "Generate printable schedule PDF")
 	public ResponseEntity<byte[]> schedule(@Valid @RequestBody SessionRequest request) {
 		ScheduleDocResponse data = documentDataService.schedule(request.defenseSessionId());
-		
+
 		Map<String, Object> templateData = Map.of("schedule", data);
 		byte[] pdf = pdfGenerationService.generatePdf("schedule", templateData);
-		
+
 		return createPdfResponse("schedule.pdf", pdf);
 	}
 
@@ -86,10 +88,10 @@ public class DocumentPdfController {
 	@Operation(summary = "Generate proces-verbal (PV) PDF for a project")
 	public ResponseEntity<byte[]> procesVerbal(@Valid @RequestBody ProjectIdRequest request) {
 		ProcesVerbalResponse data = documentDataService.procesVerbal(request.projectId());
-		
+
 		Map<String, Object> templateData = Map.of("pv", data);
 		byte[] pdf = pdfGenerationService.generatePdf("proces-verbal", templateData);
-		
+
 		return createPdfResponse("proces-verbal.pdf", pdf);
 	}
 
