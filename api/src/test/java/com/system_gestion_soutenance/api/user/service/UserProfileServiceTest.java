@@ -56,8 +56,8 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateBasicInfo_Success() {
-		UpdateUserRequest request = new UpdateUserRequest("NewLast", "NewFirst", null, null, null, null, null, null, null,
-				null);
+		UpdateUserRequest request = new UpdateUserRequest("NewLast", "NewFirst", null, null, null, null, null, null,
+				null, null);
 		userProfileService.updateBasicInfo(user, request);
 
 		assertEquals("NewLast", user.getLastName());
@@ -66,7 +66,8 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateBasicInfo_PartialUpdate() {
-		UpdateUserRequest request = new UpdateUserRequest("NewLast", null, null, null, null, null, null, null, null, null);
+		UpdateUserRequest request = new UpdateUserRequest("NewLast", null, null, null, null, null, null, null, null,
+				null);
 		userProfileService.updateBasicInfo(user, request);
 
 		assertEquals("NewLast", user.getLastName());

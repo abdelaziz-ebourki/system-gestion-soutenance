@@ -49,8 +49,9 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
 	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
-			@RequestParam("file") MultipartFile file) {
-		StudentDocument doc = studentDocumentService.upload(id, file);
+			@RequestParam("file") MultipartFile file,
+			@AuthenticationPrincipal User user) {
+		StudentDocument doc = studentDocumentService.upload(id, user.getId(), file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}
 
@@ -59,10 +60,10 @@ public class StudentDocumentController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
-	public ResponseEntity<byte[]> download(@PathVariable Long id) {
+	public ResponseEntity<byte[]> download(@PathVariable Long id, @AuthenticationPrincipal User user) {
 		byte[] content;
 		try {
-			content = studentDocumentService.download(id);
+			content = studentDocumentService.download(id, user.getId());
 		} catch (EntityNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		}

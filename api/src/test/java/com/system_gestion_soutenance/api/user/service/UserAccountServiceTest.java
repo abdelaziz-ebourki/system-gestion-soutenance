@@ -57,8 +57,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createUser_EmailExists_ThrowsException() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "test@test.com", null, null, null, null, null,
-				null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "test@test.com", null, null, null, null,
+				null, null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(new User()));
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -105,8 +105,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createUser_Coordinator_Success() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "coord@test.com", null, null, null, null, null,
-				null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "coord@test.com", null, null, null, null,
+				null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
@@ -119,8 +119,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createUser_AdminRole_CreatesBaseUser() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "admin@test.com", null, null, null, null, null,
-				null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "admin@test.com", null, null, null, null,
+				null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
@@ -134,8 +134,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createStudent_MajorNotFound_ThrowsException() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", null, 99L,
-				1L, null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", null,
+				99L, 1L, null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(majorRepository.findById(99L)).thenReturn(Optional.empty());
 

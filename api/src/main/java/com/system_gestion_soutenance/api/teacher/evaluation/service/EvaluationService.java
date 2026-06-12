@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
 import org.springframework.stereotype.Service;
 @SuppressWarnings("PMD")
 
@@ -52,9 +53,13 @@ public class EvaluationService {
 	}
 
 	@Audited(action = "UPDATE", entity = "Evaluation")
-	public Evaluation submit(Long id, EvaluationSubmitRequest request) {
+	public Evaluation submit(Long id, Long currentUserId, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Évaluation non trouvée"));
+
+		if (!evaluation.getTeacherId().equals(currentUserId)) {
+			throw new UnauthorizedAccessException("Vous ne pouvez soumettre que vos propres évaluations");
+		}
 
 		if (evaluation.getStatus() == EvaluationStatus.SUBMITTED) {
 			throw new InvalidBusinessStateException("Cette évaluation a déjà été soumise");

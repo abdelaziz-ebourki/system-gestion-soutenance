@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -52,6 +53,7 @@ public class JuryController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Update jury", description = "Updates an existing jury's details.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury updated successfully"),
@@ -63,6 +65,7 @@ public class JuryController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Delete jury", description = "Removes a jury from the system.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury deleted successfully"),

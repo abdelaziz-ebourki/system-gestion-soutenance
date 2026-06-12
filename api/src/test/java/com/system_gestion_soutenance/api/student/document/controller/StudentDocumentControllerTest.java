@@ -69,7 +69,7 @@ class StudentDocumentControllerTest {
 		StudentDocument doc = new StudentDocument();
 		doc.setId(1L);
 		doc.setStatus("submitted");
-		when(studentDocumentService.upload(anyLong(), any())).thenReturn(doc);
+		when(studentDocumentService.upload(anyLong(), anyLong(), any())).thenReturn(doc);
 
 		StudentDocumentDto dto = new StudentDocumentDto(1L, 1L, "test.pdf", "pdf", "2026-06-01", "submitted", null,
 				"/path/to/file");

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,9 +38,13 @@ public class StudentDocumentService {
 		return repository.findByStudentId(studentId);
 	}
 
-	public StudentDocument upload(Long id, MultipartFile file) {
+	public StudentDocument upload(Long id, Long currentUserId, MultipartFile file) {
 		StudentDocument doc = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Document non trouve"));
+
+		if (!doc.getStudentId().equals(currentUserId)) {
+			throw new UnauthorizedAccessException("Vous ne pouvez modifier que vos propres documents");
+		}
 
 		long maxBytes = maxFileSizeMb * 1024L * 1024L;
 		if (file.getSize() > maxBytes) {
@@ -85,9 +90,13 @@ public class StudentDocumentService {
 		}
 	}
 
-	public byte[] download(Long id) {
+	public byte[] download(Long id, Long currentUserId) {
 		StudentDocument doc = repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Document non trouve"));
+
+		if (!doc.getStudentId().equals(currentUserId)) {
+			throw new UnauthorizedAccessException("Vous ne pouvez télécharger que vos propres documents");
+		}
 		if (doc.getFilePath() == null) {
 			throw new EntityNotFoundException("Aucun fichier telecharge pour ce document");
 		}

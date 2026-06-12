@@ -76,7 +76,7 @@ class EvaluationControllerTest {
 		Evaluation evaluation = new Evaluation();
 		evaluation.setId(1L);
 		evaluation.setDefense(defense);
-		when(evaluationService.submit(anyLong(), any())).thenReturn(evaluation);
+		when(evaluationService.submit(anyLong(), anyLong(), any())).thenReturn(evaluation);
 		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
 		when(evaluationMapper.toDto(eq(evaluation), any()))
 				.thenReturn(new EvaluationResponse(1L, 1L, "Project", 15.0, "Good", "SUBMITTED"));

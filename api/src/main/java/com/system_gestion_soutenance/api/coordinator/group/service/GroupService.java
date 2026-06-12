@@ -66,8 +66,7 @@ public class GroupService {
 		} else {
 			leaderId = null;
 		}
-		if (leaderId != null && !students.isEmpty()
-				&& students.stream().noneMatch(s -> s.getId().equals(leaderId))) {
+		if (leaderId != null && !students.isEmpty() && students.stream().noneMatch(s -> s.getId().equals(leaderId))) {
 			throw new InvalidBusinessStateException("Le leader doit être membre du groupe");
 		}
 

@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -44,6 +45,7 @@ public class CoordinatorDefenseSessionController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Update a defense session")
 	public ApiResponse<DefenseSessionDto> update(@PathVariable Long id,
 			@Valid @RequestBody CreateDefenseSessionRequest request) {
@@ -51,6 +53,7 @@ public class CoordinatorDefenseSessionController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Delete a defense session")
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
 		service.delete(id);
@@ -58,6 +61,7 @@ public class CoordinatorDefenseSessionController {
 	}
 
 	@PostMapping("/{id}/transition")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Transition a defense session to a new status")
 	public ApiResponse<DefenseSessionDto> transition(@PathVariable Long id,
 			@Valid @RequestBody StatusTransitionRequest request) {

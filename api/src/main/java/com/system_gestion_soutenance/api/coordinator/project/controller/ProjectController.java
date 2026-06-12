@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -55,6 +56,7 @@ public class ProjectController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Update project", description = "Updates a project's details by its ID.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project updated successfully"),
@@ -68,6 +70,7 @@ public class ProjectController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Delete project", description = "Removes a project from the system.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project deleted successfully"),

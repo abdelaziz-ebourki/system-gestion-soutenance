@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluationServiceTest {
@@ -63,7 +64,7 @@ class EvaluationServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
-		Evaluation result = service.submit(1L, req);
+		Evaluation result = service.submit(1L, 1L, req);
 
 		assertEquals(EvaluationStatus.SUBMITTED, result.getStatus());
 		assertEquals(15.0, result.getScore());
@@ -82,7 +83,7 @@ class EvaluationServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(null, "Good");
-		Evaluation result = service.submit(1L, req);
+		Evaluation result = service.submit(1L, 1L, req);
 
 		assertNull(result.getScore());
 		assertEquals("Good", result.getComment());
@@ -100,7 +101,7 @@ class EvaluationServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, null);
-		Evaluation result = service.submit(1L, req);
+		Evaluation result = service.submit(1L, 1L, req);
 
 		assertEquals(15.0, result.getScore());
 		assertNull(result.getComment());
@@ -109,7 +110,7 @@ class EvaluationServiceTest {
 	@Test
 	void submit_notFound_throws() {
 		when(evaluationRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(EntityNotFoundException.class, () -> service.submit(99L, new EvaluationSubmitRequest(10.0, "")));
+		assertThrows(EntityNotFoundException.class, () -> service.submit(99L, 1L, new EvaluationSubmitRequest(10.0, "")));
 	}
 
 	@Test
@@ -119,7 +120,7 @@ class EvaluationServiceTest {
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
 		assertThrows(InvalidBusinessStateException.class,
-				() -> service.submit(1L, new EvaluationSubmitRequest(15.0, "Update")));
+				() -> service.submit(1L, 1L, new EvaluationSubmitRequest(15.0, "Update")));
 		verify(evaluationRepository, never()).save(any());
 	}
 
@@ -132,5 +133,16 @@ class EvaluationServiceTest {
 		List<Evaluation> result = service.findByTeacher(1L);
 
 		assertEquals(1, result.size());
+	}
+
+	@Test
+	void submit_wrongTeacher_throws() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
+				null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+
+		assertThrows(UnauthorizedAccessException.class,
+				() -> service.submit(1L, 99L, new EvaluationSubmitRequest(15.0, "Update")));
+		verify(evaluationRepository, never()).save(any());
 	}
 }

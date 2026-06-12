@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
 
 @ExtendWith(MockitoExtension.class)
 class StudentDocumentServiceTest {
@@ -44,6 +45,7 @@ class StudentDocumentServiceTest {
 		StudentDocument doc = new StudentDocument();
 		doc.setId(1L);
 		doc.setStatus("missing");
+		doc.setStudentId(1L);
 
 		MultipartFile file = mock(MultipartFile.class);
 		when(file.getOriginalFilename()).thenReturn("report.pdf");
@@ -51,7 +53,7 @@ class StudentDocumentServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.of(doc));
 		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		StudentDocument result = service.upload(1L, file);
+		StudentDocument result = service.upload(1L, 1L, file);
 
 		assertEquals("submitted", result.getStatus());
 		assertNotNull(result.getSubmittedAt());
@@ -61,6 +63,18 @@ class StudentDocumentServiceTest {
 	@Test
 	void upload_notFound_throws() {
 		when(repository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(EntityNotFoundException.class, () -> service.upload(99L, mock(MultipartFile.class)));
+		assertThrows(EntityNotFoundException.class, () -> service.upload(99L, 1L, mock(MultipartFile.class)));
+	}
+
+	@Test
+	void upload_wrongOwner_throws() {
+		StudentDocument doc = new StudentDocument();
+		doc.setId(1L);
+		doc.setStudentId(1L);
+
+		when(repository.findById(1L)).thenReturn(Optional.of(doc));
+
+		assertThrows(UnauthorizedAccessException.class,
+				() -> service.upload(1L, 99L, mock(MultipartFile.class)));
 	}
 }
