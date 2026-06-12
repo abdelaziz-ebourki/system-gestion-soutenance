@@ -11,6 +11,7 @@ public record UserDto(@Schema(description = "Unique identifier of the user", exa
 		@Schema(description = "User's first name", example = "John") String firstName,
 		@Schema(description = "Account status", example = "true") boolean isActive,
 		@Schema(description = "Student's national student number (CNE)", example = "12345678") String cne,
+		@Schema(description = "Student's Apogee code", example = "APG12345") String codeApogee,
 		@Schema(description = "Major ID", example = "1") Long majorId,
 		@Schema(description = "Major name", example = "Computer Science") String majorName,
 		@Schema(description = "Level ID", example = "1") Long levelId,

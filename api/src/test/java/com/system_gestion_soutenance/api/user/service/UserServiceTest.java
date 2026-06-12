@@ -73,7 +73,7 @@ class UserServiceTest {
 	@Test
 	void createUser_callsAccountService() {
 		CreateUserRequest request = new CreateUserRequest("Base", "User", "base@t.com", "ADMIN", null, null, null, null,
-				null);
+				null, null);
 		User expectedUser = createUser(1L, "base@t.com", Role.ADMIN, "Base", "User");
 		when(accountService.createUser(eq(request), eq(Role.ADMIN))).thenReturn(expectedUser);
 
@@ -85,7 +85,7 @@ class UserServiceTest {
 
 	@Test
 	void bulkCreate_callsAccountService() {
-		var entry = new BulkCreateRequest.BulkUserEntry("Doe", "John", "j@t.com", null, null, null, null, null);
+		var entry = new BulkCreateRequest.BulkUserEntry("Doe", "John", "j@t.com", null, null, null, null, null, null);
 		var request = new BulkCreateRequest(List.of(entry), "teacher");
 		User expectedUser = createUser(1L, "j@t.com", Role.TEACHER, "Doe", "John");
 		when(accountService.bulkCreate(eq(request), eq(Role.TEACHER))).thenReturn(List.of(expectedUser));
@@ -102,7 +102,7 @@ class UserServiceTest {
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		UpdateUserRequest req = new UpdateUserRequest("New", "Name", null, null, null, null, null, null, null);
+		UpdateUserRequest req = new UpdateUserRequest("New", "Name", null, null, null, null, null, null, null, null);
 		User result = userService.updateUser(1L, req);
 
 		assertNotNull(result);
@@ -118,7 +118,7 @@ class UserServiceTest {
 		when(userRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, 99L, null, null, null);
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, 99L, null, null, null);
 		User result = userService.updateUser(1L, req);
 
 		assertNotNull(result);
@@ -133,7 +133,7 @@ class UserServiceTest {
 		when(userRepository.findById(1L)).thenReturn(Optional.of(teacher));
 		when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, null, 99L, null);
+		UpdateUserRequest req = new UpdateUserRequest(null, null, null, null, null, null, null, null, 99L, null);
 		User result = userService.updateUser(1L, req);
 
 		assertNotNull(result);

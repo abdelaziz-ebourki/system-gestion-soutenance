@@ -44,6 +44,8 @@ public class UserProfileService {
 	public void updateStudentProfile(Student student, UpdateUserRequest request) {
 		if (request.cne() != null)
 			student.setCne(request.cne());
+		if (request.codeApogee() != null)
+			student.setCodeApogee(request.codeApogee());
 		if (request.majorId() != null) {
 			Major major = majorRepository.findById(request.majorId())
 					.orElseThrow(() -> new InvalidBusinessStateException("Filière introuvable"));

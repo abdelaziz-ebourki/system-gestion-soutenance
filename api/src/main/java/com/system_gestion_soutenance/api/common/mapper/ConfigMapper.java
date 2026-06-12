@@ -27,6 +27,8 @@ public interface ConfigMapper {
 	@Mapping(target = "deanId", source = "dean.id")
 	FacultyDto toFacultyDto(Faculty faculty);
 
+	@Mapping(target = "departmentId", source = "department.id")
+	@Mapping(target = "departmentName", source = "department.name")
 	MajorDto toMajorDto(Major major);
 
 	GradeDto toGradeDto(Grade grade);

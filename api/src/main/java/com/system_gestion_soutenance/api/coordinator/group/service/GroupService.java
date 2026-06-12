@@ -42,11 +42,6 @@ public class GroupService {
 	@Audited(action = "CREATE", entity = "Group")
 	@Transactional
 	public Group create(CreateGroupRequest request) {
-		if (request.leaderId() != null && request.studentIds() != null
-				&& !request.studentIds().contains(request.leaderId())) {
-			throw new InvalidBusinessStateException("Le leader doit être membre du groupe");
-		}
-
 		Project project = projectRepository.findById(request.projectId())
 				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 
@@ -62,12 +57,26 @@ public class GroupService {
 			}
 		}
 
+		Long requestedLeaderId = request.leaderId();
+		Long leaderId;
+		if (requestedLeaderId != null) {
+			leaderId = requestedLeaderId;
+		} else if (!students.isEmpty()) {
+			leaderId = students.get(0).getId();
+		} else {
+			leaderId = null;
+		}
+		if (leaderId != null && !students.isEmpty()
+				&& students.stream().noneMatch(s -> s.getId().equals(leaderId))) {
+			throw new InvalidBusinessStateException("Le leader doit être membre du groupe");
+		}
+
 		Group group = new Group();
 		group.setGroupName(request.groupName());
 		group.setProject(project);
 		group.setStudents(students);
 		group.setSessionId(request.sessionId());
-		group.setLeaderId(request.leaderId());
+		group.setLeaderId(leaderId);
 
 		return groupRepository.save(group);
 	}

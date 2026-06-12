@@ -45,6 +45,10 @@ public class CoordinatorDefenseSessionService {
 
 	@Transactional
 	public DefenseSession create(CreateDefenseSessionRequest request) {
+		if (request.maxGroupSize() < 1) {
+			throw new InvalidBusinessStateException("La taille maximale du groupe doit être au moins 1");
+		}
+
 		DefenseSession ds = new DefenseSession();
 		ds.setName(request.name());
 		ds.setDefenseType(parseDefenseType(request.defenseType()));
@@ -76,6 +80,10 @@ public class CoordinatorDefenseSessionService {
 
 	@Transactional
 	public DefenseSession update(Long id, CreateDefenseSessionRequest request) {
+		if (request.maxGroupSize() < 1) {
+			throw new InvalidBusinessStateException("La taille maximale du groupe doit être au moins 1");
+		}
+
 		DefenseSession ds = defenseSessionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 

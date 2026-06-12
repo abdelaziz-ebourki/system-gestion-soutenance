@@ -120,6 +120,7 @@ public class UserAccountService {
 		student.setLastName(request.lastName());
 		student.setFirstName(request.firstName());
 		student.setCne(request.cne());
+		student.setCodeApogee(request.codeApogee());
 		student.setMajor(major);
 		student.setLevel(level);
 		return student;
@@ -182,6 +183,7 @@ public class UserAccountService {
 		student.setLastName(entry.lastName());
 		student.setFirstName(entry.firstName());
 		student.setCne(entry.cne());
+		student.setCodeApogee(entry.codeApogee());
 		student.setMajor(major);
 		student.setLevel(level);
 		return student;

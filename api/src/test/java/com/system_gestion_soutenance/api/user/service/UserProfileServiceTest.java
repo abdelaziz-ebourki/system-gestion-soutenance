@@ -56,7 +56,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateBasicInfo_Success() {
-		UpdateUserRequest request = new UpdateUserRequest("NewLast", "NewFirst", null, null, null, null, null, null,
+		UpdateUserRequest request = new UpdateUserRequest("NewLast", "NewFirst", null, null, null, null, null, null, null,
 				null);
 		userProfileService.updateBasicInfo(user, request);
 
@@ -66,7 +66,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateBasicInfo_PartialUpdate() {
-		UpdateUserRequest request = new UpdateUserRequest("NewLast", null, null, null, null, null, null, null, null);
+		UpdateUserRequest request = new UpdateUserRequest("NewLast", null, null, null, null, null, null, null, null, null);
 		userProfileService.updateBasicInfo(user, request);
 
 		assertEquals("NewLast", user.getLastName());
@@ -75,7 +75,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateStudentProfile_Success() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, "CNE456", 1L, 1L, null, null);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, "CNE456", null, 1L, 1L, null, null);
 		Major major = new Major();
 		Level level = new Level();
 
@@ -91,7 +91,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateStudentProfile_MajorNotFound_ThrowsException() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, 1L, null, null, null);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, 1L, null, null, null);
 		when(majorRepository.findById(1L)).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -101,7 +101,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateTeacherProfile_Success() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, 1L, 1L);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, 1L, 1L);
 		Grade grade = new Grade();
 		Department dept = new Department();
 
@@ -116,7 +116,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateTeacherProfile_DepartmentNotFound_ThrowsException() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, 1L);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, null, 1L);
 		when(departmentRepository.findById(1L)).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,

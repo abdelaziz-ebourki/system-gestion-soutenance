@@ -20,6 +20,7 @@ public interface UserMapper {
 
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToLowerCase")
 	@Mapping(target = "cne", source = "cne")
+	@Mapping(target = "codeApogee", source = "codeApogee")
 	@Mapping(target = "majorId", source = "major.id")
 	@Mapping(target = "majorName", source = "major.name")
 	@Mapping(target = "levelId", source = "level.id")
@@ -32,6 +33,7 @@ public interface UserMapper {
 
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToLowerCase")
 	@Mapping(target = "cne", ignore = true)
+	@Mapping(target = "codeApogee", ignore = true)
 	@Mapping(target = "majorId", ignore = true)
 	@Mapping(target = "majorName", ignore = true)
 	@Mapping(target = "levelId", ignore = true)

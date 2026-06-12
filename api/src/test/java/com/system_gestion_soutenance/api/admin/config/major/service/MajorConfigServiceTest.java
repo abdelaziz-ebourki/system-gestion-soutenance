@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorRequest;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
+import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,8 @@ class MajorConfigServiceTest {
 	private MajorRepository majorRepository;
 	@Mock
 	private StudentRepository studentRepository;
+	@Mock
+	private DepartmentRepository departmentRepository;
 	@InjectMocks
 	private MajorConfigService majorConfigService;
 
@@ -38,7 +41,7 @@ class MajorConfigServiceTest {
 	void create_success() {
 		when(majorRepository.findByName("GL")).thenReturn(Optional.empty());
 		when(majorRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		Major result = majorConfigService.create(new CreateMajorRequest("GL"));
+		Major result = majorConfigService.create(new CreateMajorRequest("GL", null));
 		assertEquals("GL", result.getName());
 	}
 
@@ -46,7 +49,7 @@ class MajorConfigServiceTest {
 	void create_duplicate_throws() {
 		when(majorRepository.findByName("GL")).thenReturn(Optional.of(new Major()));
 		assertThrows(InvalidBusinessStateException.class,
-				() -> majorConfigService.create(new CreateMajorRequest("GL")));
+				() -> majorConfigService.create(new CreateMajorRequest("GL", null)));
 	}
 
 	@Test
@@ -55,7 +58,7 @@ class MajorConfigServiceTest {
 		major.setId(1L);
 		when(majorRepository.findById(1L)).thenReturn(Optional.of(major));
 		when(majorRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-		Major result = majorConfigService.update(1L, new CreateMajorRequest("IIR"));
+		Major result = majorConfigService.update(1L, new CreateMajorRequest("IIR", null));
 		assertEquals("IIR", result.getName());
 	}
 

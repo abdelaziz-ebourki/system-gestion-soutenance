@@ -129,12 +129,24 @@ public class DataInitializer implements CommandLineRunner {
 		// Phase 1: Singleton configs
 		defenseSettingsRepo.save(new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-03-01", "2026-05-01"));
 
-		// Phase 2: Reference data
-		Major m1 = majorRepo.save(new Major(null, "Génie Informatique"));
-		Major m2 = majorRepo.save(new Major(null, "Génie Industriel"));
-		Major m3 = majorRepo.save(new Major(null, "Génie Civil"));
-		Major m4 = majorRepo.save(new Major(null, "Génie Électrique"));
-		Major m5 = majorRepo.save(new Major(null, "Management"));
+		// Phase 2: Faculty
+		Faculty f1 = new Faculty();
+		f1.setName("Faculté des Sciences Ben M'Sik");
+		f1.setCode("FSBM");
+		f1 = facultyRepo.save(f1);
+
+		// Phase 3: Departments
+		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
+		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
+		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
+		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
+
+		// Phase 4: Reference data
+		Major m1 = majorRepo.save(new Major(null, "Génie Informatique", dInfo));
+		Major m2 = majorRepo.save(new Major(null, "Génie Industriel", dMath));
+		Major m3 = majorRepo.save(new Major(null, "Génie Civil", dPhys));
+		Major m4 = majorRepo.save(new Major(null, "Génie Électrique", dBio));
+		Major m5 = majorRepo.save(new Major(null, "Management", dInfo));
 		List<Major> majors = List.of(m1, m2, m3, m4, m5);
 
 		Level n1 = levelRepo.save(new Level(null, "Licence"));
@@ -146,18 +158,6 @@ public class DataInitializer implements CommandLineRunner {
 		Grade g2 = gradeRepo.save(new Grade(null, "PH"));
 		Grade g3 = gradeRepo.save(new Grade(null, "PA"));
 		List<Grade> grades = List.of(g1, g2, g3);
-
-		// Phase 4: Faculty
-		Faculty f1 = new Faculty();
-		f1.setName("Faculté des Sciences Ben M'Sik");
-		f1.setCode("FSBM");
-		f1 = facultyRepo.save(f1);
-
-		// Phase 5: Departments (no head yet)
-		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
-		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
-		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
-		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
 
 		// Phase 6: Users
 		User admin = new User();
@@ -202,9 +202,6 @@ public class DataInitializer implements CommandLineRunner {
 		departmentRepo.saveAll(List.of(dInfo, dMath, dPhys, dBio));
 
 		// Phase 8: Students (100)
-		record StudentSeed(String lastName, String firstName, String email, String cne, Major major, Level level) {
-		}
-
 		String[][] studentData = {{"Khalid", "Mohamed", "student", "E13000999"},
 				{"Benali", "Salma", "student1", "E1300001"}, {"Fassi", "Yassine", "student2", "E1300002"},
 				{"Tazi", "Fatima", "student3", "E1300003"}, {"Mansouri", "Mehdi", "student4", "E1300004"},
@@ -266,9 +263,10 @@ public class DataInitializer implements CommandLineRunner {
 			String ln = studentData[i][0];
 			String email = studentData[i][2] + "@univh2c.ma";
 			String cne = studentData[i][3];
+			String codeApogee = "APG" + String.format("%05d", i + 1);
 			Major major = majors.get(studentMajorIndices[i % 10]);
 			Level level = levels.get(studentLevelIndices[i % 10]);
-			students.add(saveStudent(ln, fn, email, cne, major, level));
+			students.add(saveStudent(ln, fn, email, cne, codeApogee, major, level));
 		}
 
 		List<Student> studentsList = students;
@@ -864,7 +862,8 @@ public class DataInitializer implements CommandLineRunner {
 		return teacherRepo.save(t);
 	}
 
-	private Student saveStudent(String lastName, String firstName, String email, String cne, Major major, Level level) {
+	private Student saveStudent(String lastName, String firstName, String email, String cne, String codeApogee,
+			Major major, Level level) {
 		Student s = new Student();
 		s.setLastName(lastName);
 		s.setFirstName(firstName);
@@ -873,6 +872,7 @@ public class DataInitializer implements CommandLineRunner {
 		s.setRole(Role.STUDENT);
 		s.setActive(true);
 		s.setCne(cne);
+		s.setCodeApogee(codeApogee);
 		s.setMajor(major);
 		s.setLevel(level);
 		return studentRepo.save(s);

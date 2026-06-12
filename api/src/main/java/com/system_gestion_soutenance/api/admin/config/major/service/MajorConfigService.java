@@ -3,6 +3,8 @@ package com.system_gestion_soutenance.api.admin.config.major.service;
 import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorRequest;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
+import com.system_gestion_soutenance.api.admin.department.entity.Department;
+import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
@@ -17,11 +19,14 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 
 	private final MajorRepository majorRepository;
 	private final StudentRepository studentRepository;
+	private final DepartmentRepository departmentRepository;
 
-	public MajorConfigService(MajorRepository majorRepository, StudentRepository studentRepository) {
+	public MajorConfigService(MajorRepository majorRepository, StudentRepository studentRepository,
+			DepartmentRepository departmentRepository) {
 		super(majorRepository);
 		this.majorRepository = majorRepository;
 		this.studentRepository = studentRepository;
+		this.departmentRepository = departmentRepository;
 	}
 
 	@Audited(action = "CREATE", entity = "Major")
@@ -33,6 +38,11 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 
 		Major major = new Major();
 		major.setName(request.name());
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
+		}
 		return save(major);
 	}
 
@@ -41,6 +51,13 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 	public Major update(Long id, CreateMajorRequest request) {
 		Major major = findByIdOrThrow(id, "Filière");
 		major.setName(request.name());
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
+		} else {
+			major.setDepartment(null);
+		}
 		return save(major);
 	}
 
