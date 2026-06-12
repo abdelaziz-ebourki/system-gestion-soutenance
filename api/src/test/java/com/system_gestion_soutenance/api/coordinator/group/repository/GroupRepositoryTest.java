@@ -2,7 +2,7 @@ package com.system_gestion_soutenance.api.coordinator.group.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
@@ -46,9 +46,9 @@ class GroupRepositoryTest {
 		department.setFaculty(faculty);
 		em.persist(department);
 
-		Grade grade = new Grade();
-		grade.setName("Professeur");
-		em.persist(grade);
+		TeacherRank teacherRank = new TeacherRank();
+		teacherRank.setName("Professeur");
+		em.persist(teacherRank);
 
 		Major major = new Major();
 		major.setName("Génie Info");
@@ -65,7 +65,7 @@ class GroupRepositoryTest {
 		teacher.setLastName("Martin");
 		teacher.setFirstName("Jean");
 		teacher.setActive(true);
-		teacher.setGrade(grade);
+		teacher.setTeacherRank(teacherRank);
 		teacher.setDepartment(department);
 		savedTeacher = em.persist(teacher);
 

@@ -16,8 +16,8 @@ public record UserDto(@Schema(description = "Unique identifier of the user", exa
 		@Schema(description = "Major name", example = "Computer Science") String majorName,
 		@Schema(description = "Level ID", example = "1") Long levelId,
 		@Schema(description = "Level name", example = "L3") String levelName,
-		@Schema(description = "Grade ID", example = "1") Long gradeId,
-		@Schema(description = "Grade name", example = "Professor") String gradeName,
+		@Schema(description = "Teacher rank ID", example = "1") Long teacherRankId,
+		@Schema(description = "Teacher rank name", example = "Professor") String teacherRankName,
 		@Schema(description = "Department ID", example = "1") Long departmentId,
 		@Schema(description = "Department name", example = "IT Department") String departmentName) {
 }

@@ -11,6 +11,6 @@ public record UpdateUserRequest(@Schema(description = "User's last name", exampl
 		@Schema(description = "Student's Apogee code", example = "APG12345") String codeApogee,
 		@Schema(description = "Major ID", example = "1") Long majorId,
 		@Schema(description = "Level ID", example = "1") Long levelId,
-		@Schema(description = "Grade ID", example = "1") Long gradeId,
+		@Schema(description = "Teacher rank ID", example = "1") Long teacherRankId,
 		@Schema(description = "Department ID", example = "1") Long departmentId) {
 }

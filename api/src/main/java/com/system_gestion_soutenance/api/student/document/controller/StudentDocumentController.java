@@ -49,8 +49,7 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
 	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
-			@RequestParam("file") MultipartFile file,
-			@AuthenticationPrincipal User user) {
+			@RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
 		StudentDocument doc = studentDocumentService.upload(id, user.getId(), file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}

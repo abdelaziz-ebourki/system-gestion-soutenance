@@ -1,4 +1,4 @@
-package com.system_gestion_soutenance.api.admin.config.grade.entity;
+package com.system_gestion_soutenance.api.admin.config.teacherrank.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,12 +14,12 @@ import org.hibernate.annotations.BatchSize;
 
 @Entity
 @BatchSize(size = 20)
-@Table(name = "grade")
+@Table(name = "teacher_rank")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Grade {
+public class TeacherRank {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

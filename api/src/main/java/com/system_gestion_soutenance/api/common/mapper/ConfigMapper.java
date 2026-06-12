@@ -2,8 +2,8 @@ package com.system_gestion_soutenance.api.common.mapper;
 
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.dto.DepartmentResponse;
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.dto.GradeDto;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.TeacherRankDto;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.dto.LevelDto;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -31,7 +31,7 @@ public interface ConfigMapper {
 	@Mapping(target = "departmentName", source = "department.name")
 	MajorDto toMajorDto(Major major);
 
-	GradeDto toGradeDto(Grade grade);
+	TeacherRankDto toTeacherRankDto(TeacherRank teacherRank);
 
 	LevelDto toLevelDto(Level level);
 

@@ -110,7 +110,8 @@ class EvaluationServiceTest {
 	@Test
 	void submit_notFound_throws() {
 		when(evaluationRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(EntityNotFoundException.class, () -> service.submit(99L, 1L, new EvaluationSubmitRequest(10.0, "")));
+		assertThrows(EntityNotFoundException.class,
+				() -> service.submit(99L, 1L, new EvaluationSubmitRequest(10.0, "")));
 	}
 
 	@Test

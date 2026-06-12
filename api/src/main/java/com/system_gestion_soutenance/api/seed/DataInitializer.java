@@ -3,8 +3,8 @@ package com.system_gestion_soutenance.api.seed;
 import com.system_gestion_soutenance.api.admin.audit.entity.AuditLog;
 import com.system_gestion_soutenance.api.admin.audit.repository.AuditLogRepository;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.TemplateRole;
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
@@ -70,7 +70,7 @@ public class DataInitializer implements CommandLineRunner {
 
 	private final MajorRepository majorRepo;
 	private final LevelRepository levelRepo;
-	private final GradeRepository gradeRepo;
+	private final TeacherRankRepository teacherRankRepo;
 	private final FacultyRepository facultyRepo;
 	private final DepartmentRepository departmentRepo;
 	private final UserRepository userRepo;
@@ -90,7 +90,7 @@ public class DataInitializer implements CommandLineRunner {
 	private final DefenseSettingsRepository defenseSettingsRepo;
 
 	@SuppressWarnings("checkstyle:ParameterNumber")
-	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, GradeRepository gradeRepo,
+	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, TeacherRankRepository teacherRankRepo,
 			FacultyRepository facultyRepo, DepartmentRepository departmentRepo, UserRepository userRepo,
 			TeacherRepository teacherRepo, StudentRepository studentRepo, RoomRepository roomRepo,
 			JuryRoleTemplateRepository juryRoleTemplateRepo, DefenseSessionRepository defenseSessionRepo,
@@ -100,7 +100,7 @@ public class DataInitializer implements CommandLineRunner {
 			AuditLogRepository auditLogRepo, DefenseSettingsRepository defenseSettingsRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
-		this.gradeRepo = gradeRepo;
+		this.teacherRankRepo = teacherRankRepo;
 		this.facultyRepo = facultyRepo;
 		this.departmentRepo = departmentRepo;
 		this.userRepo = userRepo;
@@ -154,10 +154,10 @@ public class DataInitializer implements CommandLineRunner {
 		Level n3 = levelRepo.save(new Level(null, "Doctorat"));
 		List<Level> levels = List.of(n1, n2, n3);
 
-		Grade g1 = gradeRepo.save(new Grade(null, "PES"));
-		Grade g2 = gradeRepo.save(new Grade(null, "PH"));
-		Grade g3 = gradeRepo.save(new Grade(null, "PA"));
-		List<Grade> grades = List.of(g1, g2, g3);
+		TeacherRank g1 = teacherRankRepo.save(new TeacherRank(null, "PES"));
+		TeacherRank g2 = teacherRankRepo.save(new TeacherRank(null, "PH"));
+		TeacherRank g3 = teacherRankRepo.save(new TeacherRank(null, "PA"));
+		List<TeacherRank> teacherRanks = List.of(g1, g2, g3);
 
 		// Phase 6: Users
 		User admin = new User();
@@ -178,18 +178,18 @@ public class DataInitializer implements CommandLineRunner {
 		coord.setActive(true);
 		coord = userRepo.save(coord);
 
-		Teacher teacherT3 = saveTeacher("Ben Ali", "Ali", "teacher@univh2c.ma", grades.get(0), dInfo);
-		Teacher teacherT4 = saveTeacher("Alami", "Moussa", "moussa@univh2c.ma", grades.get(1), dMath);
-		Teacher teacherT5 = saveTeacher("El Ghazi", "Hassan", "hassan@univh2c.ma", grades.get(2), dPhys);
-		Teacher teacherT6 = saveTeacher("Benkirane", "Jamila", "jamila@univh2c.ma", grades.get(0), dBio);
-		Teacher teacherT7 = saveTeacher("El Ouafi", "Rachid", "rachid@univh2c.ma", grades.get(1), dInfo);
-		Teacher teacherT8 = saveTeacher("El Fekkak", "Khadija", "khadija@univh2c.ma", grades.get(2), dMath);
-		Teacher teacherT9 = saveTeacher("Ben Omar", "Nabil", "nabil@univh2c.ma", grades.get(0), dPhys);
-		Teacher teacherT10 = saveTeacher("El Kholti", "Samira", "samira@univh2c.ma", grades.get(1), dBio);
-		Teacher teacherT11 = saveTeacher("El Idrissi", "Abdellah", "abdellah@univh2c.ma", grades.get(2), dInfo);
-		Teacher teacherT12 = saveTeacher("Bensouda", "Fatiha", "fatiha@univh2c.ma", grades.get(0), dMath);
-		Teacher teacherT13 = saveTeacher("El Mourabit", "Karim", "karim@univh2c.ma", grades.get(1), dPhys);
-		Teacher teacherT14 = saveTeacher("El Hassani", "Latifa", "latifa@univh2c.ma", grades.get(2), dBio);
+		Teacher teacherT3 = saveTeacher("Ben Ali", "Ali", "teacher@univh2c.ma", teacherRanks.get(0), dInfo);
+		Teacher teacherT4 = saveTeacher("Alami", "Moussa", "moussa@univh2c.ma", teacherRanks.get(1), dMath);
+		Teacher teacherT5 = saveTeacher("El Ghazi", "Hassan", "hassan@univh2c.ma", teacherRanks.get(2), dPhys);
+		Teacher teacherT6 = saveTeacher("Benkirane", "Jamila", "jamila@univh2c.ma", teacherRanks.get(0), dBio);
+		Teacher teacherT7 = saveTeacher("El Ouafi", "Rachid", "rachid@univh2c.ma", teacherRanks.get(1), dInfo);
+		Teacher teacherT8 = saveTeacher("El Fekkak", "Khadija", "khadija@univh2c.ma", teacherRanks.get(2), dMath);
+		Teacher teacherT9 = saveTeacher("Ben Omar", "Nabil", "nabil@univh2c.ma", teacherRanks.get(0), dPhys);
+		Teacher teacherT10 = saveTeacher("El Kholti", "Samira", "samira@univh2c.ma", teacherRanks.get(1), dBio);
+		Teacher teacherT11 = saveTeacher("El Idrissi", "Abdellah", "abdellah@univh2c.ma", teacherRanks.get(2), dInfo);
+		Teacher teacherT12 = saveTeacher("Bensouda", "Fatiha", "fatiha@univh2c.ma", teacherRanks.get(0), dMath);
+		Teacher teacherT13 = saveTeacher("El Mourabit", "Karim", "karim@univh2c.ma", teacherRanks.get(1), dPhys);
+		Teacher teacherT14 = saveTeacher("El Hassani", "Latifa", "latifa@univh2c.ma", teacherRanks.get(2), dBio);
 
 		List<Teacher> teachers = List.of(teacherT3, teacherT4, teacherT5, teacherT6, teacherT7, teacherT8, teacherT9,
 				teacherT10, teacherT11, teacherT12, teacherT13, teacherT14);
@@ -849,7 +849,8 @@ public class DataInitializer implements CommandLineRunner {
 		return userRepo.save(user);
 	}
 
-	private Teacher saveTeacher(String lastName, String firstName, String email, Grade grade, Department dept) {
+	private Teacher saveTeacher(String lastName, String firstName, String email, TeacherRank teacherRank,
+			Department dept) {
 		Teacher t = new Teacher();
 		t.setLastName(lastName);
 		t.setFirstName(firstName);
@@ -857,7 +858,7 @@ public class DataInitializer implements CommandLineRunner {
 		t.setPassword(PASSWORD);
 		t.setRole(Role.TEACHER);
 		t.setActive(true);
-		t.setGrade(grade);
+		t.setTeacherRank(teacherRank);
 		t.setDepartment(dept);
 		return teacherRepo.save(t);
 	}

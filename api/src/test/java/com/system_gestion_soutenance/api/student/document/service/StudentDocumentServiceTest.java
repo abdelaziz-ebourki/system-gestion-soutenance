@@ -74,7 +74,6 @@ class StudentDocumentServiceTest {
 
 		when(repository.findById(1L)).thenReturn(Optional.of(doc));
 
-		assertThrows(UnauthorizedAccessException.class,
-				() -> service.upload(1L, 99L, mock(MultipartFile.class)));
+		assertThrows(UnauthorizedAccessException.class, () -> service.upload(1L, 99L, mock(MultipartFile.class)));
 	}
 }

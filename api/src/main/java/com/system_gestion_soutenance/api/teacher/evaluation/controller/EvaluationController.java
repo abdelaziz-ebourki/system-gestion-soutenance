@@ -49,8 +49,7 @@ public class EvaluationController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid evaluation data"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Evaluation not found")})
 	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id,
-			@Valid @RequestBody EvaluationSubmitRequest request,
-			@AuthenticationPrincipal User user) {
+			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
 		Evaluation evaluation = evaluationService.submit(id, user.getId(), request);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));
 		return ApiResponse.success(evaluationMapper.toDto(evaluation, projectMap));

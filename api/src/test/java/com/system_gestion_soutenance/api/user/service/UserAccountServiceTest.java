@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -38,7 +38,7 @@ class UserAccountServiceTest {
 	@Mock
 	private LevelRepository levelRepository;
 	@Mock
-	private GradeRepository gradeRepository;
+	private TeacherRankRepository teacherRankRepository;
 	@Mock
 	private DepartmentRepository departmentRepository;
 	@Mock
@@ -51,8 +51,8 @@ class UserAccountServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		userAccountService = new UserAccountService(userRepository, majorRepository, levelRepository, gradeRepository,
-				departmentRepository, emailService, passwordEncoder, baseUrl);
+		userAccountService = new UserAccountService(userRepository, majorRepository, levelRepository,
+				teacherRankRepository, departmentRepository, emailService, passwordEncoder, baseUrl);
 	}
 
 	@Test
@@ -90,11 +90,11 @@ class UserAccountServiceTest {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
 				null, 1L, 1L);
 		Department dept = new Department();
-		Grade grade = new Grade();
+		TeacherRank teacherRank = new TeacherRank();
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-		when(gradeRepository.findById(1L)).thenReturn(Optional.of(grade));
+		when(teacherRankRepository.findById(1L)).thenReturn(Optional.of(teacherRank));
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
 		User result = userAccountService.createUser(request, Role.TEACHER);
@@ -204,11 +204,11 @@ class UserAccountServiceTest {
 		Department dept = new Department();
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-		when(gradeRepository.findById(99L)).thenReturn(Optional.empty());
+		when(teacherRankRepository.findById(99L)).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.TEACHER));
-		assertEquals("Grade introuvable", ex.getMessage());
+		assertEquals("Rank introuvable", ex.getMessage());
 	}
 
 	@Test

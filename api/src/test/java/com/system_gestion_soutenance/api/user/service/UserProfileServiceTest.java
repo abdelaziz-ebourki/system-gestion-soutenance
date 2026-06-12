@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -31,7 +31,7 @@ class UserProfileServiceTest {
 	@Mock
 	private LevelRepository levelRepository;
 	@Mock
-	private GradeRepository gradeRepository;
+	private TeacherRankRepository teacherRankRepository;
 	@Mock
 	private DepartmentRepository departmentRepository;
 
@@ -103,15 +103,15 @@ class UserProfileServiceTest {
 	@Test
 	void updateTeacherProfile_Success() {
 		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, 1L, 1L);
-		Grade grade = new Grade();
+		TeacherRank teacherRank = new TeacherRank();
 		Department dept = new Department();
 
-		when(gradeRepository.findById(1L)).thenReturn(Optional.of(grade));
+		when(teacherRankRepository.findById(1L)).thenReturn(Optional.of(teacherRank));
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 
 		userProfileService.updateTeacherProfile(teacher, request);
 
-		assertEquals(grade, teacher.getGrade());
+		assertEquals(teacherRank, teacher.getTeacherRank());
 		assertEquals(dept, teacher.getDepartment());
 	}
 
