@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.ProjectMapper;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse;
+import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectStatusUpdateRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
@@ -67,6 +68,19 @@ public class ProjectController {
 		Project project = projectService.update(id, updates);
 		return ApiResponse.success("Projet mis à jour avec succès",
 				projectMapper.toDto(project, Collections.emptyMap()));
+	}
+
+	@PatchMapping("/{id}/status")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Update project status", description = "Approves, rejects, or resets a project's status.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Status updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status transition")})
+	public ApiResponse<ProjectResponse> updateStatus(@PathVariable Long id,
+			@Valid @RequestBody ProjectStatusUpdateRequest request) {
+		Project project = projectService.updateStatus(id, request.status());
+		return ApiResponse.success("Statut du projet mis à jour", projectMapper.toDto(project, Collections.emptyMap()));
 	}
 
 	@DeleteMapping("/{id}")

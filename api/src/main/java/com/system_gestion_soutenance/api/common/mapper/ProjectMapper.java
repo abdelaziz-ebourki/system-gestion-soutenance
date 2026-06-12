@@ -11,6 +11,7 @@ import org.mapstruct.Mapping;
 @Mapper(config = CentralMapperConfig.class)
 public interface ProjectMapper {
 
+	@Mapping(target = "status", expression = "java(project.getStatus() != null ? project.getStatus().name() : null)")
 	@Mapping(target = "groupId", expression = "java(projectGroupIds != null ? projectGroupIds.get(project.getId()) : null)")
 	@Mapping(target = "supervisorName", expression = "java(resolveSupervisorName(project))")
 	@Mapping(target = "studentNames", expression = "java(resolveStudentNames(project))")

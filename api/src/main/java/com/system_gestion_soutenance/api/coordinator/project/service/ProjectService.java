@@ -90,6 +90,31 @@ public class ProjectService {
 		return projectRepository.save(project);
 	}
 
+	@Audited(action = "UPDATE_STATUS", entity = "Project")
+	@Transactional
+	public Project updateStatus(Long id, ProjectStatus newStatus) {
+		Project project = projectRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
+
+		ProjectStatus current = project.getStatus();
+		if (current == newStatus) {
+			throw new InvalidBusinessStateException("Le projet est déjà à l'état " + newStatus.name());
+		}
+		if (current == ProjectStatus.PENDING && newStatus != ProjectStatus.APPROVED
+				&& newStatus != ProjectStatus.REJECTED) {
+			throw new InvalidBusinessStateException("Un projet en attente ne peut être approuvé ou rejeté uniquement");
+		}
+		if (current == ProjectStatus.APPROVED && newStatus != ProjectStatus.PENDING) {
+			throw new InvalidBusinessStateException("Un projet approuvé ne peut revenir qu'à l'état en attente");
+		}
+		if (current == ProjectStatus.REJECTED && newStatus != ProjectStatus.PENDING) {
+			throw new InvalidBusinessStateException("Un projet rejeté ne peut revenir qu'à l'état en attente");
+		}
+
+		project.setStatus(newStatus);
+		return projectRepository.save(project);
+	}
+
 	@Audited(action = "DELETE", entity = "Project")
 	@Transactional
 	public void delete(Long id) {
