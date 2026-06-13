@@ -61,6 +61,9 @@ public class DefenseSession {
 	@Column(name = "end_date", nullable = false)
 	private LocalDate endDate;
 
+	@Column(name = "is_frozen")
+	private boolean isFrozen = false;
+
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;
 	}

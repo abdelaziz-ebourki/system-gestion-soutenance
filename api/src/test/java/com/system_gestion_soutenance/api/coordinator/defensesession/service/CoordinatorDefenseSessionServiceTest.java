@@ -364,4 +364,74 @@ class CoordinatorDefenseSessionServiceTest {
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.transition(1L, "INVALID_STATUS"));
 	}
+
+	@Test
+	void transition_toCompleted_autoFreezes() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.transition(1L, "COMPLETED");
+
+		assertEquals(DefenseSessionStatus.COMPLETED, result.getStatus());
+		assertTrue(result.isFrozen());
+	}
+
+	@Test
+	void freeze_setsIsFrozenTrue() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setFrozen(false);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.freeze(1L);
+
+		assertTrue(result.isFrozen());
+	}
+
+	@Test
+	void unfreeze_setsIsFrozenFalse() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setFrozen(true);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.unfreeze(1L);
+
+		assertFalse(result.isFrozen());
+	}
+
+	@Test
+	void freeze_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.freeze(99L));
+	}
+
+	@Test
+	void unfreeze_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.unfreeze(99L));
+	}
+
+	@Test
+	void unfreeze_completedSession_throws() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setFrozen(true);
+		ds.setStatus(DefenseSessionStatus.COMPLETED);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.unfreeze(1L));
+		verify(defenseSessionRepository, never()).save(any());
+	}
 }

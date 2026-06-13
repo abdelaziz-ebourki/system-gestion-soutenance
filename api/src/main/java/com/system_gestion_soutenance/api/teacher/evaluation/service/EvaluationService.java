@@ -68,6 +68,10 @@ public class EvaluationService {
 		DefenseSession ds = defenseSessionRepository.findById(evaluation.getDefenseSessionId())
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
+		if (ds.isFrozen()) {
+			throw new InvalidBusinessStateException("Cette session est gelée. Les soumissions de notes sont bloquées.");
+		}
+
 		if (ds.getSubmissionDeadline() != null && LocalDate.now().isAfter(ds.getSubmissionDeadline())) {
 			throw new InvalidBusinessStateException("La date limite de soumission des évaluations est dépassée");
 		}

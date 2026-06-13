@@ -67,4 +67,18 @@ public class CoordinatorDefenseSessionController {
 			@Valid @RequestBody StatusTransitionRequest request) {
 		return ApiResponse.success(mapper.toDto(service.transition(id, request.toStatus())));
 	}
+
+	@PatchMapping("/{id}/freeze")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Freeze a defense session", description = "Blocks all grade submissions for this session.")
+	public ApiResponse<DefenseSessionDto> freeze(@PathVariable Long id) {
+		return ApiResponse.success(mapper.toDto(service.freeze(id)));
+	}
+
+	@PatchMapping("/{id}/unfreeze")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Unfreeze a defense session", description = "Re-enables grade submissions for this session.")
+	public ApiResponse<DefenseSessionDto> unfreeze(@PathVariable Long id) {
+		return ApiResponse.success(mapper.toDto(service.unfreeze(id)));
+	}
 }

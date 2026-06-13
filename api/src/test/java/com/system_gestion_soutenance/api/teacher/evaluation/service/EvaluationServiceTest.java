@@ -146,4 +146,20 @@ class EvaluationServiceTest {
 				() -> service.submit(1L, 99L, new EvaluationSubmitRequest(15.0, "Update")));
 		verify(evaluationRepository, never()).save(any());
 	}
+
+	@Test
+	void submit_frozenSession_throws() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
+				null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+
+		DefenseSession ds = new DefenseSession();
+		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
+		ds.setFrozen(true);
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		assertThrows(InvalidBusinessStateException.class,
+				() -> service.submit(1L, 1L, new EvaluationSubmitRequest(15.0, "Score")));
+		verify(evaluationRepository, never()).save(any());
+	}
 }

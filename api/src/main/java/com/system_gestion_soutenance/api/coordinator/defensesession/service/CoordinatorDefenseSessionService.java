@@ -136,6 +136,28 @@ public class CoordinatorDefenseSessionService {
 		DefenseSessionStatus newStatus = parseStatus(toStatus);
 		validateTransition(ds.getStatus(), newStatus);
 		ds.setStatus(newStatus);
+		if (newStatus == DefenseSessionStatus.COMPLETED) {
+			ds.setFrozen(true);
+		}
+		return defenseSessionRepository.save(ds);
+	}
+
+	@Transactional
+	public DefenseSession freeze(Long id) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		ds.setFrozen(true);
+		return defenseSessionRepository.save(ds);
+	}
+
+	@Transactional
+	public DefenseSession unfreeze(Long id) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		if (ds.getStatus() == DefenseSessionStatus.COMPLETED) {
+			throw new InvalidBusinessStateException("Impossible de dégeler une session terminée");
+		}
+		ds.setFrozen(false);
 		return defenseSessionRepository.save(ds);
 	}
 
