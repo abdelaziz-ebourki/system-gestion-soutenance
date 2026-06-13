@@ -4,6 +4,10 @@ import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkImportResult;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectEntry;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectRequest;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectResponse;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
@@ -139,6 +143,53 @@ public class ProjectService {
 		}
 
 		projectRepository.delete(project);
+	}
+
+	@Transactional
+	public BulkImportResult bulkImport(BulkProjectRequest request) {
+		List<BulkImportResult.BulkImportError> errors = new ArrayList<>();
+		List<BulkProjectResponse> created = new ArrayList<>();
+
+		int line = 0;
+		for (BulkProjectEntry entry : request.projects()) {
+			line++;
+			try {
+				Teacher supervisor = teacherRepository.findById(entry.supervisorId()).orElse(null);
+				if (supervisor == null) {
+					errors.add(new BulkImportResult.BulkImportError(line,
+							"Encadrant introuvable avec l'id " + entry.supervisorId()));
+					continue;
+				}
+
+				List<Student> students = Collections.emptyList();
+				if (entry.studentIds() != null && !entry.studentIds().isEmpty()) {
+					students = new ArrayList<>(studentRepository.findAllById(entry.studentIds()));
+					if (students.size() != entry.studentIds().size()) {
+						List<Long> foundIds = students.stream().map(Student::getId).toList();
+						List<Long> missingIds = entry.studentIds().stream().filter(id -> !foundIds.contains(id))
+								.toList();
+						errors.add(new BulkImportResult.BulkImportError(line,
+								"Étudiants introuvables avec les ids: " + missingIds));
+						continue;
+					}
+				}
+
+				Project project = new Project();
+				project.setTitle(entry.title());
+				project.setDescription(entry.description());
+				project.setDefenseType(entry.defenseType());
+				project.setStatus(ProjectStatus.PENDING);
+				project.setSupervisor(supervisor);
+				project.setStudents(students);
+
+				Project saved = projectRepository.save(project);
+				created.add(new BulkProjectResponse(saved.getId(), saved.getTitle()));
+			} catch (Exception e) {
+				errors.add(new BulkImportResult.BulkImportError(line, e.getMessage()));
+			}
+		}
+
+		return new BulkImportResult(request.projects().size(), created.size(), created, errors);
 	}
 
 }

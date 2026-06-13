@@ -3,6 +3,8 @@ package com.system_gestion_soutenance.api.coordinator.project.controller;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ProjectMapper;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkImportResult;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse;
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectStatusUpdateRequest;
@@ -61,6 +63,19 @@ public class ProjectController {
 		Project project = projectService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(
 				ApiResponse.success("Projet créé avec succès", projectMapper.toDto(project, Collections.emptyMap())));
+	}
+
+	@PostMapping("/bulk")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Bulk import projects", description = "Imports multiple projects at once. Returns per-row results with errors for failed entries.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Import completed with partial results"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
+	public ResponseEntity<ApiResponse<BulkImportResult>> bulkImport(
+			@Valid @RequestBody BulkProjectRequest request) {
+		BulkImportResult result = projectService.bulkImport(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				ApiResponse.success("Import en masse terminé", result));
 	}
 
 	@PutMapping("/{id}")
