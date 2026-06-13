@@ -93,4 +93,12 @@ class GroupControllerTest {
 		mockMvc.perform(delete("/api/coordinator/groups/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void removeMember_returns200() throws Exception {
+		doNothing().when(groupService).removeMember(1L, 2L);
+
+		mockMvc.perform(delete("/api/coordinator/groups/1/members/2")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
+	}
 }

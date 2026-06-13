@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.admin.config.teacherrank.controller;
 
 import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.CreateTeacherRankRequest;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.TeacherRankDto;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.UpdateTeacherRankRequest;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.service.TeacherRankConfigService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -50,6 +51,14 @@ public class TeacherRankConfigController {
 			@Valid @RequestBody CreateTeacherRankRequest request) {
 		return ApiResponse.success("Rank mis à jour avec succès",
 				configMapper.toTeacherRankDto(teacherRankConfigService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update a teacher rank")
+	public ApiResponse<TeacherRankDto> patch(@PathVariable Long id,
+			@Valid @RequestBody UpdateTeacherRankRequest request) {
+		return ApiResponse.success("Rank mis à jour avec succès",
+				configMapper.toTeacherRankDto(teacherRankConfigService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

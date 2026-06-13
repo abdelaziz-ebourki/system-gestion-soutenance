@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.admin.config.teacherrank.service;
 
 import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.CreateTeacherRankRequest;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.UpdateTeacherRankRequest;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
@@ -41,6 +42,16 @@ public class TeacherRankConfigService extends BaseCrudService<TeacherRank, Long,
 	public TeacherRank update(Long id, CreateTeacherRankRequest request) {
 		TeacherRank teacherRank = findByIdOrThrow(id, "TeacherRank");
 		teacherRank.setName(request.name());
+		return save(teacherRank);
+	}
+
+	@Audited(action = "UPDATE", entity = "TeacherRank")
+	@Transactional
+	public TeacherRank updatePartial(Long id, UpdateTeacherRankRequest request) {
+		TeacherRank teacherRank = findByIdOrThrow(id, "TeacherRank");
+		if (request.name() != null) {
+			teacherRank.setName(request.name());
+		}
 		return save(teacherRank);
 	}
 

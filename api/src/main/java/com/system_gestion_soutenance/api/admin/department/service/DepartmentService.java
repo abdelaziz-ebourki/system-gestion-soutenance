@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.admin.department.service;
 
 import com.system_gestion_soutenance.api.admin.department.dto.CreateDepartmentRequest;
+import com.system_gestion_soutenance.api.admin.department.dto.UpdateDepartmentRequest;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
@@ -85,6 +86,31 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 			department.setHead(head);
 		} else {
 			department.setHead(null);
+		}
+
+		return save(department);
+	}
+
+	@Audited(action = "UPDATE", entity = "Department")
+	@Transactional
+	public Department updatePartial(Long id, UpdateDepartmentRequest request) {
+		Department department = findByIdOrThrow(id, "Département");
+
+		if (request.name() != null) {
+			department.setName(request.name());
+		}
+		if (request.code() != null) {
+			department.setCode(request.code());
+		}
+		if (request.facultyId() != null) {
+			Faculty faculty = facultyRepository.findById(request.facultyId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Faculté introuvable"));
+			department.setFaculty(faculty);
+		}
+		if (request.headId() != null) {
+			Teacher head = teacherRepository.findById(request.headId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant responsable introuvable"));
+			department.setHead(head);
 		}
 
 		return save(department);

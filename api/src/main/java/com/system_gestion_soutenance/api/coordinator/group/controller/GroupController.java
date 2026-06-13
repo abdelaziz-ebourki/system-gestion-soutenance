@@ -61,4 +61,15 @@ public class GroupController {
 		groupService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Groupe supprimé avec succès", null));
 	}
+
+	@DeleteMapping("/{id}/members/{studentId}")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Remove member from group", description = "Removes a student from a group. Reassigns leadership if the removed member was the leader.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Member removed successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group or student not found")})
+	public ResponseEntity<ApiResponse<Void>> removeMember(@PathVariable Long id, @PathVariable Long studentId) {
+		groupService.removeMember(id, studentId);
+		return ResponseEntity.ok(ApiResponse.success("Membre supprimé avec succès", null));
+	}
 }

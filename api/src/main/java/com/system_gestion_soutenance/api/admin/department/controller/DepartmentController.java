@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.admin.department.controller;
 
 import com.system_gestion_soutenance.api.admin.department.dto.CreateDepartmentRequest;
 import com.system_gestion_soutenance.api.admin.department.dto.DepartmentResponse;
+import com.system_gestion_soutenance.api.admin.department.dto.UpdateDepartmentRequest;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.service.DepartmentService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -70,6 +71,14 @@ public class DepartmentController {
 			@Valid @RequestBody CreateDepartmentRequest request) {
 		return ApiResponse.success("Département mis à jour avec succès",
 				configMapper.toDepartmentResponse(departmentService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update department", description = "Updates only the provided fields of a department.")
+	public ApiResponse<DepartmentResponse> patch(@PathVariable Long id,
+			@Valid @RequestBody UpdateDepartmentRequest request) {
+		return ApiResponse.success("Département mis à jour avec succès",
+				configMapper.toDepartmentResponse(departmentService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

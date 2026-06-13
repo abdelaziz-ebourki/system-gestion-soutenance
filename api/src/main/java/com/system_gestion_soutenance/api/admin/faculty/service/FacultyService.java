@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.admin.faculty.service;
 
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.admin.faculty.dto.CreateFacultyRequest;
+import com.system_gestion_soutenance.api.admin.faculty.dto.UpdateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.repository.FacultyRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
@@ -59,6 +60,27 @@ public class FacultyService {
 		faculty.setCode(request.code());
 		faculty.setDean(resolveDean(request.deanId()));
 		faculty.setLogoUrl(request.logoUrl());
+		return facultyRepository.save(faculty);
+	}
+
+	@Audited(action = "UPDATE", entity = "Faculty")
+	@Transactional
+	public Faculty updatePartial(Long id, UpdateFacultyRequest request) {
+		Faculty faculty = facultyRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Faculté non trouvée"));
+
+		if (request.name() != null) {
+			faculty.setName(request.name());
+		}
+		if (request.code() != null) {
+			faculty.setCode(request.code());
+		}
+		if (request.deanId() != null) {
+			faculty.setDean(resolveDean(request.deanId()));
+		}
+		if (request.logoUrl() != null) {
+			faculty.setLogoUrl(request.logoUrl());
+		}
 		return facultyRepository.save(faculty);
 	}
 

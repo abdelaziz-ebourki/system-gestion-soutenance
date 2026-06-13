@@ -61,4 +61,12 @@ class DepartmentControllerTest {
 		mockMvc.perform(delete("/api/admin/departments/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(departmentService.updatePartial(anyLong(), any())).thenReturn(new Department());
+		mockMvc.perform(patch("/api/admin/departments/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"Upd\",\"code\":\"UP\"}")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
+	}
 }

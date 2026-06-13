@@ -134,6 +134,29 @@ public class StudentGroupService {
 		return isCreationOpen(ds.getGroupCreationStartDate(), ds.getGroupCreationEndDate());
 	}
 
+	@Transactional
+	public void leaveGroup(Long studentId) {
+		Group group = groupRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new InvalidBusinessStateException("Vous n'êtes membre d'aucun groupe"));
+
+		if (group.getProject() != null) {
+			throw new InvalidBusinessStateException("Impossible de quitter un groupe ayant un projet assigné");
+		}
+
+		group.getStudents().removeIf(s -> s.getId().equals(studentId));
+
+		if (group.getStudents().isEmpty()) {
+			groupRepository.deleteById(group.getId());
+			return;
+		}
+
+		if (group.getLeaderId() != null && group.getLeaderId().equals(studentId)) {
+			group.setLeaderId(group.getStudents().get(0).getId());
+		}
+
+		groupRepository.save(group);
+	}
+
 	private boolean isCreationOpen(String startDate, String endDate) {
 		try {
 			LocalDate now = LocalDate.now();

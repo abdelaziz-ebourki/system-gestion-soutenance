@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.admin.config.major.service;
 
 import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorRequest;
+import com.system_gestion_soutenance.api.admin.config.major.dto.UpdateMajorRequest;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
@@ -57,6 +58,21 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 			major.setDepartment(dept);
 		} else {
 			major.setDepartment(null);
+		}
+		return save(major);
+	}
+
+	@Audited(action = "UPDATE", entity = "Major")
+	@Transactional
+	public Major updatePartial(Long id, UpdateMajorRequest request) {
+		Major major = findByIdOrThrow(id, "Filière");
+		if (request.name() != null) {
+			major.setName(request.name());
+		}
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
 		}
 		return save(major);
 	}

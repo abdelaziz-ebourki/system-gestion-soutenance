@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.admin.faculty.controller;
 
 import com.system_gestion_soutenance.api.admin.faculty.dto.CreateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto;
+import com.system_gestion_soutenance.api.admin.faculty.dto.UpdateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.service.FacultyService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -68,6 +69,13 @@ public class FacultyController {
 	public ApiResponse<FacultyDto> update(@PathVariable Long id, @Valid @RequestBody CreateFacultyRequest request) {
 		return ApiResponse.success("Faculté mise à jour avec succès",
 				configMapper.toFacultyDto(facultyService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update faculty", description = "Updates only the provided fields of a faculty.")
+	public ApiResponse<FacultyDto> patch(@PathVariable Long id, @Valid @RequestBody UpdateFacultyRequest request) {
+		return ApiResponse.success("Faculté mise à jour avec succès",
+				configMapper.toFacultyDto(facultyService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

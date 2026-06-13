@@ -61,4 +61,11 @@ class LevelConfigControllerTest {
 		mockMvc.perform(delete("/api/admin/config/levels/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(levelConfigService.updatePartial(anyLong(), any())).thenReturn(new Level());
+		mockMvc.perform(patch("/api/admin/config/levels/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"S7\"}")).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+	}
 }

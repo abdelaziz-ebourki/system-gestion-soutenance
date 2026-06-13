@@ -95,4 +95,17 @@ class StudentGroupControllerTest {
 		mockMvc.perform(post("/api/student/groups/10/members").with(authentication(auth)).with(csrf()))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
 	}
+
+	@Test
+	void leaveGroup_returns200() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		doNothing().when(studentGroupService).leaveGroup(1L);
+
+		mockMvc.perform(delete("/api/student/groups/leave").with(authentication(auth)).with(csrf()))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+	}
 }

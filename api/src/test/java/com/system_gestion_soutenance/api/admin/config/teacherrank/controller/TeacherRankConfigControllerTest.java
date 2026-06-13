@@ -70,4 +70,15 @@ class TeacherRankConfigControllerTest {
 		mockMvc.perform(delete("/api/admin/config/teacher-ranks/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		TeacherRank teacherRank = new TeacherRank(1L, "Updated");
+		when(teacherRankConfigService.updatePartial(anyLong(), any())).thenReturn(teacherRank);
+		when(configMapper.toTeacherRankDto(teacherRank)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.config.teacherrank.dto.TeacherRankDto(1L, "Updated"));
+		mockMvc.perform(patch("/api/admin/config/teacher-ranks/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"Updated\"}")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.name").value("Updated"));
+	}
 }

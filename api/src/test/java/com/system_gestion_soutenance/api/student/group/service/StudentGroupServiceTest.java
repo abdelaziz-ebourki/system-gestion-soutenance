@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.repository.Defense
 import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.ArrayList;
@@ -385,6 +386,81 @@ class StudentGroupServiceTest {
 		Group result = service.createGroup(1L);
 
 		assertNull(result.getSessionId());
+	}
+
+	@Test
+	void leaveGroup_notInGroup_throws() {
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.leaveGroup(1L));
+		assertEquals("Vous n'êtes membre d'aucun groupe", ex.getMessage());
+	}
+
+	@Test
+	void leaveGroup_groupHasProject_throws() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>(List.of(student)));
+		group.setLeaderId(1L);
+		group.setProject(mock(Project.class));
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.leaveGroup(1L));
+		assertEquals("Impossible de quitter un groupe ayant un projet assigné", ex.getMessage());
+	}
+
+	@Test
+	void leaveGroup_lastMember_deletesGroup() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>(List.of(student)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+
+		service.leaveGroup(1L);
+
+		verify(groupRepository).deleteById(10L);
+		verify(groupRepository, never()).save(any());
+	}
+
+	@Test
+	void leaveGroup_leaderLeaves_reassignsLeadership() {
+		Student alice = student(1L, "Alice", "Test");
+		Student bob = student(2L, "Bob", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>(List.of(alice, bob)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		service.leaveGroup(1L);
+
+		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(2L)));
+	}
+
+	@Test
+	void leaveGroup_memberLeaves_leaderUnchanged() {
+		Student alice = student(1L, "Alice", "Test");
+		Student bob = student(2L, "Bob", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>(List.of(alice, bob)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findByStudentId(2L)).thenReturn(Optional.of(group));
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		service.leaveGroup(2L);
+
+		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(1L)));
 	}
 
 	private static Student student(Long id, String firstName, String lastName) {

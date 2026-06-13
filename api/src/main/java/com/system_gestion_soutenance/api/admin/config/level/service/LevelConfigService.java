@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.admin.config.level.service;
 
 import com.system_gestion_soutenance.api.admin.config.level.dto.CreateLevelRequest;
+import com.system_gestion_soutenance.api.admin.config.level.dto.UpdateLevelRequest;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
@@ -41,6 +42,16 @@ public class LevelConfigService extends BaseCrudService<Level, Long, CreateLevel
 	public Level update(Long id, CreateLevelRequest request) {
 		Level level = findByIdOrThrow(id, "Niveau");
 		level.setName(request.name());
+		return save(level);
+	}
+
+	@Audited(action = "UPDATE", entity = "Level")
+	@Transactional
+	public Level updatePartial(Long id, UpdateLevelRequest request) {
+		Level level = findByIdOrThrow(id, "Niveau");
+		if (request.name() != null) {
+			level.setName(request.name());
+		}
 		return save(level);
 	}
 

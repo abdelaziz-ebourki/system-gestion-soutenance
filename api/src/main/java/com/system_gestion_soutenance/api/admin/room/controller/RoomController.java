@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.admin.room.controller;
 import com.system_gestion_soutenance.api.admin.room.dto.BulkRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.dto.CreateRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.dto.RoomResponse;
+import com.system_gestion_soutenance.api.admin.room.dto.UpdateRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.service.RoomService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -74,6 +75,13 @@ public class RoomController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ApiResponse<RoomResponse> update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
 		return ApiResponse.success("Salle mise à jour avec succès", roomMapper.toDto(roomService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update room", description = "Updates only the provided fields of a room.")
+	public ApiResponse<RoomResponse> patch(@PathVariable Long id, @Valid @RequestBody UpdateRoomRequest request) {
+		return ApiResponse.success("Salle mise à jour avec succès",
+				roomMapper.toDto(roomService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.admin.config.major.controller;
 
 import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorRequest;
 import com.system_gestion_soutenance.api.admin.config.major.dto.MajorDto;
+import com.system_gestion_soutenance.api.admin.config.major.dto.UpdateMajorRequest;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.service.MajorConfigService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -58,6 +59,13 @@ public class MajorConfigController {
 	public ApiResponse<MajorDto> update(@PathVariable Long id, @Valid @RequestBody CreateMajorRequest request) {
 		return ApiResponse.success("Filière mise à jour avec succès",
 				configMapper.toMajorDto(majorConfigService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update major", description = "Updates only the provided fields of a major.")
+	public ApiResponse<MajorDto> patch(@PathVariable Long id, @Valid @RequestBody UpdateMajorRequest request) {
+		return ApiResponse.success("Filière mise à jour avec succès",
+				configMapper.toMajorDto(majorConfigService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

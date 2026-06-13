@@ -88,4 +88,15 @@ class FacultyControllerTest {
 		mockMvc.perform(delete("/api/admin/faculties/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		Faculty faculty = createFaculty(1L, "New", "N");
+		when(facultyService.updatePartial(anyLong(), any())).thenReturn(faculty);
+		when(configMapper.toFacultyDto(faculty)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "New", "N", null, null));
+		mockMvc.perform(
+				patch("/api/admin/faculties/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"New\"}"))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("New"));
+	}
 }

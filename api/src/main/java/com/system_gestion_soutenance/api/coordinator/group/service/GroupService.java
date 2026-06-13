@@ -80,6 +80,29 @@ public class GroupService {
 		return groupRepository.save(group);
 	}
 
+	@Audited(action = "REMOVE_MEMBER", entity = "Group")
+	@Transactional
+	public void removeMember(Long groupId, Long studentId) {
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
+
+		boolean removed = group.getStudents().removeIf(s -> s.getId().equals(studentId));
+		if (!removed) {
+			throw new InvalidBusinessStateException("L'étudiant n'est pas membre de ce groupe");
+		}
+
+		if (group.getStudents().isEmpty()) {
+			groupRepository.deleteById(group.getId());
+			return;
+		}
+
+		if (group.getLeaderId() != null && group.getLeaderId().equals(studentId)) {
+			group.setLeaderId(group.getStudents().get(0).getId());
+		}
+
+		groupRepository.save(group);
+	}
+
 	@Audited(action = "DELETE", entity = "Group")
 	@Transactional
 	public void delete(Long id) {

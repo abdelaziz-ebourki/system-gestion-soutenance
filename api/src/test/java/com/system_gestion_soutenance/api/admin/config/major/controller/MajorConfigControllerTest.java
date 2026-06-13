@@ -61,4 +61,11 @@ class MajorConfigControllerTest {
 		mockMvc.perform(delete("/api/admin/config/majors/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(majorConfigService.updatePartial(anyLong(), any())).thenReturn(new Major());
+		mockMvc.perform(patch("/api/admin/config/majors/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"IIR\"}")).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+	}
 }

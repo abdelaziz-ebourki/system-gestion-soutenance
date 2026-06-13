@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.admin.config.level.controller;
 
 import com.system_gestion_soutenance.api.admin.config.level.dto.CreateLevelRequest;
 import com.system_gestion_soutenance.api.admin.config.level.dto.LevelDto;
+import com.system_gestion_soutenance.api.admin.config.level.dto.UpdateLevelRequest;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.service.LevelConfigService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -58,6 +59,13 @@ public class LevelConfigController {
 	public ApiResponse<LevelDto> update(@PathVariable Long id, @Valid @RequestBody CreateLevelRequest request) {
 		return ApiResponse.success("Niveau mis à jour avec succès",
 				configMapper.toLevelDto(levelConfigService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update level", description = "Updates only the provided fields of a level.")
+	public ApiResponse<LevelDto> patch(@PathVariable Long id, @Valid @RequestBody UpdateLevelRequest request) {
+		return ApiResponse.success("Niveau mis à jour avec succès",
+				configMapper.toLevelDto(levelConfigService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

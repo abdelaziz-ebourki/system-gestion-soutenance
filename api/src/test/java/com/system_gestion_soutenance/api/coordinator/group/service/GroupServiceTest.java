@@ -165,4 +165,84 @@ class GroupServiceTest {
 				() -> service.create(request));
 		assertEquals("Le groupe a atteint sa taille maximale", ex.getMessage());
 	}
+
+	@Test
+	void removeMember_groupNotFound_throws() {
+		when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.removeMember(99L, 1L));
+	}
+
+	@Test
+	void removeMember_studentNotInGroup_throws() {
+		Student bob = student(2L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(bob)));
+		group.setLeaderId(2L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.removeMember(10L, 1L));
+		assertEquals("L'étudiant n'est pas membre de ce groupe", ex.getMessage());
+	}
+
+	@Test
+	void removeMember_lastMember_deletesGroup() {
+		Student alice = student(1L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		service.removeMember(10L, 1L);
+
+		verify(groupRepository).deleteById(10L);
+		verify(groupRepository, never()).save(any());
+	}
+
+	@Test
+	void removeMember_leaderRemoved_reassignsLeadership() {
+		Student alice = student(1L);
+		Student bob = student(2L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice, bob)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		service.removeMember(10L, 1L);
+
+		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(2L)));
+	}
+
+	@Test
+	void removeMember_memberRemoved_leaderUnchanged() {
+		Student alice = student(1L);
+		Student bob = student(2L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice, bob)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		service.removeMember(10L, 2L);
+
+		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(1L)));
+	}
+
+	private static Student student(Long id) {
+		Student s = new Student();
+		s.setId(id);
+		return s;
+	}
 }
