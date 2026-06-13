@@ -189,6 +189,10 @@ public class DefenseService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 		if (ds.getStatus() == DefenseSessionStatus.ACTIVE) {
+			if (ds.getApprovedBy() == null) {
+				throw new InvalidBusinessStateException(
+						"La session doit être approuvée par un administrateur avant d'être publiée");
+			}
 			ds.setStatus(DefenseSessionStatus.SCHEDULED);
 			defenseSessionRepository.save(ds);
 			createNotification(NotificationType.SUCCESS, "Session publiée",

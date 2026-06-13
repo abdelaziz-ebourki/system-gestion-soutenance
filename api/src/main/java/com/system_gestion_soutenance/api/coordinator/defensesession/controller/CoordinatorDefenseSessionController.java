@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.coordinator.defensesession.dto.StatusTr
 import com.system_gestion_soutenance.api.coordinator.defensesession.service.CoordinatorDefenseSessionService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.mapper.DefenseSessionMapper;
+import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -80,5 +82,19 @@ public class CoordinatorDefenseSessionController {
 	@Operation(summary = "Unfreeze a defense session", description = "Re-enables grade submissions for this session.")
 	public ApiResponse<DefenseSessionDto> unfreeze(@PathVariable Long id) {
 		return ApiResponse.success(mapper.toDto(service.unfreeze(id)));
+	}
+
+	@PatchMapping("/{id}/approve")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "Approve a defense session", description = "Admin approves a defense session, enabling schedule publishing.")
+	public ApiResponse<DefenseSessionDto> approve(@PathVariable Long id, @AuthenticationPrincipal User user) {
+		return ApiResponse.success(mapper.toDto(service.approve(id, user.getId())));
+	}
+
+	@PatchMapping("/{id}/revoke-approval")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "Revoke approval of a defense session", description = "Admin revokes approval, preventing schedule publishing.")
+	public ApiResponse<DefenseSessionDto> revokeApproval(@PathVariable Long id) {
+		return ApiResponse.success(mapper.toDto(service.revokeApproval(id)));
 	}
 }

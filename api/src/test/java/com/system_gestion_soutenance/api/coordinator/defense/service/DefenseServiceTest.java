@@ -210,6 +210,7 @@ class DefenseServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setName("Session Test");
 		ds.setStatus(DefenseSessionStatus.ACTIVE);
+		ds.setApprovedBy(10L);
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 		when(defenseSessionRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
@@ -218,6 +219,18 @@ class DefenseServiceTest {
 		assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
 		verify(defenseSessionRepository).save(ds);
 		verify(notificationRepository).save(any());
+	}
+
+	@Test
+	void publish_unapprovedSession_throws() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session Test");
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
+		ds.setApprovedBy(null);
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.publish(1L));
+		verify(defenseSessionRepository, never()).save(any());
 	}
 
 	@Test

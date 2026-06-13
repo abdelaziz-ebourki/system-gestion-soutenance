@@ -434,4 +434,52 @@ class CoordinatorDefenseSessionServiceTest {
 		assertThrows(InvalidBusinessStateException.class, () -> service.unfreeze(1L));
 		verify(defenseSessionRepository, never()).save(any());
 	}
+
+	@Test
+	void approve_setsApprovedByAndTimestamp() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setApprovedBy(null);
+		ds.setApprovedAt(null);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.approve(1L, 10L);
+
+		assertEquals(10L, result.getApprovedBy());
+		assertNotNull(result.getApprovedAt());
+		verify(defenseSessionRepository).save(ds);
+	}
+
+	@Test
+	void approve_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.approve(99L, 10L));
+	}
+
+	@Test
+	void revokeApproval_clearsApprovedByAndTimestamp() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setApprovedBy(10L);
+		ds.setApprovedAt(java.time.LocalDateTime.now());
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.revokeApproval(1L);
+
+		assertNull(result.getApprovedBy());
+		assertNull(result.getApprovedAt());
+		verify(defenseSessionRepository).save(ds);
+	}
+
+	@Test
+	void revokeApproval_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.revokeApproval(99L));
+	}
 }

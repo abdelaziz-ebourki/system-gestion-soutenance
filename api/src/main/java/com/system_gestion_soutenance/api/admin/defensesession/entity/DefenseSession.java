@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.*;
@@ -63,6 +64,12 @@ public class DefenseSession {
 
 	@Column(name = "is_frozen")
 	private boolean isFrozen = false;
+
+	@Column(name = "approved_by")
+	private Long approvedBy;
+
+	@Column(name = "approved_at")
+	private LocalDateTime approvedAt;
 
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;

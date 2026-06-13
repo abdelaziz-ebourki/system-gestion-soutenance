@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -158,6 +159,24 @@ public class CoordinatorDefenseSessionService {
 			throw new InvalidBusinessStateException("Impossible de dégeler une session terminée");
 		}
 		ds.setFrozen(false);
+		return defenseSessionRepository.save(ds);
+	}
+
+	@Transactional
+	public DefenseSession approve(Long id, Long adminUserId) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		ds.setApprovedBy(adminUserId);
+		ds.setApprovedAt(LocalDateTime.now());
+		return defenseSessionRepository.save(ds);
+	}
+
+	@Transactional
+	public DefenseSession revokeApproval(Long id) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		ds.setApprovedBy(null);
+		ds.setApprovedAt(null);
 		return defenseSessionRepository.save(ds);
 	}
 
