@@ -79,7 +79,7 @@ class EvaluationControllerTest {
 		when(evaluationService.submit(anyLong(), anyLong(), any())).thenReturn(evaluation);
 		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
 		when(evaluationMapper.toDto(eq(evaluation), any()))
-				.thenReturn(new EvaluationResponse(1L, 1L, "Project", 15.0, "Good", "SUBMITTED"));
+				.thenReturn(new EvaluationResponse(1L, 1L, "Project", 15.0, "Good", "SUBMITTED", "PRESENT"));
 		mockMvc.perform(post("/api/teacher/evaluations/1").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"score\":15.0,\"comment\":\"Good\"}").with(authentication(auth)).with(csrf()))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));

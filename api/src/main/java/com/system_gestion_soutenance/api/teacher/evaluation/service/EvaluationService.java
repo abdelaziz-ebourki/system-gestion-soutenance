@@ -80,6 +80,8 @@ public class EvaluationService {
 			evaluation.setScore(request.score());
 		if (request.comment() != null)
 			evaluation.setComment(request.comment());
+		if (request.attendanceStatus() != null)
+			evaluation.setAttendanceStatus(request.attendanceStatus());
 
 		evaluation.setStatus(EvaluationStatus.SUBMITTED);
 		evaluation.setSubmittedAt(LocalDateTime.now());

@@ -45,4 +45,8 @@ public class Evaluation {
 
 	@Column(name = "submitted_at")
 	private LocalDateTime submittedAt;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "attendance_status")
+	private EvaluationAttendanceStatus attendanceStatus;
 }

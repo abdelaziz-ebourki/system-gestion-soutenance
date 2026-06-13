@@ -649,7 +649,7 @@ public class DataInitializer implements CommandLineRunner {
 				continue;
 			}
 			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role, es.score,
-					"Évaluation complète.", es.status, es.submitted));
+					"Évaluation complète.", es.status, es.submitted, null));
 		}
 
 		// Phase 20: Student Documents
