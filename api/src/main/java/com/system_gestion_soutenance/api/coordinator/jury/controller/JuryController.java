@@ -6,11 +6,14 @@ import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,10 +38,13 @@ public class JuryController {
 	@Operation(summary = "List juries", description = "Retrieves all juries configured for the current session.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved juries")})
-	public ApiResponse<List<JuryResponse>> findAll() {
-		List<Defense> defenses = defenseService.getSchedule();
-		return ApiResponse.success("Liste des jurys récupérée avec succès",
-				defenses.stream().map(juryMapper::toDto).toList());
+	public ApiResponse<PaginatedResponse<JuryResponse>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Defense> result = defenseService.getSchedule(page, limit);
+		List<JuryResponse> items = result.items().stream().map(juryMapper::toDto).toList();
+		PaginatedResponse<JuryResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des jurys récupérée avec succès", mapped);
 	}
 
 	@PostMapping

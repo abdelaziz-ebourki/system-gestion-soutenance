@@ -11,6 +11,7 @@ import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -63,12 +64,12 @@ class JuryControllerTest {
 	void findAll_returnsJuries() throws Exception {
 		Defense defense = mock(Defense.class);
 		when(defense.getId()).thenReturn(1L);
-		when(defenseService.getSchedule()).thenReturn(List.of(defense));
+		when(defenseService.getSchedule(0, 10)).thenReturn(new PaginatedResponse<>(List.of(defense), 1, 1, 0, 10));
 		when(juryMapper.toDto(defense)).thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", List.of()));
 
 		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.size()").value(1))
-				.andExpect(jsonPath("$.data[0].projectTitle").value("Projet Test"));
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].projectTitle").value("Projet Test"));
 	}
 
 	@Test

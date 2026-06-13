@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.defensesession.dto.CreateDefenseSessionRequest;
 import com.system_gestion_soutenance.api.coordinator.defensesession.service.CoordinatorDefenseSessionService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
@@ -62,13 +63,14 @@ class CoordinatorDefenseSessionControllerTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
 		ds.setName("Session 1");
-		when(service.findAll()).thenReturn(List.of(ds));
+		when(service.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(ds), 1, 1, 0, 10));
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, null, null));
 
 		mockMvc.perform(get("/api/coordinator/defense-sessions")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.size()").value(1)).andExpect(jsonPath("$.data[0].name").value("Session 1"));
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].name").value("Session 1"));
 	}
 
 	@Test

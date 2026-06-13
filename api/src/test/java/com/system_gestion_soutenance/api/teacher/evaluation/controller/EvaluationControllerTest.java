@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.EvaluationMapper;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
@@ -58,7 +59,7 @@ class EvaluationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
-		when(evaluationService.findByTeacher(1L)).thenReturn(List.of());
+		when(evaluationService.findByTeacher(1L, 0, 10)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
 		mockMvc.perform(get("/api/teacher/evaluations").with(authentication(auth))).andExpect(status().isOk());
 	}

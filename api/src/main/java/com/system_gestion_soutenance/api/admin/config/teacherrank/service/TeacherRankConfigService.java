@@ -5,9 +5,12 @@ import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.UpdateTeac
 import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -23,6 +26,12 @@ public class TeacherRankConfigService extends BaseCrudService<TeacherRank, Long,
 		super(teacherRankRepository);
 		this.teacherRankRepository = teacherRankRepository;
 		this.teacherRepository = teacherRepository;
+	}
+
+	public PaginatedResponse<TeacherRank> findAll(int page, int limit) {
+		Page<TeacherRank> rankPage = teacherRankRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(rankPage.getContent(), rankPage.getTotalElements(), rankPage.getTotalPages(),
+				page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "TeacherRank")

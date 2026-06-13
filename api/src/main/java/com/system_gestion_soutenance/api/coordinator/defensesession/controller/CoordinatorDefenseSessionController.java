@@ -6,11 +6,14 @@ import com.system_gestion_soutenance.api.coordinator.defensesession.dto.CreateDe
 import com.system_gestion_soutenance.api.coordinator.defensesession.dto.StatusTransitionRequest;
 import com.system_gestion_soutenance.api.coordinator.defensesession.service.CoordinatorDefenseSessionService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.DefenseSessionMapper;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +37,13 @@ public class CoordinatorDefenseSessionController {
 
 	@GetMapping
 	@Operation(summary = "List all defense sessions")
-	public ApiResponse<List<DefenseSessionDto>> findAll() {
-		return ApiResponse.success(service.findAll().stream().map(mapper::toDto).toList());
+	public ApiResponse<PaginatedResponse<DefenseSessionDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<DefenseSession> result = service.findAll(page, limit);
+		List<DefenseSessionDto> items = result.items().stream().map(mapper::toDto).toList();
+		PaginatedResponse<DefenseSessionDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success(mapped);
 	}
 
 	@PostMapping

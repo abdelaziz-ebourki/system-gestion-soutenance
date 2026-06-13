@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.project.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ProjectMapper;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +41,15 @@ public class ProjectController {
 	@Operation(summary = "List projects", description = "Retrieves all projects assigned for the current session.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved projects")})
-	public ApiResponse<List<ProjectResponse>> findAll() {
-		List<Project> projects = projectService.findAll();
-		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(projects);
-		List<ProjectResponse> response = projects.stream().map(p -> projectMapper.toDto(p, projectGroupIds)).toList();
-		return ApiResponse.success("Liste des projets récupérée avec succès", response);
+	public ApiResponse<PaginatedResponse<ProjectResponse>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Project> result = projectService.findAll(page, limit);
+		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(result.items());
+		List<ProjectResponse> items = result.items().stream().map(p -> projectMapper.toDto(p, projectGroupIds))
+				.toList();
+		PaginatedResponse<ProjectResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des projets récupérée avec succès", mapped);
 	}
 
 	@PostMapping

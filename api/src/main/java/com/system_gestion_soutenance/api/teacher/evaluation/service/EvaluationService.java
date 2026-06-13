@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.teacher.evaluation.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 @SuppressWarnings("PMD")
 
@@ -41,6 +44,12 @@ public class EvaluationService {
 
 	public List<Evaluation> findByTeacher(Long teacherId) {
 		return evaluationRepository.findByTeacherId(teacherId);
+	}
+
+	public PaginatedResponse<Evaluation> findByTeacher(Long teacherId, int page, int limit) {
+		Page<Evaluation> evalPage = evaluationRepository.findByTeacherId(teacherId, PageRequest.of(page, limit));
+		return new PaginatedResponse<>(evalPage.getContent(), evalPage.getTotalElements(), evalPage.getTotalPages(),
+				page, limit);
 	}
 
 	public Map<Long, Project> buildProjectMap(List<Evaluation> evaluations) {

@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.project.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -42,6 +45,12 @@ public class ProjectService {
 	@Transactional(readOnly = true)
 	public List<Project> findAll() {
 		return projectRepository.findAllWithDetails();
+	}
+
+	public PaginatedResponse<Project> findAll(int page, int limit) {
+		Page<Project> projectPage = projectRepository.findAllWithDetails(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(projectPage.getContent(), projectPage.getTotalElements(),
+				projectPage.getTotalPages(), page, limit);
 	}
 
 	public Map<Long, Long> buildProjectGroupIdMap(List<Project> projects) {

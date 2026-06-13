@@ -5,10 +5,13 @@ import com.system_gestion_soutenance.api.admin.config.juryrole.dto.JuryRoleTempl
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.service.JuryRoleTemplateService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +33,14 @@ public class JuryRoleTemplateController {
 
 	@GetMapping
 	@Operation(summary = "List all jury role templates")
-	public ApiResponse<List<JuryRoleTemplateDto>> findAll() {
-		List<JuryRoleTemplateDto> templates = juryRoleTemplateService.findAll().stream()
-				.map(configMapper::toJuryRoleTemplateDto).toList();
-		return ApiResponse.success("Liste des templates de rôles récupérée avec succès", templates);
+	public ApiResponse<PaginatedResponse<JuryRoleTemplateDto>> findAll(
+			@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<JuryRoleTemplate> result = juryRoleTemplateService.findAll(page, limit);
+		List<JuryRoleTemplateDto> items = result.items().stream().map(configMapper::toJuryRoleTemplateDto).toList();
+		PaginatedResponse<JuryRoleTemplateDto> mapped = new PaginatedResponse<>(items, result.total(),
+				result.pageCount(), result.currentPage(), result.size());
+		return ApiResponse.success("Liste des templates de rôles récupérée avec succès", mapped);
 	}
 
 	@PostMapping

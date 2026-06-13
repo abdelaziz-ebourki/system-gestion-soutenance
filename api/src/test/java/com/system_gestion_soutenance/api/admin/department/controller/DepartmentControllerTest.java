@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.service.DepartmentService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -34,9 +35,10 @@ class DepartmentControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(departmentService.findAll()).thenReturn(List.of(new Department()));
+		when(departmentService.findAll(0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(new Department()), 1, 1, 0, 10));
 		mockMvc.perform(get("/api/admin/departments")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.success").value(true));
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.items").isArray());
 	}
 
 	@Test

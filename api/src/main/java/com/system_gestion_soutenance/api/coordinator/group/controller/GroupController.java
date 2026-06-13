@@ -5,11 +5,14 @@ import com.system_gestion_soutenance.api.coordinator.group.dto.GroupResponse;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +37,13 @@ public class GroupController {
 	@Operation(summary = "List groups", description = "Retrieves all student groups for the current session.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved groups")})
-	public ApiResponse<List<GroupResponse>> findAll() {
-		List<Group> groups = groupService.findAll();
-		return ApiResponse.success("Liste des groupes récupérée avec succès",
-				groups.stream().map(groupMapper::toDto).toList());
+	public ApiResponse<PaginatedResponse<GroupResponse>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Group> result = groupService.findAll(page, limit);
+		List<GroupResponse> items = result.items().stream().map(groupMapper::toDto).toList();
+		PaginatedResponse<GroupResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des groupes récupérée avec succès", mapped);
 	}
 
 	@PostMapping

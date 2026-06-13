@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.service.MajorConfigService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -34,9 +35,9 @@ class MajorConfigControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(majorConfigService.findAll()).thenReturn(List.of(new Major()));
+		when(majorConfigService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(new Major()), 1, 1, 0, 10));
 		mockMvc.perform(get("/api/admin/config/majors")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.success").value(true));
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.items").isArray());
 	}
 
 	@Test

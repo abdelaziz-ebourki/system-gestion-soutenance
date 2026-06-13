@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ProjectMapper;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
@@ -74,13 +75,13 @@ class ProjectControllerTest {
 		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", "PENDING", 1L, "Supervisor",
 				List.of());
 
-		when(projectService.findAll()).thenReturn(List.of(project));
+		when(projectService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(project), 1, 1, 0, 10));
 		when(projectService.buildProjectGroupIdMap(anyList())).thenReturn(Map.of(1L, 1L));
 		when(projectMapper.toDto(project, Map.of(1L, 1L))).thenReturn(dto);
 
 		mockMvc.perform(get("/api/coordinator/projects")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.size()").value(1))
-				.andExpect(jsonPath("$.data[0].title").value("Projet Test"));
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].title").value("Projet Test"));
 	}
 
 	@Test

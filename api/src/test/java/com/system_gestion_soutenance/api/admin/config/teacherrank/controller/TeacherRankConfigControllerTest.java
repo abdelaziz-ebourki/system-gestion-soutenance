@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.service.TeacherRankConfigService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -35,11 +36,12 @@ class TeacherRankConfigControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		TeacherRank teacherRank = new TeacherRank(1L, "Prof");
-		when(teacherRankConfigService.findAll()).thenReturn(List.of(teacherRank));
+		when(teacherRankConfigService.findAll(0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(teacherRank), 1, 1, 0, 10));
 		when(configMapper.toTeacherRankDto(teacherRank)).thenReturn(
 				new com.system_gestion_soutenance.api.admin.config.teacherrank.dto.TeacherRankDto(1L, "Prof"));
 		mockMvc.perform(get("/api/admin/config/teacher-ranks")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data[0].name").value("Prof"));
+				.andExpect(jsonPath("$.data.items[0].name").value("Prof"));
 	}
 
 	@Test

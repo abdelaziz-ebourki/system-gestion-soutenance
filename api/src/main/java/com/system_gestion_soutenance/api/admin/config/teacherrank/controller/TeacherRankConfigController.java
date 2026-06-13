@@ -6,10 +6,13 @@ import com.system_gestion_soutenance.api.admin.config.teacherrank.dto.UpdateTeac
 import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.teacherrank.service.TeacherRankConfigService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +34,13 @@ public class TeacherRankConfigController {
 
 	@GetMapping
 	@Operation(summary = "List all teacher ranks")
-	public ApiResponse<List<TeacherRankDto>> findAll() {
-		List<TeacherRankDto> ranks = teacherRankConfigService.findAll().stream().map(configMapper::toTeacherRankDto)
-				.toList();
-		return ApiResponse.success("Liste des ranks récupérée avec succès", ranks);
+	public ApiResponse<PaginatedResponse<TeacherRankDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<TeacherRank> result = teacherRankConfigService.findAll(page, limit);
+		List<TeacherRankDto> items = result.items().stream().map(configMapper::toTeacherRankDto).toList();
+		PaginatedResponse<TeacherRankDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des ranks récupérée avec succès", mapped);
 	}
 
 	@PostMapping

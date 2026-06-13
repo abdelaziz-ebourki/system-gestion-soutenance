@@ -6,11 +6,14 @@ import com.system_gestion_soutenance.api.admin.config.level.dto.UpdateLevelReque
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.service.LevelConfigService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +37,13 @@ public class LevelConfigController {
 	@Operation(summary = "List levels", description = "Retrieves all configured academic levels.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved levels")})
-	public ApiResponse<List<LevelDto>> findAll() {
-		List<LevelDto> levels = levelConfigService.findAll().stream().map(configMapper::toLevelDto).toList();
-		return ApiResponse.success("Liste des niveaux récupérée avec succès", levels);
+	public ApiResponse<PaginatedResponse<LevelDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Level> result = levelConfigService.findAll(page, limit);
+		List<LevelDto> items = result.items().stream().map(configMapper::toLevelDto).toList();
+		PaginatedResponse<LevelDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des niveaux récupérée avec succès", mapped);
 	}
 
 	@PostMapping

@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.defensesession.dto.CreateDefenseSessionRequest;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import java.time.LocalDateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -42,6 +45,12 @@ public class CoordinatorDefenseSessionService {
 
 	public List<DefenseSession> findAll() {
 		return defenseSessionRepository.findAll();
+	}
+
+	public PaginatedResponse<DefenseSession> findAll(int page, int limit) {
+		Page<DefenseSession> dsPage = defenseSessionRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(dsPage.getContent(), dsPage.getTotalElements(), dsPage.getTotalPages(), page,
+				limit);
 	}
 
 	@Transactional

@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.defense.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
@@ -31,6 +32,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -64,6 +67,12 @@ public class DefenseService {
 	@Transactional(readOnly = true)
 	public List<Defense> getSchedule() {
 		return defenseRepository.findAllWithMembers();
+	}
+
+	public PaginatedResponse<Defense> getSchedule(int page, int limit) {
+		Page<Defense> defensePage = defenseRepository.findAllWithMembers(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(defensePage.getContent(), defensePage.getTotalElements(),
+				defensePage.getTotalPages(), page, limit);
 	}
 
 	public Map<Long, Project> buildProjectMap(List<Defense> defenses) {

@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.student.document.service;
 
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +12,8 @@ import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 @SuppressWarnings("PMD")
@@ -36,6 +39,12 @@ public class StudentDocumentService {
 
 	public List<StudentDocument> findByStudent(Long studentId) {
 		return repository.findByStudentId(studentId);
+	}
+
+	public PaginatedResponse<StudentDocument> findByStudent(Long studentId, int page, int limit) {
+		Page<StudentDocument> docPage = repository.findByStudentId(studentId, PageRequest.of(page, limit));
+		return new PaginatedResponse<>(docPage.getContent(), docPage.getTotalElements(), docPage.getTotalPages(), page,
+				limit);
 	}
 
 	public StudentDocument upload(Long id, Long currentUserId, MultipartFile file) {

@@ -6,11 +6,14 @@ import com.system_gestion_soutenance.api.admin.config.major.dto.UpdateMajorReque
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.service.MajorConfigService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +37,13 @@ public class MajorConfigController {
 	@Operation(summary = "List majors", description = "Retrieves all configured academic majors.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved majors")})
-	public ApiResponse<List<MajorDto>> findAll() {
-		List<MajorDto> majors = majorConfigService.findAll().stream().map(configMapper::toMajorDto).toList();
-		return ApiResponse.success("Liste des filières récupérée avec succès", majors);
+	public ApiResponse<PaginatedResponse<MajorDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Major> result = majorConfigService.findAll(page, limit);
+		List<MajorDto> items = result.items().stream().map(configMapper::toMajorDto).toList();
+		PaginatedResponse<MajorDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des filières récupérée avec succès", mapped);
 	}
 
 	@PostMapping

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.service.JuryRoleTemplateService;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.ArrayList;
@@ -36,9 +37,9 @@ class JuryRoleTemplateControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(juryRoleTemplateService.findAll()).thenReturn(List.of());
+		when(juryRoleTemplateService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 		mockMvc.perform(get("/api/admin/config/jury-role-templates")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.success").value(true));
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.items").isArray());
 	}
 
 	@Test

@@ -7,12 +7,15 @@ import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRo
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -32,6 +35,12 @@ public class JuryRoleTemplateService {
 
 	public List<JuryRoleTemplate> findAll() {
 		return juryRoleTemplateRepository.findAll();
+	}
+
+	public PaginatedResponse<JuryRoleTemplate> findAll(int page, int limit) {
+		Page<JuryRoleTemplate> templatePage = juryRoleTemplateRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(templatePage.getContent(), templatePage.getTotalElements(),
+				templatePage.getTotalPages(), page, limit);
 	}
 
 	@Transactional

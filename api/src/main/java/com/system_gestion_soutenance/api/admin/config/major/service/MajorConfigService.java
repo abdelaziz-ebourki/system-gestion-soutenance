@@ -7,9 +7,12 @@ import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepo
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -28,6 +31,12 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 		this.majorRepository = majorRepository;
 		this.studentRepository = studentRepository;
 		this.departmentRepository = departmentRepository;
+	}
+
+	public PaginatedResponse<Major> findAll(int page, int limit) {
+		Page<Major> majorPage = majorRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(majorPage.getContent(), majorPage.getTotalElements(), majorPage.getTotalPages(),
+				page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "Major")

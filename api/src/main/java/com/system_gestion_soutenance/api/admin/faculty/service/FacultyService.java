@@ -6,12 +6,15 @@ import com.system_gestion_soutenance.api.admin.faculty.dto.UpdateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.repository.FacultyRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -33,6 +36,12 @@ public class FacultyService {
 
 	public List<Faculty> findAll() {
 		return facultyRepository.findAll();
+	}
+
+	public PaginatedResponse<Faculty> findAll(int page, int limit) {
+		Page<Faculty> facultyPage = facultyRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(facultyPage.getContent(), facultyPage.getTotalElements(),
+				facultyPage.getTotalPages(), page, limit);
 	}
 
 	public Faculty findById(Long id) {

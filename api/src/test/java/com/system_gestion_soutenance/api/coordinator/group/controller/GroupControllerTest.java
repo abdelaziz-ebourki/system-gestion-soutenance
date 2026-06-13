@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupReques
 import com.system_gestion_soutenance.api.coordinator.group.dto.GroupResponse;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -64,12 +65,12 @@ class GroupControllerTest {
 		Group group = new Group();
 		group.setId(1L);
 		group.setGroupName("Groupe A");
-		when(groupService.findAll()).thenReturn(List.of(group));
+		when(groupService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(group), 1, 1, 0, 10));
 		when(groupMapper.toDto(group)).thenReturn(new GroupResponse(1L, "Groupe A", 1L, 2, List.of()));
 
 		mockMvc.perform(get("/api/coordinator/groups")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.size()").value(1))
-				.andExpect(jsonPath("$.data[0].groupName").value("Groupe A"));
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].groupName").value("Groupe A"));
 	}
 
 	@Test
