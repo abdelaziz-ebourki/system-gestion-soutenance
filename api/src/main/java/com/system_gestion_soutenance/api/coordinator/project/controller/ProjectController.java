@@ -71,11 +71,9 @@ public class ProjectController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Import completed with partial results"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
-	public ResponseEntity<ApiResponse<BulkImportResult>> bulkImport(
-			@Valid @RequestBody BulkProjectRequest request) {
+	public ResponseEntity<ApiResponse<BulkImportResult>> bulkImport(@Valid @RequestBody BulkProjectRequest request) {
 		BulkImportResult result = projectService.bulkImport(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(
-				ApiResponse.success("Import en masse terminé", result));
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Import en masse terminé", result));
 	}
 
 	@PutMapping("/{id}")
