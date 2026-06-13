@@ -816,35 +816,96 @@ public class DataInitializer implements CommandLineRunner {
 		}
 
 		// Phase 22: Audit Logs
-		record AuditSeed(String action, String entity, String entityId, String performedBy, int day) {
-		}
-		AuditSeed[] auditSeeds = {new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 10),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 11),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 12),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 13),
-				new AuditSeed("REJECT", "Jury", "", "admin@univh2c.ma", 14),
-				new AuditSeed("ARCHIVE", "User", "", "admin@univh2c.ma", 15),
-				new AuditSeed("ACTIVATE", "Room", "", "admin@univh2c.ma", 16),
-				new AuditSeed("DEACTIVATE", "Document", "", "admin@univh2c.ma", 17),
-				new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 18),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 19),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 20),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 21),
-				new AuditSeed("REJECT", "Jury", "", "admin@univh2c.ma", 22),
-				new AuditSeed("ARCHIVE", "User", "", "admin@univh2c.ma", 23),
-				new AuditSeed("ACTIVATE", "Room", "", "admin@univh2c.ma", 24),
-				new AuditSeed("DEACTIVATE", "Document", "", "admin@univh2c.ma", 25),
-				new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 26),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 27),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 28),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 29),};
-		for (int i = 0; i < auditSeeds.length; i++) {
-			AuditSeed as2 = auditSeeds[i];
-			String details = "Action " + as2.action.toLowerCase() + " effectuée sur " + as2.entity.toLowerCase() + " "
-					+ as2.entityId + ".";
-			auditLogRepo.save(new AuditLog(null, as2.action, as2.entity, (long) (i + 1), as2.performedBy, details,
-					LocalDateTime.of(2026, 5, as2.day, 9 + (i % 8), 30)));
-		}
+		auditLogRepo.save(new AuditLog(null, "CREATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Création de la session de soutenance 'Soutenance PFE Printemps 2026'",
+				LocalDateTime.of(2026, 3, 10, 9, 15)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Modification des paramètres de la session 'Soutenance PFE Printemps 2026' (durée de soutenance: 30min)",
+				LocalDateTime.of(2026, 3, 12, 10, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Project", projects.get(0).getId(), "coord@univh2c.ma",
+				"Création du projet 'Système de Gestion des Soutenances' pour l'étudiant Khalid Mohamed",
+				LocalDateTime.of(2026, 3, 15, 11, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Project", projects.get(1).getId(), "coord@univh2c.ma",
+				"Création du projet 'Application E-commerce Mobile' pour le groupe de Benali Salma et Fassi Yassine",
+				LocalDateTime.of(2026, 3, 18, 14, 20)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(1).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Application E-commerce Mobile' — statut changé de PENDING vers APPROVED",
+				LocalDateTime.of(2026, 3, 20, 9, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Group", null, "coord@univh2c.ma",
+				"Création du groupe 'Groupe Alpha' (2 étudiants) pour le projet 'Système de Gestion des Soutenances'",
+				LocalDateTime.of(2026, 3, 22, 15, 45)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Group", null, "coord@univh2c.ma",
+				"Création du groupe 'Groupe Beta' (3 étudiants) pour le projet 'Application E-commerce Mobile'",
+				LocalDateTime.of(2026, 3, 22, 16, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds1.getId(), "admin@univh2c.ma",
+				"Clôture de la session 'Soutenance PFE Printemps 2025' — passage au statut COMPLETED",
+				LocalDateTime.of(2026, 4, 1, 8, 30)));
+		auditLogRepo.save(new AuditLog(null, "APPROVE", "DefenseSession", ds4.getId(), "admin@univh2c.ma",
+				"Approbation de la session 'Soutenance Mémoire Printemps 2026' — statut changé vers SCHEDULED",
+				LocalDateTime.of(2026, 4, 5, 9, 15)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Defense", null, "coord@univh2c.ma",
+				"Planification de la soutenance du projet 'Système de Gestion des Soutenances' en salle Amphi A",
+				LocalDateTime.of(2026, 4, 10, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Teacher", teacherT3.getId(), "admin@univh2c.ma",
+				"Mise à jour du département de l'enseignant Ben Ali — transfert vers le département Informatique",
+				LocalDateTime.of(2026, 4, 12, 11, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "JuryRoleTemplate", jrtPfe.getId(), "admin@univh2c.ma",
+				"Création du template jury 'Template PFE' avec 3 rôles (Président, Rapporteur, Examinateur)",
+				LocalDateTime.of(2026, 4, 15, 14, 0)));
+		auditLogRepo.save(new AuditLog(null, "SUBMIT", "StudentDocument", null, "student@univh2c.ma",
+				"Soumission du document 'Rapport PFE' par l'étudiant Khalid Mohamed",
+				LocalDateTime.of(2026, 5, 25, 14, 10)));
+		auditLogRepo.save(new AuditLog(null, "SUBMIT", "StudentDocument", null, "student1@univh2c.ma",
+				"Soumission du document 'Fiche de synthèse' par l'étudiant Benali Salma",
+				LocalDateTime.of(2026, 5, 25, 14, 25)));
+		auditLogRepo.save(new AuditLog(null, "PUBLISH", "Evaluation", null, "teacher@univh2c.ma",
+				"Publication de l'évaluation du projet 'Système de Gestion des Soutenances' — note: 16.4/20",
+				LocalDateTime.of(2026, 6, 1, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "PUBLISH", "Evaluation", null, "moussa@univh2c.ma",
+				"Publication de l'évaluation du projet 'Application E-commerce Mobile' — note: 10.3/20",
+				LocalDateTime.of(2026, 6, 1, 10, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(5).getId(), "admin@univh2c.ma",
+				"Rejet du projet 'Système de Recommandation de Cours' — motif: insuffisance de détails techniques",
+				LocalDateTime.of(2026, 6, 3, 9, 45)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Defense", null, "coord@univh2c.ma",
+				"Planification de la soutenance du projet 'Application E-commerce Mobile' en salle Salle 101",
+				LocalDateTime.of(2026, 6, 5, 11, 15)));
+		auditLogRepo.save(new AuditLog(null, "FREEZE", "DefenseSession", ds3.getId(), "admin@univh2c.ma",
+				"Gel de la session 'Soutenance PFE Printemps 2026' — les notes ne peuvent plus être modifiées",
+				LocalDateTime.of(2026, 6, 10, 8, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Student", studentsList.get(95).getId(), "admin@univh2c.ma",
+				"Création de l'étudiant Amrani Layla (codeApogee: APG00096) — niveau Master, filière Génie Informatique",
+				LocalDateTime.of(2026, 6, 12, 15, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Room", rooms.get(0).getId(), "admin@univh2c.ma",
+				"Mise à jour de la salle 'Amphi A' — capacité modifiée de 200 à 220 places",
+				LocalDateTime.of(2026, 6, 14, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "DELETE", "DefenseSession", ds6.getId(), "coord@univh2c.ma",
+				"Suppression de la session 'Soutenance Rattrapage 2026' — pas de groupes assignés",
+				LocalDateTime.of(2026, 6, 15, 16, 0)));
+		auditLogRepo.save(new AuditLog(null, "APPROVE", "Project", projects.get(8).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Assistant Virtuel pour Bibliothèque' — statut changé vers APPROVED",
+				LocalDateTime.of(2026, 6, 16, 9, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Modification de la date de début de la session 'Soutenance PFE Printemps 2026' au 1er juillet 2026",
+				LocalDateTime.of(2026, 6, 18, 14, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Notification", null, "coord@univh2c.ma",
+				"Envoi de notification de rappel aux étudiants pour la soumission des documents avant le 1er juillet",
+				LocalDateTime.of(2026, 6, 20, 11, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(15).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Jeu Sérieux pour l'Apprentissage de la Programmation' — statut changé vers APPROVED",
+				LocalDateTime.of(2026, 6, 22, 10, 15)));
+		auditLogRepo.save(new AuditLog(null, "ASSIGN", "Defense", null, "coord@univh2c.ma",
+				"Affectation de l'enseignant El Ghazi Hassan comme Président du jury pour la soutenance du projet 'Plateforme IoT pour Smart Campus'",
+				LocalDateTime.of(2026, 6, 25, 9, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Student", studentsList.get(2).getId(), "admin@univh2c.ma",
+				"Mise à jour du niveau de l'étudiant Fassi Yassine — passage de Licence à Master",
+				LocalDateTime.of(2026, 6, 27, 15, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Faculty", f1.getId(), "admin@univh2c.ma",
+				"Création de la faculté 'Faculté des Sciences Ben M'Sik' (code: FSBM)",
+				LocalDateTime.of(2026, 3, 5, 8, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Department", dInfo.getId(), "admin@univh2c.ma",
+				"Désignation de Benkirane Jamila comme chef du département Informatique",
+				LocalDateTime.of(2026, 3, 7, 10, 0)));
 
 		System.out.println(">>> Seed data inserted successfully <<<");
 	}
