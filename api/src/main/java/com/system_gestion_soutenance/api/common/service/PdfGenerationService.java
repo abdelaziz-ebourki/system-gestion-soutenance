@@ -21,9 +21,17 @@ public class PdfGenerationService {
 	private static final String FONT_BOLD = "static/fonts/DejaVuSans-Bold.ttf";
 
 	private final TemplateEngine templateEngine;
+	private final File fontFile;
+	private final File fontBoldFile;
 
 	public PdfGenerationService(TemplateEngine templateEngine) {
 		this.templateEngine = templateEngine;
+		try {
+			this.fontFile = extractFont(FONT);
+			this.fontBoldFile = extractFont(FONT_BOLD);
+		} catch (IOException e) {
+			throw new PdfGenerationException("Failed to load PDF fonts", e);
+		}
 	}
 
 	public byte[] generatePdf(String templateName, Map<String, Object> data) {
@@ -36,8 +44,8 @@ public class PdfGenerationService {
 			PdfRendererBuilder builder = new PdfRendererBuilder();
 			builder.useFastMode();
 			builder.withHtmlContent(htmlContent, "/");
-			builder.useFont(extractFont(FONT), "DejaVu Sans");
-			builder.useFont(extractFont(FONT_BOLD), "DejaVu Sans", 700, null, true);
+			builder.useFont(fontFile, "DejaVu Sans");
+			builder.useFont(fontBoldFile, "DejaVu Sans", 700, null, true);
 			builder.toStream(outputStream);
 			builder.run();
 			return outputStream.toByteArray();

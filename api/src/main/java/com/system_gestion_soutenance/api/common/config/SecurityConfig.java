@@ -57,10 +57,11 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-						.ignoringRequestMatchers("/api/auth/**", "/h2-console/**"))
-				.headers(headers -> headers.frameOptions(o -> o.disable()))
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> {
+			CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+			repo.setCookieCustomizer(cookie -> cookie.sameSite("None").secure(true));
+			csrf.csrfTokenRepository(repo).ignoringRequestMatchers("/api/auth/**", "/h2-console/**");
+		}).headers(headers -> headers.frameOptions(o -> o.disable()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
 					response.setContentType("application/json;charset=UTF-8");

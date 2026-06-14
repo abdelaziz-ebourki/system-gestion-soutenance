@@ -13,8 +13,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,12 +42,14 @@ public class AuthController {
 			HttpServletResponse response) {
 		LoginResponse loginResponse = authService.login(request);
 
-		Cookie cookie = new Cookie("jwt_token", loginResponse.token());
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setMaxAge(7200);
-		response.addCookie(cookie);
+		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", loginResponse.token())
+				.path("/")
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.maxAge(7200)
+				.build();
+		response.setHeader("Set-Cookie", jwtCookie.toString());
 
 		return ResponseEntity.ok(new LoginCookieResponse(loginResponse.user(), loginResponse.expiresAt()));
 	}
@@ -55,12 +57,14 @@ public class AuthController {
 	@PostMapping("/auth/logout")
 	@Operation(summary = "Logout", description = "Clears the JWT cookie.")
 	public ResponseEntity<Void> logout(HttpServletResponse response) {
-		Cookie cookie = new Cookie("jwt_token", "");
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setMaxAge(0);
-		response.addCookie(cookie);
+		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
+				.path("/")
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.maxAge(0)
+				.build();
+		response.setHeader("Set-Cookie", jwtCookie.toString());
 		return ResponseEntity.noContent().build();
 	}
 
