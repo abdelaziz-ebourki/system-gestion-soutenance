@@ -8,8 +8,12 @@ import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
+import com.system_gestion_soutenance.api.common.util.PasswordValidator;
+import com.system_gestion_soutenance.api.user.dto.ChangePasswordRequest;
+import com.system_gestion_soutenance.api.user.dto.UpdateProfileRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
 import com.system_gestion_soutenance.api.user.entity.*;
+import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -34,6 +39,12 @@ class UserProfileServiceTest {
 	private TeacherRankRepository teacherRankRepository;
 	@Mock
 	private DepartmentRepository departmentRepository;
+	@Mock
+	private PasswordEncoder passwordEncoder;
+	@Mock
+	private PasswordValidator passwordValidator;
+	@Mock
+	private UserRepository userRepository;
 
 	@InjectMocks
 	private UserProfileService userProfileService;
@@ -123,5 +134,46 @@ class UserProfileServiceTest {
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userProfileService.updateTeacherProfile(teacher, request));
 		assertEquals("Département introuvable", ex.getMessage());
+	}
+
+	@Test
+	void updateOwnProfile_Success() {
+		UpdateProfileRequest request = new UpdateProfileRequest("NewLast", "NewFirst");
+		userProfileService.updateOwnProfile(user, request);
+
+		assertEquals("NewLast", user.getLastName());
+		assertEquals("NewFirst", user.getFirstName());
+	}
+
+	@Test
+	void updateOwnProfile_PartialUpdate() {
+		UpdateProfileRequest request = new UpdateProfileRequest("NewLast", null);
+		userProfileService.updateOwnProfile(user, request);
+
+		assertEquals("NewLast", user.getLastName());
+		assertEquals("First", user.getFirstName());
+	}
+
+	@Test
+	void changePassword_Success() {
+		user.setPassword(passwordEncoder.encode("OldP@ss1"));
+		ChangePasswordRequest request = new ChangePasswordRequest("OldP@ss1", "NewP@ss2");
+		when(passwordEncoder.matches("OldP@ss1", user.getPassword())).thenReturn(true);
+
+		userProfileService.changePassword(user, request);
+
+		verify(passwordEncoder).encode("NewP@ss2");
+		verify(passwordValidator).validate("NewP@ss2");
+	}
+
+	@Test
+	void changePassword_WrongCurrentPassword_ThrowsException() {
+		user.setPassword("encoded-old");
+		ChangePasswordRequest request = new ChangePasswordRequest("WrongPass", "NewP@ss2");
+		when(passwordEncoder.matches("WrongPass", "encoded-old")).thenReturn(false);
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> userProfileService.changePassword(user, request));
+		assertEquals("Le mot de passe actuel est incorrect", ex.getMessage());
 	}
 }
