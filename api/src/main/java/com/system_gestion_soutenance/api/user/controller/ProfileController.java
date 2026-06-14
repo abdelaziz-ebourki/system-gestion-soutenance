@@ -39,8 +39,7 @@ public class ProfileController {
 
 	@GetMapping
 	@Operation(summary = "Get current user profile")
-	@ApiResponses({
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile retrieved successfully")})
+	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile retrieved successfully")})
 	public ResponseEntity<ApiResponse<UserDto>> getProfile() {
 		User user = securityService.getCurrentUser();
 		return ResponseEntity.ok(ApiResponse.success("Profil récupéré avec succès", userMapper.toDto(user)));
@@ -48,8 +47,7 @@ public class ProfileController {
 
 	@PatchMapping
 	@Operation(summary = "Update current user profile", description = "Update the authenticated user's first name and/or last name.")
-	@ApiResponses({
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated successfully"),
+	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ResponseEntity<ApiResponse<UserDto>> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
 		User user = securityService.getCurrentUser();
@@ -59,8 +57,7 @@ public class ProfileController {
 
 	@PutMapping("/password")
 	@Operation(summary = "Change password", description = "Change the authenticated user's password. Requires current password.")
-	@ApiResponses({
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password changed successfully"),
+	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password changed successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid password data")})
 	public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
 		User user = securityService.getCurrentUser();
