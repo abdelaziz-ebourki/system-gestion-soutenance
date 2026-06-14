@@ -38,12 +38,13 @@ public class UserAccountService {
 	private final DepartmentRepository departmentRepository;
 	private final EmailService emailService;
 	private final PasswordEncoder passwordEncoder;
+	private final UserCacheService userCacheService;
 	private final String baseUrl;
 
 	public UserAccountService(UserRepository userRepository, MajorRepository majorRepository,
 			LevelRepository levelRepository, TeacherRankRepository teacherRankRepository,
 			DepartmentRepository departmentRepository, EmailService emailService, PasswordEncoder passwordEncoder,
-			@Value("${app.ui.base-url}") String baseUrl) {
+			UserCacheService userCacheService, @Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;
@@ -51,6 +52,7 @@ public class UserAccountService {
 		this.departmentRepository = departmentRepository;
 		this.emailService = emailService;
 		this.passwordEncoder = passwordEncoder;
+		this.userCacheService = userCacheService;
 		this.baseUrl = baseUrl;
 	}
 
@@ -72,6 +74,7 @@ public class UserAccountService {
 
 		userRepository.save(user);
 		sendVerificationEmail(user);
+		userCacheService.clearCache();
 
 		return user;
 	}
@@ -102,6 +105,7 @@ public class UserAccountService {
 			results.add(user);
 		}
 
+		userCacheService.clearCache();
 		return results;
 	}
 

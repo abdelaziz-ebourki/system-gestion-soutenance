@@ -45,6 +45,8 @@ class UserAccountServiceTest {
 	private EmailService emailService;
 	@Mock
 	private PasswordEncoder passwordEncoder;
+	@Mock
+	private UserCacheService userCacheService;
 
 	private UserAccountService userAccountService;
 	private final String baseUrl = "http://localhost:8080";
@@ -52,7 +54,7 @@ class UserAccountServiceTest {
 	@BeforeEach
 	void setUp() {
 		userAccountService = new UserAccountService(userRepository, majorRepository, levelRepository,
-				teacherRankRepository, departmentRepository, emailService, passwordEncoder, baseUrl);
+				teacherRankRepository, departmentRepository, emailService, passwordEncoder, userCacheService, baseUrl);
 	}
 
 	@Test

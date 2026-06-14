@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,11 +38,8 @@ public class MajorConfigController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved majors")})
 	public ApiResponse<PaginatedResponse<MajorDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
 			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
-		PaginatedResponse<Major> result = majorConfigService.findAll(page, limit);
-		List<MajorDto> items = result.items().stream().map(configMapper::toMajorDto).toList();
-		PaginatedResponse<MajorDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
-				result.currentPage(), result.size());
-		return ApiResponse.success("Liste des filières récupérée avec succès", mapped);
+		PaginatedResponse<MajorDto> result = majorConfigService.findAll(page, limit);
+		return ApiResponse.success("Liste des filières récupérée avec succès", result);
 	}
 
 	@PostMapping

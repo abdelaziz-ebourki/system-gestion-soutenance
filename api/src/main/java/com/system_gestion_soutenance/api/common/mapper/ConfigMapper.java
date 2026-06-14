@@ -29,6 +29,7 @@ public interface ConfigMapper {
 
 	@Mapping(target = "departmentId", source = "department.id")
 	@Mapping(target = "departmentName", source = "department.name")
+	@Mapping(target = "studentCount", ignore = true)
 	MajorDto toMajorDto(Major major);
 
 	TeacherRankDto toTeacherRankDto(TeacherRank teacherRank);
