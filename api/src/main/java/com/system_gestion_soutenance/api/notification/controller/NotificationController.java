@@ -38,7 +38,8 @@ public class NotificationController {
 
 	@GetMapping
 	@Operation(summary = "List all notifications")
-	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved notifications"),
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved notifications"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
 	public ApiResponse<PaginatedResponse<AppNotificationDto>> findAll(
 			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -52,7 +53,8 @@ public class NotificationController {
 
 	@PatchMapping("/{id}/read")
 	@Operation(summary = "Mark a notification as read")
-	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Notification marked as read"),
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Notification marked as read"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Notification not found")})
 	public ResponseEntity<Void> markRead(@Parameter(description = "Notification ID") @PathVariable Long id) {
 		repository.findById(id).ifPresent(n -> {
@@ -64,7 +66,8 @@ public class NotificationController {
 
 	@PatchMapping("/read-all")
 	@Operation(summary = "Mark all notifications as read")
-	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "All notifications marked as read")})
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "All notifications marked as read")})
 	public ResponseEntity<Void> markAllRead() {
 		List<AppNotification> all = repository.findAll();
 		for (AppNotification n : all) {
@@ -77,7 +80,8 @@ public class NotificationController {
 	@PostMapping("/{id}/send-email")
 	@PreAuthorize("hasAnyRole('ADMIN', 'COORDINATOR')")
 	@Operation(summary = "Manually trigger email delivery for a notification")
-	@ApiResponses({@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Email sent successfully"),
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Email sent successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Notification not found")})
 	public ResponseEntity<Void> sendEmail(@Parameter(description = "Notification ID") @PathVariable Long id) {
 		notificationService.sendNotificationEmail(id);
