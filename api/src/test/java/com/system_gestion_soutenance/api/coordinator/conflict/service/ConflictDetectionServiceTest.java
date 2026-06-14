@@ -7,10 +7,6 @@ import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.De
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.admin.room.entity.Room;
-import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
-import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
-import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
@@ -30,16 +26,13 @@ import org.junit.jupiter.api.Test;
 class ConflictDetectionServiceTest {
 
 	private final DefenseRepository defenseRepository = mock(DefenseRepository.class);
-	private final RoomRepository roomRepository = mock(RoomRepository.class);
-	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final UnavailabilityRepository unavailabilityRepository = mock(UnavailabilityRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
 
-	private final ConflictDetectionService service = new ConflictDetectionService(defenseRepository, roomRepository,
-			groupRepository, projectRepository, unavailabilityRepository, defenseSessionRepository,
-			defenseSettingsRepository);
+	private final ConflictDetectionService service = new ConflictDetectionService(defenseRepository, projectRepository,
+			unavailabilityRepository, defenseSessionRepository, defenseSettingsRepository);
 
 	private ScheduleRequest singleSlot(String projectId, String roomId, String date, String time) {
 		return new ScheduleRequest(1L, List
@@ -83,49 +76,6 @@ class ConflictDetectionServiceTest {
 		var result = service.validate(schedule, null);
 
 		assertTrue(result.stream().anyMatch(c -> "slot_occupied".equals(c.type())));
-	}
-
-	@Test
-	void checkRoomCapacity_detectsOverflow() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		Room room = mock(Room.class);
-		when(room.getCapacity()).thenReturn(2);
-		when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
-
-		Student s1 = mock(Student.class);
-		Student s2 = mock(Student.class);
-		Student s3 = mock(Student.class);
-
-		Group group = mock(Group.class);
-		when(group.getStudents()).thenReturn(List.of(s1, s2, s3));
-
-		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
-
-		var schedule = singleSlot("1", "10", "2025-06-01", "09:00");
-
-		var result = service.validate(schedule, null);
-
-		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.type())));
-	}
-
-	@Test
-	void checkRoomCapacity_withSufficientCapacity_noConflict() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		Room room = mock(Room.class);
-		when(room.getCapacity()).thenReturn(10);
-		when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
-
-		Student s1 = mock(Student.class);
-		Group group = mock(Group.class);
-		when(group.getStudents()).thenReturn(List.of(s1));
-		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
-
-		var schedule = singleSlot("1", "10", "2025-06-01", "09:00");
-		var result = service.validate(schedule, null);
-
-		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.type())));
 	}
 
 	@Test
@@ -347,26 +297,6 @@ class ConflictDetectionServiceTest {
 	}
 
 	@Test
-	void checkBreakInterval_detectsViolation() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		DefenseSession ds = mock(DefenseSession.class);
-		when(ds.getBreakDuration()).thenReturn(30);
-		when(ds.getStartDate()).thenReturn(LocalDate.of(2025, 6, 1));
-		when(ds.getEndDate()).thenReturn(LocalDate.of(2025, 6, 30));
-		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-
-		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:15", 2L, 10L));
-
-		var schedule = new ScheduleRequest(1L, slots);
-
-		var result = service.validate(schedule, "1");
-
-		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.type())));
-	}
-
-	@Test
 	void checkTeacherUnavailable_teacherAvailable_noConflict() {
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
@@ -433,51 +363,6 @@ class ConflictDetectionServiceTest {
 	}
 
 	@Test
-	void checkRoomCapacity_nullProjectIdOrRoomId_skipsCheck() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		var schedule = new ScheduleRequest(1L,
-				List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", null, 1L)));
-		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.type())));
-	}
-
-	@Test
-	void checkRoomCapacity_roomNotFound_skipsCheck() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-		when(roomRepository.findById(99L)).thenReturn(Optional.empty());
-
-		var result = service.validate(singleSlot("1", "99", "2025-06-01", "09:00"), null);
-		assertTrue(result.stream().noneMatch(c -> "room_capacity".equals(c.type())));
-	}
-
-	@Test
-	void getStudentCountForProject_fromGroupOrProjectFallback() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		Room room = mock(Room.class);
-		when(room.getCapacity()).thenReturn(0);
-		when(roomRepository.findById(10L)).thenReturn(Optional.of(room));
-
-		Group emptyGroup = mock(Group.class);
-		when(emptyGroup.getStudents()).thenReturn(List.of());
-
-		Group nullStudentsGroup = mock(Group.class);
-		when(nullStudentsGroup.getStudents()).thenReturn(null);
-
-		Student student = mock(Student.class);
-		Project project = mock(Project.class);
-		when(project.getStudents()).thenReturn(List.of(student));
-		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-
-		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(emptyGroup, nullStudentsGroup));
-
-		var result = service.validate(singleSlot("1", "10", "2025-06-01", "09:00"), null);
-
-		assertTrue(result.stream().anyMatch(c -> "room_capacity".equals(c.type())));
-	}
-
-	@Test
 	void getJuryTeacherIds_nullTeacher_skipsMember() {
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
@@ -514,18 +399,6 @@ class ConflictDetectionServiceTest {
 
 		var result = service.validate(singleSlot("1", "1", "2025-06-01", "09:00"), null);
 		assertTrue(result.stream().noneMatch(c -> "supervisor_conflict".equals(c.type())));
-	}
-
-	@Test
-	void checkBreakInterval_invalidTimeFormat_skipsCheck() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "not-a-time", 1L, 10L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:00", 2L, 10L));
-
-		var schedule = new ScheduleRequest(1L, slots);
-		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.type())));
 	}
 
 	@Test
@@ -612,30 +485,6 @@ class ConflictDetectionServiceTest {
 	}
 
 	@Test
-	void checkBreakInterval_sufficientGap_noViolation() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "10:15", 2L, 10L));
-
-		var schedule = new ScheduleRequest(1L, slots);
-		var result = service.validate(schedule, null);
-		assertTrue(result.stream().noneMatch(c -> "break_violation".equals(c.type())));
-	}
-
-	@Test
-	void checkBreakInterval_nullSessionId_usesDefaultBreak() {
-		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
-
-		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 10L),
-				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:10", 2L, 10L));
-
-		var schedule = new ScheduleRequest(1L, slots);
-		var result = service.validate(schedule, null);
-		assertTrue(result.stream().anyMatch(c -> "break_violation".equals(c.type())));
-	}
-
-	@Test
 	void checkTeacherDoubleBooked_sharedTeachers_producesSingleConflict() {
 		Teacher teacher1 = mock(Teacher.class);
 		when(teacher1.getId()).thenReturn(5L);
@@ -700,5 +549,70 @@ class ConflictDetectionServiceTest {
 		var result = service.validate(schedule, null);
 
 		assertTrue(result.stream().noneMatch(c -> "slot_occupied".equals(c.type())));
+	}
+
+	@Test
+	void checkStudentDoubleBooked_detectsConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		Student student = mock(Student.class);
+		when(student.getId()).thenReturn(100L);
+
+		Project project1 = mock(Project.class);
+		when(project1.getId()).thenReturn(1L);
+		when(project1.getStudents()).thenReturn(List.of(student));
+
+		Project project2 = mock(Project.class);
+		when(project2.getId()).thenReturn(2L);
+		when(project2.getStudents()).thenReturn(List.of(student));
+
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().anyMatch(c -> "student_double_booked".equals(c.type())));
+	}
+
+	@Test
+	void checkStudentDoubleBooked_differentTimes_noConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		Student student = mock(Student.class);
+		when(student.getId()).thenReturn(100L);
+
+		Project project1 = mock(Project.class);
+		when(project1.getId()).thenReturn(1L);
+		when(project1.getStudents()).thenReturn(List.of(student));
+
+		Project project2 = mock(Project.class);
+		when(project2.getId()).thenReturn(2L);
+		when(project2.getStudents()).thenReturn(List.of(student));
+
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "15:00", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "student_double_booked".equals(c.type())));
+	}
+
+	@Test
+	void checkStudentDoubleBooked_projectNotFound_skipsCheck() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+		when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "student_double_booked".equals(c.type())));
 	}
 }

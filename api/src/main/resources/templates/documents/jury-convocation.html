@@ -20,7 +20,7 @@
     <th:block th:each="conv, iterStat : ${convocations}">
         <div th:classappend="${not iterStat.last} ? 'page-break' : ''">
             <div class="header">
-                <h1>Universit&#233; Hassan II</h1>
+                <h1 th:text="${institutionName} ?: 'Universit&#233;'">Universit&#233;</h1>
                 <h1>Convocation de Jur&#233;</h1>
             </div>
 

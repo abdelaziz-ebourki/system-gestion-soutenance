@@ -741,8 +741,8 @@ public class DataInitializer implements CommandLineRunner {
 					? "/uploads/" + studentsList.get((int) (doc.sid - studentsList.get(0).getId())) + "/"
 							+ doc.name.toLowerCase().replace(" ", "_") + ".pdf"
 					: null;
-			studentDocumentRepo.save(new StudentDocument(null, doc.sid, doc.name, doc.type, "2026-06-01", doc.status,
-					doc.submitted, fp));
+			studentDocumentRepo.save(new StudentDocument(null, doc.sid, doc.name, doc.type,
+					java.time.LocalDate.parse("2026-06-01"), doc.status, doc.submitted, fp));
 		}
 
 		// Phase 21: Notifications

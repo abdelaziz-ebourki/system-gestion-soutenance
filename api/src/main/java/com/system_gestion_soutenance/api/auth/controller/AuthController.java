@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.auth.controller;
 
 import com.system_gestion_soutenance.api.auth.dto.ForgotPasswordRequest;
+import com.system_gestion_soutenance.api.auth.dto.LoginCookieResponse;
 import com.system_gestion_soutenance.api.auth.dto.LoginRequest;
 import com.system_gestion_soutenance.api.auth.dto.LoginResponse;
 import com.system_gestion_soutenance.api.auth.dto.ResetPasswordRequest;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,17 +35,37 @@ public class AuthController {
 	}
 
 	@PostMapping("/auth/login")
-	@Operation(summary = "Authenticate a user", description = "Validates credentials and returns a JWT token with user info.")
-	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
+	@Operation(summary = "Authenticate a user", description = "Validates credentials and returns user info. JWT is set as an HTTP-only cookie.")
+	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = LoginCookieResponse.class)))
 	@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid email or password", content = @Content(examples = @ExampleObject("{\"message\": \"Invalid credentials (email or password incorrect)\"}")))
-	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+	public ResponseEntity<LoginCookieResponse> login(@Valid @RequestBody LoginRequest request,
+			HttpServletResponse response) {
 		LoginResponse loginResponse = authService.login(request);
 
-		String cookieValue = String.format("jwt_token=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax",
-				loginResponse.token(), 7200);
-		response.addHeader("Set-Cookie", cookieValue);
+		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", loginResponse.token())
+				.path("/")
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.maxAge(7200)
+				.build();
+		response.setHeader("Set-Cookie", jwtCookie.toString());
 
-		return ResponseEntity.ok(loginResponse);
+		return ResponseEntity.ok(new LoginCookieResponse(loginResponse.user(), loginResponse.expiresAt()));
+	}
+
+	@PostMapping("/auth/logout")
+	@Operation(summary = "Logout", description = "Clears the JWT cookie.")
+	public ResponseEntity<Void> logout(HttpServletResponse response) {
+		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
+				.path("/")
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("None")
+				.maxAge(0)
+				.build();
+		response.setHeader("Set-Cookie", jwtCookie.toString());
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/auth/forgot-password")

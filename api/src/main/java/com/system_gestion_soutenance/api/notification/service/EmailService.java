@@ -23,7 +23,7 @@ public class EmailService {
 	@Autowired(required = false)
 	private JavaMailSender mailSender;
 
-	@Value("${app.mail.from:noreply@soutenance-univ.ma}")
+	@Value("${app.mail.from:noreply@example.com}")
 	private String fromAddress;
 
 	public EmailService(MessageService messageService) {

@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.system_gestion_soutenance.api.admin.config.major.dto.MajorDto;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.service.MajorConfigService;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
@@ -35,7 +36,8 @@ class MajorConfigControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(majorConfigService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(new Major()), 1, 1, 0, 10));
+		when(majorConfigService.findAll(0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(new MajorDto(1L, "GL", null, null, 0)), 1, 1, 0, 10));
 		mockMvc.perform(get("/api/admin/config/majors")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.items").isArray());
 	}
