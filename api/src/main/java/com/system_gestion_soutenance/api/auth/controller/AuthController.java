@@ -42,13 +42,8 @@ public class AuthController {
 			HttpServletResponse response) {
 		LoginResponse loginResponse = authService.login(request);
 
-		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", loginResponse.token())
-				.path("/")
-				.httpOnly(true)
-				.secure(true)
-				.sameSite("None")
-				.maxAge(7200)
-				.build();
+		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", loginResponse.token()).path("/").httpOnly(true)
+				.secure(true).sameSite("None").maxAge(7200).build();
 		response.setHeader("Set-Cookie", jwtCookie.toString());
 
 		return ResponseEntity.ok(new LoginCookieResponse(loginResponse.user(), loginResponse.expiresAt()));
@@ -57,13 +52,8 @@ public class AuthController {
 	@PostMapping("/auth/logout")
 	@Operation(summary = "Logout", description = "Clears the JWT cookie.")
 	public ResponseEntity<Void> logout(HttpServletResponse response) {
-		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "")
-				.path("/")
-				.httpOnly(true)
-				.secure(true)
-				.sameSite("None")
-				.maxAge(0)
-				.build();
+		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "").path("/").httpOnly(true).secure(true)
+				.sameSite("None").maxAge(0).build();
 		response.setHeader("Set-Cookie", jwtCookie.toString());
 		return ResponseEntity.noContent().build();
 	}
