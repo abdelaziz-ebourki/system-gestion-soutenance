@@ -57,7 +57,8 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.create(request);
 
 		assertEquals("Session PFE", result.getName());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -84,7 +85,8 @@ class CoordinatorDefenseSessionServiceTest {
 
 		verify(defenseSessionRepository).save(argThat(ds -> ds.getEvaluationCoefficients() != null
 				&& ds.getEvaluationCoefficients().containsKey("président") && ds.getJuryRoleTemplate() != null));
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -111,7 +113,8 @@ class CoordinatorDefenseSessionServiceTest {
 
 		verify(defenseSessionRepository).save(argThat(ds -> ds.getEvaluationCoefficients() != null
 				&& ds.getEvaluationCoefficients().containsKey("président")));
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -266,7 +269,8 @@ class CoordinatorDefenseSessionServiceTest {
 
 		var result = service.transition(1L, "ACTIVE");
 		assertEquals(DefenseSessionStatus.ACTIVE, result.getStatus());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -290,7 +294,8 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.transition(1L, "SCHEDULED");
 
 		assertEquals(DefenseSessionStatus.SCHEDULED, result.getStatus());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -307,7 +312,8 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.transition(1L, "COMPLETED");
 
 		assertEquals(DefenseSessionStatus.COMPLETED, result.getStatus());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -324,7 +330,8 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.transition(1L, "ARCHIVED");
 
 		assertEquals(DefenseSessionStatus.ARCHIVED, result.getStatus());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -399,7 +406,8 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.freeze(1L);
 
 		assertTrue(result.isFrozen());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -416,7 +424,8 @@ class CoordinatorDefenseSessionServiceTest {
 		var result = service.unfreeze(1L);
 
 		assertFalse(result.isFrozen());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test

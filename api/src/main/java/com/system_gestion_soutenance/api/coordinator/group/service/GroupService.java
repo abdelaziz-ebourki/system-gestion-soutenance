@@ -113,12 +113,12 @@ public class GroupService {
 		}
 
 		if (group.getStudents().isEmpty()) {
+			if (group.getProject() != null) {
+				throw new InvalidBusinessStateException("Impossible de supprimer un groupe ayant un projet assigné");
+			}
 			groupRepository.deleteById(group.getId());
-			eventPublisher.publishEvent(new StudentLeftGroupEvent(
-					securityService.getCurrentUserEmail(),
-					studentId,
-					studentName,
-					groupId));
+			eventPublisher.publishEvent(
+					new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId, studentName, groupId));
 			return;
 		}
 
@@ -127,11 +127,8 @@ public class GroupService {
 		}
 
 		groupRepository.save(group);
-		eventPublisher.publishEvent(new StudentLeftGroupEvent(
-				securityService.getCurrentUserEmail(),
-				studentId,
-				studentName,
-				groupId));
+		eventPublisher.publishEvent(
+				new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId, studentName, groupId));
 	}
 
 	@Audited(action = "DELETE", entity = "Group")

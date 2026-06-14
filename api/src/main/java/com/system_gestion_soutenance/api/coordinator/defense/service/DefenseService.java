@@ -27,7 +27,6 @@ import com.system_gestion_soutenance.api.notification.event.DefenseSessionPublis
 import org.springframework.context.ApplicationEventPublisher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,7 +54,8 @@ public class DefenseService {
 	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
 			DefenseSessionRepository defenseSessionRepository, DefenseSettingsRepository defenseSettingsRepository,
 			ProjectRepository projectRepository, GroupRepository groupRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService, TeacherRepository teacherRepository) {
+			ApplicationEventPublisher eventPublisher, SecurityService securityService,
+			TeacherRepository teacherRepository) {
 		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
@@ -182,11 +182,8 @@ public class DefenseService {
 
 		defenseRepository.delete(defense);
 
-		eventPublisher.publishEvent(new DefenseCancelledEvent(
-				securityService.getCurrentUserEmail(),
-				defense.getId(),
-				defense.getDate(),
-				defense.getTime()));
+		eventPublisher.publishEvent(new DefenseCancelledEvent(securityService.getCurrentUserEmail(), defense.getId(),
+				defense.getDate(), defense.getTime()));
 	}
 
 	@Audited(action = "UPDATE", entity = "Jury")
@@ -209,10 +206,8 @@ public class DefenseService {
 			}
 			ds.setStatus(DefenseSessionStatus.SCHEDULED);
 			defenseSessionRepository.save(ds);
-			eventPublisher.publishEvent(new DefenseSessionPublishedEvent(
-					securityService.getCurrentUserEmail(),
-					ds.getId(),
-					ds.getName()));
+			eventPublisher.publishEvent(
+					new DefenseSessionPublishedEvent(securityService.getCurrentUserEmail(), ds.getId(), ds.getName()));
 		}
 	}
 

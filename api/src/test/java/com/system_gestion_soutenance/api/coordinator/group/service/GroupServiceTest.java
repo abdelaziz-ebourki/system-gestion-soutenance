@@ -202,6 +202,7 @@ class GroupServiceTest {
 		group.setId(10L);
 		group.setStudents(new java.util.ArrayList<>(List.of(alice)));
 		group.setLeaderId(1L);
+		group.setProject(null);
 
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
 
@@ -209,7 +210,31 @@ class GroupServiceTest {
 
 		verify(groupRepository).deleteById(10L);
 		verify(groupRepository, never()).save(any());
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void removeMember_lastMemberWithProject_throws() {
+		Student alice = student(1L);
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(alice));
+
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(10L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice)));
+		group.setLeaderId(1L);
+		group.setProject(project);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.removeMember(10L, 1L));
+		assertEquals("Impossible de supprimer un groupe ayant un projet assigné", ex.getMessage());
+		verify(groupRepository, never()).deleteById(any());
+		verify(groupRepository, never()).save(any());
 	}
 
 	@Test
@@ -229,7 +254,8 @@ class GroupServiceTest {
 		service.removeMember(10L, 1L);
 
 		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(2L)));
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -249,7 +275,8 @@ class GroupServiceTest {
 		service.removeMember(10L, 2L);
 
 		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(1L)));
-		verify(eventPublisher).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	private static Student student(Long id) {

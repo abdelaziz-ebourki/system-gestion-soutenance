@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public class DefenseSessionFrozenEvent extends DomainEvent {
-    private final Long sessionId;
-    private final String sessionName;
+	private final Long sessionId;
+	private final String sessionName;
 
-    public DefenseSessionFrozenEvent(String actor, Long sessionId, String sessionName) {
-        super(actor);
-        this.sessionId = sessionId;
-        this.sessionName = sessionName;
-    }
+	public DefenseSessionFrozenEvent(String actor, Long sessionId, String sessionName) {
+		super(actor);
+		this.sessionId = sessionId;
+		this.sessionName = sessionName;
+	}
 }

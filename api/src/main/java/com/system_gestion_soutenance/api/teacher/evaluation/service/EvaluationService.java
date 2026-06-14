@@ -41,7 +41,8 @@ public class EvaluationService {
 
 	public EvaluationService(EvaluationRepository evaluationRepository,
 			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
-			GroupRepository groupRepository, ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			GroupRepository groupRepository, ApplicationEventPublisher eventPublisher,
+			SecurityService securityService) {
 		this.evaluationRepository = evaluationRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.projectRepository = projectRepository;
@@ -104,17 +105,14 @@ public class EvaluationService {
 		evaluation.setStatus(EvaluationStatus.SUBMITTED);
 		evaluation.setSubmittedAt(LocalDateTime.now());
 		Evaluation saved = evaluationRepository.save(evaluation);
-		
+
 		String projectTitle = "Inconnu";
 		if (saved.getDefense() != null && saved.getDefense().getProject() != null) {
 			projectTitle = saved.getDefense().getProject().getTitle();
 		}
-		
-		eventPublisher.publishEvent(new EvaluationSubmittedEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				projectTitle,
-				saved.getScore() != null ? saved.getScore().doubleValue() : 0.0));
+
+		eventPublisher.publishEvent(new EvaluationSubmittedEvent(securityService.getCurrentUserEmail(), saved.getId(),
+				projectTitle, saved.getScore() != null ? saved.getScore().doubleValue() : 0.0));
 		return saved;
 	}
 }

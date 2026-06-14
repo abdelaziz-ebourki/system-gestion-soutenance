@@ -97,10 +97,8 @@ public class CoordinatorDefenseSessionService {
 		}
 
 		DefenseSession saved = defenseSessionRepository.save(ds);
-		eventPublisher.publishEvent(new DefenseSessionCreatedEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				saved.getName()));
+		eventPublisher.publishEvent(
+				new DefenseSessionCreatedEvent(securityService.getCurrentUserEmail(), saved.getId(), saved.getName()));
 		return saved;
 	}
 
@@ -166,11 +164,8 @@ public class CoordinatorDefenseSessionService {
 			ds.setFrozen(true);
 		}
 		DefenseSession saved = defenseSessionRepository.save(ds);
-		eventPublisher.publishEvent(new DefenseSessionStatusChangedEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				saved.getName(),
-				newStatus.name()));
+		eventPublisher.publishEvent(new DefenseSessionStatusChangedEvent(securityService.getCurrentUserEmail(),
+				saved.getId(), saved.getName(), newStatus.name()));
 		return saved;
 	}
 
@@ -180,10 +175,8 @@ public class CoordinatorDefenseSessionService {
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 		ds.setFrozen(true);
 		DefenseSession saved = defenseSessionRepository.save(ds);
-		eventPublisher.publishEvent(new DefenseSessionFrozenEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				saved.getName()));
+		eventPublisher.publishEvent(
+				new DefenseSessionFrozenEvent(securityService.getCurrentUserEmail(), saved.getId(), saved.getName()));
 		return saved;
 	}
 
@@ -196,10 +189,8 @@ public class CoordinatorDefenseSessionService {
 		}
 		ds.setFrozen(false);
 		DefenseSession saved = defenseSessionRepository.save(ds);
-		eventPublisher.publishEvent(new DefenseSessionUnfrozenEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				saved.getName()));
+		eventPublisher.publishEvent(
+				new DefenseSessionUnfrozenEvent(securityService.getCurrentUserEmail(), saved.getId(), saved.getName()));
 		return saved;
 	}
 

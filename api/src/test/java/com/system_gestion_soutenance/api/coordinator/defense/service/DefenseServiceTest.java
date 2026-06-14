@@ -44,8 +44,8 @@ class DefenseServiceTest {
 	private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
 
 	private final DefenseService service = new DefenseService(defenseRepository, roomRepository,
-			defenseSessionRepository, defenseSettingsRepository, projectRepository, groupRepository,
-			eventPublisher, securityService, teacherRepository);
+			defenseSessionRepository, defenseSettingsRepository, projectRepository, groupRepository, eventPublisher,
+			securityService, teacherRepository);
 
 	@Test
 	void getSchedule_returnsAllDefenses() {
@@ -154,7 +154,8 @@ class DefenseServiceTest {
 		service.cancelDefense(1L);
 
 		verify(defenseRepository).delete(defense);
-		verify(eventPublisher, times(1)).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher, times(1))
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -223,7 +224,8 @@ class DefenseServiceTest {
 
 		assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
 		verify(defenseSessionRepository).save(ds);
-		verify(eventPublisher, times(1)).publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+		verify(eventPublisher, times(1))
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test

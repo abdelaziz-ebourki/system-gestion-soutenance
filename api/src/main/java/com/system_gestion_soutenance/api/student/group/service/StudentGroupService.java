@@ -36,7 +36,8 @@ public class StudentGroupService {
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
 			DefenseSettingsRepository defenseSettingsRepository, DefenseSessionRepository defenseSessionRepository,
-			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher,
+			SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSettingsRepository = defenseSettingsRepository;
@@ -158,11 +159,8 @@ public class StudentGroupService {
 
 		if (group.getStudents().isEmpty()) {
 			groupRepository.deleteById(group.getId());
-			eventPublisher.publishEvent(new StudentLeftGroupEvent(
-					securityService.getCurrentUserEmail(),
-					studentId,
-					studentName,
-					group.getId()));
+			eventPublisher.publishEvent(new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId,
+					studentName, group.getId()));
 			return;
 		}
 
@@ -171,11 +169,8 @@ public class StudentGroupService {
 		}
 
 		groupRepository.save(group);
-		eventPublisher.publishEvent(new StudentLeftGroupEvent(
-				securityService.getCurrentUserEmail(),
-				studentId,
-				studentName,
-				group.getId()));
+		eventPublisher.publishEvent(new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId,
+				studentName, group.getId()));
 	}
 
 	private boolean isCreationOpen(String startDate, String endDate) {

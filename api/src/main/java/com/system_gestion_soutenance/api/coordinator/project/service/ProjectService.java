@@ -94,12 +94,11 @@ public class ProjectService {
 		project.setStudents(students);
 
 		Project saved = projectRepository.save(project);
-		String studentName = students.isEmpty() ? "Divers" : students.get(0).getFirstName() + " " + students.get(0).getLastName();
-		eventPublisher.publishEvent(new ProjectProposedEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				saved.getTitle(),
-				studentName));
+		String studentName = students.isEmpty()
+				? "Divers"
+				: students.get(0).getFirstName() + " " + students.get(0).getLastName();
+		eventPublisher.publishEvent(new ProjectProposedEvent(securityService.getCurrentUserEmail(), saved.getId(),
+				saved.getTitle(), studentName));
 		return saved;
 	}
 
@@ -142,12 +141,8 @@ public class ProjectService {
 
 		project.setStatus(newStatus);
 		Project saved = projectRepository.save(project);
-		eventPublisher.publishEvent(new ProjectStatusChangedEvent(
-				securityService.getCurrentUserEmail(),
-				saved.getId(),
-				saved.getTitle(),
-				current.name(),
-				newStatus.name()));
+		eventPublisher.publishEvent(new ProjectStatusChangedEvent(securityService.getCurrentUserEmail(), saved.getId(),
+				saved.getTitle(), current.name(), newStatus.name()));
 		return saved;
 	}
 

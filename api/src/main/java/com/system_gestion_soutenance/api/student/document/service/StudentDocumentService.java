@@ -105,16 +105,13 @@ public class StudentDocumentService {
 			doc.setSubmittedAt(LocalDateTime.now());
 			doc.setStatus("submitted");
 			StudentDocument saved = repository.save(doc);
-			
+
 			com.system_gestion_soutenance.api.user.entity.Student student = studentRepository.findById(currentUserId)
 					.orElseThrow(() -> new EntityNotFoundException("Étudiant introuvable"));
-			
-			eventPublisher.publishEvent(new StudentDocumentSubmittedEvent(
-					securityService.getCurrentUserEmail(),
-					saved.getId(),
-					saved.getName(),
-					student.getFirstName() + " " + student.getLastName()));
-			
+
+			eventPublisher.publishEvent(new StudentDocumentSubmittedEvent(securityService.getCurrentUserEmail(),
+					saved.getId(), saved.getName(), student.getFirstName() + " " + student.getLastName()));
+
 			return saved;
 		} catch (IOException e) {
 			throw new RuntimeException("Erreur lors du telechargement du fichier");
