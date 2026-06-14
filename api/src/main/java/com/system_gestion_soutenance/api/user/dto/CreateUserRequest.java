@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(description = "Request for creating a new user")
 public record CreateUserRequest(@Schema(description = "User's last name", example = "Doe") @NotBlank String lastName,
 		@Schema(description = "User's first name", example = "John") @NotBlank String firstName,
-		@Schema(description = "User's email address", example = "john.doe@univh2c.ma") @NotBlank @Email String email,
+		@Schema(description = "User's email address", example = "john.doe@example.com") @NotBlank @Email String email,
 		@Schema(description = "User role (STUDENT, TEACHER, COORDINATOR, ADMIN)", example = "STUDENT") String role,
 		@Schema(description = "Student's national student number (CNE)", example = "12345678") String cne,
 		@Schema(description = "Student's Apogee code", example = "APG12345") String codeApogee,

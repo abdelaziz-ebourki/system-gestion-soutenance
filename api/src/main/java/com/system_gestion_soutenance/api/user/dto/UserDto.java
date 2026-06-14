@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "User data transfer object")
 public record UserDto(@Schema(description = "Unique identifier of the user", example = "1") Long id,
-		@Schema(description = "User's email address", example = "user@univh2c.ma") String email,
+		@Schema(description = "User's email address", example = "user@example.com") String email,
 		@Schema(description = "User role", example = "STUDENT") String role,
 		@Schema(description = "User's last name", example = "Doe") String lastName,
 		@Schema(description = "User's first name", example = "John") String firstName,
