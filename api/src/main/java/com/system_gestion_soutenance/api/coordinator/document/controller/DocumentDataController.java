@@ -12,6 +12,7 @@ import com.system_gestion_soutenance.api.coordinator.document.dto.SessionRequest
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -42,6 +43,9 @@ public class DocumentDataController {
 
 	@PostMapping("/evaluation-sheets")
 	@Operation(summary = "Get evaluation sheets data for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Data retrieved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<ApiResponse<List<EvaluationSheetResponse>>> evaluationSheets(
 			@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
@@ -51,6 +55,10 @@ public class DocumentDataController {
 
 	@PostMapping("/evaluation-sheets/pdf")
 	@Operation(summary = "Download evaluation sheet PDF for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Data not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> evaluationSheetsPdf(@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
 		List<EvaluationSheetResponse> sheets = documentDataService.evaluationSheets(idsRequest);
@@ -69,6 +77,9 @@ public class DocumentDataController {
 
 	@PostMapping("/attendance-lists")
 	@Operation(summary = "Get attendance lists data")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Data retrieved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<ApiResponse<AttendanceListResponse>> attendanceList(
 			@Valid @RequestBody SessionRequest request) {
 		return ResponseEntity.ok(ApiResponse.success("Donnees de la liste de presence recuperees avec succes",
@@ -77,6 +88,9 @@ public class DocumentDataController {
 
 	@PostMapping("/attendance-lists/pdf")
 	@Operation(summary = "Download attendance list PDF")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> attendanceListPdf(@Valid @RequestBody SessionRequest request) {
 		AttendanceListResponse attendance = documentDataService.attendanceList(request.defenseSessionId());
 		Map<String, Object> data = Map.of("sessionName",
@@ -88,6 +102,9 @@ public class DocumentDataController {
 
 	@PostMapping("/jury-convocations")
 	@Operation(summary = "Get jury convocation data for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Data retrieved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<ApiResponse<List<JuryConvocationResponse>>> juryConvocations(
 			@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
@@ -97,6 +114,10 @@ public class DocumentDataController {
 
 	@PostMapping("/jury-convocations/pdf")
 	@Operation(summary = "Download jury convocation PDF for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Data not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> juryConvocationsPdf(@Valid @RequestBody ProjectIdRequest request) {
 		DefenseIdsRequest idsRequest = new DefenseIdsRequest(null, request.projectId());
 		List<JuryConvocationResponse> convocations = documentDataService.juryConvocations(idsRequest);
@@ -116,6 +137,9 @@ public class DocumentDataController {
 
 	@PostMapping("/schedule/pdf")
 	@Operation(summary = "Download printable schedule PDF")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> schedulePdf(@Valid @RequestBody SessionRequest request) {
 		ScheduleDocResponse schedule = documentDataService.schedule(request.defenseSessionId());
 		Map<String, Object> data = Map.of("sessionName",
@@ -127,6 +151,9 @@ public class DocumentDataController {
 
 	@PostMapping("/schedule")
 	@Operation(summary = "Get printable schedule data")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Data retrieved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<ApiResponse<ScheduleDocResponse>> schedule(@Valid @RequestBody SessionRequest request) {
 		return ResponseEntity.ok(ApiResponse.success("Donnees du planning recuperees avec succes",
 				documentDataService.schedule(request.defenseSessionId())));
@@ -134,6 +161,9 @@ public class DocumentDataController {
 
 	@PostMapping("/proces-verbal/pdf")
 	@Operation(summary = "Download proces-verbal (PV) PDF for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> minutesPdf(@Valid @RequestBody ProjectIdRequest request) {
 		MinutesResponse minutes = documentDataService.minutes(request.projectId());
 		Map<String, Object> data = Map.of("settings", minutes.settings() != null ? minutes.settings() : "", "grade",
@@ -147,6 +177,9 @@ public class DocumentDataController {
 
 	@PostMapping("/proces-verbal")
 	@Operation(summary = "Get proces-verbal (PV) data for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Data retrieved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<ApiResponse<MinutesResponse>> minutes(@Valid @RequestBody ProjectIdRequest request) {
 		return ResponseEntity.ok(ApiResponse.success("Donnees du proces-verbal recuperees avec succes",
 				documentDataService.minutes(request.projectId())));

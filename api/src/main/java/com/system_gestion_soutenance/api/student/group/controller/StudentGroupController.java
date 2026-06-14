@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspace
 import com.system_gestion_soutenance.api.student.group.service.StudentGroupService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,8 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully joined the group"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Group is full or student already in a group"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
-	public ApiResponse<GroupDetailsResponse> joinGroup(@PathVariable Long id, @AuthenticationPrincipal User user) {
+	public ApiResponse<GroupDetailsResponse> joinGroup(@Parameter(description = "Group ID") @PathVariable Long id,
+			@AuthenticationPrincipal User user) {
 		Long studentId = user.getId();
 		return ApiResponse
 				.success(studentGroupMapper.toDetails(studentGroupService.joinGroup(id, studentId), studentId));

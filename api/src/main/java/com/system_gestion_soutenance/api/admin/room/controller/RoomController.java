@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.RoomMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,8 +37,9 @@ public class RoomController {
 	@Operation(summary = "List rooms", description = "Retrieves a paginated list of available rooms.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved rooms")})
-	public ApiResponse<PaginatedResponse<RoomResponse>> findAll(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int limit) {
+	public ApiResponse<PaginatedResponse<RoomResponse>> findAll(
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+			@Parameter(description = "Items per page (1-500)") @RequestParam(defaultValue = "10") int limit) {
 		PaginatedResponse<Room> result = roomService.findAll(page, limit);
 		List<RoomResponse> items = result.items().stream().map(roomMapper::toDto).toList();
 		PaginatedResponse<RoomResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -73,13 +75,19 @@ public class RoomController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
-	public ApiResponse<RoomResponse> update(@PathVariable Long id, @Valid @RequestBody CreateRoomRequest request) {
+	public ApiResponse<RoomResponse> update(@Parameter(description = "Room ID") @PathVariable Long id,
+			@Valid @RequestBody CreateRoomRequest request) {
 		return ApiResponse.success("Salle mise à jour avec succès", roomMapper.toDto(roomService.update(id, request)));
 	}
 
 	@PatchMapping("/{id}")
 	@Operation(summary = "Partially update room", description = "Updates only the provided fields of a room.")
-	public ApiResponse<RoomResponse> patch(@PathVariable Long id, @Valid @RequestBody UpdateRoomRequest request) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room partially updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+	public ApiResponse<RoomResponse> patch(@Parameter(description = "Room ID") @PathVariable Long id,
+			@Valid @RequestBody UpdateRoomRequest request) {
 		return ApiResponse.success("Salle mise à jour avec succès",
 				roomMapper.toDto(roomService.updatePartial(id, request)));
 	}
@@ -89,7 +97,7 @@ public class RoomController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Room deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Room not found")})
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Room ID") @PathVariable Long id) {
 		roomService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Salle supprimée avec succès", null));
 	}

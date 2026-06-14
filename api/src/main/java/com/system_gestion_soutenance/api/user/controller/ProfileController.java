@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,8 @@ public class ProfileController {
 
 	@GetMapping
 	@Operation(summary = "Get current user profile")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile retrieved successfully")})
 	public ResponseEntity<ApiResponse<UserDto>> getProfile() {
 		User user = securityService.getCurrentUser();
 		return ResponseEntity.ok(ApiResponse.success("Profil récupéré avec succès", userMapper.toDto(user)));
@@ -45,6 +48,9 @@ public class ProfileController {
 
 	@PatchMapping
 	@Operation(summary = "Update current user profile", description = "Update the authenticated user's first name and/or last name.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
 	public ResponseEntity<ApiResponse<UserDto>> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
 		User user = securityService.getCurrentUser();
 		userProfileService.updateOwnProfile(user, request);
@@ -53,6 +59,9 @@ public class ProfileController {
 
 	@PutMapping("/password")
 	@Operation(summary = "Change password", description = "Change the authenticated user's password. Requires current password.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password changed successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid password data")})
 	public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
 		User user = securityService.getCurrentUser();
 		userProfileService.changePassword(user, request);

@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,8 +39,9 @@ public class JuryController {
 	@Operation(summary = "List juries", description = "Retrieves all juries configured for the current session.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved juries")})
-	public ApiResponse<PaginatedResponse<JuryResponse>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	public ApiResponse<PaginatedResponse<JuryResponse>> findAll(
+			@Parameter(description = "Page number") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<Defense> result = defenseService.getSchedule(page, limit);
 		List<JuryResponse> items = result.items().stream().map(juryMapper::toDto).toList();
 		PaginatedResponse<JuryResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -65,7 +67,8 @@ public class JuryController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
-	public ApiResponse<JuryResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateJuryRequest updates) {
+	public ApiResponse<JuryResponse> update(@Parameter(description = "Jury ID") @PathVariable Long id,
+			@Valid @RequestBody UpdateJuryRequest updates) {
 		return ApiResponse.success("Jury mis à jour avec succès",
 				juryMapper.toDto(defenseService.updateJury(id, updates)));
 	}
@@ -76,7 +79,7 @@ public class JuryController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury not found")})
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Jury ID") @PathVariable Long id) {
 		defenseService.clearJuryMembers(id);
 		return ResponseEntity.ok(ApiResponse.success("Jury supprimé avec succès", null));
 	}

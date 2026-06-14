@@ -8,6 +8,8 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -36,9 +38,12 @@ public class NotificationController {
 
 	@GetMapping
 	@Operation(summary = "List all notifications")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved notifications"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
 	public ApiResponse<PaginatedResponse<AppNotificationDto>> findAll(
-			@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<AppNotification> result = notificationService.findAll(page, limit);
 		List<AppNotificationDto> items = result.items().stream().map(mapper::toDto).toList();
 		PaginatedResponse<AppNotificationDto> mapped = new PaginatedResponse<>(items, result.total(),
@@ -48,7 +53,10 @@ public class NotificationController {
 
 	@PatchMapping("/{id}/read")
 	@Operation(summary = "Mark a notification as read")
-	public ResponseEntity<Void> markRead(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Notification marked as read"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Notification not found")})
+	public ResponseEntity<Void> markRead(@Parameter(description = "Notification ID") @PathVariable Long id) {
 		repository.findById(id).ifPresent(n -> {
 			n.setRead(true);
 			repository.save(n);
@@ -58,6 +66,8 @@ public class NotificationController {
 
 	@PatchMapping("/read-all")
 	@Operation(summary = "Mark all notifications as read")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "All notifications marked as read")})
 	public ResponseEntity<Void> markAllRead() {
 		List<AppNotification> all = repository.findAll();
 		for (AppNotification n : all) {
@@ -70,7 +80,10 @@ public class NotificationController {
 	@PostMapping("/{id}/send-email")
 	@PreAuthorize("hasAnyRole('ADMIN', 'COORDINATOR')")
 	@Operation(summary = "Manually trigger email delivery for a notification")
-	public ResponseEntity<Void> sendEmail(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Email sent successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Notification not found")})
+	public ResponseEntity<Void> sendEmail(@Parameter(description = "Notification ID") @PathVariable Long id) {
 		notificationService.sendNotificationEmail(id);
 		return ResponseEntity.noContent().build();
 	}

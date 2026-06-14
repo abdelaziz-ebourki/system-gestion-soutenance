@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
 import com.system_gestion_soutenance.api.coordinator.grade.service.CoordinatorGradeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,9 @@ public class CoordinatorGradeController {
 
 	@GetMapping
 	@Operation(summary = "Get all grades with weighted averages")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved grades"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")})
 	public ApiResponse<List<GradeWeightedAverageResponse>> getGrades() {
 		return ApiResponse.success(gradeService.getGrades());
 	}

@@ -9,6 +9,8 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -34,8 +36,11 @@ public class TeacherRankConfigController {
 
 	@GetMapping
 	@Operation(summary = "List all teacher ranks")
-	public ApiResponse<PaginatedResponse<TeacherRankDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved teacher ranks")})
+	public ApiResponse<PaginatedResponse<TeacherRankDto>> findAll(
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Items per page (1-500)") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<TeacherRank> result = teacherRankConfigService.findAll(page, limit);
 		List<TeacherRankDto> items = result.items().stream().map(configMapper::toTeacherRankDto).toList();
 		PaginatedResponse<TeacherRankDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -45,6 +50,9 @@ public class TeacherRankConfigController {
 
 	@PostMapping
 	@Operation(summary = "Create a new teacher rank")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Teacher rank created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid teacher rank data")})
 	public ResponseEntity<ApiResponse<TeacherRankDto>> create(@Valid @RequestBody CreateTeacherRankRequest request) {
 		TeacherRank teacherRank = teacherRankConfigService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,7 +61,11 @@ public class TeacherRankConfigController {
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a teacher rank")
-	public ApiResponse<TeacherRankDto> update(@PathVariable Long id,
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Teacher rank updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Teacher rank not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+	public ApiResponse<TeacherRankDto> update(@Parameter(description = "Teacher rank ID") @PathVariable Long id,
 			@Valid @RequestBody CreateTeacherRankRequest request) {
 		return ApiResponse.success("Rank mis à jour avec succès",
 				configMapper.toTeacherRankDto(teacherRankConfigService.update(id, request)));
@@ -61,7 +73,11 @@ public class TeacherRankConfigController {
 
 	@PatchMapping("/{id}")
 	@Operation(summary = "Partially update a teacher rank")
-	public ApiResponse<TeacherRankDto> patch(@PathVariable Long id,
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Teacher rank partially updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Teacher rank not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+	public ApiResponse<TeacherRankDto> patch(@Parameter(description = "Teacher rank ID") @PathVariable Long id,
 			@Valid @RequestBody UpdateTeacherRankRequest request) {
 		return ApiResponse.success("Rank mis à jour avec succès",
 				configMapper.toTeacherRankDto(teacherRankConfigService.updatePartial(id, request)));
@@ -69,7 +85,10 @@ public class TeacherRankConfigController {
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete a teacher rank")
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Teacher rank deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Teacher rank not found")})
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Teacher rank ID") @PathVariable Long id) {
 		teacherRankConfigService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Rank supprimé avec succès", null));
 	}

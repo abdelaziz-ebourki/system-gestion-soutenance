@@ -10,6 +10,8 @@ import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.DefenseSessionMapper;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -37,8 +39,12 @@ public class CoordinatorDefenseSessionController {
 
 	@GetMapping
 	@Operation(summary = "List all defense sessions")
-	public ApiResponse<PaginatedResponse<DefenseSessionDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved defense sessions"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid parameters")})
+	public ApiResponse<PaginatedResponse<DefenseSessionDto>> findAll(
+			@Parameter(description = "Page number") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<DefenseSession> result = service.findAll(page, limit);
 		List<DefenseSessionDto> items = result.items().stream().map(mapper::toDto).toList();
 		PaginatedResponse<DefenseSessionDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -48,6 +54,9 @@ public class CoordinatorDefenseSessionController {
 
 	@PostMapping
 	@Operation(summary = "Create a new defense session")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Defense session created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<ApiResponse<DefenseSessionDto>> create(
 			@Valid @RequestBody CreateDefenseSessionRequest request) {
 		DefenseSession ds = service.create(request);
@@ -57,7 +66,11 @@ public class CoordinatorDefenseSessionController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Update a defense session")
-	public ApiResponse<DefenseSessionDto> update(@PathVariable Long id,
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Defense session updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
+	public ApiResponse<DefenseSessionDto> update(@Parameter(description = "Defense session ID") @PathVariable Long id,
 			@Valid @RequestBody CreateDefenseSessionRequest request) {
 		return ApiResponse.success(mapper.toDto(service.update(id, request)));
 	}
@@ -65,7 +78,11 @@ public class CoordinatorDefenseSessionController {
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Delete a defense session")
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Defense session deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found")})
+	public ResponseEntity<ApiResponse<Void>> delete(
+			@Parameter(description = "Defense session ID") @PathVariable Long id) {
 		service.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Session supprimée avec succès.", null));
 	}
@@ -73,7 +90,12 @@ public class CoordinatorDefenseSessionController {
 	@PostMapping("/{id}/transition")
 	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Transition a defense session to a new status")
-	public ApiResponse<DefenseSessionDto> transition(@PathVariable Long id,
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Status transition completed successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status transition")})
+	public ApiResponse<DefenseSessionDto> transition(
+			@Parameter(description = "Defense session ID") @PathVariable Long id,
 			@Valid @RequestBody StatusTransitionRequest request) {
 		return ApiResponse.success(mapper.toDto(service.transition(id, request.toStatus())));
 	}
@@ -81,28 +103,45 @@ public class CoordinatorDefenseSessionController {
 	@PatchMapping("/{id}/freeze")
 	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Freeze a defense session", description = "Blocks all grade submissions for this session.")
-	public ApiResponse<DefenseSessionDto> freeze(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Defense session frozen successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found")})
+	public ApiResponse<DefenseSessionDto> freeze(@Parameter(description = "Defense session ID") @PathVariable Long id) {
 		return ApiResponse.success(mapper.toDto(service.freeze(id)));
 	}
 
 	@PatchMapping("/{id}/unfreeze")
 	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Unfreeze a defense session", description = "Re-enables grade submissions for this session.")
-	public ApiResponse<DefenseSessionDto> unfreeze(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Defense session unfrozen successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found")})
+	public ApiResponse<DefenseSessionDto> unfreeze(
+			@Parameter(description = "Defense session ID") @PathVariable Long id) {
 		return ApiResponse.success(mapper.toDto(service.unfreeze(id)));
 	}
 
 	@PatchMapping("/{id}/approve")
 	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Approve a defense session", description = "Admin approves a defense session, enabling schedule publishing.")
-	public ApiResponse<DefenseSessionDto> approve(@PathVariable Long id, @AuthenticationPrincipal User user) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Defense session approved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Unauthorized")})
+	public ApiResponse<DefenseSessionDto> approve(@Parameter(description = "Defense session ID") @PathVariable Long id,
+			@AuthenticationPrincipal User user) {
 		return ApiResponse.success(mapper.toDto(service.approve(id, user.getId())));
 	}
 
 	@PatchMapping("/{id}/revoke-approval")
 	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Revoke approval of a defense session", description = "Admin revokes approval, preventing schedule publishing.")
-	public ApiResponse<DefenseSessionDto> revokeApproval(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Approval revoked successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Unauthorized")})
+	public ApiResponse<DefenseSessionDto> revokeApproval(
+			@Parameter(description = "Defense session ID") @PathVariable Long id) {
 		return ApiResponse.success(mapper.toDto(service.revokeApproval(id)));
 	}
 }

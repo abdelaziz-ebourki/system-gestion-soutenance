@@ -1,6 +1,9 @@
 package com.system_gestion_soutenance.api.admin.config.teacherrank.dto;
 
-@SuppressWarnings("PMD")
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public record UpdateTeacherRankRequest(String name) {
+@Schema(description = "Request to update an existing teacher rank")
+@SuppressWarnings("PMD")
+public record UpdateTeacherRankRequest(
+		@Schema(description = "Name of the teacher rank", example = "Professor") String name) {
 }

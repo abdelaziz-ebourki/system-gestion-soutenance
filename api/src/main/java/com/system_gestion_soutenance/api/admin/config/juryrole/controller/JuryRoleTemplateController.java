@@ -8,6 +8,8 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -33,9 +35,11 @@ public class JuryRoleTemplateController {
 
 	@GetMapping
 	@Operation(summary = "List all jury role templates")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved jury role templates")})
 	public ApiResponse<PaginatedResponse<JuryRoleTemplateDto>> findAll(
-			@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Items per page (1-500)") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<JuryRoleTemplate> result = juryRoleTemplateService.findAll(page, limit);
 		List<JuryRoleTemplateDto> items = result.items().stream().map(configMapper::toJuryRoleTemplateDto).toList();
 		PaginatedResponse<JuryRoleTemplateDto> mapped = new PaginatedResponse<>(items, result.total(),
@@ -45,6 +49,9 @@ public class JuryRoleTemplateController {
 
 	@PostMapping
 	@Operation(summary = "Create a new jury role template")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Jury role template created successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid jury role template data")})
 	public ResponseEntity<ApiResponse<JuryRoleTemplateDto>> create(
 			@Valid @RequestBody CreateJuryRoleTemplateRequest request) {
 		JuryRoleTemplate template = juryRoleTemplateService.create(request);
@@ -54,7 +61,12 @@ public class JuryRoleTemplateController {
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update a jury role template")
-	public ApiResponse<JuryRoleTemplateDto> update(@PathVariable Long id,
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury role template updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury role template not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+	public ApiResponse<JuryRoleTemplateDto> update(
+			@Parameter(description = "Jury role template ID") @PathVariable Long id,
 			@Valid @RequestBody CreateJuryRoleTemplateRequest request) {
 		return ApiResponse.success("Template de rôle mis à jour avec succès",
 				configMapper.toJuryRoleTemplateDto(juryRoleTemplateService.update(id, request)));
@@ -62,7 +74,11 @@ public class JuryRoleTemplateController {
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete a jury role template")
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury role template deleted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Jury role template not found")})
+	public ResponseEntity<ApiResponse<Void>> delete(
+			@Parameter(description = "Jury role template ID") @PathVariable Long id) {
 		juryRoleTemplateService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Template de rôle supprimé avec succès", null));
 	}

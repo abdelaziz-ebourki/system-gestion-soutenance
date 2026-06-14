@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,8 +38,9 @@ public class LevelConfigController {
 	@Operation(summary = "List levels", description = "Retrieves all configured academic levels.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved levels")})
-	public ApiResponse<PaginatedResponse<LevelDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	public ApiResponse<PaginatedResponse<LevelDto>> findAll(
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Items per page (1-500)") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<Level> result = levelConfigService.findAll(page, limit);
 		List<LevelDto> items = result.items().stream().map(configMapper::toLevelDto).toList();
 		PaginatedResponse<LevelDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -63,14 +65,20 @@ public class LevelConfigController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Level updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Level not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
-	public ApiResponse<LevelDto> update(@PathVariable Long id, @Valid @RequestBody CreateLevelRequest request) {
+	public ApiResponse<LevelDto> update(@Parameter(description = "Level ID") @PathVariable Long id,
+			@Valid @RequestBody CreateLevelRequest request) {
 		return ApiResponse.success("Niveau mis à jour avec succès",
 				configMapper.toLevelDto(levelConfigService.update(id, request)));
 	}
 
 	@PatchMapping("/{id}")
 	@Operation(summary = "Partially update level", description = "Updates only the provided fields of a level.")
-	public ApiResponse<LevelDto> patch(@PathVariable Long id, @Valid @RequestBody UpdateLevelRequest request) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Level partially updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Level not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+	public ApiResponse<LevelDto> patch(@Parameter(description = "Level ID") @PathVariable Long id,
+			@Valid @RequestBody UpdateLevelRequest request) {
 		return ApiResponse.success("Niveau mis à jour avec succès",
 				configMapper.toLevelDto(levelConfigService.updatePartial(id, request)));
 	}
@@ -80,7 +88,7 @@ public class LevelConfigController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Level deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Level not found")})
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Level ID") @PathVariable Long id) {
 		levelConfigService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Niveau supprimé avec succès", null));
 	}
