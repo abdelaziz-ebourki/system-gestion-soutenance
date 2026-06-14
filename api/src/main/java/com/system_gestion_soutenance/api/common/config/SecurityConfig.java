@@ -17,6 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -54,7 +57,9 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+						.ignoringRequestMatchers("/api/auth/**", "/h2-console/**"))
 				.headers(headers -> headers.frameOptions(o -> o.disable()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
@@ -76,7 +81,14 @@ public class SecurityConfig {
 						.requestMatchers("/api/teacher/**").hasRole("TEACHER").requestMatchers("/api/student/**")
 						.hasRole("STUDENT").requestMatchers("/api/notifications/**").authenticated().anyRequest()
 						.authenticated())
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilterAfter((request, response, filterChain) -> {
+					CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+					if (csrfToken != null) {
+						csrfToken.getToken();
+					}
+					filterChain.doFilter(request, response);
+				}, BasicAuthenticationFilter.class);
 
 		return http.build();
 	}

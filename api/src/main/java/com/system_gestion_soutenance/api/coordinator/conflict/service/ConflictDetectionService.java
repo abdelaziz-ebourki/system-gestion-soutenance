@@ -35,8 +35,7 @@ public class ConflictDetectionService {
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final DefenseSettingsRepository defenseSettingsRepository;
 
-	public ConflictDetectionService(DefenseRepository defenseRepository,
-			ProjectRepository projectRepository,
+	public ConflictDetectionService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
 			UnavailabilityRepository unavailabilityRepository, DefenseSessionRepository defenseSessionRepository,
 			DefenseSettingsRepository defenseSettingsRepository) {
 		this.defenseRepository = defenseRepository;
@@ -104,6 +103,7 @@ public class ConflictDetectionService {
 		conflicts.addAll(checkTeacherDoubleBooked(schedule, juryTeacherIdsByProject));
 		conflicts.addAll(checkSupervisorConflict(schedule));
 		conflicts.addAll(checkTeacherUnavailable(schedule, juryTeacherIdsByProject));
+		conflicts.addAll(checkStudentDoubleBooked(schedule));
 
 		return conflicts;
 	}
@@ -296,6 +296,50 @@ public class ConflictDetectionService {
 								"Choisissez un autre creneau ou modifiez les indisponibilites"));
 					}
 				}
+			}
+		}
+		return conflicts;
+	}
+
+	private List<ConflictDetailResponse> checkStudentDoubleBooked(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
+		Map<String, List<Map.Entry<String, ConflictSlot>>> dateStudentSlots = new HashMap<>();
+		Set<String> reportedSlotIds = new HashSet<>();
+
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
+			String slotId = entry.getKey();
+			ConflictSlot data = entry.getValue();
+			String projectId = data.projectId();
+			String date = data.date();
+			String time = data.time();
+			String endTime = data.endTime();
+			if (projectId == null || date == null || time == null || endTime == null)
+				continue;
+
+			Project project = projectRepository.findById(Long.valueOf(projectId)).orElse(null);
+			if (project == null || project.getStudents() == null)
+				continue;
+
+			for (var student : project.getStudents()) {
+				String studentId = String.valueOf(student.getId());
+				String key = date + "|" + studentId;
+				List<Map.Entry<String, ConflictSlot>> existing = dateStudentSlots.getOrDefault(key, new ArrayList<>());
+				for (Map.Entry<String, ConflictSlot> prev : existing) {
+					ConflictSlot prevData = prev.getValue();
+					if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+						if (!reportedSlotIds.contains(slotId)) {
+							conflicts
+									.add(createConflict("student_double_booked", "error",
+											"Un etudiant est deja assigne a un autre projet le " + date + " de " + time
+													+ " a " + endTime,
+											slotId, "Verifiez l'assignation des etudiants aux projets"));
+							reportedSlotIds.add(slotId);
+						}
+						break;
+					}
+				}
+				existing.add(entry);
+				dateStudentSlots.put(key, existing);
 			}
 		}
 		return conflicts;

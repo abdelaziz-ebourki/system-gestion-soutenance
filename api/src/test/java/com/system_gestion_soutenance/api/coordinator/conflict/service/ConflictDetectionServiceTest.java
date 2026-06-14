@@ -14,6 +14,7 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
+import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest;
@@ -30,9 +31,8 @@ class ConflictDetectionServiceTest {
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
 
-	private final ConflictDetectionService service = new ConflictDetectionService(defenseRepository,
-			projectRepository, unavailabilityRepository, defenseSessionRepository,
-			defenseSettingsRepository);
+	private final ConflictDetectionService service = new ConflictDetectionService(defenseRepository, projectRepository,
+			unavailabilityRepository, defenseSessionRepository, defenseSettingsRepository);
 
 	private ScheduleRequest singleSlot(String projectId, String roomId, String date, String time) {
 		return new ScheduleRequest(1L, List
@@ -549,5 +549,70 @@ class ConflictDetectionServiceTest {
 		var result = service.validate(schedule, null);
 
 		assertTrue(result.stream().noneMatch(c -> "slot_occupied".equals(c.type())));
+	}
+
+	@Test
+	void checkStudentDoubleBooked_detectsConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		Student student = mock(Student.class);
+		when(student.getId()).thenReturn(100L);
+
+		Project project1 = mock(Project.class);
+		when(project1.getId()).thenReturn(1L);
+		when(project1.getStudents()).thenReturn(List.of(student));
+
+		Project project2 = mock(Project.class);
+		when(project2.getId()).thenReturn(2L);
+		when(project2.getStudents()).thenReturn(List.of(student));
+
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().anyMatch(c -> "student_double_booked".equals(c.type())));
+	}
+
+	@Test
+	void checkStudentDoubleBooked_differentTimes_noConflict() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		Student student = mock(Student.class);
+		when(student.getId()).thenReturn(100L);
+
+		Project project1 = mock(Project.class);
+		when(project1.getId()).thenReturn(1L);
+		when(project1.getStudents()).thenReturn(List.of(student));
+
+		Project project2 = mock(Project.class);
+		when(project2.getId()).thenReturn(2L);
+		when(project2.getStudents()).thenReturn(List.of(student));
+
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+
+		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
+				new SlotAssignmentRequest("Slot 2", "2025-06-01", "15:00", 2L, 1L));
+
+		var schedule = new ScheduleRequest(1L, slots);
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "student_double_booked".equals(c.type())));
+	}
+
+	@Test
+	void checkStudentDoubleBooked_projectNotFound_skipsCheck() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+		when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
+		var result = service.validate(schedule, null);
+
+		assertTrue(result.stream().noneMatch(c -> "student_double_booked".equals(c.type())));
 	}
 }

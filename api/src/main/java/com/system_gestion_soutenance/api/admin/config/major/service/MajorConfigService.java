@@ -42,20 +42,16 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 
 	public PaginatedResponse<MajorDto> findAll(int page, int limit) {
 		Page<Major> majorPage = majorRepository.findAll(PageRequest.of(page, limit));
-		List<MajorDto> dtos = majorPage.getContent().stream()
-				.map(configMapper::toMajorDto)
+		List<MajorDto> dtos = majorPage.getContent().stream().map(configMapper::toMajorDto)
 				.collect(Collectors.toList());
 
 		Map<Long, Long> counts = dtos.stream()
 				.collect(Collectors.toMap(MajorDto::id, d -> studentRepository.countByMajorId(d.id())));
 
-		List<MajorDto> enriched = dtos.stream()
-				.map(d -> new MajorDto(d.id(), d.name(), d.departmentId(), d.departmentName(),
-						counts.getOrDefault(d.id(), 0L)))
-				.collect(Collectors.toList());
+		List<MajorDto> enriched = dtos.stream().map(d -> new MajorDto(d.id(), d.name(), d.departmentId(),
+				d.departmentName(), counts.getOrDefault(d.id(), 0L))).collect(Collectors.toList());
 
-		return new PaginatedResponse<>(enriched, majorPage.getTotalElements(), majorPage.getTotalPages(),
-				page, limit);
+		return new PaginatedResponse<>(enriched, majorPage.getTotalElements(), majorPage.getTotalPages(), page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "Major")

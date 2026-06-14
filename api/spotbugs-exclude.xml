@@ -53,4 +53,11 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
         <Class name="com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService"/>
     </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+            <Class name="com.system_gestion_soutenance.api.user.service.UserAccountService"/>
+        </Or>
+    </Match>
 </FindBugsFilter>

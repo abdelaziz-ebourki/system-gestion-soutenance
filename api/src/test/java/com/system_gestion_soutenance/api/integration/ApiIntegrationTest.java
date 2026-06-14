@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
+import java.util.List;
 import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -18,7 +18,6 @@ class ApiIntegrationTest {
 
 	@Test
 	void loginAndAccessProtectedResource_success() {
-		// 1. Login
 		Map<String, String> loginRequest = Map.of("email", "admin@univh2c.ma", "password", "1234");
 
 		ResponseEntity<Map<String, Object>> loginResponse = restTemplate.exchange("/api/auth/login", HttpMethod.POST,
@@ -26,16 +25,22 @@ class ApiIntegrationTest {
 				});
 
 		assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
-		String token = (String) loginResponse.getBody().get("token");
-		assertNotNull(token);
+		assertNotNull(loginResponse.getBody().get("user"));
 
-		// 2. Access protected resource with token
+		List<String> cookies = loginResponse.getHeaders().getOrDefault(HttpHeaders.SET_COOKIE, List.of());
+		String jwt = null;
+		for (String cookie : cookies) {
+			if (cookie.contains("jwt_token=")) {
+				jwt = cookie.split("jwt_token=")[1].split(";")[0];
+				break;
+			}
+		}
+		assertNotNull(jwt, "JWT cookie not found in Set-Cookie headers: " + cookies);
+
 		HttpHeaders headers = new HttpHeaders();
-		headers.setBearerAuth(token);
-		HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-		ResponseEntity<String> protectedResponse = restTemplate.exchange("/api/admin/stats", HttpMethod.GET, entity,
-				String.class);
+		headers.add("Cookie", "jwt_token=" + jwt);
+		ResponseEntity<String> protectedResponse = restTemplate.exchange("/api/admin/stats", HttpMethod.GET,
+				new HttpEntity<>(headers), String.class);
 
 		assertEquals(HttpStatus.OK, protectedResponse.getStatusCode());
 	}

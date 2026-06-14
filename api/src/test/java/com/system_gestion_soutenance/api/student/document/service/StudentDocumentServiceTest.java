@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.student.document.entity.StudentDocument
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,5 +89,17 @@ class StudentDocumentServiceTest {
 		when(repository.findById(1L)).thenReturn(Optional.of(doc));
 
 		assertThrows(UnauthorizedAccessException.class, () -> service.upload(1L, 99L, mock(MultipartFile.class)));
+	}
+
+	@Test
+	void upload_pastDeadline_throws() {
+		StudentDocument doc = new StudentDocument();
+		doc.setId(1L);
+		doc.setStudentId(1L);
+		doc.setDeadline(LocalDate.of(2020, 1, 1));
+
+		when(repository.findById(1L)).thenReturn(Optional.of(doc));
+
+		assertThrows(IllegalArgumentException.class, () -> service.upload(1L, 1L, mock(MultipartFile.class)));
 	}
 }

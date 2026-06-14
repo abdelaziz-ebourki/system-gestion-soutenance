@@ -73,8 +73,8 @@ class StudentDocumentControllerTest {
 		doc.setStatus("submitted");
 		when(studentDocumentService.upload(anyLong(), anyLong(), any())).thenReturn(doc);
 
-		StudentDocumentDto dto = new StudentDocumentDto(1L, 1L, "test.pdf", "pdf", "2026-06-01", "submitted", null,
-				"/path/to/file");
+		StudentDocumentDto dto = new StudentDocumentDto(1L, 1L, "test.pdf", "pdf",
+				java.time.LocalDate.parse("2026-06-01"), "submitted", null, "/path/to/file");
 		when(studentDocumentMapper.toDto(doc)).thenReturn(dto);
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "data".getBytes());

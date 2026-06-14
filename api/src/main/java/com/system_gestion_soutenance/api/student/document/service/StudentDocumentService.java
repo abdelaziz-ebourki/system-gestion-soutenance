@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
@@ -64,6 +65,10 @@ public class StudentDocumentService {
 
 		if (!doc.getStudentId().equals(currentUserId)) {
 			throw new UnauthorizedAccessException("Vous ne pouvez modifier que vos propres documents");
+		}
+
+		if (doc.getDeadline() != null && LocalDate.now().isAfter(doc.getDeadline())) {
+			throw new IllegalArgumentException("Le delai de soumission est expire. Date limite: " + doc.getDeadline());
 		}
 
 		long maxBytes = maxFileSizeMb * 1024L * 1024L;
