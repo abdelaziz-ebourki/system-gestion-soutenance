@@ -12,6 +12,7 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRe
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,8 +44,9 @@ public class ProjectController {
 	@Operation(summary = "List projects", description = "Retrieves all projects assigned for the current session.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved projects")})
-	public ApiResponse<PaginatedResponse<ProjectResponse>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	public ApiResponse<PaginatedResponse<ProjectResponse>> findAll(
+			@Parameter(description = "Page number") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<Project> result = projectService.findAll(page, limit);
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(result.items());
 		List<ProjectResponse> items = result.items().stream().map(p -> projectMapper.toDto(p, projectGroupIds))
@@ -83,7 +85,7 @@ public class ProjectController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
-	public ApiResponse<ProjectResponse> update(@PathVariable Long id,
+	public ApiResponse<ProjectResponse> update(@Parameter(description = "Project ID") @PathVariable Long id,
 			@Valid @RequestBody UpdateProjectRequest updates) {
 		Project project = projectService.update(id, updates);
 		return ApiResponse.success("Projet mis à jour avec succès",
@@ -97,7 +99,7 @@ public class ProjectController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Status updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid status transition")})
-	public ApiResponse<ProjectResponse> updateStatus(@PathVariable Long id,
+	public ApiResponse<ProjectResponse> updateStatus(@Parameter(description = "Project ID") @PathVariable Long id,
 			@Valid @RequestBody ProjectStatusUpdateRequest request) {
 		Project project = projectService.updateStatus(id, request.status());
 		return ApiResponse.success("Statut du projet mis à jour", projectMapper.toDto(project, Collections.emptyMap()));
@@ -109,7 +111,7 @@ public class ProjectController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Project ID") @PathVariable Long id) {
 		projectService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Projet supprimé avec succès", null));
 	}

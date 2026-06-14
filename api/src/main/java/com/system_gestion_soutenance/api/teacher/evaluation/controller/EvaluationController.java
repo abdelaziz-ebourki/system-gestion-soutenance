@@ -12,6 +12,7 @@ import com.system_gestion_soutenance.api.user.entity.User;
 import java.util.List;
 import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,8 +40,8 @@ public class EvaluationController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved evaluations")})
 	public ApiResponse<PaginatedResponse<EvaluationResponse>> findByTeacher(@AuthenticationPrincipal User user,
-			@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		Long teacherId = user.getId();
 		PaginatedResponse<Evaluation> result = evaluationService.findByTeacher(teacherId, page, limit);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(result.items());
@@ -57,7 +58,7 @@ public class EvaluationController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Evaluation submitted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid evaluation data"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Evaluation not found")})
-	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id,
+	public ApiResponse<EvaluationResponse> submit(@Parameter(description = "Evaluation ID") @PathVariable Long id,
 			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
 		Evaluation evaluation = evaluationService.submit(id, user.getId(), request);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));

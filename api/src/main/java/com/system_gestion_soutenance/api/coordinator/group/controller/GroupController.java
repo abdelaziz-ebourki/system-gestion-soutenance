@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,8 +38,9 @@ public class GroupController {
 	@Operation(summary = "List groups", description = "Retrieves all student groups for the current session.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved groups")})
-	public ApiResponse<PaginatedResponse<GroupResponse>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	public ApiResponse<PaginatedResponse<GroupResponse>> findAll(
+			@Parameter(description = "Page number") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<Group> result = groupService.findAll(page, limit);
 		List<GroupResponse> items = result.items().stream().map(groupMapper::toDto).toList();
 		PaginatedResponse<GroupResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -63,7 +65,7 @@ public class GroupController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Group ID") @PathVariable Long id) {
 		groupService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Groupe supprimé avec succès", null));
 	}
@@ -74,7 +76,8 @@ public class GroupController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Member removed successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group or student not found")})
-	public ResponseEntity<ApiResponse<Void>> removeMember(@PathVariable Long id, @PathVariable Long studentId) {
+	public ResponseEntity<ApiResponse<Void>> removeMember(@Parameter(description = "Group ID") @PathVariable Long id,
+			@Parameter(description = "Student ID") @PathVariable Long studentId) {
 		groupService.removeMember(id, studentId);
 		return ResponseEntity.ok(ApiResponse.success("Membre supprimé avec succès", null));
 	}

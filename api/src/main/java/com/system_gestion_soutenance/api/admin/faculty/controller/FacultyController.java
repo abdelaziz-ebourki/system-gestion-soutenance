@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,8 +38,9 @@ public class FacultyController {
 	@Operation(summary = "List faculties", description = "Retrieves all academic faculties.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculties")})
-	public ApiResponse<PaginatedResponse<FacultyDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+	public ApiResponse<PaginatedResponse<FacultyDto>> findAll(
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Items per page (1-500)") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<Faculty> result = facultyService.findAll(page, limit);
 		List<FacultyDto> items = result.items().stream().map(configMapper::toFacultyDto).toList();
 		PaginatedResponse<FacultyDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
@@ -51,7 +53,7 @@ public class FacultyController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculty"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found")})
-	public ApiResponse<FacultyDto> findById(@PathVariable Long id) {
+	public ApiResponse<FacultyDto> findById(@Parameter(description = "Faculty ID") @PathVariable Long id) {
 		return ApiResponse.success("Faculté récupérée avec succès",
 				configMapper.toFacultyDto(facultyService.findById(id)));
 	}
@@ -73,14 +75,20 @@ public class FacultyController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty updated successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
-	public ApiResponse<FacultyDto> update(@PathVariable Long id, @Valid @RequestBody CreateFacultyRequest request) {
+	public ApiResponse<FacultyDto> update(@Parameter(description = "Faculty ID") @PathVariable Long id,
+			@Valid @RequestBody CreateFacultyRequest request) {
 		return ApiResponse.success("Faculté mise à jour avec succès",
 				configMapper.toFacultyDto(facultyService.update(id, request)));
 	}
 
 	@PatchMapping("/{id}")
 	@Operation(summary = "Partially update faculty", description = "Updates only the provided fields of a faculty.")
-	public ApiResponse<FacultyDto> patch(@PathVariable Long id, @Valid @RequestBody UpdateFacultyRequest request) {
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty partially updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid update data")})
+	public ApiResponse<FacultyDto> patch(@Parameter(description = "Faculty ID") @PathVariable Long id,
+			@Valid @RequestBody UpdateFacultyRequest request) {
 		return ApiResponse.success("Faculté mise à jour avec succès",
 				configMapper.toFacultyDto(facultyService.updatePartial(id, request)));
 	}
@@ -90,7 +98,7 @@ public class FacultyController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Faculty deleted successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Faculty not found")})
-	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> delete(@Parameter(description = "Faculty ID") @PathVariable Long id) {
 		facultyService.delete(id);
 		return ResponseEntity.ok(ApiResponse.success("Faculté supprimée avec succès", null));
 	}

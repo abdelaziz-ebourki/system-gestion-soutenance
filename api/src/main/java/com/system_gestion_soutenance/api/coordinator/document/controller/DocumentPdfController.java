@@ -11,6 +11,7 @@ import com.system_gestion_soutenance.api.coordinator.document.dto.SessionRequest
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
 import com.system_gestion_soutenance.api.common.service.PdfGenerationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +41,9 @@ public class DocumentPdfController {
 
 	@PostMapping("/evaluation-sheets")
 	@Operation(summary = "Generate evaluation sheets PDF for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF generated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> evaluationSheets(@Valid @RequestBody ProjectIdRequest request) {
 		List<EvaluationSheetResponse> data = documentDataService
 				.evaluationSheets(new DefenseIdsRequest(null, request.projectId()));
@@ -52,6 +56,9 @@ public class DocumentPdfController {
 
 	@PostMapping("/attendance-lists")
 	@Operation(summary = "Generate attendance list PDF")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF generated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> attendanceList(@Valid @RequestBody SessionRequest request) {
 		AttendanceListResponse data = documentDataService.attendanceList(request.defenseSessionId());
 
@@ -63,6 +70,9 @@ public class DocumentPdfController {
 
 	@PostMapping("/jury-convocations")
 	@Operation(summary = "Generate jury convocations PDF for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF generated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> juryConvocations(@Valid @RequestBody ProjectIdRequest request) {
 		List<JuryConvocationResponse> data = documentDataService
 				.juryConvocations(new DefenseIdsRequest(null, request.projectId()));
@@ -75,6 +85,9 @@ public class DocumentPdfController {
 
 	@PostMapping("/schedule")
 	@Operation(summary = "Generate printable schedule PDF")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF generated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> schedule(@Valid @RequestBody SessionRequest request) {
 		ScheduleDocResponse data = documentDataService.schedule(request.defenseSessionId());
 
@@ -86,6 +99,9 @@ public class DocumentPdfController {
 
 	@PostMapping("/proces-verbal")
 	@Operation(summary = "Generate proces-verbal (PV) PDF for a project")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "PDF generated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> minutesPdf(@Valid @RequestBody ProjectIdRequest request) {
 		MinutesResponse data = documentDataService.minutes(request.projectId());
 

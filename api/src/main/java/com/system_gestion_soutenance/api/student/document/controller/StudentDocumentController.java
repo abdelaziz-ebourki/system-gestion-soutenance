@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.student.document.entity.StudentDocument
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -41,8 +42,8 @@ public class StudentDocumentController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved documents")})
 	public ApiResponse<PaginatedResponse<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user,
-			@RequestParam(defaultValue = "0") @Min(0) int page,
-			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<StudentDocument> result = studentDocumentService.findByStudent(user.getId(), page, limit);
 		List<StudentDocumentDto> items = result.items().stream().map(mapper::toDto).toList();
 		PaginatedResponse<StudentDocumentDto> mapped = new PaginatedResponse<>(items, result.total(),
@@ -56,8 +57,10 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File uploaded successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
-	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
-			@RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
+	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(
+			@Parameter(description = "Document ID") @PathVariable Long id,
+			@Parameter(description = "File to upload") @RequestParam("file") MultipartFile file,
+			@AuthenticationPrincipal User user) {
 		StudentDocument doc = studentDocumentService.upload(id, user.getId(), file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}
@@ -67,7 +70,8 @@ public class StudentDocumentController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
-	public ResponseEntity<byte[]> download(@PathVariable Long id, @AuthenticationPrincipal User user) {
+	public ResponseEntity<byte[]> download(@Parameter(description = "Document ID") @PathVariable Long id,
+			@AuthenticationPrincipal User user) {
 		byte[] content;
 		try {
 			content = studentDocumentService.download(id, user.getId());
