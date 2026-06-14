@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.defensesession.dto.CreateDefenseSessionRequest;
 import com.system_gestion_soutenance.api.coordinator.defensesession.service.CoordinatorDefenseSessionService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
@@ -62,13 +63,14 @@ class CoordinatorDefenseSessionControllerTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
 		ds.setName("Session 1");
-		when(service.findAll()).thenReturn(List.of(ds));
+		when(service.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(ds), 1, 1, 0, 10));
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
-						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null));
+						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, null, null));
 
 		mockMvc.perform(get("/api/coordinator/defense-sessions")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.size()").value(1)).andExpect(jsonPath("$.data[0].name").value("Session 1"));
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].name").value("Session 1"));
 	}
 
 	@Test
@@ -81,7 +83,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(service.create(any())).thenReturn(ds);
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
-						"Session PFE", "PFE", "CREATED", 3, 30, 15, null, null, null, null, null));
+						"Session PFE", "PFE", "CREATED", 3, 30, 15, null, null, null, null, null, false, null, null));
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -96,9 +98,9 @@ class CoordinatorDefenseSessionControllerTest {
 		ds.setId(1L);
 		ds.setName("Updated Session");
 		when(service.update(eq(1L), any())).thenReturn(ds);
-		when(defenseSessionMapper.toDto(ds))
-				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
-						"Updated Session", "MEMOIRE", "ACTIVE", 4, 20, 10, null, null, null, null, null));
+		when(defenseSessionMapper.toDto(ds)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L, "Updated Session",
+						"MEMOIRE", "ACTIVE", 4, 20, 10, null, null, null, null, null, false, null, null));
 
 		mockMvc.perform(put("/api/coordinator/defense-sessions/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isOk())
@@ -120,10 +122,41 @@ class CoordinatorDefenseSessionControllerTest {
 		when(service.transition(1L, "ACTIVE")).thenReturn(ds);
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
-						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null));
+						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, null, null));
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions/1/transition").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("toStatus", "ACTIVE")))).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.status").value("ACTIVE"));
+	}
+
+	@Test
+	void approve_returnsSessionWithApproval() throws Exception {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setApprovedBy(1L);
+		ds.setApprovedAt(java.time.LocalDateTime.of(2026, 6, 13, 9, 0));
+		when(service.approve(eq(1L), any())).thenReturn(ds);
+		when(defenseSessionMapper.toDto(ds))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
+						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, 1L,
+						java.time.LocalDateTime.of(2026, 6, 13, 9, 0)));
+
+		mockMvc.perform(patch("/api/coordinator/defense-sessions/1/approve")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.approvedBy").value(1));
+	}
+
+	@Test
+	void revokeApproval_returnsSessionWithoutApproval() throws Exception {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setApprovedBy(null);
+		ds.setApprovedAt(null);
+		when(service.revokeApproval(1L)).thenReturn(ds);
+		when(defenseSessionMapper.toDto(ds))
+				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
+						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, null, null));
+
+		mockMvc.perform(patch("/api/coordinator/defense-sessions/1/revoke-approval")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.approvedBy").isEmpty());
 	}
 }

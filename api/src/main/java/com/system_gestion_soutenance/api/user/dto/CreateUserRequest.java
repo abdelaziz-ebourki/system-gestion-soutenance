@@ -10,8 +10,9 @@ public record CreateUserRequest(@Schema(description = "User's last name", exampl
 		@Schema(description = "User's email address", example = "john.doe@univh2c.ma") @NotBlank @Email String email,
 		@Schema(description = "User role (STUDENT, TEACHER, COORDINATOR, ADMIN)", example = "STUDENT") String role,
 		@Schema(description = "Student's national student number (CNE)", example = "12345678") String cne,
+		@Schema(description = "Student's Apogee code", example = "APG12345") String codeApogee,
 		@Schema(description = "Major ID (for students)", example = "1") Long majorId,
 		@Schema(description = "Level ID (for students)", example = "1") Long levelId,
-		@Schema(description = "Grade ID (for teachers)", example = "1") Long gradeId,
+		@Schema(description = "Teacher rank ID (for teachers)", example = "1") Long teacherRankId,
 		@Schema(description = "Department ID (for teachers)", example = "1") Long departmentId) {
 }

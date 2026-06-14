@@ -15,6 +15,8 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
@@ -24,9 +26,11 @@ class GroupServiceTest {
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final StudentRepository studentRepository = mock(StudentRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
+	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+	private final SecurityService securityService = mock(SecurityService.class);
 
 	private final GroupService service = new GroupService(groupRepository, projectRepository, studentRepository,
-			defenseSessionRepository);
+			defenseSessionRepository, eventPublisher, securityService);
 
 	@Test
 	void findAll_returnsAllGroups() {
@@ -164,5 +168,120 @@ class GroupServiceTest {
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> service.create(request));
 		assertEquals("Le groupe a atteint sa taille maximale", ex.getMessage());
+	}
+
+	@Test
+	void removeMember_groupNotFound_throws() {
+		when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.removeMember(99L, 1L));
+	}
+
+	@Test
+	void removeMember_studentNotInGroup_throws() {
+		Student bob = student(2L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(bob)));
+		group.setLeaderId(2L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.removeMember(10L, 1L));
+	}
+
+	@Test
+	void removeMember_lastMember_deletesGroup() {
+		Student alice = student(1L);
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(alice));
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice)));
+		group.setLeaderId(1L);
+		group.setProject(null);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		service.removeMember(10L, 1L);
+
+		verify(groupRepository).deleteById(10L);
+		verify(groupRepository, never()).save(any());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void removeMember_lastMemberWithProject_throws() {
+		Student alice = student(1L);
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(alice));
+
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(10L);
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice)));
+		group.setLeaderId(1L);
+		group.setProject(project);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.removeMember(10L, 1L));
+		assertEquals("Impossible de supprimer un groupe ayant un projet assigné", ex.getMessage());
+		verify(groupRepository, never()).deleteById(any());
+		verify(groupRepository, never()).save(any());
+	}
+
+	@Test
+	void removeMember_leaderRemoved_reassignsLeadership() {
+		Student alice = student(1L);
+		Student bob = student(2L);
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(alice));
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice, bob)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		service.removeMember(10L, 1L);
+
+		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(2L)));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void removeMember_memberRemoved_leaderUnchanged() {
+		Student alice = student(1L);
+		Student bob = student(2L);
+		when(studentRepository.findById(2L)).thenReturn(Optional.of(bob));
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
+
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new java.util.ArrayList<>(List.of(alice, bob)));
+		group.setLeaderId(1L);
+
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+
+		service.removeMember(10L, 2L);
+
+		verify(groupRepository).save(argThat(g -> g.getLeaderId().equals(1L)));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	private static Student student(Long id) {
+		Student s = new Student();
+		s.setId(id);
+		return s;
 	}
 }

@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.admin.room.dto.BulkRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.dto.CreateRoomRequest;
+import com.system_gestion_soutenance.api.admin.room.dto.UpdateRoomRequest;
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
@@ -79,6 +80,25 @@ public class RoomService {
 		room.setName(request.name());
 		room.setCapacity(request.capacity());
 		room.setDepartment(dept);
+		return roomRepository.save(room);
+	}
+
+	@Audited(action = "UPDATE", entity = "Room")
+	@Transactional
+	public Room updatePartial(Long id, UpdateRoomRequest request) {
+		Room room = roomRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Salle non trouvée"));
+
+		if (request.name() != null) {
+			room.setName(request.name());
+		}
+		if (request.capacity() != null) {
+			room.setCapacity(request.capacity());
+		}
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			room.setDepartment(dept);
+		}
 		return roomRepository.save(room);
 	}
 

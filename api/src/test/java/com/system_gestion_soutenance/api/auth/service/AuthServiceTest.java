@@ -71,7 +71,7 @@ class AuthServiceTest {
 		when(jwtTokenProvider.getExpirationMs()).thenReturn(7200000L);
 		when(userMapper.toDto(user)).thenReturn(new com.system_gestion_soutenance.api.user.dto.UserDto(user.getId(),
 				user.getEmail(), user.getRole().name().toLowerCase(), user.getLastName(), user.getFirstName(),
-				user.isActive(), null, null, null, null, null, null, null, null, null));
+				user.isActive(), null, null, null, null, null, null, null, null, null, null));
 
 		LoginResponse response = authService.login(new LoginRequest("admin@test.com", "password"));
 

@@ -11,6 +11,9 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.student.group.dto.AvailableGroupResponse;
 import com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.StudentLeftGroupEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,15 +31,20 @@ public class StudentGroupService {
 	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final StudentGroupMapper studentGroupMapper;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
 			DefenseSettingsRepository defenseSettingsRepository, DefenseSessionRepository defenseSessionRepository,
-			StudentGroupMapper studentGroupMapper) {
+			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher,
+			SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.studentGroupMapper = studentGroupMapper;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	@Transactional(readOnly = true)
@@ -132,6 +140,37 @@ public class StudentGroupService {
 		if (ds == null)
 			return false;
 		return isCreationOpen(ds.getGroupCreationStartDate(), ds.getGroupCreationEndDate());
+	}
+
+	@Transactional
+	public void leaveGroup(Long studentId) {
+		Group group = groupRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new InvalidBusinessStateException("Vous n'êtes membre d'aucun groupe"));
+
+		if (group.getProject() != null) {
+			throw new InvalidBusinessStateException("Impossible de quitter un groupe ayant un projet assigné");
+		}
+
+		Student student = studentRepository.findById(studentId)
+				.orElseThrow(() -> new EntityNotFoundException("Étudiant introuvable"));
+		String studentName = student.getFirstName() + " " + student.getLastName();
+
+		group.getStudents().removeIf(s -> s.getId().equals(studentId));
+
+		if (group.getStudents().isEmpty()) {
+			groupRepository.deleteById(group.getId());
+			eventPublisher.publishEvent(new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId,
+					studentName, group.getId()));
+			return;
+		}
+
+		if (group.getLeaderId() != null && group.getLeaderId().equals(studentId)) {
+			group.setLeaderId(group.getStudents().get(0).getId());
+		}
+
+		groupRepository.save(group);
+		eventPublisher.publishEvent(new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId,
+				studentName, group.getId()));
 	}
 
 	private boolean isCreationOpen(String startDate, String endDate) {

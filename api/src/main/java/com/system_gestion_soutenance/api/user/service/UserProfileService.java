@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -23,14 +23,14 @@ public class UserProfileService {
 
 	private final MajorRepository majorRepository;
 	private final LevelRepository levelRepository;
-	private final GradeRepository gradeRepository;
+	private final TeacherRankRepository teacherRankRepository;
 	private final DepartmentRepository departmentRepository;
 
 	public UserProfileService(MajorRepository majorRepository, LevelRepository levelRepository,
-			GradeRepository gradeRepository, DepartmentRepository departmentRepository) {
+			TeacherRankRepository teacherRankRepository, DepartmentRepository departmentRepository) {
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;
-		this.gradeRepository = gradeRepository;
+		this.teacherRankRepository = teacherRankRepository;
 		this.departmentRepository = departmentRepository;
 	}
 
@@ -44,6 +44,8 @@ public class UserProfileService {
 	public void updateStudentProfile(Student student, UpdateUserRequest request) {
 		if (request.cne() != null)
 			student.setCne(request.cne());
+		if (request.codeApogee() != null)
+			student.setCodeApogee(request.codeApogee());
 		if (request.majorId() != null) {
 			Major major = majorRepository.findById(request.majorId())
 					.orElseThrow(() -> new InvalidBusinessStateException("Filière introuvable"));
@@ -57,10 +59,10 @@ public class UserProfileService {
 	}
 
 	public void updateTeacherProfile(Teacher teacher, UpdateUserRequest request) {
-		if (request.gradeId() != null) {
-			Grade grade = gradeRepository.findById(request.gradeId())
-					.orElseThrow(() -> new InvalidBusinessStateException("Grade introuvable"));
-			teacher.setGrade(grade);
+		if (request.teacherRankId() != null) {
+			TeacherRank teacherRank = teacherRankRepository.findById(request.teacherRankId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Rank introuvable"));
+			teacher.setTeacherRank(teacherRank);
 		}
 		if (request.departmentId() != null) {
 			Department dept = departmentRepository.findById(request.departmentId())

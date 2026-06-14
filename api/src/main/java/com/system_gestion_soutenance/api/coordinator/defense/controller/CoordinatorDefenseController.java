@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -19,6 +20,7 @@ public class CoordinatorDefenseController {
 	}
 
 	@PostMapping("/{id}/cancel")
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Cancel a scheduled defense")
 	public ApiResponse<Void> cancel(@PathVariable Long id) {
 		defenseService.cancelDefense(id);

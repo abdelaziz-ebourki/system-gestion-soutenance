@@ -3,8 +3,8 @@ package com.system_gestion_soutenance.api.seed;
 import com.system_gestion_soutenance.api.admin.audit.entity.AuditLog;
 import com.system_gestion_soutenance.api.admin.audit.repository.AuditLogRepository;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.TemplateRole;
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
@@ -70,7 +70,7 @@ public class DataInitializer implements CommandLineRunner {
 
 	private final MajorRepository majorRepo;
 	private final LevelRepository levelRepo;
-	private final GradeRepository gradeRepo;
+	private final TeacherRankRepository teacherRankRepo;
 	private final FacultyRepository facultyRepo;
 	private final DepartmentRepository departmentRepo;
 	private final UserRepository userRepo;
@@ -90,7 +90,7 @@ public class DataInitializer implements CommandLineRunner {
 	private final DefenseSettingsRepository defenseSettingsRepo;
 
 	@SuppressWarnings("checkstyle:ParameterNumber")
-	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, GradeRepository gradeRepo,
+	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, TeacherRankRepository teacherRankRepo,
 			FacultyRepository facultyRepo, DepartmentRepository departmentRepo, UserRepository userRepo,
 			TeacherRepository teacherRepo, StudentRepository studentRepo, RoomRepository roomRepo,
 			JuryRoleTemplateRepository juryRoleTemplateRepo, DefenseSessionRepository defenseSessionRepo,
@@ -100,7 +100,7 @@ public class DataInitializer implements CommandLineRunner {
 			AuditLogRepository auditLogRepo, DefenseSettingsRepository defenseSettingsRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
-		this.gradeRepo = gradeRepo;
+		this.teacherRankRepo = teacherRankRepo;
 		this.facultyRepo = facultyRepo;
 		this.departmentRepo = departmentRepo;
 		this.userRepo = userRepo;
@@ -129,12 +129,24 @@ public class DataInitializer implements CommandLineRunner {
 		// Phase 1: Singleton configs
 		defenseSettingsRepo.save(new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-03-01", "2026-05-01"));
 
-		// Phase 2: Reference data
-		Major m1 = majorRepo.save(new Major(null, "Génie Informatique"));
-		Major m2 = majorRepo.save(new Major(null, "Génie Industriel"));
-		Major m3 = majorRepo.save(new Major(null, "Génie Civil"));
-		Major m4 = majorRepo.save(new Major(null, "Génie Électrique"));
-		Major m5 = majorRepo.save(new Major(null, "Management"));
+		// Phase 2: Faculty
+		Faculty f1 = new Faculty();
+		f1.setName("Faculté des Sciences Ben M'Sik");
+		f1.setCode("FSBM");
+		f1 = facultyRepo.save(f1);
+
+		// Phase 3: Departments
+		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
+		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
+		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
+		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
+
+		// Phase 4: Reference data
+		Major m1 = majorRepo.save(new Major(null, "Génie Informatique", dInfo));
+		Major m2 = majorRepo.save(new Major(null, "Génie Industriel", dMath));
+		Major m3 = majorRepo.save(new Major(null, "Génie Civil", dPhys));
+		Major m4 = majorRepo.save(new Major(null, "Génie Électrique", dBio));
+		Major m5 = majorRepo.save(new Major(null, "Management", dInfo));
 		List<Major> majors = List.of(m1, m2, m3, m4, m5);
 
 		Level n1 = levelRepo.save(new Level(null, "Licence"));
@@ -142,22 +154,10 @@ public class DataInitializer implements CommandLineRunner {
 		Level n3 = levelRepo.save(new Level(null, "Doctorat"));
 		List<Level> levels = List.of(n1, n2, n3);
 
-		Grade g1 = gradeRepo.save(new Grade(null, "PES"));
-		Grade g2 = gradeRepo.save(new Grade(null, "PH"));
-		Grade g3 = gradeRepo.save(new Grade(null, "PA"));
-		List<Grade> grades = List.of(g1, g2, g3);
-
-		// Phase 4: Faculty
-		Faculty f1 = new Faculty();
-		f1.setName("Faculté des Sciences Ben M'Sik");
-		f1.setCode("FSBM");
-		f1 = facultyRepo.save(f1);
-
-		// Phase 5: Departments (no head yet)
-		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
-		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
-		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
-		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
+		TeacherRank g1 = teacherRankRepo.save(new TeacherRank(null, "PES"));
+		TeacherRank g2 = teacherRankRepo.save(new TeacherRank(null, "PH"));
+		TeacherRank g3 = teacherRankRepo.save(new TeacherRank(null, "PA"));
+		List<TeacherRank> teacherRanks = List.of(g1, g2, g3);
 
 		// Phase 6: Users
 		User admin = new User();
@@ -178,18 +178,18 @@ public class DataInitializer implements CommandLineRunner {
 		coord.setActive(true);
 		coord = userRepo.save(coord);
 
-		Teacher teacherT3 = saveTeacher("Ben Ali", "Ali", "teacher@univh2c.ma", grades.get(0), dInfo);
-		Teacher teacherT4 = saveTeacher("Alami", "Moussa", "moussa@univh2c.ma", grades.get(1), dMath);
-		Teacher teacherT5 = saveTeacher("El Ghazi", "Hassan", "hassan@univh2c.ma", grades.get(2), dPhys);
-		Teacher teacherT6 = saveTeacher("Benkirane", "Jamila", "jamila@univh2c.ma", grades.get(0), dBio);
-		Teacher teacherT7 = saveTeacher("El Ouafi", "Rachid", "rachid@univh2c.ma", grades.get(1), dInfo);
-		Teacher teacherT8 = saveTeacher("El Fekkak", "Khadija", "khadija@univh2c.ma", grades.get(2), dMath);
-		Teacher teacherT9 = saveTeacher("Ben Omar", "Nabil", "nabil@univh2c.ma", grades.get(0), dPhys);
-		Teacher teacherT10 = saveTeacher("El Kholti", "Samira", "samira@univh2c.ma", grades.get(1), dBio);
-		Teacher teacherT11 = saveTeacher("El Idrissi", "Abdellah", "abdellah@univh2c.ma", grades.get(2), dInfo);
-		Teacher teacherT12 = saveTeacher("Bensouda", "Fatiha", "fatiha@univh2c.ma", grades.get(0), dMath);
-		Teacher teacherT13 = saveTeacher("El Mourabit", "Karim", "karim@univh2c.ma", grades.get(1), dPhys);
-		Teacher teacherT14 = saveTeacher("El Hassani", "Latifa", "latifa@univh2c.ma", grades.get(2), dBio);
+		Teacher teacherT3 = saveTeacher("Ben Ali", "Ali", "teacher@univh2c.ma", teacherRanks.get(0), dInfo);
+		Teacher teacherT4 = saveTeacher("Alami", "Moussa", "moussa@univh2c.ma", teacherRanks.get(1), dMath);
+		Teacher teacherT5 = saveTeacher("El Ghazi", "Hassan", "hassan@univh2c.ma", teacherRanks.get(2), dPhys);
+		Teacher teacherT6 = saveTeacher("Benkirane", "Jamila", "jamila@univh2c.ma", teacherRanks.get(0), dBio);
+		Teacher teacherT7 = saveTeacher("El Ouafi", "Rachid", "rachid@univh2c.ma", teacherRanks.get(1), dInfo);
+		Teacher teacherT8 = saveTeacher("El Fekkak", "Khadija", "khadija@univh2c.ma", teacherRanks.get(2), dMath);
+		Teacher teacherT9 = saveTeacher("Ben Omar", "Nabil", "nabil@univh2c.ma", teacherRanks.get(0), dPhys);
+		Teacher teacherT10 = saveTeacher("El Kholti", "Samira", "samira@univh2c.ma", teacherRanks.get(1), dBio);
+		Teacher teacherT11 = saveTeacher("El Idrissi", "Abdellah", "abdellah@univh2c.ma", teacherRanks.get(2), dInfo);
+		Teacher teacherT12 = saveTeacher("Bensouda", "Fatiha", "fatiha@univh2c.ma", teacherRanks.get(0), dMath);
+		Teacher teacherT13 = saveTeacher("El Mourabit", "Karim", "karim@univh2c.ma", teacherRanks.get(1), dPhys);
+		Teacher teacherT14 = saveTeacher("El Hassani", "Latifa", "latifa@univh2c.ma", teacherRanks.get(2), dBio);
 
 		List<Teacher> teachers = List.of(teacherT3, teacherT4, teacherT5, teacherT6, teacherT7, teacherT8, teacherT9,
 				teacherT10, teacherT11, teacherT12, teacherT13, teacherT14);
@@ -202,9 +202,6 @@ public class DataInitializer implements CommandLineRunner {
 		departmentRepo.saveAll(List.of(dInfo, dMath, dPhys, dBio));
 
 		// Phase 8: Students (100)
-		record StudentSeed(String lastName, String firstName, String email, String cne, Major major, Level level) {
-		}
-
 		String[][] studentData = {{"Khalid", "Mohamed", "student", "E13000999"},
 				{"Benali", "Salma", "student1", "E1300001"}, {"Fassi", "Yassine", "student2", "E1300002"},
 				{"Tazi", "Fatima", "student3", "E1300003"}, {"Mansouri", "Mehdi", "student4", "E1300004"},
@@ -266,9 +263,10 @@ public class DataInitializer implements CommandLineRunner {
 			String ln = studentData[i][0];
 			String email = studentData[i][2] + "@univh2c.ma";
 			String cne = studentData[i][3];
+			String codeApogee = "APG" + String.format("%05d", i + 1);
 			Major major = majors.get(studentMajorIndices[i % 10]);
 			Level level = levels.get(studentLevelIndices[i % 10]);
-			students.add(saveStudent(ln, fn, email, cne, major, level));
+			students.add(saveStudent(ln, fn, email, cne, codeApogee, major, level));
 		}
 
 		List<Student> studentsList = students;
@@ -301,26 +299,30 @@ public class DataInitializer implements CommandLineRunner {
 
 		DefenseSession ds1 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2025",
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
-				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
-		DefenseSession ds2 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Automne 2025",
-				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25)));
+				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, admin.getId(),
+				LocalDateTime.of(2025, 5, 10, 9, 0)));
+		DefenseSession ds2 = defenseSessionRepo.save(
+				new DefenseSession(null, "Soutenance PFE Automne 2025", DefenseType.PFE, DefenseSessionStatus.COMPLETED,
+						3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe, LocalDate.of(2026, 1, 5),
+						LocalDate.of(2026, 1, 25), true, admin.getId(), LocalDateTime.of(2025, 12, 10, 9, 0)));
 		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
 				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
-				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10)));
+				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10), false, null, null));
 		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
 				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
-				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15)));
+				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, admin.getId(),
+				LocalDateTime.of(2026, 6, 10, 9, 0)));
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
 		coeffs2.put("Rapporteur", 30);
 		coeffs2.put("Examinateur", 45);
 		DefenseSession ds5 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Thèse Printemps 2026",
 				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
-				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5)));
+				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, admin.getId(),
+				LocalDateTime.of(2026, 5, 20, 9, 0)));
 		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
 				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15)));
+				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15), false, null, null));
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -647,7 +649,7 @@ public class DataInitializer implements CommandLineRunner {
 				continue;
 			}
 			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role, es.score,
-					"Évaluation complète.", es.status, es.submitted));
+					"Évaluation complète.", es.status, es.submitted, null));
 		}
 
 		// Phase 20: Student Documents
@@ -814,35 +816,96 @@ public class DataInitializer implements CommandLineRunner {
 		}
 
 		// Phase 22: Audit Logs
-		record AuditSeed(String action, String entity, String entityId, String performedBy, int day) {
-		}
-		AuditSeed[] auditSeeds = {new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 10),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 11),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 12),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 13),
-				new AuditSeed("REJECT", "Jury", "", "admin@univh2c.ma", 14),
-				new AuditSeed("ARCHIVE", "User", "", "admin@univh2c.ma", 15),
-				new AuditSeed("ACTIVATE", "Room", "", "admin@univh2c.ma", 16),
-				new AuditSeed("DEACTIVATE", "Document", "", "admin@univh2c.ma", 17),
-				new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 18),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 19),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 20),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 21),
-				new AuditSeed("REJECT", "Jury", "", "admin@univh2c.ma", 22),
-				new AuditSeed("ARCHIVE", "User", "", "admin@univh2c.ma", 23),
-				new AuditSeed("ACTIVATE", "Room", "", "admin@univh2c.ma", 24),
-				new AuditSeed("DEACTIVATE", "Document", "", "admin@univh2c.ma", 25),
-				new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 26),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 27),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 28),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 29),};
-		for (int i = 0; i < auditSeeds.length; i++) {
-			AuditSeed as2 = auditSeeds[i];
-			String details = "Action " + as2.action.toLowerCase() + " effectuée sur " + as2.entity.toLowerCase() + " "
-					+ as2.entityId + ".";
-			auditLogRepo.save(new AuditLog(null, as2.action, as2.entity, (long) (i + 1), as2.performedBy, details,
-					LocalDateTime.of(2026, 5, as2.day, 9 + (i % 8), 30)));
-		}
+		auditLogRepo.save(new AuditLog(null, "CREATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Création de la session de soutenance 'Soutenance PFE Printemps 2026'",
+				LocalDateTime.of(2026, 3, 10, 9, 15)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Modification des paramètres de la session 'Soutenance PFE Printemps 2026' (durée de soutenance: 30min)",
+				LocalDateTime.of(2026, 3, 12, 10, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Project", projects.get(0).getId(), "coord@univh2c.ma",
+				"Création du projet 'Système de Gestion des Soutenances' pour l'étudiant Khalid Mohamed",
+				LocalDateTime.of(2026, 3, 15, 11, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Project", projects.get(1).getId(), "coord@univh2c.ma",
+				"Création du projet 'Application E-commerce Mobile' pour le groupe de Benali Salma et Fassi Yassine",
+				LocalDateTime.of(2026, 3, 18, 14, 20)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(1).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Application E-commerce Mobile' — statut changé de PENDING vers APPROVED",
+				LocalDateTime.of(2026, 3, 20, 9, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Group", null, "coord@univh2c.ma",
+				"Création du groupe 'Groupe Alpha' (2 étudiants) pour le projet 'Système de Gestion des Soutenances'",
+				LocalDateTime.of(2026, 3, 22, 15, 45)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Group", null, "coord@univh2c.ma",
+				"Création du groupe 'Groupe Beta' (3 étudiants) pour le projet 'Application E-commerce Mobile'",
+				LocalDateTime.of(2026, 3, 22, 16, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds1.getId(), "admin@univh2c.ma",
+				"Clôture de la session 'Soutenance PFE Printemps 2025' — passage au statut COMPLETED",
+				LocalDateTime.of(2026, 4, 1, 8, 30)));
+		auditLogRepo.save(new AuditLog(null, "APPROVE", "DefenseSession", ds4.getId(), "admin@univh2c.ma",
+				"Approbation de la session 'Soutenance Mémoire Printemps 2026' — statut changé vers SCHEDULED",
+				LocalDateTime.of(2026, 4, 5, 9, 15)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Defense", null, "coord@univh2c.ma",
+				"Planification de la soutenance du projet 'Système de Gestion des Soutenances' en salle Amphi A",
+				LocalDateTime.of(2026, 4, 10, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Teacher", teacherT3.getId(), "admin@univh2c.ma",
+				"Mise à jour du département de l'enseignant Ben Ali — transfert vers le département Informatique",
+				LocalDateTime.of(2026, 4, 12, 11, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "JuryRoleTemplate", jrtPfe.getId(), "admin@univh2c.ma",
+				"Création du template jury 'Template PFE' avec 3 rôles (Président, Rapporteur, Examinateur)",
+				LocalDateTime.of(2026, 4, 15, 14, 0)));
+		auditLogRepo.save(new AuditLog(null, "SUBMIT", "StudentDocument", null, "student@univh2c.ma",
+				"Soumission du document 'Rapport PFE' par l'étudiant Khalid Mohamed",
+				LocalDateTime.of(2026, 5, 25, 14, 10)));
+		auditLogRepo.save(new AuditLog(null, "SUBMIT", "StudentDocument", null, "student1@univh2c.ma",
+				"Soumission du document 'Fiche de synthèse' par l'étudiant Benali Salma",
+				LocalDateTime.of(2026, 5, 25, 14, 25)));
+		auditLogRepo.save(new AuditLog(null, "PUBLISH", "Evaluation", null, "teacher@univh2c.ma",
+				"Publication de l'évaluation du projet 'Système de Gestion des Soutenances' — note: 16.4/20",
+				LocalDateTime.of(2026, 6, 1, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "PUBLISH", "Evaluation", null, "moussa@univh2c.ma",
+				"Publication de l'évaluation du projet 'Application E-commerce Mobile' — note: 10.3/20",
+				LocalDateTime.of(2026, 6, 1, 10, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(5).getId(), "admin@univh2c.ma",
+				"Rejet du projet 'Système de Recommandation de Cours' — motif: insuffisance de détails techniques",
+				LocalDateTime.of(2026, 6, 3, 9, 45)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Defense", null, "coord@univh2c.ma",
+				"Planification de la soutenance du projet 'Application E-commerce Mobile' en salle Salle 101",
+				LocalDateTime.of(2026, 6, 5, 11, 15)));
+		auditLogRepo.save(new AuditLog(null, "FREEZE", "DefenseSession", ds3.getId(), "admin@univh2c.ma",
+				"Gel de la session 'Soutenance PFE Printemps 2026' — les notes ne peuvent plus être modifiées",
+				LocalDateTime.of(2026, 6, 10, 8, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Student", studentsList.get(95).getId(), "admin@univh2c.ma",
+				"Création de l'étudiant Amrani Layla (codeApogee: APG00096) — niveau Master, filière Génie Informatique",
+				LocalDateTime.of(2026, 6, 12, 15, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Room", rooms.get(0).getId(), "admin@univh2c.ma",
+				"Mise à jour de la salle 'Amphi A' — capacité modifiée de 200 à 220 places",
+				LocalDateTime.of(2026, 6, 14, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "DELETE", "DefenseSession", ds6.getId(), "coord@univh2c.ma",
+				"Suppression de la session 'Soutenance Rattrapage 2026' — pas de groupes assignés",
+				LocalDateTime.of(2026, 6, 15, 16, 0)));
+		auditLogRepo.save(new AuditLog(null, "APPROVE", "Project", projects.get(8).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Assistant Virtuel pour Bibliothèque' — statut changé vers APPROVED",
+				LocalDateTime.of(2026, 6, 16, 9, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Modification de la date de début de la session 'Soutenance PFE Printemps 2026' au 1er juillet 2026",
+				LocalDateTime.of(2026, 6, 18, 14, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Notification", null, "coord@univh2c.ma",
+				"Envoi de notification de rappel aux étudiants pour la soumission des documents avant le 1er juillet",
+				LocalDateTime.of(2026, 6, 20, 11, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(15).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Jeu Sérieux pour l'Apprentissage de la Programmation' — statut changé vers APPROVED",
+				LocalDateTime.of(2026, 6, 22, 10, 15)));
+		auditLogRepo.save(new AuditLog(null, "ASSIGN", "Defense", null, "coord@univh2c.ma",
+				"Affectation de l'enseignant El Ghazi Hassan comme Président du jury pour la soutenance du projet 'Plateforme IoT pour Smart Campus'",
+				LocalDateTime.of(2026, 6, 25, 9, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Student", studentsList.get(2).getId(), "admin@univh2c.ma",
+				"Mise à jour du niveau de l'étudiant Fassi Yassine — passage de Licence à Master",
+				LocalDateTime.of(2026, 6, 27, 15, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Faculty", f1.getId(), "admin@univh2c.ma",
+				"Création de la faculté 'Faculté des Sciences Ben M'Sik' (code: FSBM)",
+				LocalDateTime.of(2026, 3, 5, 8, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Department", dInfo.getId(), "admin@univh2c.ma",
+				"Désignation de Benkirane Jamila comme chef du département Informatique",
+				LocalDateTime.of(2026, 3, 7, 10, 0)));
 
 		System.out.println(">>> Seed data inserted successfully <<<");
 	}
@@ -851,7 +914,8 @@ public class DataInitializer implements CommandLineRunner {
 		return userRepo.save(user);
 	}
 
-	private Teacher saveTeacher(String lastName, String firstName, String email, Grade grade, Department dept) {
+	private Teacher saveTeacher(String lastName, String firstName, String email, TeacherRank teacherRank,
+			Department dept) {
 		Teacher t = new Teacher();
 		t.setLastName(lastName);
 		t.setFirstName(firstName);
@@ -859,12 +923,13 @@ public class DataInitializer implements CommandLineRunner {
 		t.setPassword(PASSWORD);
 		t.setRole(Role.TEACHER);
 		t.setActive(true);
-		t.setGrade(grade);
+		t.setTeacherRank(teacherRank);
 		t.setDepartment(dept);
 		return teacherRepo.save(t);
 	}
 
-	private Student saveStudent(String lastName, String firstName, String email, String cne, Major major, Level level) {
+	private Student saveStudent(String lastName, String firstName, String email, String cne, String codeApogee,
+			Major major, Level level) {
 		Student s = new Student();
 		s.setLastName(lastName);
 		s.setFirstName(firstName);
@@ -873,6 +938,7 @@ public class DataInitializer implements CommandLineRunner {
 		s.setRole(Role.STUDENT);
 		s.setActive(true);
 		s.setCne(cne);
+		s.setCodeApogee(codeApogee);
 		s.setMajor(major);
 		s.setLevel(level);
 		return studentRepo.save(s);

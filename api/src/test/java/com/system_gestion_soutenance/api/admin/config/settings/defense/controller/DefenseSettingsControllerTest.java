@@ -43,4 +43,12 @@ class DefenseSettingsControllerTest {
 				.content("{\"startTime\":\"09:00\",\"endTime\":\"17:00\",\"defenseDuration\":45,\"breakDuration\":10}"))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.startTime").value("09:00"));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(service.patch(any())).thenReturn(new DefenseSettings(1L, "09:00", "18:00", 30, 15, null, null));
+		mockMvc.perform(patch("/api/admin/config/settings").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"startTime\":\"09:00\"}")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.startTime").value("09:00"));
+	}
 }

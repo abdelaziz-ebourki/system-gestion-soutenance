@@ -1,12 +1,18 @@
 package com.system_gestion_soutenance.api.admin.config.major.service;
 
 import com.system_gestion_soutenance.api.admin.config.major.dto.CreateMajorRequest;
+import com.system_gestion_soutenance.api.admin.config.major.dto.UpdateMajorRequest;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
+import com.system_gestion_soutenance.api.admin.department.entity.Department;
+import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -17,11 +23,20 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 
 	private final MajorRepository majorRepository;
 	private final StudentRepository studentRepository;
+	private final DepartmentRepository departmentRepository;
 
-	public MajorConfigService(MajorRepository majorRepository, StudentRepository studentRepository) {
+	public MajorConfigService(MajorRepository majorRepository, StudentRepository studentRepository,
+			DepartmentRepository departmentRepository) {
 		super(majorRepository);
 		this.majorRepository = majorRepository;
 		this.studentRepository = studentRepository;
+		this.departmentRepository = departmentRepository;
+	}
+
+	public PaginatedResponse<Major> findAll(int page, int limit) {
+		Page<Major> majorPage = majorRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(majorPage.getContent(), majorPage.getTotalElements(), majorPage.getTotalPages(),
+				page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "Major")
@@ -33,6 +48,11 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 
 		Major major = new Major();
 		major.setName(request.name());
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
+		}
 		return save(major);
 	}
 
@@ -41,6 +61,28 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 	public Major update(Long id, CreateMajorRequest request) {
 		Major major = findByIdOrThrow(id, "Filière");
 		major.setName(request.name());
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
+		} else {
+			major.setDepartment(null);
+		}
+		return save(major);
+	}
+
+	@Audited(action = "UPDATE", entity = "Major")
+	@Transactional
+	public Major updatePartial(Long id, UpdateMajorRequest request) {
+		Major major = findByIdOrThrow(id, "Filière");
+		if (request.name() != null) {
+			major.setName(request.name());
+		}
+		if (request.departmentId() != null) {
+			Department dept = departmentRepository.findById(request.departmentId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
+		}
 		return save(major);
 	}
 

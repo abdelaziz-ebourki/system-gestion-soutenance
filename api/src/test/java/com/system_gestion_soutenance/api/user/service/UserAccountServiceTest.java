@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -38,7 +38,7 @@ class UserAccountServiceTest {
 	@Mock
 	private LevelRepository levelRepository;
 	@Mock
-	private GradeRepository gradeRepository;
+	private TeacherRankRepository teacherRankRepository;
 	@Mock
 	private DepartmentRepository departmentRepository;
 	@Mock
@@ -51,14 +51,14 @@ class UserAccountServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		userAccountService = new UserAccountService(userRepository, majorRepository, levelRepository, gradeRepository,
-				departmentRepository, emailService, passwordEncoder, baseUrl);
+		userAccountService = new UserAccountService(userRepository, majorRepository, levelRepository,
+				teacherRankRepository, departmentRepository, emailService, passwordEncoder, baseUrl);
 	}
 
 	@Test
 	void createUser_EmailExists_ThrowsException() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "test@test.com", null, null, null, null,
-				null, null);
+				null, null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(new User()));
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -68,8 +68,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createUser_Student_Success() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", 1L, 1L,
-				null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", null, 1L,
+				1L, null, null);
 		Major major = new Major();
 		Level level = new Level();
 
@@ -88,13 +88,13 @@ class UserAccountServiceTest {
 	@Test
 	void createUser_Teacher_Success() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
-				1L, 1L);
+				null, 1L, 1L);
 		Department dept = new Department();
-		Grade grade = new Grade();
+		TeacherRank teacherRank = new TeacherRank();
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-		when(gradeRepository.findById(1L)).thenReturn(Optional.of(grade));
+		when(teacherRankRepository.findById(1L)).thenReturn(Optional.of(teacherRank));
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
 		User result = userAccountService.createUser(request, Role.TEACHER);
@@ -106,7 +106,7 @@ class UserAccountServiceTest {
 	@Test
 	void createUser_Coordinator_Success() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "coord@test.com", null, null, null, null,
-				null, null);
+				null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
@@ -120,7 +120,7 @@ class UserAccountServiceTest {
 	@Test
 	void createUser_AdminRole_CreatesBaseUser() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "admin@test.com", null, null, null, null,
-				null, null);
+				null, null, null);
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
@@ -134,8 +134,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createStudent_MajorNotFound_ThrowsException() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", 99L, 1L,
-				null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", null,
+				99L, 1L, null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(majorRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -146,8 +146,8 @@ class UserAccountServiceTest {
 
 	@Test
 	void createStudent_LevelNotFound_ThrowsException() {
-		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", 1L, 99L,
-				null, null);
+		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, "CNE123", null, 1L,
+				99L, null, null);
 		Major major = new Major();
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(majorRepository.findById(1L)).thenReturn(Optional.of(major));
@@ -161,7 +161,7 @@ class UserAccountServiceTest {
 	@Test
 	void createTeacher_NullDepartment_ThrowsException() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
-				null, null);
+				null, null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -172,7 +172,7 @@ class UserAccountServiceTest {
 	@Test
 	void createTeacher_DepartmentNotFound_ThrowsException() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
-				1L, 99L);
+				null, 1L, 99L);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -184,7 +184,7 @@ class UserAccountServiceTest {
 	@Test
 	void createTeacher_NullGrade_Success() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
-				null, 1L);
+				null, null, 1L);
 		Department dept = new Department();
 
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
@@ -200,21 +200,21 @@ class UserAccountServiceTest {
 	@Test
 	void createTeacher_GradeNotFound_ThrowsException() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "teacher@test.com", null, null, null, null,
-				99L, 1L);
+				null, 99L, 1L);
 		Department dept = new Department();
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
-		when(gradeRepository.findById(99L)).thenReturn(Optional.empty());
+		when(teacherRankRepository.findById(99L)).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
 				() -> userAccountService.createUser(request, Role.TEACHER));
-		assertEquals("Grade introuvable", ex.getMessage());
+		assertEquals("Rank introuvable", ex.getMessage());
 	}
 
 	@Test
 	void bulkCreate_Success() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "bulk@test.com",
-				"CNE", "Major", "Level", null, null);
+				"CNE", null, "Major", "Level", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "STUDENT");
 		Major major = new Major();
 		Level level = new Level();
@@ -233,7 +233,7 @@ class UserAccountServiceTest {
 	@Test
 	void createUser_Student_MissingFields_ThrowsException() {
 		CreateUserRequest request = new CreateUserRequest("Last", "First", "student@test.com", null, null, null, null,
-				null, null);
+				null, null, null);
 		when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -244,7 +244,7 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreate_UnsupportedRole_ThrowsException() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "bulk@test.com",
-				"CNE", "Major", "Level", null, null);
+				"CNE", null, "Major", "Level", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "ADMIN");
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
@@ -257,9 +257,9 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreate_DuplicateEmail_ThrowsException() {
 		BulkCreateRequest.BulkUserEntry entry1 = new BulkCreateRequest.BulkUserEntry("Last", "First", "first@test.com",
-				"CNE", "Major", "Level", null, null);
+				"CNE", null, "Major", "Level", null, null);
 		BulkCreateRequest.BulkUserEntry entry2 = new BulkCreateRequest.BulkUserEntry("Last", "First", "second@test.com",
-				"CNE2", "Major", "Level", null, null);
+				"CNE2", null, "Major", "Level", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry1, entry2), "STUDENT");
 		Major major = new Major();
 		Level level = new Level();
@@ -277,7 +277,7 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreate_Teacher_Success() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "teacher@test.com",
-				null, null, null, null, "Dept");
+				null, null, null, null, null, "Dept");
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "TEACHER");
 		Department dept = new Department();
 
@@ -294,7 +294,7 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreate_Coordinator_Success() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "coord@test.com",
-				null, null, null, null, null);
+				null, null, null, null, null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "COORDINATOR");
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
@@ -309,7 +309,7 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreateStudent_NullCne_ThrowsException() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "student@test.com",
-				null, "Major", "Level", null, null);
+				null, null, "Major", "Level", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "STUDENT");
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
@@ -322,7 +322,7 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreateStudent_MajorNotFound_ThrowsException() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "student@test.com",
-				"CNE", "NONEXISTENT", "Level", null, null);
+				"CNE", null, "NONEXISTENT", "Level", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "STUDENT");
 
 		when(userRepository.findByEmail(entry.email())).thenReturn(Optional.empty());
@@ -336,7 +336,7 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreateStudent_LevelNotFound_ThrowsException() {
 		BulkCreateRequest.BulkUserEntry entry = new BulkCreateRequest.BulkUserEntry("Last", "First", "student@test.com",
-				"CNE", "Major", "NONEXISTENT", null, null);
+				"CNE", null, "Major", "NONEXISTENT", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry), "STUDENT");
 		Major major = new Major();
 
@@ -352,9 +352,9 @@ class UserAccountServiceTest {
 	@Test
 	void bulkCreate_MultipleEntries_Success() {
 		BulkCreateRequest.BulkUserEntry entry1 = new BulkCreateRequest.BulkUserEntry("Last", "First", "first@test.com",
-				"CNE1", "Major", "Level", null, null);
+				"CNE1", null, "Major", "Level", null, null);
 		BulkCreateRequest.BulkUserEntry entry2 = new BulkCreateRequest.BulkUserEntry("Last", "First", "second@test.com",
-				"CNE2", "Major", "Level", null, null);
+				"CNE2", null, "Major", "Level", null, null);
 		BulkCreateRequest request = new BulkCreateRequest(List.of(entry1, entry2), "STUDENT");
 		Major major = new Major();
 		Level level = new Level();

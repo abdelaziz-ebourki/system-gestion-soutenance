@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Teacher extends User {
 	@ManyToOne
-	@JoinColumn(name = "grade_id")
-	private Grade grade;
+	@JoinColumn(name = "teacher_rank_id")
+	private TeacherRank teacherRank;
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")

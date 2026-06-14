@@ -18,6 +18,9 @@ import lombok.NoArgsConstructor;
 public class Student extends User {
 	private String cne;
 
+	@Column(unique = true, nullable = true)
+	private String codeApogee;
+
 	@ManyToOne
 	@JoinColumn(name = "major_id")
 	private Major major;

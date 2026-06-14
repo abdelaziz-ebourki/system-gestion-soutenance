@@ -22,6 +22,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluationServiceTest {
@@ -34,6 +37,10 @@ class EvaluationServiceTest {
 	private ProjectRepository projectRepository;
 	@Mock
 	private GroupRepository groupRepository;
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
+	@Mock
+	private SecurityService securityService;
 
 	@InjectMocks
 	private EvaluationService service;
@@ -45,7 +52,7 @@ class EvaluationServiceTest {
 	@Test
 	void findByTeacher_returnsList() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null);
+				null, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
 
 		assertEquals(1, service.findByTeacher(1L).size());
@@ -54,16 +61,17 @@ class EvaluationServiceTest {
 	@Test
 	void submit_success() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null);
+				null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
-		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good");
-		Evaluation result = service.submit(1L, req);
+		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good", null);
+		Evaluation result = service.submit(1L, 1L, req);
 
 		assertEquals(EvaluationStatus.SUBMITTED, result.getStatus());
 		assertEquals(15.0, result.getScore());
@@ -73,16 +81,17 @@ class EvaluationServiceTest {
 	@Test
 	void submit_withNullScore_doesNotSetScore() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null);
+				null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
-		EvaluationSubmitRequest req = new EvaluationSubmitRequest(null, "Good");
-		Evaluation result = service.submit(1L, req);
+		EvaluationSubmitRequest req = new EvaluationSubmitRequest(null, "Good", null);
+		Evaluation result = service.submit(1L, 1L, req);
 
 		assertNull(result.getScore());
 		assertEquals("Good", result.getComment());
@@ -91,16 +100,17 @@ class EvaluationServiceTest {
 	@Test
 	void submit_withNullComment_doesNotSetComment() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null);
+				null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
-		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, null);
-		Evaluation result = service.submit(1L, req);
+		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, null, null);
+		Evaluation result = service.submit(1L, 1L, req);
 
 		assertEquals(15.0, result.getScore());
 		assertNull(result.getComment());
@@ -109,28 +119,76 @@ class EvaluationServiceTest {
 	@Test
 	void submit_notFound_throws() {
 		when(evaluationRepository.findById(99L)).thenReturn(Optional.empty());
-		assertThrows(EntityNotFoundException.class, () -> service.submit(99L, new EvaluationSubmitRequest(10.0, "")));
+		assertThrows(EntityNotFoundException.class,
+				() -> service.submit(99L, 1L, new EvaluationSubmitRequest(10.0, "", null)));
 	}
 
 	@Test
 	void submit_alreadySubmitted_throws() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", 12.0, null, EvaluationStatus.SUBMITTED,
-				null);
+				null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
 		assertThrows(InvalidBusinessStateException.class,
-				() -> service.submit(1L, new EvaluationSubmitRequest(15.0, "Update")));
+				() -> service.submit(1L, 1L, new EvaluationSubmitRequest(15.0, "Update", null)));
 		verify(evaluationRepository, never()).save(any());
 	}
 
 	@Test
 	void findByTeacher_returnsListWithProject() {
 		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null);
+				null, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
 
 		List<Evaluation> result = service.findByTeacher(1L);
 
 		assertEquals(1, result.size());
+	}
+
+	@Test
+	void submit_wrongTeacher_throws() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
+				null, null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+
+		assertThrows(UnauthorizedAccessException.class,
+				() -> service.submit(1L, 99L, new EvaluationSubmitRequest(15.0, "Update", null)));
+		verify(evaluationRepository, never()).save(any());
+	}
+
+	@Test
+	void submit_frozenSession_throws() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
+				null, null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+
+		DefenseSession ds = new DefenseSession();
+		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
+		ds.setFrozen(true);
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		assertThrows(InvalidBusinessStateException.class,
+				() -> service.submit(1L, 1L, new EvaluationSubmitRequest(15.0, "Score", null)));
+		verify(evaluationRepository, never()).save(any());
+	}
+
+	@Test
+	void submit_withAttendanceStatus_persistsAttendance() {
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
+				null, null);
+		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
+		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
+
+		DefenseSession ds = new DefenseSession();
+		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good",
+				com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationAttendanceStatus.PRESENT);
+		Evaluation result = service.submit(1L, 1L, req);
+
+		assertEquals(com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationAttendanceStatus.PRESENT,
+				result.getAttendanceStatus());
 	}
 }

@@ -2,14 +2,18 @@ package com.system_gestion_soutenance.api.admin.faculty.controller;
 
 import com.system_gestion_soutenance.api.admin.faculty.dto.CreateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto;
+import com.system_gestion_soutenance.api.admin.faculty.dto.UpdateFacultyRequest;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.service.FacultyService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +37,13 @@ public class FacultyController {
 	@Operation(summary = "List faculties", description = "Retrieves all academic faculties.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved faculties")})
-	public ApiResponse<List<FacultyDto>> findAll() {
-		List<FacultyDto> faculties = facultyService.findAll().stream().map(configMapper::toFacultyDto).toList();
-		return ApiResponse.success("Liste des facultés récupérée avec succès", faculties);
+	public ApiResponse<PaginatedResponse<FacultyDto>> findAll(@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Faculty> result = facultyService.findAll(page, limit);
+		List<FacultyDto> items = result.items().stream().map(configMapper::toFacultyDto).toList();
+		PaginatedResponse<FacultyDto> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
+				result.currentPage(), result.size());
+		return ApiResponse.success("Liste des facultés récupérée avec succès", mapped);
 	}
 
 	@GetMapping("/{id}")
@@ -68,6 +76,13 @@ public class FacultyController {
 	public ApiResponse<FacultyDto> update(@PathVariable Long id, @Valid @RequestBody CreateFacultyRequest request) {
 		return ApiResponse.success("Faculté mise à jour avec succès",
 				configMapper.toFacultyDto(facultyService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update faculty", description = "Updates only the provided fields of a faculty.")
+	public ApiResponse<FacultyDto> patch(@PathVariable Long id, @Valid @RequestBody UpdateFacultyRequest request) {
+		return ApiResponse.success("Faculté mise à jour avec succès",
+				configMapper.toFacultyDto(facultyService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

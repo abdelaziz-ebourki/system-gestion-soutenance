@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.service.FacultyService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -43,11 +44,11 @@ class FacultyControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		Faculty faculty = createFaculty(1L, "FS", "FS");
-		when(facultyService.findAll()).thenReturn(List.of(faculty));
+		when(facultyService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(faculty), 1, 1, 0, 10));
 		when(configMapper.toFacultyDto(faculty)).thenReturn(
 				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "FS", "FS", null, null));
 		mockMvc.perform(get("/api/admin/faculties")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data[0].name").value("FS"));
+				.andExpect(jsonPath("$.data.items[0].name").value("FS"));
 	}
 
 	@Test
@@ -87,5 +88,16 @@ class FacultyControllerTest {
 		doNothing().when(facultyService).delete(1L);
 		mockMvc.perform(delete("/api/admin/faculties/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
+	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		Faculty faculty = createFaculty(1L, "New", "N");
+		when(facultyService.updatePartial(anyLong(), any())).thenReturn(faculty);
+		when(configMapper.toFacultyDto(faculty)).thenReturn(
+				new com.system_gestion_soutenance.api.admin.faculty.dto.FacultyDto(1L, "New", "N", null, null));
+		mockMvc.perform(
+				patch("/api/admin/faculties/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"New\"}"))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.data.name").value("New"));
 	}
 }

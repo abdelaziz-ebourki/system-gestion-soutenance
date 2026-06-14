@@ -2,14 +2,18 @@ package com.system_gestion_soutenance.api.admin.department.controller;
 
 import com.system_gestion_soutenance.api.admin.department.dto.CreateDepartmentRequest;
 import com.system_gestion_soutenance.api.admin.department.dto.DepartmentResponse;
+import com.system_gestion_soutenance.api.admin.department.dto.UpdateDepartmentRequest;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.service.DepartmentService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +37,14 @@ public class DepartmentController {
 	@Operation(summary = "List departments", description = "Retrieves all academic departments.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved departments")})
-	public ApiResponse<List<DepartmentResponse>> findAll() {
-		List<DepartmentResponse> departments = departmentService.findAll().stream()
-				.map(configMapper::toDepartmentResponse).toList();
-		return ApiResponse.success("Liste des départements récupérée avec succès", departments);
+	public ApiResponse<PaginatedResponse<DepartmentResponse>> findAll(
+			@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<Department> result = departmentService.findAll(page, limit);
+		List<DepartmentResponse> items = result.items().stream().map(configMapper::toDepartmentResponse).toList();
+		PaginatedResponse<DepartmentResponse> mapped = new PaginatedResponse<>(items, result.total(),
+				result.pageCount(), result.currentPage(), result.size());
+		return ApiResponse.success("Liste des départements récupérée avec succès", mapped);
 	}
 
 	@GetMapping("/{id}")
@@ -70,6 +78,14 @@ public class DepartmentController {
 			@Valid @RequestBody CreateDepartmentRequest request) {
 		return ApiResponse.success("Département mis à jour avec succès",
 				configMapper.toDepartmentResponse(departmentService.update(id, request)));
+	}
+
+	@PatchMapping("/{id}")
+	@Operation(summary = "Partially update department", description = "Updates only the provided fields of a department.")
+	public ApiResponse<DepartmentResponse> patch(@PathVariable Long id,
+			@Valid @RequestBody UpdateDepartmentRequest request) {
+		return ApiResponse.success("Département mis à jour avec succès",
+				configMapper.toDepartmentResponse(departmentService.updatePartial(id, request)));
 	}
 
 	@DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.student.document.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
@@ -9,6 +10,8 @@ import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,9 +40,14 @@ public class StudentDocumentController {
 	@Operation(summary = "List documents", description = "Retrieves all documents uploaded by the connected student.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved documents")})
-	public ApiResponse<List<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user) {
-		return ApiResponse
-				.success(studentDocumentService.findByStudent(user.getId()).stream().map(mapper::toDto).toList());
+	public ApiResponse<PaginatedResponse<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user,
+			@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		PaginatedResponse<StudentDocument> result = studentDocumentService.findByStudent(user.getId(), page, limit);
+		List<StudentDocumentDto> items = result.items().stream().map(mapper::toDto).toList();
+		PaginatedResponse<StudentDocumentDto> mapped = new PaginatedResponse<>(items, result.total(),
+				result.pageCount(), result.currentPage(), result.size());
+		return ApiResponse.success(mapped);
 	}
 
 	@PostMapping("/{id}/attachments")
@@ -49,8 +57,8 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
 	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
-			@RequestParam("file") MultipartFile file) {
-		StudentDocument doc = studentDocumentService.upload(id, file);
+			@RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
+		StudentDocument doc = studentDocumentService.upload(id, user.getId(), file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}
 
@@ -59,10 +67,10 @@ public class StudentDocumentController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
-	public ResponseEntity<byte[]> download(@PathVariable Long id) {
+	public ResponseEntity<byte[]> download(@PathVariable Long id, @AuthenticationPrincipal User user) {
 		byte[] content;
 		try {
-			content = studentDocumentService.download(id);
+			content = studentDocumentService.download(id, user.getId());
 		} catch (EntityNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		}

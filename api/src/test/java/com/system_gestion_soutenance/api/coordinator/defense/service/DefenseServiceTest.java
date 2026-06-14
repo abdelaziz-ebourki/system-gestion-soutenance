@@ -21,7 +21,8 @@ import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectR
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
-import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.time.LocalDate;
@@ -38,12 +39,13 @@ class DefenseServiceTest {
 	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
-	private final NotificationRepository notificationRepository = mock(NotificationRepository.class);
+	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+	private final SecurityService securityService = mock(SecurityService.class);
 	private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
 
 	private final DefenseService service = new DefenseService(defenseRepository, roomRepository,
-			defenseSessionRepository, defenseSettingsRepository, projectRepository, groupRepository,
-			notificationRepository, teacherRepository);
+			defenseSessionRepository, defenseSettingsRepository, projectRepository, groupRepository, eventPublisher,
+			securityService, teacherRepository);
 
 	@Test
 	void getSchedule_returnsAllDefenses() {
@@ -145,12 +147,15 @@ class DefenseServiceTest {
 		Defense defense = mock(Defense.class);
 		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 1));
 		when(defense.getTime()).thenReturn(java.time.LocalTime.of(9, 0));
+		when(defense.getId()).thenReturn(1L);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		service.cancelDefense(1L);
 
 		verify(defenseRepository).delete(defense);
-		verify(notificationRepository).save(any());
+		verify(eventPublisher, times(1))
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -210,14 +215,29 @@ class DefenseServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setName("Session Test");
 		ds.setStatus(DefenseSessionStatus.ACTIVE);
+		ds.setApprovedBy(10L);
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 		when(defenseSessionRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		service.publish(1L);
 
 		assertEquals(DefenseSessionStatus.SCHEDULED, ds.getStatus());
 		verify(defenseSessionRepository).save(ds);
-		verify(notificationRepository).save(any());
+		verify(eventPublisher, times(1))
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void publish_unapprovedSession_throws() {
+		DefenseSession ds = new DefenseSession();
+		ds.setName("Session Test");
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
+		ds.setApprovedBy(null);
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.publish(1L));
+		verify(defenseSessionRepository, never()).save(any());
 	}
 
 	@Test

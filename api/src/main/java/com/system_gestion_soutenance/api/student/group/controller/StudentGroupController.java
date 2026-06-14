@@ -59,4 +59,14 @@ public class StudentGroupController {
 		return ApiResponse
 				.success(studentGroupMapper.toDetails(studentGroupService.joinGroup(id, studentId), studentId));
 	}
+
+	@DeleteMapping("/leave")
+	@Operation(summary = "Leave group", description = "Allows a student to leave their current group. Blocked if the group has an assigned project.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully left the group"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Not in a group or group has a project")})
+	public ResponseEntity<ApiResponse<Void>> leaveGroup(@AuthenticationPrincipal User user) {
+		studentGroupService.leaveGroup(user.getId());
+		return ResponseEntity.ok(ApiResponse.success("Vous avez quitté le groupe", null));
+	}
 }

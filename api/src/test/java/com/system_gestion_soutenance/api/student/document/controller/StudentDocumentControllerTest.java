@@ -9,6 +9,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -55,7 +56,8 @@ class StudentDocumentControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
-		when(studentDocumentService.findByStudent(1L)).thenReturn(List.of());
+		when(studentDocumentService.findByStudent(1L, 0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 		mockMvc.perform(get("/api/student/documents").with(authentication(auth))).andExpect(status().isOk());
 	}
 
@@ -69,7 +71,7 @@ class StudentDocumentControllerTest {
 		StudentDocument doc = new StudentDocument();
 		doc.setId(1L);
 		doc.setStatus("submitted");
-		when(studentDocumentService.upload(anyLong(), any())).thenReturn(doc);
+		when(studentDocumentService.upload(anyLong(), anyLong(), any())).thenReturn(doc);
 
 		StudentDocumentDto dto = new StudentDocumentDto(1L, 1L, "test.pdf", "pdf", "2026-06-01", "submitted", null,
 				"/path/to/file");

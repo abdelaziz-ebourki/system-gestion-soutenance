@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -34,19 +34,20 @@ public class UserAccountService {
 	private final UserRepository userRepository;
 	private final MajorRepository majorRepository;
 	private final LevelRepository levelRepository;
-	private final GradeRepository gradeRepository;
+	private final TeacherRankRepository teacherRankRepository;
 	private final DepartmentRepository departmentRepository;
 	private final EmailService emailService;
 	private final PasswordEncoder passwordEncoder;
 	private final String baseUrl;
 
 	public UserAccountService(UserRepository userRepository, MajorRepository majorRepository,
-			LevelRepository levelRepository, GradeRepository gradeRepository, DepartmentRepository departmentRepository,
-			EmailService emailService, PasswordEncoder passwordEncoder, @Value("${app.ui.base-url}") String baseUrl) {
+			LevelRepository levelRepository, TeacherRankRepository teacherRankRepository,
+			DepartmentRepository departmentRepository, EmailService emailService, PasswordEncoder passwordEncoder,
+			@Value("${app.ui.base-url}") String baseUrl) {
 		this.userRepository = userRepository;
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;
-		this.gradeRepository = gradeRepository;
+		this.teacherRankRepository = teacherRankRepository;
 		this.departmentRepository = departmentRepository;
 		this.emailService = emailService;
 		this.passwordEncoder = passwordEncoder;
@@ -120,6 +121,7 @@ public class UserAccountService {
 		student.setLastName(request.lastName());
 		student.setFirstName(request.firstName());
 		student.setCne(request.cne());
+		student.setCodeApogee(request.codeApogee());
 		student.setMajor(major);
 		student.setLevel(level);
 		return student;
@@ -138,10 +140,10 @@ public class UserAccountService {
 		teacher.setRole(Role.TEACHER);
 		teacher.setLastName(request.lastName());
 		teacher.setFirstName(request.firstName());
-		if (request.gradeId() != null) {
-			Grade grade = gradeRepository.findById(request.gradeId())
-					.orElseThrow(() -> new InvalidBusinessStateException("Grade introuvable"));
-			teacher.setGrade(grade);
+		if (request.teacherRankId() != null) {
+			TeacherRank teacherRank = teacherRankRepository.findById(request.teacherRankId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Rank introuvable"));
+			teacher.setTeacherRank(teacherRank);
 		}
 		teacher.setDepartment(dept);
 		return teacher;
@@ -182,6 +184,7 @@ public class UserAccountService {
 		student.setLastName(entry.lastName());
 		student.setFirstName(entry.firstName());
 		student.setCne(entry.cne());
+		student.setCodeApogee(entry.codeApogee());
 		student.setMajor(major);
 		student.setLevel(level);
 		return student;
@@ -200,10 +203,10 @@ public class UserAccountService {
 		teacher.setRole(Role.TEACHER);
 		teacher.setLastName(entry.lastName());
 		teacher.setFirstName(entry.firstName());
-		if (entry.gradeName() != null) {
-			Grade grade = gradeRepository.findByName(entry.gradeName())
-					.orElseThrow(() -> new InvalidBusinessStateException("Grade introuvable: " + entry.gradeName()));
-			teacher.setGrade(grade);
+		if (entry.teacherRankName() != null) {
+			TeacherRank teacherRank = teacherRankRepository.findByName(entry.teacherRankName()).orElseThrow(
+					() -> new InvalidBusinessStateException("Rank introuvable: " + entry.teacherRankName()));
+			teacher.setTeacherRank(teacherRank);
 		}
 		teacher.setDepartment(dept);
 		return teacher;

@@ -1,16 +1,20 @@
 package com.system_gestion_soutenance.api.admin.department.service;
 
 import com.system_gestion_soutenance.api.admin.department.dto.CreateDepartmentRequest;
+import com.system_gestion_soutenance.api.admin.department.dto.UpdateDepartmentRequest;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.admin.faculty.entity.Faculty;
 import com.system_gestion_soutenance.api.admin.faculty.repository.FacultyRepository;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -31,6 +35,12 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 		this.teacherRepository = teacherRepository;
 		this.roomRepository = roomRepository;
 		this.facultyRepository = facultyRepository;
+	}
+
+	public PaginatedResponse<Department> findAll(int page, int limit) {
+		Page<Department> deptPage = departmentRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(deptPage.getContent(), deptPage.getTotalElements(), deptPage.getTotalPages(),
+				page, limit);
 	}
 
 	public Department findById(Long id) {
@@ -85,6 +95,31 @@ public class DepartmentService extends BaseCrudService<Department, Long, CreateD
 			department.setHead(head);
 		} else {
 			department.setHead(null);
+		}
+
+		return save(department);
+	}
+
+	@Audited(action = "UPDATE", entity = "Department")
+	@Transactional
+	public Department updatePartial(Long id, UpdateDepartmentRequest request) {
+		Department department = findByIdOrThrow(id, "Département");
+
+		if (request.name() != null) {
+			department.setName(request.name());
+		}
+		if (request.code() != null) {
+			department.setCode(request.code());
+		}
+		if (request.facultyId() != null) {
+			Faculty faculty = facultyRepository.findById(request.facultyId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Faculté introuvable"));
+			department.setFaculty(faculty);
+		}
+		if (request.headId() != null) {
+			Teacher head = teacherRepository.findById(request.headId())
+					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant responsable introuvable"));
+			department.setHead(head);
 		}
 
 		return save(department);

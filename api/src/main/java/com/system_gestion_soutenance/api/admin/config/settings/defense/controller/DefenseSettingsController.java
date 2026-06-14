@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.admin.config.settings.defense.controller;
 
+import com.system_gestion_soutenance.api.admin.config.settings.defense.dto.PatchDefenseSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.dto.UpdateDefenseSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.service.DefenseSettingsService;
@@ -30,5 +31,11 @@ public class DefenseSettingsController {
 	@Operation(summary = "Update defense settings")
 	public DefenseSettings update(@Valid @RequestBody UpdateDefenseSettingsRequest updates) {
 		return service.update(updates);
+	}
+
+	@PatchMapping
+	@Operation(summary = "Partially update defense settings")
+	public DefenseSettings patch(@Valid @RequestBody PatchDefenseSettingsRequest updates) {
+		return service.patch(updates);
 	}
 }

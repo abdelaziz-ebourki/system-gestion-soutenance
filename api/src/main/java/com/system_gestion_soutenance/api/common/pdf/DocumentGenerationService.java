@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.common.pdf;
 
 import com.lowagie.text.DocumentException;
+import com.system_gestion_soutenance.api.common.exception.PdfGenerationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +49,7 @@ public class DocumentGenerationService {
 			return baos.toByteArray();
 		} catch (DocumentException | IOException e) {
 			LOG.error("Failed to generate PDF for template: {}", templateName, e);
-			throw new RuntimeException("Erreur lors de la generation du PDF", e);
+			throw new PdfGenerationException("Erreur lors de la generation du PDF", e);
 		}
 	}
 

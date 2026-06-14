@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.teacher.evaluation.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.EvaluationMapper;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
@@ -14,6 +15,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
@@ -35,11 +38,17 @@ public class EvaluationController {
 	@Operation(summary = "List evaluations", description = "Retrieves all evaluations assigned to the connected teacher.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved evaluations")})
-	public ApiResponse<List<EvaluationResponse>> findByTeacher(@AuthenticationPrincipal User user) {
+	public ApiResponse<PaginatedResponse<EvaluationResponse>> findByTeacher(@AuthenticationPrincipal User user,
+			@RequestParam(defaultValue = "0") @Min(0) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		Long teacherId = user.getId();
-		List<Evaluation> evaluations = evaluationService.findByTeacher(teacherId);
-		Map<Long, Project> projectMap = evaluationService.buildProjectMap(evaluations);
-		return ApiResponse.success(evaluations.stream().map(e -> evaluationMapper.toDto(e, projectMap)).toList());
+		PaginatedResponse<Evaluation> result = evaluationService.findByTeacher(teacherId, page, limit);
+		Map<Long, Project> projectMap = evaluationService.buildProjectMap(result.items());
+		List<EvaluationResponse> items = result.items().stream().map(e -> evaluationMapper.toDto(e, projectMap))
+				.toList();
+		PaginatedResponse<EvaluationResponse> mapped = new PaginatedResponse<>(items, result.total(),
+				result.pageCount(), result.currentPage(), result.size());
+		return ApiResponse.success(mapped);
 	}
 
 	@PostMapping("/{id}")
@@ -49,8 +58,8 @@ public class EvaluationController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid evaluation data"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Evaluation not found")})
 	public ApiResponse<EvaluationResponse> submit(@PathVariable Long id,
-			@Valid @RequestBody EvaluationSubmitRequest request) {
-		Evaluation evaluation = evaluationService.submit(id, request);
+			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
+		Evaluation evaluation = evaluationService.submit(id, user.getId(), request);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));
 		return ApiResponse.success(evaluationMapper.toDto(evaluation, projectMap));
 	}

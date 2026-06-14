@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.defensesession.dto.CreateDefenseSessionRequest;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +17,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
-import org.springframework.stereotype.Service;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionCreatedEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionFrozenEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionStatusChangedEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionUnfrozenEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import java.time.LocalDateTime;
 @SuppressWarnings("PMD")
 
 @Service
@@ -32,19 +42,34 @@ public class CoordinatorDefenseSessionService {
 
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final JuryRoleTemplateRepository juryRoleTemplateRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public CoordinatorDefenseSessionService(DefenseSessionRepository defenseSessionRepository,
-			JuryRoleTemplateRepository juryRoleTemplateRepository) {
+			JuryRoleTemplateRepository juryRoleTemplateRepository, ApplicationEventPublisher eventPublisher,
+			SecurityService securityService) {
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.juryRoleTemplateRepository = juryRoleTemplateRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	public List<DefenseSession> findAll() {
 		return defenseSessionRepository.findAll();
 	}
 
+	public PaginatedResponse<DefenseSession> findAll(int page, int limit) {
+		Page<DefenseSession> dsPage = defenseSessionRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(dsPage.getContent(), dsPage.getTotalElements(), dsPage.getTotalPages(), page,
+				limit);
+	}
+
 	@Transactional
 	public DefenseSession create(CreateDefenseSessionRequest request) {
+		if (request.maxGroupSize() < 1) {
+			throw new InvalidBusinessStateException("La taille maximale du groupe doit être au moins 1");
+		}
+
 		DefenseSession ds = new DefenseSession();
 		ds.setName(request.name());
 		ds.setDefenseType(parseDefenseType(request.defenseType()));
@@ -71,11 +96,18 @@ public class CoordinatorDefenseSessionService {
 					.collect(Collectors.toMap(TemplateRole::getName, TemplateRole::getCoefficient)));
 		}
 
-		return defenseSessionRepository.save(ds);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(
+				new DefenseSessionCreatedEvent(securityService.getCurrentUserEmail(), saved.getId(), saved.getName()));
+		return saved;
 	}
 
 	@Transactional
 	public DefenseSession update(Long id, CreateDefenseSessionRequest request) {
+		if (request.maxGroupSize() < 1) {
+			throw new InvalidBusinessStateException("La taille maximale du groupe doit être au moins 1");
+		}
+
 		DefenseSession ds = defenseSessionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
@@ -128,6 +160,55 @@ public class CoordinatorDefenseSessionService {
 		DefenseSessionStatus newStatus = parseStatus(toStatus);
 		validateTransition(ds.getStatus(), newStatus);
 		ds.setStatus(newStatus);
+		if (newStatus == DefenseSessionStatus.COMPLETED) {
+			ds.setFrozen(true);
+		}
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(new DefenseSessionStatusChangedEvent(securityService.getCurrentUserEmail(),
+				saved.getId(), saved.getName(), newStatus.name()));
+		return saved;
+	}
+
+	@Transactional
+	public DefenseSession freeze(Long id) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		ds.setFrozen(true);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(
+				new DefenseSessionFrozenEvent(securityService.getCurrentUserEmail(), saved.getId(), saved.getName()));
+		return saved;
+	}
+
+	@Transactional
+	public DefenseSession unfreeze(Long id) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		if (ds.getStatus() == DefenseSessionStatus.COMPLETED) {
+			throw new InvalidBusinessStateException("Impossible de dégeler une session terminée");
+		}
+		ds.setFrozen(false);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(
+				new DefenseSessionUnfrozenEvent(securityService.getCurrentUserEmail(), saved.getId(), saved.getName()));
+		return saved;
+	}
+
+	@Transactional
+	public DefenseSession approve(Long id, Long adminUserId) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		ds.setApprovedBy(adminUserId);
+		ds.setApprovedAt(LocalDateTime.now());
+		return defenseSessionRepository.save(ds);
+	}
+
+	@Transactional
+	public DefenseSession revokeApproval(Long id) {
+		DefenseSession ds = defenseSessionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
+		ds.setApprovedBy(null);
+		ds.setApprovedAt(null);
 		return defenseSessionRepository.save(ds);
 	}
 

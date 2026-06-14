@@ -1,8 +1,13 @@
 package com.system_gestion_soutenance.api.coordinator.project.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkImportResult;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectEntry;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectRequest;
+import com.system_gestion_soutenance.api.coordinator.project.dto.BulkProjectResponse;
 import com.system_gestion_soutenance.api.coordinator.project.dto.CreateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
@@ -12,11 +17,17 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.ProjectProposedEvent;
+import com.system_gestion_soutenance.api.notification.event.ProjectStatusChangedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -29,19 +40,30 @@ public class ProjectService {
 	private final StudentRepository studentRepository;
 	private final GroupRepository groupRepository;
 	private final DefenseRepository defenseRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public ProjectService(ProjectRepository projectRepository, TeacherRepository teacherRepository,
-			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository) {
+			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.projectRepository = projectRepository;
 		this.teacherRepository = teacherRepository;
 		this.studentRepository = studentRepository;
 		this.groupRepository = groupRepository;
 		this.defenseRepository = defenseRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	@Transactional(readOnly = true)
 	public List<Project> findAll() {
 		return projectRepository.findAllWithDetails();
+	}
+
+	public PaginatedResponse<Project> findAll(int page, int limit) {
+		Page<Project> projectPage = projectRepository.findAllWithDetails(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(projectPage.getContent(), projectPage.getTotalElements(),
+				projectPage.getTotalPages(), page, limit);
 	}
 
 	public Map<Long, Long> buildProjectGroupIdMap(List<Project> projects) {
@@ -71,7 +93,13 @@ public class ProjectService {
 		project.setSupervisor(supervisor);
 		project.setStudents(students);
 
-		return projectRepository.save(project);
+		Project saved = projectRepository.save(project);
+		String studentName = students.isEmpty()
+				? "Divers"
+				: students.get(0).getFirstName() + " " + students.get(0).getLastName();
+		eventPublisher.publishEvent(new ProjectProposedEvent(securityService.getCurrentUserEmail(), saved.getId(),
+				saved.getTitle(), studentName));
+		return saved;
 	}
 
 	@Audited(action = "UPDATE", entity = "Project")
@@ -90,6 +118,34 @@ public class ProjectService {
 		return projectRepository.save(project);
 	}
 
+	@Audited(action = "UPDATE_STATUS", entity = "Project")
+	@Transactional
+	public Project updateStatus(Long id, ProjectStatus newStatus) {
+		Project project = projectRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
+
+		ProjectStatus current = project.getStatus();
+		if (current == newStatus) {
+			throw new InvalidBusinessStateException("Le projet est déjà à l'état " + newStatus.name());
+		}
+		if (current == ProjectStatus.PENDING && newStatus != ProjectStatus.APPROVED
+				&& newStatus != ProjectStatus.REJECTED) {
+			throw new InvalidBusinessStateException("Un projet en attente ne peut être approuvé ou rejeté uniquement");
+		}
+		if (current == ProjectStatus.APPROVED && newStatus != ProjectStatus.PENDING) {
+			throw new InvalidBusinessStateException("Un projet approuvé ne peut revenir qu'à l'état en attente");
+		}
+		if (current == ProjectStatus.REJECTED && newStatus != ProjectStatus.PENDING) {
+			throw new InvalidBusinessStateException("Un projet rejeté ne peut revenir qu'à l'état en attente");
+		}
+
+		project.setStatus(newStatus);
+		Project saved = projectRepository.save(project);
+		eventPublisher.publishEvent(new ProjectStatusChangedEvent(securityService.getCurrentUserEmail(), saved.getId(),
+				saved.getTitle(), current.name(), newStatus.name()));
+		return saved;
+	}
+
 	@Audited(action = "DELETE", entity = "Project")
 	@Transactional
 	public void delete(Long id) {
@@ -105,6 +161,53 @@ public class ProjectService {
 		}
 
 		projectRepository.delete(project);
+	}
+
+	@Transactional
+	public BulkImportResult bulkImport(BulkProjectRequest request) {
+		List<BulkImportResult.BulkImportError> errors = new ArrayList<>();
+		List<BulkProjectResponse> created = new ArrayList<>();
+
+		int line = 0;
+		for (BulkProjectEntry entry : request.projects()) {
+			line++;
+			try {
+				Teacher supervisor = teacherRepository.findById(entry.supervisorId()).orElse(null);
+				if (supervisor == null) {
+					errors.add(new BulkImportResult.BulkImportError(line,
+							"Encadrant introuvable avec l'id " + entry.supervisorId()));
+					continue;
+				}
+
+				List<Student> students = Collections.emptyList();
+				if (entry.studentIds() != null && !entry.studentIds().isEmpty()) {
+					students = new ArrayList<>(studentRepository.findAllById(entry.studentIds()));
+					if (students.size() != entry.studentIds().size()) {
+						List<Long> foundIds = students.stream().map(Student::getId).toList();
+						List<Long> missingIds = entry.studentIds().stream().filter(id -> !foundIds.contains(id))
+								.toList();
+						errors.add(new BulkImportResult.BulkImportError(line,
+								"Étudiants introuvables avec les ids: " + missingIds));
+						continue;
+					}
+				}
+
+				Project project = new Project();
+				project.setTitle(entry.title());
+				project.setDescription(entry.description());
+				project.setDefenseType(entry.defenseType());
+				project.setStatus(ProjectStatus.PENDING);
+				project.setSupervisor(supervisor);
+				project.setStudents(students);
+
+				Project saved = projectRepository.save(project);
+				created.add(new BulkProjectResponse(saved.getId(), saved.getTitle()));
+			} catch (Exception e) {
+				errors.add(new BulkImportResult.BulkImportError(line, e.getMessage()));
+			}
+		}
+
+		return new BulkImportResult(request.projects().size(), created.size(), created, errors);
 	}
 
 }

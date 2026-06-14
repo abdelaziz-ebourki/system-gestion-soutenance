@@ -1,12 +1,16 @@
 package com.system_gestion_soutenance.api.admin.config.level.service;
 
 import com.system_gestion_soutenance.api.admin.config.level.dto.CreateLevelRequest;
+import com.system_gestion_soutenance.api.admin.config.level.dto.UpdateLevelRequest;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.service.BaseCrudService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
@@ -22,6 +26,12 @@ public class LevelConfigService extends BaseCrudService<Level, Long, CreateLevel
 		super(levelRepository);
 		this.levelRepository = levelRepository;
 		this.studentRepository = studentRepository;
+	}
+
+	public PaginatedResponse<Level> findAll(int page, int limit) {
+		Page<Level> levelPage = levelRepository.findAll(PageRequest.of(page, limit));
+		return new PaginatedResponse<>(levelPage.getContent(), levelPage.getTotalElements(), levelPage.getTotalPages(),
+				page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "Level")
@@ -41,6 +51,16 @@ public class LevelConfigService extends BaseCrudService<Level, Long, CreateLevel
 	public Level update(Long id, CreateLevelRequest request) {
 		Level level = findByIdOrThrow(id, "Niveau");
 		level.setName(request.name());
+		return save(level);
+	}
+
+	@Audited(action = "UPDATE", entity = "Level")
+	@Transactional
+	public Level updatePartial(Long id, UpdateLevelRequest request) {
+		Level level = findByIdOrThrow(id, "Niveau");
+		if (request.name() != null) {
+			level.setName(request.name());
+		}
 		return save(level);
 	}
 

@@ -1,7 +1,7 @@
 package com.system_gestion_soutenance.api.user.service;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
@@ -31,7 +31,7 @@ class UserProfileServiceTest {
 	@Mock
 	private LevelRepository levelRepository;
 	@Mock
-	private GradeRepository gradeRepository;
+	private TeacherRankRepository teacherRankRepository;
 	@Mock
 	private DepartmentRepository departmentRepository;
 
@@ -57,7 +57,7 @@ class UserProfileServiceTest {
 	@Test
 	void updateBasicInfo_Success() {
 		UpdateUserRequest request = new UpdateUserRequest("NewLast", "NewFirst", null, null, null, null, null, null,
-				null);
+				null, null);
 		userProfileService.updateBasicInfo(user, request);
 
 		assertEquals("NewLast", user.getLastName());
@@ -66,7 +66,8 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateBasicInfo_PartialUpdate() {
-		UpdateUserRequest request = new UpdateUserRequest("NewLast", null, null, null, null, null, null, null, null);
+		UpdateUserRequest request = new UpdateUserRequest("NewLast", null, null, null, null, null, null, null, null,
+				null);
 		userProfileService.updateBasicInfo(user, request);
 
 		assertEquals("NewLast", user.getLastName());
@@ -75,7 +76,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateStudentProfile_Success() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, "CNE456", 1L, 1L, null, null);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, "CNE456", null, 1L, 1L, null, null);
 		Major major = new Major();
 		Level level = new Level();
 
@@ -91,7 +92,7 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateStudentProfile_MajorNotFound_ThrowsException() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, 1L, null, null, null);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, 1L, null, null, null);
 		when(majorRepository.findById(1L)).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -101,22 +102,22 @@ class UserProfileServiceTest {
 
 	@Test
 	void updateTeacherProfile_Success() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, 1L, 1L);
-		Grade grade = new Grade();
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, 1L, 1L);
+		TeacherRank teacherRank = new TeacherRank();
 		Department dept = new Department();
 
-		when(gradeRepository.findById(1L)).thenReturn(Optional.of(grade));
+		when(teacherRankRepository.findById(1L)).thenReturn(Optional.of(teacherRank));
 		when(departmentRepository.findById(1L)).thenReturn(Optional.of(dept));
 
 		userProfileService.updateTeacherProfile(teacher, request);
 
-		assertEquals(grade, teacher.getGrade());
+		assertEquals(teacherRank, teacher.getTeacherRank());
 		assertEquals(dept, teacher.getDepartment());
 	}
 
 	@Test
 	void updateTeacherProfile_DepartmentNotFound_ThrowsException() {
-		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, 1L);
+		UpdateUserRequest request = new UpdateUserRequest(null, null, null, null, null, null, null, null, null, 1L);
 		when(departmentRepository.findById(1L)).thenReturn(Optional.empty());
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,

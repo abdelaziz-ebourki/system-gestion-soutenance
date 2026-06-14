@@ -10,11 +10,13 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import org.junit.jupiter.api.Test;
 import com.system_gestion_soutenance.api.coordinator.defensesession.dto.CreateDefenseSessionRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.jupiter.api.Test;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 
@@ -22,9 +24,11 @@ class CoordinatorDefenseSessionServiceTest {
 
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 	private final JuryRoleTemplateRepository juryRoleTemplateRepository = mock(JuryRoleTemplateRepository.class);
+	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+	private final SecurityService securityService = mock(SecurityService.class);
 
 	private final CoordinatorDefenseSessionService service = new CoordinatorDefenseSessionService(
-			defenseSessionRepository, juryRoleTemplateRepository);
+			defenseSessionRepository, juryRoleTemplateRepository, eventPublisher, securityService);
 
 	@Test
 	void findAll_returnsAllSessions() {
@@ -48,10 +52,13 @@ class CoordinatorDefenseSessionServiceTest {
 		saved.setId(1L);
 		saved.setName("Session PFE");
 		when(defenseSessionRepository.save(any(DefenseSession.class))).thenReturn(saved);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		var result = service.create(request);
 
 		assertEquals("Session PFE", result.getName());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -64,6 +71,7 @@ class CoordinatorDefenseSessionServiceTest {
 		template.setRoles(List.of(role));
 
 		when(juryRoleTemplateRepository.findById(10L)).thenReturn(Optional.of(template));
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "PFE", "DRAFT", 3, 30, 15,
 				null, Map.of("président", 2), 10L, "2025-06-01", "2025-06-30");
@@ -77,6 +85,8 @@ class CoordinatorDefenseSessionServiceTest {
 
 		verify(defenseSessionRepository).save(argThat(ds -> ds.getEvaluationCoefficients() != null
 				&& ds.getEvaluationCoefficients().containsKey("président") && ds.getJuryRoleTemplate() != null));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -90,6 +100,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(template.getRoles()).thenReturn(List.of(role));
 
 		when(juryRoleTemplateRepository.findById(10L)).thenReturn(Optional.of(template));
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "PFE", "DRAFT", 3, 30, 15,
 				null, null, 10L, "2025-06-01", "2025-06-30");
@@ -102,6 +113,8 @@ class CoordinatorDefenseSessionServiceTest {
 
 		verify(defenseSessionRepository).save(argThat(ds -> ds.getEvaluationCoefficients() != null
 				&& ds.getEvaluationCoefficients().containsKey("président")));
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -245,18 +258,19 @@ class CoordinatorDefenseSessionServiceTest {
 	}
 
 	@Test
-	void validateTransition_sameToStatus_returnsEarly() {
+	void transition_validTransition_updatesStatus() {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
+		ds.setName("Session");
 		ds.setStatus(DefenseSessionStatus.DRAFT);
-
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
-		var result = service.transition(1L, "DRAFT");
-		assertEquals(DefenseSessionStatus.DRAFT, result.getStatus());
-
-		verify(defenseSessionRepository).save(ds);
+		var result = service.transition(1L, "ACTIVE");
+		assertEquals(DefenseSessionStatus.ACTIVE, result.getStatus());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -267,59 +281,57 @@ class CoordinatorDefenseSessionServiceTest {
 	}
 
 	@Test
-	void transition_validTransition_updatesStatus() {
-		DefenseSession ds = new DefenseSession();
-		ds.setId(1L);
-		ds.setStatus(DefenseSessionStatus.DRAFT);
-
-		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSessionRepository.save(ds)).thenReturn(ds);
-
-		var result = service.transition(1L, "ACTIVE");
-
-		assertEquals(DefenseSessionStatus.ACTIVE, result.getStatus());
-	}
-
-	@Test
 	void transition_activeToScheduled_success() {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
+		ds.setName("Session");
 		ds.setStatus(DefenseSessionStatus.ACTIVE);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		var result = service.transition(1L, "SCHEDULED");
 
 		assertEquals(DefenseSessionStatus.SCHEDULED, result.getStatus());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
 	void transition_scheduledToCompleted_success() {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
+		ds.setName("Session");
 		ds.setStatus(DefenseSessionStatus.SCHEDULED);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		var result = service.transition(1L, "COMPLETED");
 
 		assertEquals(DefenseSessionStatus.COMPLETED, result.getStatus());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
 	void transition_completedToArchived_success() {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
+		ds.setName("Session");
 		ds.setStatus(DefenseSessionStatus.COMPLETED);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		var result = service.transition(1L, "ARCHIVED");
 
 		assertEquals(DefenseSessionStatus.ARCHIVED, result.getStatus());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
 	}
 
 	@Test
@@ -363,5 +375,131 @@ class CoordinatorDefenseSessionServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.transition(1L, "INVALID_STATUS"));
+	}
+
+	@Test
+	void transition_toCompleted_autoFreezes() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setStatus(DefenseSessionStatus.ACTIVE);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.transition(1L, "COMPLETED");
+
+		assertEquals(DefenseSessionStatus.COMPLETED, result.getStatus());
+		assertTrue(result.isFrozen());
+	}
+
+	@Test
+	void freeze_setsIsFrozenTrue() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setName("Session");
+		ds.setFrozen(false);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
+
+		var result = service.freeze(1L);
+
+		assertTrue(result.isFrozen());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void unfreeze_setsIsFrozenFalse() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setName("Session");
+		ds.setFrozen(true);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
+
+		var result = service.unfreeze(1L);
+
+		assertFalse(result.isFrozen());
+		verify(eventPublisher)
+				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void freeze_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.freeze(99L));
+	}
+
+	@Test
+	void unfreeze_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.unfreeze(99L));
+	}
+
+	@Test
+	void unfreeze_completedSession_throws() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setFrozen(true);
+		ds.setStatus(DefenseSessionStatus.COMPLETED);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.unfreeze(1L));
+		verify(defenseSessionRepository, never()).save(any());
+	}
+
+	@Test
+	void approve_setsApprovedByAndTimestamp() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setApprovedBy(null);
+		ds.setApprovedAt(null);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.approve(1L, 10L);
+
+		assertEquals(10L, result.getApprovedBy());
+		assertNotNull(result.getApprovedAt());
+		verify(defenseSessionRepository).save(ds);
+	}
+
+	@Test
+	void approve_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.approve(99L, 10L));
+	}
+
+	@Test
+	void revokeApproval_clearsApprovedByAndTimestamp() {
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setApprovedBy(10L);
+		ds.setApprovedAt(java.time.LocalDateTime.now());
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSessionRepository.save(ds)).thenReturn(ds);
+
+		var result = service.revokeApproval(1L);
+
+		assertNull(result.getApprovedBy());
+		assertNull(result.getApprovedAt());
+		verify(defenseSessionRepository).save(ds);
+	}
+
+	@Test
+	void revokeApproval_sessionNotFound_throws() {
+		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.revokeApproval(99L));
 	}
 }
