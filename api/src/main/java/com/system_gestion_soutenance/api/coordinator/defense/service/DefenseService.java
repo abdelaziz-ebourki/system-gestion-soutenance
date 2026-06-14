@@ -21,9 +21,10 @@ import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleReques
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleResponse;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
-import com.system_gestion_soutenance.api.notification.entity.AppNotification;
-import com.system_gestion_soutenance.api.notification.entity.NotificationType;
-import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.DefenseCancelledEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionPublishedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,20 +48,22 @@ public class DefenseService {
 	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
-	private final NotificationRepository notificationRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 	private final TeacherRepository teacherRepository;
 
 	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
 			DefenseSessionRepository defenseSessionRepository, DefenseSettingsRepository defenseSettingsRepository,
 			ProjectRepository projectRepository, GroupRepository groupRepository,
-			NotificationRepository notificationRepository, TeacherRepository teacherRepository) {
+			ApplicationEventPublisher eventPublisher, SecurityService securityService, TeacherRepository teacherRepository) {
 		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
-		this.notificationRepository = notificationRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 		this.teacherRepository = teacherRepository;
 	}
 
@@ -179,9 +182,11 @@ public class DefenseService {
 
 		defenseRepository.delete(defense);
 
-		createNotification(NotificationType.WARNING, "Soutenance annulée",
-				"La soutenance du " + defense.getDate() + " à " + defense.getTime() + " a été annulée.",
-				"/coordinator/schedule");
+		eventPublisher.publishEvent(new DefenseCancelledEvent(
+				securityService.getCurrentUserEmail(),
+				defense.getId(),
+				defense.getDate(),
+				defense.getTime()));
 	}
 
 	@Audited(action = "UPDATE", entity = "Jury")
@@ -204,8 +209,10 @@ public class DefenseService {
 			}
 			ds.setStatus(DefenseSessionStatus.SCHEDULED);
 			defenseSessionRepository.save(ds);
-			createNotification(NotificationType.SUCCESS, "Session publiée",
-					"La session \"" + ds.getName() + "\" a été publiée.", "/admin/sessions");
+			eventPublisher.publishEvent(new DefenseSessionPublishedEvent(
+					securityService.getCurrentUserEmail(),
+					ds.getId(),
+					ds.getName()));
 		}
 	}
 
@@ -323,16 +330,5 @@ public class DefenseService {
 						"Un enseignant ne peut être assigné qu'à un seul rôle dans un même jury");
 			}
 		}
-	}
-
-	private void createNotification(NotificationType type, String title, String message, String actionLink) {
-		AppNotification notification = new AppNotification();
-		notification.setType(type);
-		notification.setTitle(title);
-		notification.setMessage(message);
-		notification.setTimestamp(LocalDateTime.now());
-		notification.setRead(false);
-		notification.setActionLink(actionLink);
-		notificationRepository.save(notification);
 	}
 }

@@ -23,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluationServiceTest {
@@ -35,6 +37,10 @@ class EvaluationServiceTest {
 	private ProjectRepository projectRepository;
 	@Mock
 	private GroupRepository groupRepository;
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
+	@Mock
+	private SecurityService securityService;
 
 	@InjectMocks
 	private EvaluationService service;
@@ -62,6 +68,7 @@ class EvaluationServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, "Good", null);
 		Evaluation result = service.submit(1L, 1L, req);
@@ -81,6 +88,7 @@ class EvaluationServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(null, "Good", null);
 		Evaluation result = service.submit(1L, 1L, req);
@@ -99,6 +107,7 @@ class EvaluationServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
 		EvaluationSubmitRequest req = new EvaluationSubmitRequest(15.0, null, null);
 		Evaluation result = service.submit(1L, 1L, req);
@@ -169,6 +178,7 @@ class EvaluationServiceTest {
 				null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");
 
 		DefenseSession ds = new DefenseSession();
 		ds.setSubmissionDeadline(LocalDate.now().plusDays(1));

@@ -17,11 +17,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
-import java.time.LocalDateTime;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionCreatedEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionFrozenEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionStatusChangedEvent;
+import com.system_gestion_soutenance.api.notification.event.DefenseSessionUnfrozenEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 @SuppressWarnings("PMD")
 
 @Service
@@ -36,11 +42,16 @@ public class CoordinatorDefenseSessionService {
 
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final JuryRoleTemplateRepository juryRoleTemplateRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public CoordinatorDefenseSessionService(DefenseSessionRepository defenseSessionRepository,
-			JuryRoleTemplateRepository juryRoleTemplateRepository) {
+			JuryRoleTemplateRepository juryRoleTemplateRepository, ApplicationEventPublisher eventPublisher,
+			SecurityService securityService) {
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.juryRoleTemplateRepository = juryRoleTemplateRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	public List<DefenseSession> findAll() {
@@ -85,7 +96,12 @@ public class CoordinatorDefenseSessionService {
 					.collect(Collectors.toMap(TemplateRole::getName, TemplateRole::getCoefficient)));
 		}
 
-		return defenseSessionRepository.save(ds);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(new DefenseSessionCreatedEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				saved.getName()));
+		return saved;
 	}
 
 	@Transactional
@@ -149,7 +165,13 @@ public class CoordinatorDefenseSessionService {
 		if (newStatus == DefenseSessionStatus.COMPLETED) {
 			ds.setFrozen(true);
 		}
-		return defenseSessionRepository.save(ds);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(new DefenseSessionStatusChangedEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				saved.getName(),
+				newStatus.name()));
+		return saved;
 	}
 
 	@Transactional
@@ -157,7 +179,12 @@ public class CoordinatorDefenseSessionService {
 		DefenseSession ds = defenseSessionRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 		ds.setFrozen(true);
-		return defenseSessionRepository.save(ds);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(new DefenseSessionFrozenEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				saved.getName()));
+		return saved;
 	}
 
 	@Transactional
@@ -168,7 +195,12 @@ public class CoordinatorDefenseSessionService {
 			throw new InvalidBusinessStateException("Impossible de dégeler une session terminée");
 		}
 		ds.setFrozen(false);
-		return defenseSessionRepository.save(ds);
+		DefenseSession saved = defenseSessionRepository.save(ds);
+		eventPublisher.publishEvent(new DefenseSessionUnfrozenEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				saved.getName()));
+		return saved;
 	}
 
 	@Transactional

@@ -9,6 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.StudentDocumentSubmittedEvent;
+import com.system_gestion_soutenance.api.user.repository.StudentRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessException;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class StudentDocumentService {
 
 	private final StudentDocumentRepository repository;
+	private final StudentRepository studentRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 	private final Path uploadDir = Paths.get("uploads");
 
 	@Value("${app.document.max-file-size-mb:10}")
@@ -33,8 +40,12 @@ public class StudentDocumentService {
 	@Value("${app.document.version-limit:5}")
 	private int versionLimit;
 
-	public StudentDocumentService(StudentDocumentRepository repository) {
+	public StudentDocumentService(StudentDocumentRepository repository, StudentRepository studentRepository,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.repository = repository;
+		this.studentRepository = studentRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	public List<StudentDocument> findByStudent(Long studentId) {
@@ -93,7 +104,18 @@ public class StudentDocumentService {
 			doc.setFilePath(target.toString());
 			doc.setSubmittedAt(LocalDateTime.now());
 			doc.setStatus("submitted");
-			return repository.save(doc);
+			StudentDocument saved = repository.save(doc);
+			
+			com.system_gestion_soutenance.api.user.entity.Student student = studentRepository.findById(currentUserId)
+					.orElseThrow(() -> new EntityNotFoundException("Étudiant introuvable"));
+			
+			eventPublisher.publishEvent(new StudentDocumentSubmittedEvent(
+					securityService.getCurrentUserEmail(),
+					saved.getId(),
+					saved.getName(),
+					student.getFirstName() + " " + student.getLastName()));
+			
+			return saved;
 		} catch (IOException e) {
 			throw new RuntimeException("Erreur lors du telechargement du fichier");
 		}

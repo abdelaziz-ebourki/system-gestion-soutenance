@@ -11,6 +11,9 @@ import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmit
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.EvaluationSubmittedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +26,7 @@ import com.system_gestion_soutenance.api.common.exception.UnauthorizedAccessExce
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
 
 @Service
@@ -32,14 +36,18 @@ public class EvaluationService {
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public EvaluationService(EvaluationRepository evaluationRepository,
 			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
-			GroupRepository groupRepository) {
+			GroupRepository groupRepository, ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.evaluationRepository = evaluationRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	public List<Evaluation> findByTeacher(Long teacherId) {
@@ -62,6 +70,7 @@ public class EvaluationService {
 	}
 
 	@Audited(action = "UPDATE", entity = "Evaluation")
+	@Transactional
 	public Evaluation submit(Long id, Long currentUserId, EvaluationSubmitRequest request) {
 		Evaluation evaluation = evaluationRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Évaluation non trouvée"));
@@ -94,6 +103,18 @@ public class EvaluationService {
 
 		evaluation.setStatus(EvaluationStatus.SUBMITTED);
 		evaluation.setSubmittedAt(LocalDateTime.now());
-		return evaluationRepository.save(evaluation);
+		Evaluation saved = evaluationRepository.save(evaluation);
+		
+		String projectTitle = "Inconnu";
+		if (saved.getDefense() != null && saved.getDefense().getProject() != null) {
+			projectTitle = saved.getDefense().getProject().getTitle();
+		}
+		
+		eventPublisher.publishEvent(new EvaluationSubmittedEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				projectTitle,
+				saved.getScore() != null ? saved.getScore().doubleValue() : 0.0));
+		return saved;
 	}
 }

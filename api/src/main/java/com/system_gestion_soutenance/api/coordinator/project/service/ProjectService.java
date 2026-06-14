@@ -17,6 +17,10 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.ProjectProposedEvent;
+import com.system_gestion_soutenance.api.notification.event.ProjectStatusChangedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
@@ -36,14 +40,19 @@ public class ProjectService {
 	private final StudentRepository studentRepository;
 	private final GroupRepository groupRepository;
 	private final DefenseRepository defenseRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public ProjectService(ProjectRepository projectRepository, TeacherRepository teacherRepository,
-			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository) {
+			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.projectRepository = projectRepository;
 		this.teacherRepository = teacherRepository;
 		this.studentRepository = studentRepository;
 		this.groupRepository = groupRepository;
 		this.defenseRepository = defenseRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	@Transactional(readOnly = true)
@@ -84,7 +93,14 @@ public class ProjectService {
 		project.setSupervisor(supervisor);
 		project.setStudents(students);
 
-		return projectRepository.save(project);
+		Project saved = projectRepository.save(project);
+		String studentName = students.isEmpty() ? "Divers" : students.get(0).getFirstName() + " " + students.get(0).getLastName();
+		eventPublisher.publishEvent(new ProjectProposedEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				saved.getTitle(),
+				studentName));
+		return saved;
 	}
 
 	@Audited(action = "UPDATE", entity = "Project")
@@ -125,7 +141,14 @@ public class ProjectService {
 		}
 
 		project.setStatus(newStatus);
-		return projectRepository.save(project);
+		Project saved = projectRepository.save(project);
+		eventPublisher.publishEvent(new ProjectStatusChangedEvent(
+				securityService.getCurrentUserEmail(),
+				saved.getId(),
+				saved.getTitle(),
+				current.name(),
+				newStatus.name()));
+		return saved;
 	}
 
 	@Audited(action = "DELETE", entity = "Project")

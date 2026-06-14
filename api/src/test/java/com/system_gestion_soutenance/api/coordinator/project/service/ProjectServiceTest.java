@@ -15,6 +15,8 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
@@ -28,9 +30,11 @@ class ProjectServiceTest {
 	private final StudentRepository studentRepository = mock(StudentRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final DefenseRepository defenseRepository = mock(DefenseRepository.class);
+	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+	private final SecurityService securityService = mock(SecurityService.class);
 
 	private final ProjectService service = new ProjectService(projectRepository, teacherRepository, studentRepository,
-			groupRepository, defenseRepository);
+			groupRepository, defenseRepository, eventPublisher, securityService);
 
 	@Test
 	void findAll_returnsAllProjects() {

@@ -25,10 +25,10 @@ public interface UserMapper {
 	@Mapping(target = "majorName", source = "major.name")
 	@Mapping(target = "levelId", source = "level.id")
 	@Mapping(target = "levelName", source = "level.name")
+	@Mapping(target = "departmentId", source = "major.department.id")
+	@Mapping(target = "departmentName", source = "major.department.name")
 	@Mapping(target = "teacherRankId", ignore = true)
 	@Mapping(target = "teacherRankName", ignore = true)
-	@Mapping(target = "departmentId", ignore = true)
-	@Mapping(target = "departmentName", ignore = true)
 	UserDto toDto(Student student);
 
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToLowerCase")

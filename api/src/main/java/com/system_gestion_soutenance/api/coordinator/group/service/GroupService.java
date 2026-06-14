@@ -11,6 +11,9 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.notification.event.StudentLeftGroupEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.util.Collections;
 import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
@@ -28,13 +31,18 @@ public class GroupService {
 	private final ProjectRepository projectRepository;
 	private final StudentRepository studentRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
+	private final ApplicationEventPublisher eventPublisher;
+	private final SecurityService securityService;
 
 	public GroupService(GroupRepository groupRepository, ProjectRepository projectRepository,
-			StudentRepository studentRepository, DefenseSessionRepository defenseSessionRepository) {
+			StudentRepository studentRepository, DefenseSessionRepository defenseSessionRepository,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.projectRepository = projectRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
+		this.eventPublisher = eventPublisher;
+		this.securityService = securityService;
 	}
 
 	@Transactional(readOnly = true)
@@ -95,6 +103,10 @@ public class GroupService {
 		Group group = groupRepository.findById(groupId)
 				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
 
+		Student student = studentRepository.findById(studentId)
+				.orElseThrow(() -> new EntityNotFoundException("Étudiant introuvable"));
+		String studentName = student.getFirstName() + " " + student.getLastName();
+
 		boolean removed = group.getStudents().removeIf(s -> s.getId().equals(studentId));
 		if (!removed) {
 			throw new InvalidBusinessStateException("L'étudiant n'est pas membre de ce groupe");
@@ -102,6 +114,11 @@ public class GroupService {
 
 		if (group.getStudents().isEmpty()) {
 			groupRepository.deleteById(group.getId());
+			eventPublisher.publishEvent(new StudentLeftGroupEvent(
+					securityService.getCurrentUserEmail(),
+					studentId,
+					studentName,
+					groupId));
 			return;
 		}
 
@@ -110,6 +127,11 @@ public class GroupService {
 		}
 
 		groupRepository.save(group);
+		eventPublisher.publishEvent(new StudentLeftGroupEvent(
+				securityService.getCurrentUserEmail(),
+				studentId,
+				studentName,
+				groupId));
 	}
 
 	@Audited(action = "DELETE", entity = "Group")

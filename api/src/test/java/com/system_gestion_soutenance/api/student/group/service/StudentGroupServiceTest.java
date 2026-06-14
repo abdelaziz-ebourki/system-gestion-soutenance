@@ -23,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import org.springframework.context.ApplicationEventPublisher;
+import com.system_gestion_soutenance.api.common.service.SecurityService;
 
 @ExtendWith(MockitoExtension.class)
 class StudentGroupServiceTest {
@@ -37,6 +39,10 @@ class StudentGroupServiceTest {
 	private DefenseSessionRepository defenseSessionRepository;
 	@Mock
 	private StudentGroupMapper studentGroupMapper;
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
+	@Mock
+	private SecurityService securityService;
 
 	@InjectMocks
 	private StudentGroupService service;
@@ -422,6 +428,8 @@ class StudentGroupServiceTest {
 		group.setLeaderId(1L);
 
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(securityService.getCurrentUserEmail()).thenReturn("test@test.com");
 
 		service.leaveGroup(1L);
 
@@ -440,6 +448,8 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(alice));
+		when(securityService.getCurrentUserEmail()).thenReturn("test@test.com");
 
 		service.leaveGroup(1L);
 
@@ -457,6 +467,8 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findByStudentId(2L)).thenReturn(Optional.of(group));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+		when(studentRepository.findById(2L)).thenReturn(Optional.of(bob));
+		when(securityService.getCurrentUserEmail()).thenReturn("test@test.com");
 
 		service.leaveGroup(2L);
 
