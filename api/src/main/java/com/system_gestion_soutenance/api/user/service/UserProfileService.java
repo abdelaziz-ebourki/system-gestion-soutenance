@@ -16,6 +16,7 @@ import com.system_gestion_soutenance.api.common.util.PasswordValidator;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.entity.User;
+import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +32,18 @@ public class UserProfileService {
 	private final DepartmentRepository departmentRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final PasswordValidator passwordValidator;
+	private final UserRepository userRepository;
 
 	public UserProfileService(MajorRepository majorRepository, LevelRepository levelRepository,
 			TeacherRankRepository teacherRankRepository, DepartmentRepository departmentRepository,
-			PasswordEncoder passwordEncoder, PasswordValidator passwordValidator) {
+			PasswordEncoder passwordEncoder, PasswordValidator passwordValidator, UserRepository userRepository) {
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;
 		this.teacherRankRepository = teacherRankRepository;
 		this.departmentRepository = departmentRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.passwordValidator = passwordValidator;
+		this.userRepository = userRepository;
 	}
 
 	public void updateBasicInfo(User user, UpdateUserRequest request) {
@@ -87,13 +90,19 @@ public class UserProfileService {
 		if (request.firstName() != null) {
 			user.setFirstName(request.firstName());
 		}
+		userRepository.save(user);
 	}
 
 	public void changePassword(User user, ChangePasswordRequest request) {
 		if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
 			throw new InvalidBusinessStateException("Le mot de passe actuel est incorrect");
 		}
-		passwordValidator.validate(request.newPassword());
+		try {
+			passwordValidator.validate(request.newPassword());
+		} catch (IllegalArgumentException e) {
+			throw new InvalidBusinessStateException(e.getMessage());
+		}
 		user.setPassword(passwordEncoder.encode(request.newPassword()));
+		userRepository.save(user);
 	}
 }

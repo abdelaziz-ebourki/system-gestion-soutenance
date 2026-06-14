@@ -13,6 +13,7 @@ import com.system_gestion_soutenance.api.user.dto.ChangePasswordRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateProfileRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
 import com.system_gestion_soutenance.api.user.entity.*;
+import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,8 @@ class UserProfileServiceTest {
 	private PasswordEncoder passwordEncoder;
 	@Mock
 	private PasswordValidator passwordValidator;
+	@Mock
+	private UserRepository userRepository;
 
 	@InjectMocks
 	private UserProfileService userProfileService;

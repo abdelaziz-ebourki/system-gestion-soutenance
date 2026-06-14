@@ -5,11 +5,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.User;
-import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import com.system_gestion_soutenance.api.user.service.UserProfileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,6 @@ class ProfileControllerTest {
 
 	@MockitoBean
 	private UserProfileService userProfileService;
-
-	@MockitoBean
-	private UserRepository userRepository;
 
 	@MockitoBean
 	private UserMapper userMapper;
@@ -65,7 +63,6 @@ class ProfileControllerTest {
 		UserDto dto = new UserDto(1L, "test@example.com", "student", "Updated", "Jane", true, null, null, null, null,
 				null, null, null, null, null, null);
 		when(securityService.getCurrentUser()).thenReturn(user);
-		when(userRepository.save(any())).thenReturn(user);
 		when(userMapper.toDto(user)).thenReturn(dto);
 
 		mockMvc.perform(patch("/api/me").contentType(MediaType.APPLICATION_JSON).content("""
@@ -84,13 +81,26 @@ class ProfileControllerTest {
 				""")).andExpect(status().isOk());
 
 		verify(userProfileService).changePassword(eq(user), any());
-		verify(userRepository).save(user);
 	}
 
 	@Test
 	void changePassword_withMissingFields_returns400() throws Exception {
 		mockMvc.perform(put("/api/me/password").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void changePassword_withWeakPassword_returns400() throws Exception {
+		User user = mockUser();
+		when(securityService.getCurrentUser()).thenReturn(user);
+		doThrow(new InvalidBusinessStateException(
+				"Le mot de passe doit contenir au moins 8 caractères, inclure une majuscule, "
+						+ "une minuscule, un chiffre et un caractère spécial."))
+				.when(userProfileService).changePassword(eq(user), any());
+
+		mockMvc.perform(put("/api/me/password").contentType(MediaType.APPLICATION_JSON).content("""
+				{"currentPassword":"OldP@ss1","newPassword":"weak"}
+				""")).andExpect(status().isBadRequest());
 	}
 
 	@Test

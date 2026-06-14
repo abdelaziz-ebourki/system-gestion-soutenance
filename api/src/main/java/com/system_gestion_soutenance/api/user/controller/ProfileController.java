@@ -7,7 +7,6 @@ import com.system_gestion_soutenance.api.user.dto.ChangePasswordRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateProfileRequest;
 import com.system_gestion_soutenance.api.user.dto.UserDto;
 import com.system_gestion_soutenance.api.user.entity.User;
-import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import com.system_gestion_soutenance.api.user.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,14 +27,12 @@ public class ProfileController {
 
 	private final SecurityService securityService;
 	private final UserProfileService userProfileService;
-	private final UserRepository userRepository;
 	private final UserMapper userMapper;
 
 	public ProfileController(SecurityService securityService, UserProfileService userProfileService,
-			UserRepository userRepository, UserMapper userMapper) {
+			UserMapper userMapper) {
 		this.securityService = securityService;
 		this.userProfileService = userProfileService;
-		this.userRepository = userRepository;
 		this.userMapper = userMapper;
 	}
 
@@ -51,8 +48,7 @@ public class ProfileController {
 	public ResponseEntity<ApiResponse<UserDto>> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
 		User user = securityService.getCurrentUser();
 		userProfileService.updateOwnProfile(user, request);
-		User saved = userRepository.save(user);
-		return ResponseEntity.ok(ApiResponse.success("Profil mis à jour avec succès", userMapper.toDto(saved)));
+		return ResponseEntity.ok(ApiResponse.success("Profil mis à jour avec succès", userMapper.toDto(user)));
 	}
 
 	@PutMapping("/password")
@@ -60,7 +56,6 @@ public class ProfileController {
 	public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
 		User user = securityService.getCurrentUser();
 		userProfileService.changePassword(user, request);
-		userRepository.save(user);
 		return ResponseEntity.ok(ApiResponse.success("Mot de passe modifié avec succès", null));
 	}
 }
