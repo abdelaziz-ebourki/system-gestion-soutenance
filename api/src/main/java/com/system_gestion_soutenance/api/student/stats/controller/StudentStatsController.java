@@ -27,6 +27,10 @@ public class StudentStatsController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")})
 	public ApiResponse<StudentStatsResponse> getStats(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		return ApiResponse.success(statsService.getStats(user.getId()));
 	}
 }

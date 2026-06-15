@@ -27,6 +27,10 @@ public class StudentDefenseController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved defense info")})
 	public ApiResponse<StudentDefenseResponse> getDefense(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		return ApiResponse.success(studentDefenseService.getDefense(user.getId()));
 	}
 }

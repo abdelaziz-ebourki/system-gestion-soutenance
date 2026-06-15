@@ -35,7 +35,7 @@ class StudentDefenseServiceTest {
 
 	@Test
 	void getDefense_noGroup_throws() {
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
@@ -43,7 +43,7 @@ class StudentDefenseServiceTest {
 	void getDefense_noProject_throws() {
 		Group group = new Group();
 		group.setStudents(List.of(student(1L)));
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
@@ -67,7 +67,7 @@ class StudentDefenseServiceTest {
 		defense.setDate(LocalDate.of(2026, 6, 15));
 		defense.setTime(LocalTime.of(9, 0));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
@@ -90,7 +90,7 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
@@ -116,7 +116,7 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
@@ -139,7 +139,7 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
@@ -152,7 +152,7 @@ class StudentDefenseServiceTest {
 		Group group = new Group();
 		group.setStudents(null);
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 
 		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
@@ -178,7 +178,7 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
@@ -201,7 +201,7 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);

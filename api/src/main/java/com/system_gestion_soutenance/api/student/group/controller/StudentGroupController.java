@@ -34,6 +34,10 @@ public class StudentGroupController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved workspace")})
 	public ApiResponse<StudentGroupWorkspaceResponse> getWorkspace(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		return ApiResponse.success(studentGroupService.getWorkspace(user.getId()));
 	}
 
@@ -43,6 +47,10 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Group created successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Creation period closed or invalid request")})
 	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		Long studentId = user.getId();
 		GroupDetailsResponse group = studentGroupMapper.toDetails(studentGroupService.createGroup(studentId),
 				studentId);
@@ -57,6 +65,10 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
 	public ApiResponse<GroupDetailsResponse> joinGroup(@Parameter(description = "Group ID") @PathVariable Long id,
 			@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		Long studentId = user.getId();
 		return ApiResponse
 				.success(studentGroupMapper.toDetails(studentGroupService.joinGroup(id, studentId), studentId));
@@ -68,6 +80,10 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully left the group"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Not in a group or group has a project")})
 	public ResponseEntity<ApiResponse<Void>> leaveGroup(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		studentGroupService.leaveGroup(user.getId());
 		return ResponseEntity.ok(ApiResponse.success("Vous avez quitté le groupe", null));
 	}

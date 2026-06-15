@@ -27,7 +27,7 @@ public class StudentDefenseService {
 
 	@Transactional(readOnly = true)
 	public StudentDefenseResponse getDefense(Long studentId) {
-		Group group = groupRepository.findByStudentId(studentId)
+		Group group = groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId)
 				.orElseThrow(() -> new EntityNotFoundException("Aucune soutenance trouvée pour cet étudiant"));
 
 		if (group.getProject() == null) {

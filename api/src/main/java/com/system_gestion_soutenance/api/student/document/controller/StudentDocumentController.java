@@ -44,6 +44,10 @@ public class StudentDocumentController {
 	public ApiResponse<PaginatedResponse<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user,
 			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
 			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		PaginatedResponse<StudentDocument> result = studentDocumentService.findByStudent(user.getId(), page, limit);
 		List<StudentDocumentDto> items = result.items().stream().map(mapper::toDto).toList();
 		PaginatedResponse<StudentDocumentDto> mapped = new PaginatedResponse<>(items, result.total(),
@@ -61,6 +65,10 @@ public class StudentDocumentController {
 			@Parameter(description = "Document ID") @PathVariable Long id,
 			@Parameter(description = "File to upload") @RequestParam("file") MultipartFile file,
 			@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		StudentDocument doc = studentDocumentService.upload(id, user.getId(), file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
 	}
@@ -72,6 +80,10 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
 	public ResponseEntity<byte[]> download(@Parameter(description = "Document ID") @PathVariable Long id,
 			@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		byte[] content;
 		try {
 			content = studentDocumentService.download(id, user.getId());

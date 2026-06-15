@@ -105,7 +105,7 @@ class GroupRepositoryTest {
 	}
 
 	@Test
-	void findByStudentId_returnsGroup() {
+	void findFirstByStudentsIdOrderByIdAsc_returnsGroup() {
 		Project project = createProject("Projet B");
 		em.persist(project);
 
@@ -118,15 +118,15 @@ class GroupRepositoryTest {
 		em.flush();
 		em.clear();
 
-		Optional<Group> result = repository.findByStudentId(savedStudent.getId());
+		Optional<Group> result = repository.findFirstByStudentsIdOrderByIdAsc(savedStudent.getId());
 
 		assertTrue(result.isPresent());
 		assertEquals("Groupe 2", result.get().getGroupName());
 	}
 
 	@Test
-	void findByStudentId_noMatch_returnsEmpty() {
-		Optional<Group> result = repository.findByStudentId(999L);
+	void findFirstByStudentsIdOrderByIdAsc_noMatch_returnsEmpty() {
+		Optional<Group> result = repository.findFirstByStudentsIdOrderByIdAsc(999L);
 		assertTrue(result.isEmpty());
 	}
 

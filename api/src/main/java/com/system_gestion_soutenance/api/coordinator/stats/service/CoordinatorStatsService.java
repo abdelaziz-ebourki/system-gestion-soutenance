@@ -20,7 +20,7 @@ public class CoordinatorStatsService {
 				SELECT
 				  (SELECT COUNT(*) FROM project) AS total_projects,
 				  (SELECT COUNT(*) FROM coordinator_group) AS total_groups,
-				  (SELECT COUNT(*) FROM jury) AS total_juries,
+				  (SELECT COUNT(*) FROM defense) AS total_defenses,
 				  (SELECT COUNT(*) FROM defense_session) AS scheduled_defenses
 				""");
 
