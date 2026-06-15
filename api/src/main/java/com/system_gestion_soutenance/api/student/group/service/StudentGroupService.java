@@ -49,7 +49,7 @@ public class StudentGroupService {
 
 	@Transactional(readOnly = true)
 	public StudentGroupWorkspaceResponse getWorkspace(Long studentId) {
-		Group currentGroup = groupRepository.findByStudentId(studentId).orElse(null);
+		Group currentGroup = groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).orElse(null);
 
 		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse currentDetails = currentGroup != null
 				? studentGroupMapper.toDetails(currentGroup, studentId)
@@ -73,7 +73,7 @@ public class StudentGroupService {
 
 	@Transactional
 	public Group createGroup(Long studentId) {
-		if (groupRepository.findByStudentId(studentId).isPresent()) {
+		if (groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).isPresent()) {
 			throw new InvalidBusinessStateException("Vous êtes déjà membre d'un groupe");
 		}
 		if (!isCreationPeriodOpen()) {
@@ -95,7 +95,7 @@ public class StudentGroupService {
 
 	@Transactional
 	public Group joinGroup(Long groupId, Long studentId) {
-		if (groupRepository.findByStudentId(studentId).isPresent()) {
+		if (groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).isPresent()) {
 			throw new InvalidBusinessStateException("Vous êtes déjà membre d'un groupe");
 		}
 		if (!isCreationPeriodOpen()) {
@@ -144,7 +144,7 @@ public class StudentGroupService {
 
 	@Transactional
 	public void leaveGroup(Long studentId) {
-		Group group = groupRepository.findByStudentId(studentId)
+		Group group = groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId)
 				.orElseThrow(() -> new InvalidBusinessStateException("Vous n'êtes membre d'aucun groupe"));
 
 		if (group.getProject() != null) {

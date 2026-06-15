@@ -29,14 +29,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	private final boolean trustProxyHeaders;
 	private ScheduledExecutorService evictor;
 
-	private static final int MAX_REQUESTS = 10;
+	private final int maxRequests;
 	private static final long WINDOW_MS = 60_000;
 	private static final long EVICT_INTERVAL_MS = 120_000;
 
 	public RateLimitFilter(ObjectMapper objectMapper,
-			@Value("${app.security.trust-proxy-headers:false}") boolean trustProxyHeaders) {
+			@Value("${app.security.trust-proxy-headers:false}") boolean trustProxyHeaders,
+			@Value("${app.security.rate-limit.max-requests:10}") int maxRequests) {
 		this.objectMapper = objectMapper;
 		this.trustProxyHeaders = trustProxyHeaders;
+		this.maxRequests = maxRequests;
 	}
 
 	@PostConstruct
@@ -73,7 +75,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 						: existing);
 
 		int currentCount = counter.count.incrementAndGet();
-		if (currentCount > MAX_REQUESTS) {
+		if (currentCount > maxRequests) {
 			response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			objectMapper.writeValue(response.getWriter(),

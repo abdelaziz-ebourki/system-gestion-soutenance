@@ -46,7 +46,7 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L), student(2L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc1, doc2));
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.existsByProject_Id(10L)).thenReturn(true);
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
@@ -67,7 +67,7 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc));
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
 
@@ -85,7 +85,7 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(defenseRepository.existsByProject_Id(10L)).thenReturn(false);
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
@@ -96,7 +96,7 @@ class StudentStatsServiceTest {
 	@Test
 	void getStats_noGroup_returnsZeroMembers() {
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
 

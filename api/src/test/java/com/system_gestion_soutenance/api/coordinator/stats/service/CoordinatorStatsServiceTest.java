@@ -23,7 +23,7 @@ class CoordinatorStatsServiceTest {
 
 		assertEquals(10L, result.totalProjects());
 		assertEquals(5L, result.totalGroups());
-		assertEquals(8L, result.totalJuries());
+		assertEquals(8L, result.totalDefenses());
 		assertEquals(3L, result.scheduledDefenses());
 	}
 
@@ -36,5 +36,7 @@ class CoordinatorStatsServiceTest {
 
 		assertEquals(0L, result.totalProjects());
 		assertEquals(0L, result.totalGroups());
+		assertEquals(0L, result.totalDefenses());
+		assertEquals(0L, result.scheduledDefenses());
 	}
 }

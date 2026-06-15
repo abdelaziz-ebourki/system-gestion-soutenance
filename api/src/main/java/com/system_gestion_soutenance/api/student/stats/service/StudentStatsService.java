@@ -30,7 +30,7 @@ public class StudentStatsService {
 		List<StudentDocument> docs = documentRepository.findByStudentId(studentId);
 		long missing = docs.stream().filter(d -> "missing".equals(d.getStatus())).count();
 
-		Group group = groupRepository.findByStudentId(studentId).orElse(null);
+		Group group = groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).orElse(null);
 		int groupMembers = group != null ? group.getStudents().size() : 0;
 		Long projectId = (group != null && group.getProject() != null) ? group.getProject().getId() : null;
 

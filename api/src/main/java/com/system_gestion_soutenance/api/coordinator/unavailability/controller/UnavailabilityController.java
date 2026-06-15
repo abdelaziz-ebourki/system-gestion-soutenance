@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.coordinator.unavailability.dto.Unavaila
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import com.system_gestion_soutenance.api.common.mapper.UnavailabilityMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -27,9 +28,8 @@ public class UnavailabilityController {
 
 	@GetMapping
 	@Operation(summary = "List all unavailability records")
-	@ApiResponses({
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved unavailability records"),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")})
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "Successfully retrieved unavailability records"),
+			@ApiResponse(responseCode = "500", description = "Internal server error")})
 	public List<UnavailabilityDto> findAll() {
 		return repository.findAll().stream().map(mapper::toDto).toList();
 	}

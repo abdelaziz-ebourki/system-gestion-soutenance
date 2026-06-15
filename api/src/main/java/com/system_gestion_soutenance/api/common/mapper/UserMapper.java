@@ -16,9 +16,11 @@ public interface UserMapper {
 	@SubclassMapping(source = Student.class, target = UserDto.class)
 	@SubclassMapping(source = Teacher.class, target = UserDto.class)
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToLowerCase")
+	@Mapping(target = "isActive", source = "active")
 	UserDto toDto(User user);
 
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToLowerCase")
+	@Mapping(target = "isActive", source = "active")
 	@Mapping(target = "cne", source = "cne")
 	@Mapping(target = "codeApogee", source = "codeApogee")
 	@Mapping(target = "majorId", source = "major.id")
@@ -32,6 +34,7 @@ public interface UserMapper {
 	UserDto toDto(Student student);
 
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToLowerCase")
+	@Mapping(target = "isActive", source = "active")
 	@Mapping(target = "cne", ignore = true)
 	@Mapping(target = "codeApogee", ignore = true)
 	@Mapping(target = "majorId", ignore = true)

@@ -5,26 +5,37 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Filter that ensures the CSRF token is rendered into a cookie on every
- * request. Spring Security 6 uses deferred CSRF tokens by default, which means
- * the token is not generated or written to the response until it is accessed.
- * This filter forces the token to be generated so that the frontend SPA can
- * read the XSRF-TOKEN cookie.
- */
-@SuppressWarnings("PMD")
 public class CsrfCookieFilter extends OncePerRequestFilter {
+
+	private static final Logger log = LoggerFactory.getLogger(CsrfCookieFilter.class);
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+
+		log.info("=== CsrfCookieFilter ===");
+		log.info("Method: {}", request.getMethod());
+		log.info("URI: {}", request.getRequestURI());
+		log.info("Cookies: {}", Arrays.toString(request.getCookies()));
+		log.info("X-XSRF-TOKEN header: {}", request.getHeader("X-XSRF-TOKEN"));
+
 		if (csrfToken != null) {
-			csrfToken.getToken();
+			log.info("CSRF token found in request attribute");
+			String tokenStr = csrfToken.getToken();
+			log.info("Token value: {}", tokenStr);
+			log.info("Header name expected: {}", csrfToken.getHeaderName());
+			log.info("Parameter name expected: {}", csrfToken.getParameterName());
+		} else {
+			log.info("CSRF token NOT found in request attribute");
 		}
+
 		filterChain.doFilter(request, response);
 	}
 }

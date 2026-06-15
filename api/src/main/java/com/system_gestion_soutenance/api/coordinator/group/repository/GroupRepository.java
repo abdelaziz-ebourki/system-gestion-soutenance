@@ -15,8 +15,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
 	List<Group> findBySessionId(Long sessionId);
 
-	@Query("SELECT g FROM Group g JOIN g.students s WHERE s.id = :studentId")
-	Optional<Group> findByStudentId(Long studentId);
+	Optional<Group> findFirstByStudentsIdOrderByIdAsc(Long studentId);
 
 	@Query("SELECT DISTINCT g FROM Group g LEFT JOIN FETCH g.project LEFT JOIN FETCH g.students")
 	List<Group> findAllWithDetails();
