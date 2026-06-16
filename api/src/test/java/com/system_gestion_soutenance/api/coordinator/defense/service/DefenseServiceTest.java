@@ -303,6 +303,10 @@ class DefenseServiceTest {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
 
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(defense.getProject()).thenReturn(project);
+
 		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "président");
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
 
@@ -315,6 +319,10 @@ class DefenseServiceTest {
 	void updateJury_duplicateTeachers_throwsException() {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(defense.getProject()).thenReturn(project);
 
 		UpdateJuryRequest.MemberEntry m1 = new UpdateJuryRequest.MemberEntry(5L, "président");
 		UpdateJuryRequest.MemberEntry m2 = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
@@ -509,6 +517,10 @@ class DefenseServiceTest {
 	void updateJury_withMembers_updatesJuryMembers() {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(defense.getProject()).thenReturn(project);
 
 		Teacher teacher = mock(Teacher.class);
 		when(teacher.getId()).thenReturn(5L);
