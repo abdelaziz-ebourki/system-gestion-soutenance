@@ -22,6 +22,11 @@ import org.junit.jupiter.api.Test;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
+import com.system_gestion_soutenance.api.coordinator.project.dto.*;
+import com.system_gestion_soutenance.api.notification.event.ProjectStatusChangedEvent;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 class ProjectServiceTest {
 
@@ -189,5 +194,222 @@ class ProjectServiceTest {
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(mock(Group.class)));
 
 		assertThrows(ResourceConflictException.class, () -> service.delete(1L));
+	}
+
+	@Test
+	void findAll_withPagination_returnsPaginatedResponse() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
+		when(project.getStudents()).thenReturn(List.of());
+		when(project.getSupervisor()).thenReturn(null);
+
+		Page<Project> page = new PageImpl<>(List.of(project));
+		when(projectRepository.findAllWithDetails(PageRequest.of(0, 10))).thenReturn(page);
+
+		var result = service.findAll(0, 10);
+
+		assertEquals(1, result.items().size());
+		assertEquals(1, result.total());
+	}
+
+	@Test
+	void buildProjectGroupIdMap_withProjects_returnsMap() {
+		Project p1 = mock(Project.class);
+		when(p1.getId()).thenReturn(1L);
+		Project p2 = mock(Project.class);
+		when(p2.getId()).thenReturn(2L);
+
+		Group g = mock(Group.class);
+		when(g.getProject()).thenReturn(p1);
+		when(g.getId()).thenReturn(10L);
+
+		when(groupRepository.findByProjectIdIn(List.of(1L, 2L))).thenReturn(List.of(g));
+
+		var result = service.buildProjectGroupIdMap(List.of(p1, p2));
+
+		assertEquals(10L, result.get(1L));
+		assertNull(result.get(2L));
+	}
+
+	@Test
+	void buildProjectGroupIdMap_withEmptyList_returnsEmptyMap() {
+		var result = service.buildProjectGroupIdMap(List.of());
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	void updateStatus_fromPendingToApproved_succeeds() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(projectRepository.save(any())).thenAnswer(i -> {
+			Project p = i.getArgument(0);
+			when(p.getStatus()).thenReturn(ProjectStatus.APPROVED);
+			return p;
+		});
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getId()).thenReturn(1L);
+		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
+
+		var result = service.updateStatus(1L, ProjectStatus.APPROVED);
+
+		assertEquals(ProjectStatus.APPROVED, result.getStatus());
+		verify(eventPublisher).publishEvent(any(ProjectStatusChangedEvent.class));
+	}
+
+	@Test
+	void updateStatus_fromPendingToRejected_succeeds() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(projectRepository.save(any())).thenAnswer(i -> {
+			Project p = i.getArgument(0);
+			when(p.getStatus()).thenReturn(ProjectStatus.REJECTED);
+			return p;
+		});
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getId()).thenReturn(1L);
+		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
+
+		var result = service.updateStatus(1L, ProjectStatus.REJECTED);
+
+		assertEquals(ProjectStatus.REJECTED, result.getStatus());
+	}
+
+	@Test
+	void updateStatus_sameStatus_throwsException() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.updateStatus(1L, ProjectStatus.PENDING));
+	}
+
+	@Test
+	void updateStatus_fromApprovedToPending_succeeds() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(projectRepository.save(any())).thenAnswer(i -> {
+			Project p = i.getArgument(0);
+			when(p.getStatus()).thenReturn(ProjectStatus.PENDING);
+			return p;
+		});
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getId()).thenReturn(1L);
+		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
+
+		var result = service.updateStatus(1L, ProjectStatus.PENDING);
+
+		assertEquals(ProjectStatus.PENDING, result.getStatus());
+	}
+
+	@Test
+	void updateStatus_fromApprovedToRejected_throwsException() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.APPROVED);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.updateStatus(1L, ProjectStatus.REJECTED));
+	}
+
+	@Test
+	void updateStatus_fromRejectedToPending_succeeds() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.REJECTED);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+		when(projectRepository.save(any())).thenAnswer(i -> {
+			Project p = i.getArgument(0);
+			when(p.getStatus()).thenReturn(ProjectStatus.PENDING);
+			return p;
+		});
+		when(project.getTitle()).thenReturn("Projet");
+		when(project.getId()).thenReturn(1L);
+		when(securityService.getCurrentUserEmail()).thenReturn("admin@test.com");
+
+		var result = service.updateStatus(1L, ProjectStatus.PENDING);
+
+		assertEquals(ProjectStatus.PENDING, result.getStatus());
+	}
+
+	@Test
+	void updateStatus_fromRejectedToApproved_throwsException() {
+		Project project = mock(Project.class);
+		when(project.getStatus()).thenReturn(ProjectStatus.REJECTED);
+		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.updateStatus(1L, ProjectStatus.APPROVED));
+	}
+
+	@Test
+	void bulkImport_withValidEntries_importsSuccessfully() {
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getId()).thenReturn(1L);
+
+		Student student = mock(Student.class);
+		when(student.getId()).thenReturn(10L);
+
+		Project saved = mock(Project.class);
+		when(saved.getId()).thenReturn(1L);
+		when(saved.getTitle()).thenReturn("Projet 1");
+
+		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
+		when(studentRepository.findAllById(List.of(10L))).thenReturn(List.of(student));
+		when(projectRepository.save(any())).thenReturn(saved);
+
+		BulkProjectRequest request = new BulkProjectRequest(
+				List.of(new BulkProjectEntry("Projet 1", "Description", 1L, "PFE", List.of(10L))));
+
+		var result = service.bulkImport(request);
+
+		assertEquals(1, result.imported());
+		assertEquals(0, result.errors().size());
+	}
+
+	@Test
+	void bulkImport_withInvalidSupervisor_addsError() {
+		when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+
+		BulkProjectRequest request = new BulkProjectRequest(
+				List.of(new BulkProjectEntry("Projet", "Desc", 99L, "PFE", List.of())));
+
+		var result = service.bulkImport(request);
+
+		assertEquals(0, result.imported());
+		assertEquals(1, result.errors().size());
+	}
+
+	@Test
+	void bulkImport_withMissingStudents_addsError() {
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getId()).thenReturn(1L);
+		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
+		when(studentRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of());
+
+		BulkProjectRequest request = new BulkProjectRequest(
+				List.of(new BulkProjectEntry("Projet", "Desc", 1L, "PFE", List.of(10L, 20L))));
+
+		var result = service.bulkImport(request);
+
+		assertEquals(0, result.imported());
+		assertTrue(result.errors().size() > 0);
+	}
+
+	@Test
+	void bulkImport_withException_duringSave_addsError() {
+		Teacher supervisor = mock(Teacher.class);
+		when(supervisor.getId()).thenReturn(1L);
+		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
+		when(projectRepository.save(any())).thenThrow(new RuntimeException("DB error"));
+
+		BulkProjectRequest request = new BulkProjectRequest(
+				List.of(new BulkProjectEntry("Projet", "Desc", 1L, "PFE", List.of())));
+
+		var result = service.bulkImport(request);
+
+		assertEquals(0, result.imported());
+		assertEquals(1, result.errors().size());
 	}
 }

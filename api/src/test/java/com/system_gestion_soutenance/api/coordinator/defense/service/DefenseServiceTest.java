@@ -426,4 +426,153 @@ class DefenseServiceTest {
 
 		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(1L));
 	}
+
+	@Test
+	void buildProjectMap_withDefenses_returnsProjectMap() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(projectRepository.findAllById(List.of(1L))).thenReturn(List.of(project));
+
+		var result = service.buildProjectMap(service.getSchedule());
+
+		assertEquals(1, result.size());
+		assertEquals(project, result.get(1L));
+	}
+
+	@Test
+	void buildProjectMap_withDefenseHavingNullProject_skipsIt() {
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(null);
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(projectRepository.findAllById(List.of())).thenReturn(List.of());
+
+		var result = service.buildProjectMap(service.getSchedule());
+
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	void buildStudentNamesMap_withEmptyProjectMap_returnsEmptyMap() {
+		var result = service.buildStudentNamesMap(Map.of());
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	void buildStudentNamesMap_withProjectsAndGroups_returnsNames() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getStudents()).thenReturn(List.of());
+		when(project.getTitle()).thenReturn("Projet");
+
+		com.system_gestion_soutenance.api.user.entity.Student student = new com.system_gestion_soutenance.api.user.entity.Student();
+		student.setFirstName("Alice");
+		student.setLastName("Smith");
+
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+		when(group.getStudents()).thenReturn(List.of(student));
+
+		when(groupRepository.findByProjectIdIn(List.of(1L))).thenReturn(List.of(group));
+
+		var result = service.buildStudentNamesMap(Map.of(1L, project));
+
+		assertEquals(List.of("Alice Smith"), result.get(1L));
+	}
+
+	@Test
+	void buildStudentNamesMap_withProjectHavingDirectStudents_returnsNames() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+
+		com.system_gestion_soutenance.api.user.entity.Student student = new com.system_gestion_soutenance.api.user.entity.Student();
+		student.setFirstName("Bob");
+		student.setLastName("Jones");
+		when(project.getStudents()).thenReturn(List.of(student));
+
+		when(groupRepository.findByProjectIdIn(List.of(1L))).thenReturn(List.of());
+
+		var result = service.buildStudentNamesMap(Map.of(1L, project));
+
+		assertEquals(List.of("Bob Jones"), result.get(1L));
+	}
+
+	@Test
+	void buildStudentNamesMap_withNoGroupsOrStudents_returnsEmptyList() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getStudents()).thenReturn(null);
+
+		when(groupRepository.findByProjectIdIn(List.of(1L))).thenReturn(List.of());
+
+		var result = service.buildStudentNamesMap(Map.of(1L, project));
+
+		assertEquals(List.of(), result.get(1L));
+	}
+
+	@Test
+	void updateJury_withMembers_updatesJuryMembers() {
+		Defense defense = mock(Defense.class);
+		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+
+		Teacher teacher = mock(Teacher.class);
+		when(teacher.getId()).thenReturn(5L);
+		when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
+		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
+
+		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
+		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
+
+		var result = service.updateJury(1L, request);
+
+		assertNotNull(result);
+		verify(defense).setMembers(any());
+	}
+
+	@Test
+	void saveSchedule_withNullProjectId_skipsProject() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		ScheduleRequest request = new ScheduleRequest(1L,
+				List.of(new com.system_gestion_soutenance.api.coordinator.schedule.dto.SlotAssignmentRequest("Slot 1",
+						"2025-06-01", "09:00", null, null)));
+
+		var result = service.saveSchedule(request);
+
+		verify(defenseRepository).deleteAll();
+		verify(defenseRepository, atLeastOnce()).save(any(Defense.class));
+	}
+
+	@Test
+	void autoGenerate_withNoApprovedProjects_throwsException() {
+		DefenseSession ds = new DefenseSession();
+		ds.setStartDate(LocalDate.of(2025, 6, 1));
+		ds.setEndDate(LocalDate.of(2025, 6, 1));
+
+		DefenseSettings settings = new DefenseSettings();
+		settings.setStartTime("09:00");
+		settings.setEndTime("12:00");
+
+		Room room = new Room();
+		room.setId(1L);
+		room.setCapacity(10);
+
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(1L);
+		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
+
+		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
+		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
+		when(roomRepository.findAll()).thenReturn(List.of(room));
+		when(projectRepository.findAll()).thenReturn(List.of(project));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+		when(groupRepository.findAll()).thenReturn(List.of());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
+	}
 }

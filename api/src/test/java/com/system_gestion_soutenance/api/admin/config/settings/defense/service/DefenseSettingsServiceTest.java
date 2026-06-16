@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.admin.config.settings.defense.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.system_gestion_soutenance.api.admin.config.settings.defense.dto.PatchDefenseSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.dto.UpdateDefenseSettingsRequest;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
 import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
@@ -72,5 +73,61 @@ class DefenseSettingsServiceTest {
 		assertEquals("10:00", result.getStartTime());
 		assertEquals("16:00", result.getEndTime());
 		assertEquals(20, result.getDefenseDuration());
+	}
+
+	@Test
+	void patch_withAllFields_updatesAll() {
+		DefenseSettings existing = new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-01-01", "2026-06-30");
+		when(repository.findById(1L)).thenReturn(Optional.of(existing));
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		PatchDefenseSettingsRequest req = new PatchDefenseSettingsRequest("09:00", "17:00", 45, 10, "2026-02-01",
+				"2026-07-31");
+		DefenseSettings result = service.patch(req);
+
+		assertEquals("09:00", result.getStartTime());
+		assertEquals("17:00", result.getEndTime());
+		assertEquals(45, result.getDefenseDuration());
+		assertEquals(10, result.getBreakDuration());
+		assertEquals("2026-02-01", result.getGroupCreationStartDate());
+		assertEquals("2026-07-31", result.getGroupCreationEndDate());
+	}
+
+	@Test
+	void patch_withNullFields_keepsExistingValues() {
+		DefenseSettings existing = new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-01-01", "2026-06-30");
+		when(repository.findById(1L)).thenReturn(Optional.of(existing));
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		PatchDefenseSettingsRequest req = new PatchDefenseSettingsRequest(null, null, null, null, null, null);
+		DefenseSettings result = service.patch(req);
+
+		assertEquals("08:00", result.getStartTime());
+		assertEquals("18:00", result.getEndTime());
+		assertEquals(30, result.getDefenseDuration());
+		assertEquals(15, result.getBreakDuration());
+		assertEquals("2026-01-01", result.getGroupCreationStartDate());
+		assertEquals("2026-06-30", result.getGroupCreationEndDate());
+	}
+
+	@Test
+	void patch_withPartialFields_updatesOnlyProvided() {
+		DefenseSettings existing = new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-01-01", "2026-06-30");
+		when(repository.findById(1L)).thenReturn(Optional.of(existing));
+		when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		PatchDefenseSettingsRequest req = new PatchDefenseSettingsRequest("10:00", null, null, null, null, null);
+		DefenseSettings result = service.patch(req);
+
+		assertEquals("10:00", result.getStartTime());
+		assertEquals("18:00", result.getEndTime());
+	}
+
+	@Test
+	void patch_settingsNotFound_throwsException() {
+		when(repository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class,
+				() -> service.patch(new PatchDefenseSettingsRequest(null, null, null, null, null, null)));
 	}
 }
