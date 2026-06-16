@@ -15,7 +15,8 @@ public interface ProjectMapper {
 	@Mapping(target = "groupId", expression = "java(projectGroupIds != null ? projectGroupIds.get(project.getId()) : null)")
 	@Mapping(target = "supervisorName", expression = "java(resolveSupervisorName(project))")
 	@Mapping(target = "studentNames", expression = "java(projectStudentNames != null ? projectStudentNames.getOrDefault(project.getId(), List.of()) : List.of())")
-	ProjectResponse toDto(Project project, Map<Long, Long> projectGroupIds, Map<Long, List<String>> projectStudentNames);
+	ProjectResponse toDto(Project project, Map<Long, Long> projectGroupIds,
+			Map<Long, List<String>> projectStudentNames);
 
 	default String resolveSupervisorName(Project project) {
 		if (project.getSupervisor() == null)

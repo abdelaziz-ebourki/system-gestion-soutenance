@@ -41,8 +41,8 @@ class DefenseServiceTest {
 	private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
 
 	private final DefenseService service = new DefenseService(defenseRepository, roomRepository,
-			defenseSessionRepository, projectRepository, groupRepository, eventPublisher,
-			securityService, teacherRepository);
+			defenseSessionRepository, projectRepository, groupRepository, eventPublisher, securityService,
+			teacherRepository);
 
 	@Test
 	void getSchedule_returnsAllDefenses() {

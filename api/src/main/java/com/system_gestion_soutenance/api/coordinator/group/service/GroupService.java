@@ -70,7 +70,8 @@ public class GroupService {
 		DefenseSession defenseSession = null;
 		if (request.sessionId() != null) {
 			defenseSession = defenseSessionRepository.findById(request.sessionId()).orElse(null);
-			if (defenseSession != null && defenseSession.getMaxGroupSize() > 0 && students.size() > defenseSession.getMaxGroupSize()) {
+			if (defenseSession != null && defenseSession.getMaxGroupSize() > 0
+					&& students.size() > defenseSession.getMaxGroupSize()) {
 				throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");
 			}
 		}

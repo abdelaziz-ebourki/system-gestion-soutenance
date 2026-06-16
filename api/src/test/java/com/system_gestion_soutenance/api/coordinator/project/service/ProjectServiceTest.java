@@ -38,8 +38,8 @@ class ProjectServiceTest {
 	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
 	private final SecurityService securityService = mock(SecurityService.class);
 
-	private final ProjectService service = new ProjectService(projectRepository, teacherRepository,
-			groupRepository, defenseRepository, eventPublisher, securityService);
+	private final ProjectService service = new ProjectService(projectRepository, teacherRepository, groupRepository,
+			defenseRepository, eventPublisher, securityService);
 
 	@Test
 	void findAll_returnsAllProjects() {

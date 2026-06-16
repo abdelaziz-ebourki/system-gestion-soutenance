@@ -68,8 +68,7 @@ public class ProjectController {
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(result.items());
 		Map<Long, List<String>> projectStudentNames = buildProjectStudentNames(result.items());
 		List<ProjectResponse> items = result.items().stream()
-				.map(p -> projectMapper.toDto(p, projectGroupIds, projectStudentNames))
-				.toList();
+				.map(p -> projectMapper.toDto(p, projectGroupIds, projectStudentNames)).toList();
 		PaginatedResponse<ProjectResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
 				result.currentPage(), result.size());
 		return ApiResponse.success("Liste des projets récupérée avec succès", mapped);
@@ -82,8 +81,8 @@ public class ProjectController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid project data")})
 	public ResponseEntity<ApiResponse<ProjectResponse>> create(@Valid @RequestBody CreateProjectRequest request) {
 		Project project = projectService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(
-				ApiResponse.success("Projet créé avec succès", projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())));
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Projet créé avec succès",
+				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())));
 	}
 
 	@PostMapping("/bulk")

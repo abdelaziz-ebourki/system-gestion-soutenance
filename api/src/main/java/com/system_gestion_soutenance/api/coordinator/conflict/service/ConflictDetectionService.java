@@ -36,8 +36,8 @@ public class ConflictDetectionService {
 	private final DefenseSessionRepository defenseSessionRepository;
 
 	public ConflictDetectionService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
-			GroupRepository groupRepository,
-			UnavailabilityRepository unavailabilityRepository, DefenseSessionRepository defenseSessionRepository) {
+			GroupRepository groupRepository, UnavailabilityRepository unavailabilityRepository,
+			DefenseSessionRepository defenseSessionRepository) {
 		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
@@ -318,20 +318,21 @@ public class ConflictDetectionService {
 
 			List<Group> groups = groupRepository.findByProjectId(Long.valueOf(projectId));
 			for (Group group : groups) {
-				if (group.getStudents() == null) continue;
+				if (group.getStudents() == null)
+					continue;
 				for (var student : group.getStudents()) {
 					String studentId = String.valueOf(student.getId());
 					String key = date + "|" + studentId;
-					List<Map.Entry<String, ConflictSlot>> existing = dateStudentSlots.getOrDefault(key, new ArrayList<>());
+					List<Map.Entry<String, ConflictSlot>> existing = dateStudentSlots.getOrDefault(key,
+							new ArrayList<>());
 					for (Map.Entry<String, ConflictSlot> prev : existing) {
 						ConflictSlot prevData = prev.getValue();
 						if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
 							if (!reportedSlotIds.contains(slotId)) {
-								conflicts
-										.add(createConflict("student_double_booked", "error",
-												"Un etudiant est deja assigne a un autre projet le " + date + " de " + time
-														+ " a " + endTime,
-												slotId, "Verifiez l'assignation des etudiants aux projets"));
+								conflicts.add(createConflict("student_double_booked", "error",
+										"Un etudiant est deja assigne a un autre projet le " + date + " de " + time
+												+ " a " + endTime,
+										slotId, "Verifiez l'assignation des etudiants aux projets"));
 								reportedSlotIds.add(slotId);
 							}
 							break;

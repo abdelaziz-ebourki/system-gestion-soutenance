@@ -131,8 +131,8 @@ class CoordinatorGradeServiceTest {
 
 		Defense defense = mock(Defense.class);
 		when(defense.getProject()).thenReturn(project);
-		when(defense.getMembers())
-				.thenReturn(List.of(new JuryMember(null, teacher1, "président", null), new JuryMember(null, teacher2, "examinateur", null)));
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, teacher1, "président", null),
+				new JuryMember(null, teacher2, "examinateur", null)));
 		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
 		Evaluation eval = mock(Evaluation.class);

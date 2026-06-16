@@ -294,15 +294,14 @@ public class DataInitializer implements CommandLineRunner {
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
 				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, admin.getId(),
 				LocalDateTime.of(2025, 5, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
-		DefenseSession ds2 = defenseSessionRepo.save(
-				new DefenseSession(null, "Soutenance PFE Automne 2025", DefenseType.PFE, DefenseSessionStatus.COMPLETED,
-						3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe, LocalDate.of(2026, 1, 5),
-						LocalDate.of(2026, 1, 25), true, admin.getId(), LocalDateTime.of(2025, 12, 10, 9, 0),
-						"08:00", "18:00", "2026-03-01", "2026-05-01"));
-		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
-				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
-				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10), false, null, null,
-				"08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds2 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Automne 2025",
+				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe,
+				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25), true, admin.getId(),
+				LocalDateTime.of(2025, 12, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds3 = defenseSessionRepo.save(
+				new DefenseSession(null, "Soutenance PFE Printemps 2026", DefenseType.PFE, DefenseSessionStatus.ACTIVE,
+						3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe, LocalDate.of(2026, 6, 15),
+						LocalDate.of(2026, 7, 10), false, null, null, "08:00", "18:00", "2026-03-01", "2026-05-01"));
 		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
 				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
 				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, admin.getId(),
@@ -315,10 +314,10 @@ public class DataInitializer implements CommandLineRunner {
 				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
 				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, admin.getId(),
 				LocalDateTime.of(2026, 5, 20, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
-		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
-				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15), false, null, null,
-				"08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds6 = defenseSessionRepo.save(
+				new DefenseSession(null, "Soutenance Rattrapage 2026", DefenseType.PFE, DefenseSessionStatus.DRAFT, 3,
+						30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe, LocalDate.of(2026, 9, 1),
+						LocalDate.of(2026, 9, 15), false, null, null, "08:00", "18:00", "2026-03-01", "2026-05-01"));
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -477,8 +476,8 @@ public class DataInitializer implements CommandLineRunner {
 				new GrpSeed("Groupe H1", 13, 2, new int[]{51, 52, 53, 54}),
 				new GrpSeed("Groupe H2", 14, 3, new int[]{55, 56}),};
 		for (GrpSeed gs : grpSeeds) {
-			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(),
-					dsArr[gs.sessionIdx], studentsList.get(gs.studentIdxs[0]).getId());
+			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(), dsArr[gs.sessionIdx],
+					studentsList.get(gs.studentIdxs[0]).getId());
 			for (int si : gs.studentIdxs) {
 				g.getStudents().add(studentsList.get(si));
 			}

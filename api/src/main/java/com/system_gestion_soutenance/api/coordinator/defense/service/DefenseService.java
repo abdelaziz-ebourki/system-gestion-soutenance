@@ -49,9 +49,8 @@ public class DefenseService {
 	private final TeacherRepository teacherRepository;
 
 	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
-			DefenseSessionRepository defenseSessionRepository,
-			ProjectRepository projectRepository, GroupRepository groupRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService,
+			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
+			GroupRepository groupRepository, ApplicationEventPublisher eventPublisher, SecurityService securityService,
 			TeacherRepository teacherRepository) {
 		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
