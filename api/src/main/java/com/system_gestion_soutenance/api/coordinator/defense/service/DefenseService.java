@@ -20,6 +20,7 @@ import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRespon
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
+import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.notification.event.DefenseCancelledEvent;
 import com.system_gestion_soutenance.api.notification.event.DefenseSessionPublishedEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -133,6 +134,7 @@ public class DefenseService {
 				() -> new InvalidBusinessStateException("Aucun créneau de soutenance assigné à ce projet"));
 
 		validateNoDuplicateTeachers(request.members());
+		validateSupervisorNotInJury(project, request.members());
 
 		List<JuryMember> members = request.members().stream().map(m -> {
 			var teacher = teacherRepository.findById(m.teacherId())
@@ -150,14 +152,18 @@ public class DefenseService {
 		Defense defense = defenseRepository.findById(defenseId)
 				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
 
+		Project project;
 		if (updates.projectId() != null) {
-			Project project = projectRepository.findById(updates.projectId())
+			project = projectRepository.findById(updates.projectId())
 					.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 			defense.setProject(project);
+		} else {
+			project = defense.getProject();
 		}
 
 		if (updates.members() != null) {
 			validateNoDuplicateTeachers(updates.members());
+			validateSupervisorNotInJury(project, updates.members());
 			List<JuryMember> members = updates.members().stream().map(m -> {
 				var teacher = teacherRepository.findById(m.teacherId()).orElseThrow(
 						() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
@@ -315,6 +321,40 @@ public class DefenseService {
 			if (!teacherIds.add(tid)) {
 				throw new InvalidBusinessStateException(
 						"Un enseignant ne peut être assigné qu'à un seul rôle dans un même jury");
+			}
+		}
+	}
+
+	private void validateSupervisorNotInJury(Project project, List<?> members) {
+		List<Group> groups = groupRepository.findByProjectId(project.getId());
+		if (groups.isEmpty())
+			return;
+
+		DefenseSession session = groups.get(0).getDefenseSession();
+		if (session == null || session.isAllowSupervisorInJury())
+			return;
+
+		Set<Long> blockedTeacherIds = new HashSet<>();
+		if (project.getSupervisor() != null) {
+			blockedTeacherIds.add(project.getSupervisor().getId());
+		}
+		if (project.getCoSupervisors() != null) {
+			for (Teacher coSupervisor : project.getCoSupervisors()) {
+				blockedTeacherIds.add(coSupervisor.getId());
+			}
+		}
+
+		for (Object m : members) {
+			Long tid;
+			if (m instanceof CreateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
+			} else if (m instanceof UpdateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
+			} else {
+				continue;
+			}
+			if (blockedTeacherIds.contains(tid)) {
+				throw new InvalidBusinessStateException("Un encadrant ou co-encadrant ne peut pas être membre du jury");
 			}
 		}
 	}
