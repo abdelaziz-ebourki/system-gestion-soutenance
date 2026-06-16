@@ -92,7 +92,7 @@ public class CoordinatorGradeService {
 		if (!evaluations.isEmpty()) {
 			return evaluations.get(0).getDefenseSessionId();
 		}
-		return groupRepository.findByProjectId(projectId).stream().map(Group::getSessionId).filter(Objects::nonNull)
+		return groupRepository.findByProjectId(projectId).stream().map(g -> g.getDefenseSession() != null ? g.getDefenseSession().getId() : null).filter(Objects::nonNull)
 				.findFirst().orElse(null);
 	}
 

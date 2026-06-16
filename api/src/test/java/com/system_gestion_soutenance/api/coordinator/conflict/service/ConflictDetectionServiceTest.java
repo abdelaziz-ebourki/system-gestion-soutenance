@@ -3,13 +3,13 @@ package com.system_gestion_soutenance.api.coordinator.conflict.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
@@ -29,10 +29,10 @@ class ConflictDetectionServiceTest {
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final UnavailabilityRepository unavailabilityRepository = mock(UnavailabilityRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
-	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
+	private final GroupRepository groupRepository = mock(GroupRepository.class);
 
 	private final ConflictDetectionService service = new ConflictDetectionService(defenseRepository, projectRepository,
-			unavailabilityRepository, defenseSessionRepository, defenseSettingsRepository);
+			groupRepository, unavailabilityRepository, defenseSessionRepository);
 
 	private ScheduleRequest singleSlot(String projectId, String roomId, String date, String time) {
 		return new ScheduleRequest(1L, List
@@ -560,14 +560,19 @@ class ConflictDetectionServiceTest {
 
 		Project project1 = mock(Project.class);
 		when(project1.getId()).thenReturn(1L);
-		when(project1.getStudents()).thenReturn(List.of(student));
 
 		Project project2 = mock(Project.class);
 		when(project2.getId()).thenReturn(2L);
-		when(project2.getStudents()).thenReturn(List.of(student));
+
+		Group group1 = mock(Group.class);
+		when(group1.getStudents()).thenReturn(List.of(student));
+		Group group2 = mock(Group.class);
+		when(group2.getStudents()).thenReturn(List.of(student));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
 		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group1));
+		when(groupRepository.findByProjectId(2L)).thenReturn(List.of(group2));
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "09:30", 2L, 1L));
@@ -587,14 +592,19 @@ class ConflictDetectionServiceTest {
 
 		Project project1 = mock(Project.class);
 		when(project1.getId()).thenReturn(1L);
-		when(project1.getStudents()).thenReturn(List.of(student));
 
 		Project project2 = mock(Project.class);
 		when(project2.getId()).thenReturn(2L);
-		when(project2.getStudents()).thenReturn(List.of(student));
+
+		Group group1 = mock(Group.class);
+		when(group1.getStudents()).thenReturn(List.of(student));
+		Group group2 = mock(Group.class);
+		when(group2.getStudents()).thenReturn(List.of(student));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
 		when(projectRepository.findById(2L)).thenReturn(Optional.of(project2));
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group1));
+		when(groupRepository.findByProjectId(2L)).thenReturn(List.of(group2));
 
 		var slots = List.of(new SlotAssignmentRequest("Slot 1", "2025-06-01", "09:00", 1L, 1L),
 				new SlotAssignmentRequest("Slot 2", "2025-06-01", "15:00", 2L, 1L));

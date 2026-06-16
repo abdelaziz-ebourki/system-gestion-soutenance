@@ -14,6 +14,7 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectStatusUpdateRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -54,6 +55,9 @@ class ProjectControllerTest {
 	@MockitoBean
 	private UserRepository userRepository;
 
+	@MockitoBean
+	private GroupRepository groupRepository;
+
 	@BeforeEach
 	void setUp() {
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
@@ -77,7 +81,7 @@ class ProjectControllerTest {
 
 		when(projectService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(project), 1, 1, 0, 10));
 		when(projectService.buildProjectGroupIdMap(anyList())).thenReturn(Map.of(1L, 1L));
-		when(projectMapper.toDto(project, Map.of(1L, 1L))).thenReturn(dto);
+		when(projectMapper.toDto(project, Map.of(1L, 1L), Collections.emptyMap())).thenReturn(dto);
 
 		mockMvc.perform(get("/api/coordinator/projects")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.items").isArray())
@@ -92,7 +96,7 @@ class ProjectControllerTest {
 				List.of());
 
 		when(projectService.create(any())).thenReturn(project);
-		when(projectMapper.toDto(project, Collections.emptyMap())).thenReturn(dto);
+		when(projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())).thenReturn(dto);
 
 		mockMvc.perform(post("/api/coordinator/projects").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -107,7 +111,7 @@ class ProjectControllerTest {
 				List.of());
 
 		when(projectService.update(eq(1L), any())).thenReturn(project);
-		when(projectMapper.toDto(project, Collections.emptyMap())).thenReturn(dto);
+		when(projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())).thenReturn(dto);
 
 		mockMvc.perform(put("/api/coordinator/projects/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())
@@ -129,7 +133,7 @@ class ProjectControllerTest {
 				List.of());
 
 		when(projectService.updateStatus(eq(1L), eq(ProjectStatus.APPROVED))).thenReturn(project);
-		when(projectMapper.toDto(project, Collections.emptyMap())).thenReturn(dto);
+		when(projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())).thenReturn(dto);
 
 		ProjectStatusUpdateRequest request = new ProjectStatusUpdateRequest(ProjectStatus.APPROVED);
 
@@ -145,7 +149,7 @@ class ProjectControllerTest {
 				List.of());
 
 		when(projectService.updateStatus(eq(1L), eq(ProjectStatus.REJECTED))).thenReturn(project);
-		when(projectMapper.toDto(project, Collections.emptyMap())).thenReturn(dto);
+		when(projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())).thenReturn(dto);
 
 		ProjectStatusUpdateRequest request = new ProjectStatusUpdateRequest(ProjectStatus.REJECTED);
 

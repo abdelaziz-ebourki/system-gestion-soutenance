@@ -13,9 +13,7 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRe
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
-import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
-import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.notification.event.ProjectProposedEvent;
@@ -37,18 +35,16 @@ public class ProjectService {
 
 	private final ProjectRepository projectRepository;
 	private final TeacherRepository teacherRepository;
-	private final StudentRepository studentRepository;
 	private final GroupRepository groupRepository;
 	private final DefenseRepository defenseRepository;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
 
 	public ProjectService(ProjectRepository projectRepository, TeacherRepository teacherRepository,
-			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository,
+			GroupRepository groupRepository, DefenseRepository defenseRepository,
 			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.projectRepository = projectRepository;
 		this.teacherRepository = teacherRepository;
-		this.studentRepository = studentRepository;
 		this.groupRepository = groupRepository;
 		this.defenseRepository = defenseRepository;
 		this.eventPublisher = eventPublisher;
@@ -80,25 +76,16 @@ public class ProjectService {
 		Teacher supervisor = teacherRepository.findById(request.supervisorId())
 				.orElseThrow(() -> new InvalidBusinessStateException("Encadrant introuvable"));
 
-		List<Student> students = Collections.emptyList();
-		if (request.studentIds() != null) {
-			students = studentRepository.findAllById(request.studentIds());
-		}
-
 		Project project = new Project();
 		project.setTitle(request.title());
 		project.setDescription(request.description());
 		project.setDefenseType(request.defenseType());
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(supervisor);
-		project.setStudents(students);
 
 		Project saved = projectRepository.save(project);
-		String studentName = students.isEmpty()
-				? "Divers"
-				: students.get(0).getFirstName() + " " + students.get(0).getLastName();
 		eventPublisher.publishEvent(new ProjectProposedEvent(securityService.getCurrentUserEmail(), saved.getId(),
-				saved.getTitle(), studentName));
+				saved.getTitle(), "Divers"));
 		return saved;
 	}
 
@@ -179,26 +166,12 @@ public class ProjectService {
 					continue;
 				}
 
-				List<Student> students = Collections.emptyList();
-				if (entry.studentIds() != null && !entry.studentIds().isEmpty()) {
-					students = new ArrayList<>(studentRepository.findAllById(entry.studentIds()));
-					if (students.size() != entry.studentIds().size()) {
-						List<Long> foundIds = students.stream().map(Student::getId).toList();
-						List<Long> missingIds = entry.studentIds().stream().filter(id -> !foundIds.contains(id))
-								.toList();
-						errors.add(new BulkImportResult.BulkImportError(line,
-								"Étudiants introuvables avec les ids: " + missingIds));
-						continue;
-					}
-				}
-
 				Project project = new Project();
 				project.setTitle(entry.title());
 				project.setDescription(entry.description());
 				project.setDefenseType(entry.defenseType());
 				project.setStatus(ProjectStatus.PENDING);
 				project.setSupervisor(supervisor);
-				project.setStudents(students);
 
 				Project saved = projectRepository.save(project);
 				created.add(new BulkProjectResponse(saved.getId(), saved.getTitle()));

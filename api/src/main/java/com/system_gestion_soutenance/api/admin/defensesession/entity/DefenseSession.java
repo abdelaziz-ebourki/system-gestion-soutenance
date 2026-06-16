@@ -71,6 +71,18 @@ public class DefenseSession {
 	@Column(name = "approved_at")
 	private LocalDateTime approvedAt;
 
+	@Column(name = "start_time")
+	private String startTime;
+
+	@Column(name = "end_time")
+	private String endTime;
+
+	@Column(name = "group_creation_start_date")
+	private String groupCreationStartDate;
+
+	@Column(name = "group_creation_end_date")
+	private String groupCreationEndDate;
+
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;
 	}
