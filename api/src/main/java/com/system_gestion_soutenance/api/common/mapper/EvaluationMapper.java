@@ -15,6 +15,7 @@ public interface EvaluationMapper {
 	@Mapping(target = "finalGrade", source = "evaluation.score")
 	@Mapping(target = "status", expression = "java(evaluation.getStatus().name())")
 	@Mapping(target = "attendanceStatus", expression = "java(evaluation.getAttendanceStatus() != null ? evaluation.getAttendanceStatus().name() : null)")
+	@Mapping(target = "type", expression = "java(evaluation.getType().name())")
 	EvaluationResponse toDto(Evaluation evaluation, Map<Long, Project> projectMap);
 
 	default String resolveProjectTitle(Evaluation evaluation, Map<Long, Project> projectMap) {

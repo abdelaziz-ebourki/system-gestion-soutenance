@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType;
 import com.system_gestion_soutenance.api.teacher.evaluation.service.EvaluationService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import java.util.List;
@@ -61,6 +62,35 @@ public class EvaluationController {
 	public ApiResponse<EvaluationResponse> submit(@Parameter(description = "Evaluation ID") @PathVariable Long id,
 			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
 		Evaluation evaluation = evaluationService.submit(id, user.getId(), request);
+		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));
+		return ApiResponse.success(evaluationMapper.toDto(evaluation, projectMap));
+	}
+
+	@PostMapping("/defense/{defenseId}")
+	@Operation(summary = "Submit defense evaluation", description = "Allows a jury member to submit a SOUTENANCE evaluation for a defense.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Defense evaluation submitted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Only jury members can submit defense evaluation"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense not found")})
+	public ApiResponse<EvaluationResponse> submitDefense(@Parameter(description = "Defense ID") @PathVariable Long defenseId,
+			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
+		Evaluation evaluation = evaluationService.submitDefense(defenseId, user.getId(), request);
+		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));
+		return ApiResponse.success(evaluationMapper.toDto(evaluation, projectMap));
+	}
+
+	@PostMapping("/rapport/{defenseId}")
+	@Operation(summary = "Submit rapport evaluation", description = "Allows the project supervisor to submit a RAPPORT evaluation for a defense.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Rapport evaluation submitted successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Only the supervisor can submit rapport evaluation"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense not found")})
+	public ApiResponse<EvaluationResponse> submitRapport(
+			@Parameter(description = "Defense ID") @PathVariable Long defenseId,
+			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
+		Evaluation evaluation = evaluationService.submitRapport(defenseId, user.getId(), request);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));
 		return ApiResponse.success(evaluationMapper.toDto(evaluation, projectMap));
 	}
