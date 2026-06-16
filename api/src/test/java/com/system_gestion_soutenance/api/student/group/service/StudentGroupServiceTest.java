@@ -418,18 +418,13 @@ class StudentGroupServiceTest {
 	}
 
 	@Test
-	void createGroup_noActiveSession_setsNullSession() {
-		Student student = student(1L, "Alice", "Test");
-
+	void createGroup_noActiveSession_throws() {
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(defenseSessionRepository.findActiveSession(any())).thenReturn(Optional.empty());
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-		when(groupRepository.count()).thenReturn(0L);
-		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-		Group result = service.createGroup(1L);
-
-		assertNull(result.getDefenseSession());
+		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
+				() -> service.createGroup(1L));
+		assertEquals("La période de création de groupes est fermée", ex.getMessage());
 	}
 
 	@Test
