@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Syst\u00e8me Gestion Soutenance",
-    "description": "Complete API collection for the Syst\u00e8me Gestion Soutenance project. Covers 100+ endpoints with happy path, validation error, 404, and RBAC scenarios.",
+    "name": "Système Gestion Soutenance",
+    "description": "Complete API collection for the Système Gestion Soutenance project. Covers 100+ endpoints with happy path, validation error, 404, and RBAC scenarios.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "opencode"
   },
@@ -5021,6 +5021,826 @@
               }
             }
           }
+        },
+        {
+          "name": "Update group project",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains updated resource\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/{{groupId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "{{groupId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Approve group",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains approved group\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data.status).to.eql('APPROVED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/{{groupId}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "{{groupId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject group",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains rejected group\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data.status).to.eql('REJECTED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/{{groupId}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "{{groupId}}",
+                "reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign supervisor to group",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 201\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an(\"object\");",
+                  "  if (pm.response.code === 200 || pm.response.code === 201) { pm.expect(json.data.id).to.exist; }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/{{groupId}}/assign",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "{{groupId}}",
+                "assign"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supervisorId\": 3,\n  \"projectId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove student from group",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 204\", function() { pm.expect([200, 204]).to.include(pm.response.code); });",
+                  "pm.test(\"Student removed from group\", function() {",
+                  "  if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('object');",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/{{groupId}}/members/{{studentId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "{{groupId}}",
+                "members",
+                "{{studentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Extend group formation deadline",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response has updated deadline\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data.groupFormationDeadline).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/sessions/{{sessionId}}/extend-group-formation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "sessions",
+                "{{sessionId}}",
+                "extend-group-formation"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newDeadline\": \"2026-07-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List ungrouped students for session",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/groups/sessions/{{sessionId}}/ungrouped-students",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "groups",
+                "sessions",
+                "{{sessionId}}",
+                "ungrouped-students"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get deliberation results",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains deliberation data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/sessions/{{sessionId}}/deliberation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "sessions",
+                "{{sessionId}}",
+                "deliberation"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deliberate session",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 201\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response has deliberation result\", function() {",
+                  "  const json = pm.response.json();",
+                  "  if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.expect(json).to.be.an(\"object\");",
+                  "    pm.expect(json.data).to.exist;",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/sessions/{{sessionId}}/deliberate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "sessions",
+                "{{sessionId}}",
+                "deliberate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"finalScores\": {\n    \"1\": 15.5,\n    \"2\": 12.0\n  },\n  \"comment\": \"Session valid\\u00e9e\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Adjust defense score",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response has updated score\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data.finalScore).to.eql(14.0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defenses/{{defenseId}}/adjust-score",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defenses",
+                "{{defenseId}}",
+                "adjust-score"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"finalScore\": 14.0,\n  \"comment\": \"Ajustement apr\\u00e8s d\\u00e9lib\\u00e9ration\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get session report",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains report data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/sessions/{{sessionId}}/report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "sessions",
+                "{{sessionId}}",
+                "report"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get teacher workload report",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains workload data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/reports/teacher-workload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "reports",
+                "teacher-workload"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get grade history report",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response contains grade history\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an('object');",
+                  "  pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/reports/grade-history/{{sessionId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "reports",
+                "grade-history",
+                "{{sessionId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List group documents",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{groupId}}/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "groups",
+                "{{groupId}}",
+                "documents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload report attachment",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 201\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.expect(json).to.be.an(\"object\");",
+                  "    pm.expect(json.data).to.exist;",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{groupId}}/documents/REPORT/attachments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "groups",
+                "{{groupId}}",
+                "documents",
+                "REPORT",
+                "attachments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/report.pdf",
+                  "description": "Report file to upload"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download report",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is a file download\", function() {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{groupId}}/documents/REPORT/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "groups",
+                "{{groupId}}",
+                "documents",
+                "REPORT",
+                "download"
+              ]
+            }
+          }
         }
       ]
     },
@@ -5371,6 +6191,145 @@
               ]
             }
           }
+        },
+        {
+          "name": "Get my grade",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 404\", function() { pm.expect([200, 404]).to.include(pm.response.code); });",
+                  "pm.test(\"Response is JSON object\", function() {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an(\"object\");",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(json.data).to.exist;",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/grade",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "grade"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get grade certificate",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 404\", function() { pm.expect([200, 404]).to.include(pm.response.code); });",
+                  "pm.test(\"Response is a downloadable certificate\", function() {",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.exist;",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/grade/certificate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "grade",
+                "certificate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get projects list (student)",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid\", function() {",
+                  "  pm.response.to.be.json;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/student/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "student",
+                "projects"
+              ]
+            }
+          }
         }
       ]
     },
@@ -5679,6 +6638,69 @@
             "body": {
               "mode": "raw",
               "raw": "{\"slots\": [{\"date\": \"2026-06-15\", \"slots\": [\"08:00-10:00\", \"14:00-16:00\"]}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create project (teacher)",
+          "description": "",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 201\", function() { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "pm.test(\"Response has resource data\", function() {",
+                  "  const json = pm.response.json();",
+                  "  if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.expect(json).to.be.an(\"object\");",
+                  "    pm.expect(json.data.id).to.exist;",
+                  "  }",
+                  "});",
+                  "pm.test(\"Required fields present\", function() {",
+                  "  const json = pm.response.json();",
+                  "  if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.expect(json.data.id).to.not.be.undefined;",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teacher/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teacher",
+                "projects"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nouveau Projet\",\n  \"description\": \"Description du projet\",\n  \"defenseType\": \"PFE\",\n  \"maxStudents\": 4\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -16,9 +16,15 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -46,10 +52,11 @@ class NotificationControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "Test", "Message", LocalDateTime.now(),
-				false, null, null, null);
+				false, 1L, null, null);
 		AppNotification n2 = new AppNotification(2L, NotificationType.WARNING, "Test 2", "Message 2",
 				LocalDateTime.now(), true, null, null, null);
-		when(notificationService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(n1, n2), 2, 1, 0, 10));
+		when(notificationService.findAllByUser(1L, 0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(n1, n2), 2, 1, 0, 10));
 		when(appNotificationMapper.toDto(n1))
 				.thenReturn(new com.system_gestion_soutenance.api.notification.dto.AppNotificationDto(1L, "info",
 						"Test", "Message", n1.getTimestamp(), false, null, null, null));
@@ -83,13 +90,27 @@ class NotificationControllerTest {
 		verify(repository, never()).save(any());
 	}
 
+	@BeforeEach
+	void setUp() {
+		com.system_gestion_soutenance.api.user.entity.User user = new com.system_gestion_soutenance.api.user.entity.User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
+	}
+
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
+	}
+
 	@Test
 	void markAllRead_returns204() throws Exception {
-		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "A", "Msg", LocalDateTime.now(), false,
-				null, null, null);
+		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "A", "Msg", LocalDateTime.now(), false, 1L,
+				null, null);
 		AppNotification n2 = new AppNotification(2L, NotificationType.INFO, "B", "Msg", LocalDateTime.now(), false,
 				null, null, null);
-		when(repository.findAll()).thenReturn(List.of(n1, n2));
+		when(repository.findByUserIdOrUserIdIsNullOrderByTimestampDesc(eq(1L), any(PageRequest.class)))
+				.thenReturn(new PageImpl<>(List.of(n1, n2)));
 
 		mockMvc.perform(patch("/api/notifications/read-all")).andExpect(status().isNoContent());
 

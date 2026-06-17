@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -78,11 +79,16 @@ public class NotificationController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "All notifications marked as read")})
 	public ResponseEntity<Void> markAllRead() {
-		List<AppNotification> all = repository.findAll();
-		for (AppNotification n : all) {
-			n.setRead(true);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof User user) {
+			List<AppNotification> all = repository
+					.findByUserIdOrUserIdIsNullOrderByTimestampDesc(user.getId(), PageRequest.of(0, Integer.MAX_VALUE))
+					.getContent();
+			for (AppNotification n : all) {
+				n.setRead(true);
+			}
+			repository.saveAll(all);
 		}
-		repository.saveAll(all);
 		return ResponseEntity.noContent().build();
 	}
 

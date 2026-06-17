@@ -29,16 +29,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	private final boolean trustProxyHeaders;
 	private ScheduledExecutorService evictor;
 
-	private final int maxRequests;
+	private final int defaultMaxRequests;
 	private static final long WINDOW_MS = 60_000;
 	private static final long EVICT_INTERVAL_MS = 120_000;
 
 	public RateLimitFilter(ObjectMapper objectMapper,
 			@Value("${app.security.trust-proxy-headers:false}") boolean trustProxyHeaders,
-			@Value("${app.security.rate-limit.max-requests:10}") int maxRequests) {
+			@Value("${app.security.rate-limit.max-requests:60}") int defaultMaxRequests) {
 		this.objectMapper = objectMapper;
 		this.trustProxyHeaders = trustProxyHeaders;
-		this.maxRequests = maxRequests;
+		this.defaultMaxRequests = defaultMaxRequests;
 	}
 
 	@PostConstruct
@@ -62,14 +62,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		String path = request.getRequestURI();
-		boolean isBulkEndpoint = path.startsWith("/api/coordinator/projects/bulk")
-				|| path.startsWith("/api/coordinator/schedules");
-		if (!path.startsWith("/api/auth/") && !"/api/login".equals(path) && !isBulkEndpoint) {
+
+		if (!path.startsWith("/api/")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		int effectiveMax = isBulkEndpoint ? Math.min(maxRequests, 10) : maxRequests;
+		int effectiveMax = resolveMaxRequests(path);
 
 		String clientIp = getClientIp(request);
 		long now = System.currentTimeMillis();
@@ -88,6 +87,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
 		}
 
 		filterChain.doFilter(request, response);
+	}
+
+	private int resolveMaxRequests(String path) {
+		if (path.startsWith("/api/auth/") || "/api/login".equals(path)) {
+			return Math.min(defaultMaxRequests, 10);
+		}
+		if (path.startsWith("/api/coordinator/projects/bulk") || path.startsWith("/api/coordinator/schedules")) {
+			return Math.min(defaultMaxRequests, 10);
+		}
+		return defaultMaxRequests;
 	}
 
 	private String getClientIp(HttpServletRequest request) {
