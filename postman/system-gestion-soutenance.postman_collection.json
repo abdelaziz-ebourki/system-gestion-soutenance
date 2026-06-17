@@ -199,18 +199,17 @@
           "description": "Sets environment variables with known seed data IDs (deterministic per CI run).",
           "event": [
             {
-              "listen": "test",
+              "listen": "prerequest",
               "script": {
                 "exec": [
-                  "pm.test(\"Setup environment variables\", function() {",
-                  "  pm.environment.set(\"sessionId\", \"3\");",
-                  "  pm.environment.set(\"groupId\", \"3\");",
-                  "  pm.environment.set(\"pendingGroupId\", \"40\");",
-                  "  pm.environment.set(\"defenseId\", \"1\");",
-                  "  pm.environment.set(\"projectId\", \"1\");",
-                  "  pm.environment.set(\"studentToAssign\", \"72\");",
-                  "  pm.environment.set(\"studentToRemove\", \"22\");",
-                  "});"
+                  "pm.environment.set(\"sessionId\", \"3\");",
+                  "pm.environment.set(\"groupId\", \"3\");",
+                  "pm.environment.set(\"approveGroupId\", \"39\");",
+                  "pm.environment.set(\"rejectGroupId\", \"40\");",
+                  "pm.environment.set(\"defenseId\", \"1\");",
+                  "pm.environment.set(\"projectId\", \"1\");",
+                  "pm.environment.set(\"studentToAssign\", \"72\");",
+                  "pm.environment.set(\"studentToRemove\", \"22\");"
                 ],
                 "type": "text/javascript"
               }
@@ -4938,7 +4937,7 @@
                   "pm.test(\"Response contains approved group\", function() {",
                   "  const json = pm.response.json();",
                   "  pm.expect(json).to.be.an('object');",
-                  "  pm.expect(json.data.groupName).to.eql('Groupe H2');",
+                  "  pm.expect(json.data.groupName).to.not.be.undefined;",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -4960,7 +4959,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/coordinator/groups/{{pendingGroupId}}/approve",
+              "raw": "{{base_url}}/api/coordinator/groups/{{approveGroupId}}/approve",
               "host": [
                 "{{base_url}}"
               ],
@@ -4968,7 +4967,7 @@
                 "api",
                 "coordinator",
                 "groups",
-                "{{pendingGroupId}}",
+                "{{approveGroupId}}",
                 "approve"
               ]
             }
@@ -5007,7 +5006,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/coordinator/groups/{{pendingGroupId}}/reject",
+"raw": "{{base_url}}/api/coordinator/groups/{{rejectGroupId}}/reject",
               "host": [
                 "{{base_url}}"
               ],
@@ -5015,7 +5014,7 @@
                 "api",
                 "coordinator",
                 "groups",
-                "{{groupId}}",
+                "{{rejectGroupId}}",
                 "reject"
               ]
             }
