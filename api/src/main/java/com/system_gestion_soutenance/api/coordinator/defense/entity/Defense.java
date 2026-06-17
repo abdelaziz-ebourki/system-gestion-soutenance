@@ -43,6 +43,15 @@ public class Defense {
 	@CollectionTable(name = "defense_members", joinColumns = @JoinColumn(name = "defense_id"))
 	private List<JuryMember> members = new ArrayList<>();
 
+	@Column(name = "final_score")
+	private Double finalScore;
+
+	@Column(name = "mention")
+	private String mention;
+
+	@Column(name = "deliberation_comment", columnDefinition = "TEXT")
+	private String deliberationComment;
+
 	public Long getProjectId() {
 		return project != null ? project.getId() : null;
 	}

@@ -15,7 +15,6 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class DefenseSession {
 
 	@Id
@@ -70,6 +69,21 @@ public class DefenseSession {
 
 	@Column(name = "approved_at")
 	private LocalDateTime approvedAt;
+
+	@Column(name = "deliberated_by")
+	private Long deliberatedBy;
+
+	@Column(name = "deliberated_at")
+	private LocalDateTime deliberatedAt;
+
+	@Column(name = "validated_by")
+	private Long validatedBy;
+
+	@Column(name = "validated_at")
+	private LocalDateTime validatedAt;
+
+	@Column(name = "results_published")
+	private boolean resultsPublished;
 
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;

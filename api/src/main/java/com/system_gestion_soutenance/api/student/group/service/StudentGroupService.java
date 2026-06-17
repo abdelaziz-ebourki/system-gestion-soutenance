@@ -7,6 +7,8 @@ import com.system_gestion_soutenance.api.admin.defensesession.repository.Defense
 import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.student.group.dto.AvailableGroupResponse;
@@ -30,18 +32,20 @@ public class StudentGroupService {
 	private final StudentRepository studentRepository;
 	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
+	private final ProjectRepository projectRepository;
 	private final StudentGroupMapper studentGroupMapper;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
 			DefenseSettingsRepository defenseSettingsRepository, DefenseSessionRepository defenseSessionRepository,
-			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher,
-			SecurityService securityService) {
+			ProjectRepository projectRepository, StudentGroupMapper studentGroupMapper,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
+		this.projectRepository = projectRepository;
 		this.studentGroupMapper = studentGroupMapper;
 		this.eventPublisher = eventPublisher;
 		this.securityService = securityService;
@@ -171,6 +175,49 @@ public class StudentGroupService {
 		groupRepository.save(group);
 		eventPublisher.publishEvent(new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId,
 				studentName, group.getId()));
+	}
+
+	@Transactional
+	public Group selectProject(Long groupId, Long projectId, Long studentId) {
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
+
+		if (!group.getLeaderId().equals(studentId)) {
+			throw new InvalidBusinessStateException("Seul le chef de groupe peut sélectionner un projet");
+		}
+
+		if (group.getProject() != null) {
+			throw new InvalidBusinessStateException("Le groupe a déjà un projet assigné");
+		}
+
+		Project project = projectRepository.findById(projectId)
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
+
+		if (project.getStatus() != com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus.APPROVED
+				&& project
+						.getStatus() != com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus.PENDING) {
+			throw new InvalidBusinessStateException("Ce projet n'est pas disponible pour sélection");
+		}
+
+		group.setProject(project);
+		return groupRepository.save(group);
+	}
+
+	@Transactional
+	public Group cancelProjectSelection(Long groupId, Long studentId) {
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
+
+		if (!group.getLeaderId().equals(studentId)) {
+			throw new InvalidBusinessStateException("Seul le chef de groupe peut annuler la sélection");
+		}
+
+		if (group.getProject() == null) {
+			throw new InvalidBusinessStateException("Le groupe n'a pas de projet sélectionné");
+		}
+
+		group.setProject(null);
+		return groupRepository.save(group);
 	}
 
 	private boolean isCreationOpen(String startDate, String endDate) {

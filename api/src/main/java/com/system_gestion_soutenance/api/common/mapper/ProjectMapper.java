@@ -15,6 +15,7 @@ public interface ProjectMapper {
 	@Mapping(target = "groupId", expression = "java(projectGroupIds != null ? projectGroupIds.get(project.getId()) : null)")
 	@Mapping(target = "supervisorName", expression = "java(resolveSupervisorName(project))")
 	@Mapping(target = "studentNames", expression = "java(resolveStudentNames(project))")
+	@Mapping(target = "maxStudents", source = "project.maxStudents")
 	ProjectResponse toDto(Project project, Map<Long, Long> projectGroupIds);
 
 	default String resolveSupervisorName(Project project) {
