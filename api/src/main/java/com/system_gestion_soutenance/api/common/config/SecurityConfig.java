@@ -32,8 +32,7 @@ public class SecurityConfig {
 	private final ObjectMapper objectMapper;
 	private final String[] allowedOrigins;
 
-	public SecurityConfig(ObjectMapper objectMapper,
-			@Value("${app.cors.allowed-origins}") String[] allowedOrigins) {
+	public SecurityConfig(ObjectMapper objectMapper, @Value("${app.cors.allowed-origins}") String[] allowedOrigins) {
 		this.objectMapper = objectMapper;
 		this.allowedOrigins = allowedOrigins;
 	}

@@ -91,7 +91,10 @@ public class ProjectService {
 		List<Long> projectIds = projects.stream().map(Project::getId).toList();
 		if (projectIds.isEmpty())
 			return Map.of();
-		return groupRepository.findByProjectIdIn(projectIds).stream().filter(g -> g.getProject() != null)
+		return groupRepository
+				.findByProjectIdIn(
+						projectIds)
+				.stream().filter(g -> g.getProject() != null)
 				.collect(Collectors.toMap(g -> g.getProject().getId(),
 						g -> g.getStudents() != null
 								? g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList()

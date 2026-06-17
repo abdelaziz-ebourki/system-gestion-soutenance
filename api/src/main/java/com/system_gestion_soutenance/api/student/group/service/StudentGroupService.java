@@ -37,8 +37,8 @@ public class StudentGroupService {
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
 			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
-			StudentGroupMapper studentGroupMapper,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher,
+			SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
