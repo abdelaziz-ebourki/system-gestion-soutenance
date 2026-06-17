@@ -101,8 +101,7 @@ public class EvaluationService {
 			throw new InvalidBusinessStateException("La date limite de soumission des évaluations est dépassée");
 		}
 
-		if (request.score() != null)
-			evaluation.setScore(request.score());
+		evaluation.setScore(request.score());
 		if (request.comment() != null)
 			evaluation.setComment(request.comment());
 		if (request.attendanceStatus() != null)

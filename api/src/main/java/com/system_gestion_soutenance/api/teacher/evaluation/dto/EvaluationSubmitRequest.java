@@ -4,6 +4,7 @@ import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationAtt
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "Requête de soumission d'évaluation pour un projet de soutenance")
 @SuppressWarnings("PMD")

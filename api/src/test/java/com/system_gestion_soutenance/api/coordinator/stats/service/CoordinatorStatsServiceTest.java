@@ -3,21 +3,28 @@ package com.system_gestion_soutenance.api.coordinator.stats.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
 
 class CoordinatorStatsServiceTest {
 
-	private final EntityManager entityManager = mock(EntityManager.class);
-	private final Query query = mock(Query.class);
+	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
+	private final GroupRepository groupRepository = mock(GroupRepository.class);
+	private final JuryRepository juryRepository = mock(JuryRepository.class);
+	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 
-	private final CoordinatorStatsService service = new CoordinatorStatsService(entityManager);
+	private final CoordinatorStatsService service = new CoordinatorStatsService(projectRepository, groupRepository,
+			juryRepository, defenseSessionRepository);
 
 	@Test
 	void getStats_returnsCounts() {
-		when(entityManager.createNativeQuery(anyString())).thenReturn(query);
-		when(query.getSingleResult()).thenReturn(new Object[]{10L, 5L, 8L, 3L});
+		when(projectRepository.count()).thenReturn(10L);
+		when(groupRepository.count()).thenReturn(5L);
+		when(juryRepository.count()).thenReturn(8L);
+		when(defenseSessionRepository.count()).thenReturn(3L);
 
 		var result = service.getStats();
 
@@ -29,8 +36,10 @@ class CoordinatorStatsServiceTest {
 
 	@Test
 	void getStats_allZero_returnsZeroCounts() {
-		when(entityManager.createNativeQuery(anyString())).thenReturn(query);
-		when(query.getSingleResult()).thenReturn(new Object[]{0L, 0L, 0L, 0L});
+		when(projectRepository.count()).thenReturn(0L);
+		when(groupRepository.count()).thenReturn(0L);
+		when(juryRepository.count()).thenReturn(0L);
+		when(defenseSessionRepository.count()).thenReturn(0L);
 
 		var result = service.getStats();
 

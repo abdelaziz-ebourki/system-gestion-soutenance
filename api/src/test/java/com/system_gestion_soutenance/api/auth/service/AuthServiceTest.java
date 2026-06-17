@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.system_gestion_soutenance.api.auth.dto.*;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.common.util.PasswordValidator;
+import com.system_gestion_soutenance.api.common.util.ValidationResult;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.entity.Role;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -116,6 +117,7 @@ class AuthServiceTest {
 		user.setActive(false);
 		user.setVerificationToken("valid-token");
 		when(userRepository.findByVerificationToken("valid-token")).thenReturn(Optional.of(user));
+		when(passwordValidator.validate(anyString())).thenReturn(new ValidationResult(true, null));
 		when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-pass");
 
 		authService.verifyAccount(new VerifyRequest("valid-token", "new-password"));
@@ -162,6 +164,7 @@ class AuthServiceTest {
 		user.setResetToken("reset-token");
 		user.setResetTokenExpires(Instant.now().plusSeconds(3600));
 		when(userRepository.findByResetToken("reset-token")).thenReturn(Optional.of(user));
+		when(passwordValidator.validate(anyString())).thenReturn(new ValidationResult(true, null));
 		when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-pass");
 
 		authService.resetPassword(new ResetPasswordRequest("reset-token", "new-password"));

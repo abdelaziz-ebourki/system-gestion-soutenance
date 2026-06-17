@@ -7,6 +7,7 @@ import com.system_gestion_soutenance.api.user.service.UserCacheService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -29,9 +30,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
 	private final ObjectMapper objectMapper;
+	private final String[] allowedOrigins;
 
-	public SecurityConfig(ObjectMapper objectMapper) {
+	public SecurityConfig(ObjectMapper objectMapper,
+			@Value("${app.cors.allowed-origins}") String[] allowedOrigins) {
 		this.objectMapper = objectMapper;
+		this.allowedOrigins = allowedOrigins;
 	}
 
 	@Bean
@@ -42,7 +46,7 @@ public class SecurityConfig {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4173"));
+		config.setAllowedOrigins(List.of(allowedOrigins));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
@@ -67,13 +71,13 @@ public class SecurityConfig {
 					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 					objectMapper.writeValue(response.getWriter(), Map.of("message", "Acces refuse"));
 				}))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/login").permitAll()
-						.requestMatchers("/api/auth/**").permitAll().requestMatchers("/h2-console/**").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs.yml")
 						.permitAll().requestMatchers("/actuator/health").permitAll()
 						.requestMatchers("/api/admin/rooms/**").hasAnyRole("ADMIN", "COORDINATOR")
 						.requestMatchers("/api/admin/**").hasRole("ADMIN").requestMatchers("/api/coordinator/**")
-						.hasRole("COORDINATOR").requestMatchers("/api/teacher/**").hasRole("TEACHER")
+						.hasAnyRole("ADMIN", "COORDINATOR").requestMatchers("/api/teacher/**").hasRole("TEACHER")
 						.requestMatchers("/api/student/**").hasRole("STUDENT").requestMatchers("/api/notifications/**")
 						.authenticated().anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

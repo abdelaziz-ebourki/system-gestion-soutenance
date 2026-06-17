@@ -1,32 +1,35 @@
 package com.system_gestion_soutenance.api.coordinator.stats.service;
 
+import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.stats.dto.CoordinatorStatsResponse;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import org.springframework.stereotype.Service;
 @SuppressWarnings("PMD")
 
 @Service
 public class CoordinatorStatsService {
 
-	private final EntityManager entityManager;
+	private final ProjectRepository projectRepository;
+	private final GroupRepository groupRepository;
+	private final JuryRepository juryRepository;
+	private final DefenseSessionRepository defenseSessionRepository;
 
-	public CoordinatorStatsService(EntityManager entityManager) {
-		this.entityManager = entityManager;
+	public CoordinatorStatsService(ProjectRepository projectRepository, GroupRepository groupRepository,
+			JuryRepository juryRepository, DefenseSessionRepository defenseSessionRepository) {
+		this.projectRepository = projectRepository;
+		this.groupRepository = groupRepository;
+		this.juryRepository = juryRepository;
+		this.defenseSessionRepository = defenseSessionRepository;
 	}
 
 	public CoordinatorStatsResponse getStats() {
-		Query query = entityManager.createNativeQuery("""
-				SELECT
-				  (SELECT COUNT(*) FROM project) AS total_projects,
-				  (SELECT COUNT(*) FROM coordinator_group) AS total_groups,
-				  (SELECT COUNT(*) FROM defense) AS total_defenses,
-				  (SELECT COUNT(*) FROM defense_session) AS scheduled_defenses
-				""");
+		long totalProjects = projectRepository.count();
+		long totalGroups = groupRepository.count();
+		long totalJuries = juryRepository.count();
+		long scheduledDefenses = defenseSessionRepository.count();
 
-		Object[] row = (Object[]) query.getSingleResult();
-
-		return new CoordinatorStatsResponse(((Number) row[0]).longValue(), ((Number) row[1]).longValue(),
-				((Number) row[2]).longValue(), ((Number) row[3]).longValue());
+		return new CoordinatorStatsResponse(totalProjects, totalGroups, totalJuries, scheduledDefenses);
 	}
 }

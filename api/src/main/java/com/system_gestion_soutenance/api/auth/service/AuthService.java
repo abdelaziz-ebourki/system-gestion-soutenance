@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.auth.dto.VerifyRequest;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.common.service.MessageService;
 import com.system_gestion_soutenance.api.common.util.PasswordValidator;
+import com.system_gestion_soutenance.api.common.util.ValidationResult;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.common.mapper.UserMapper;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -76,10 +77,9 @@ public class AuthService {
 		User user = userRepository.findByVerificationToken(request.token())
 				.orElseThrow(() -> new EntityNotFoundException(messageService.getMessage("auth.verify.invalid_token")));
 
-		try {
-			passwordValidator.validate(request.password());
-		} catch (IllegalArgumentException e) {
-			throw new InvalidBusinessStateException(e.getMessage());
+		ValidationResult result = passwordValidator.validate(request.password());
+		if (!result.valid()) {
+			throw new InvalidBusinessStateException(result.errorMessage());
 		}
 
 		user.setPassword(passwordEncoder.encode(request.password()));
@@ -111,10 +111,9 @@ public class AuthService {
 			throw new InvalidBusinessStateException(messageService.getMessage("auth.reset.invalid_token"));
 		}
 
-		try {
-			passwordValidator.validate(request.password());
-		} catch (IllegalArgumentException e) {
-			throw new InvalidBusinessStateException(e.getMessage());
+		ValidationResult result = passwordValidator.validate(request.password());
+		if (!result.valid()) {
+			throw new InvalidBusinessStateException(result.errorMessage());
 		}
 
 		user.setPassword(passwordEncoder.encode(request.password()));

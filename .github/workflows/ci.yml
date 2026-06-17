@@ -16,6 +16,8 @@ jobs:
     defaults:
       run:
         working-directory: api
+    env:
+      JWT_SECRET: ci-test-jwt-secret-for-github-actions-must-be-at-least-32-chars
 
     steps:
       - uses: actions/checkout@v6
@@ -37,3 +39,47 @@ jobs:
       - run: ./mvnw --no-transfer-progress compile -q
 
       - run: ./mvnw --no-transfer-progress test
+
+  postman:
+    needs: [ci]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & start API with Docker
+        run: docker compose up --build -d
+
+      - name: Wait for API health
+        run: |
+          echo "Waiting for API to be ready..."
+          for i in $(seq 1 30); do
+            status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
+            if [ "$status" = "200" ]; then
+              echo "API is ready (attempt $i)"
+              exit 0
+            fi
+            echo "Attempt $i: status=$status, waiting 5s..."
+            sleep 5
+          done
+          echo "API failed to start within timeout"
+          exit 1
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Postman Collection
+        run: |
+          newman run postman/system-gestion-soutenance.postman_collection.json \
+            -e postman/system-gestion-soutenance.postman_environment.json \
+            --reporters cli,html,json \
+            --reporter-html-export newman-report.html \
+            --reporter-json-export newman-results.json
+
+      - name: Upload Newman reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: newman-reports
+          path: |
+            newman-report.html
+            newman-results.json

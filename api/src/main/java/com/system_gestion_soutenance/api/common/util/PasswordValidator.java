@@ -12,11 +12,12 @@ public class PasswordValidator {
 	private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
 	private static final Pattern PATTERN = Pattern.compile(PASSWORD_PATTERN);
 
-	public void validate(String password) {
+	public ValidationResult validate(String password) {
 		if (password == null || !PATTERN.matcher(password).matches()) {
-			throw new IllegalArgumentException(
+			return new ValidationResult(false,
 					"Le mot de passe doit contenir au moins 8 caractères, inclure une majuscule, "
 							+ "une minuscule, un chiffre et un caractère spécial.");
 		}
+		return new ValidationResult(true, null);
 	}
 }
