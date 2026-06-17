@@ -342,7 +342,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds3.setName("Soutenance PFE Printemps 2026");
 		ds3.setDefenseType(DefenseType.PFE);
 		ds3.setStatus(DefenseSessionStatus.ACTIVE);
-		ds3.setMaxGroupSize(3);
+		ds3.setMaxGroupSize(5);
 		ds3.setDefenseDuration(30);
 		ds3.setBreakDuration(10);
 		ds3.setSubmissionDeadline(LocalDate.of(2026, 6, 1));
