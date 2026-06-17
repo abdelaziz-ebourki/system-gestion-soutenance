@@ -143,10 +143,19 @@ class CoordinatorGradeServiceTest {
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(eval.getType()).thenReturn(EvaluationType.SOUTENANCE);
 		when(eval.getDefense()).thenReturn(defense);
+		when(eval.getDefenseSessionId()).thenReturn(1L);
+
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setRapportCoefficient(0);
+		ds.setSoutenanceCoefficient(100);
+		ds.setEvaluationCoefficients(Map.of("président", 1, "examinateur", 1));
 
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
+		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
 
 		var result = service.getGrades();
 
@@ -216,6 +225,7 @@ class CoordinatorGradeServiceTest {
 		when(defense.getProject()).thenReturn(project);
 		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, teacher1, "Président", null),
 				new JuryMember(null, teacher2, "Examinateur", null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
