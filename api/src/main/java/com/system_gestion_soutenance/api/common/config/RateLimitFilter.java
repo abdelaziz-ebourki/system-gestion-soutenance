@@ -30,15 +30,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	private ScheduledExecutorService evictor;
 
 	private final int defaultMaxRequests;
+	private final boolean generalEnabled;
 	private static final long WINDOW_MS = 60_000;
 	private static final long EVICT_INTERVAL_MS = 120_000;
 
 	public RateLimitFilter(ObjectMapper objectMapper,
 			@Value("${app.security.trust-proxy-headers:false}") boolean trustProxyHeaders,
-			@Value("${app.security.rate-limit.max-requests:60}") int defaultMaxRequests) {
+			@Value("${app.security.rate-limit.max-requests:60}") int defaultMaxRequests,
+			@Value("${app.security.rate-limit.general-enabled:false}") boolean generalEnabled) {
 		this.objectMapper = objectMapper;
 		this.trustProxyHeaders = trustProxyHeaders;
 		this.defaultMaxRequests = defaultMaxRequests;
+		this.generalEnabled = generalEnabled;
 	}
 
 	@PostConstruct
@@ -68,6 +71,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
 			return;
 		}
 
+		if (!isAuthEndpoint(path) && !isBulkEndpoint(path) && !generalEnabled) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
 		int effectiveMax = resolveMaxRequests(path);
 
 		String clientIp = getClientIp(request);
@@ -89,11 +97,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
+	private boolean isAuthEndpoint(String path) {
+		return path.startsWith("/api/auth/") || "/api/login".equals(path);
+	}
+
+	private boolean isBulkEndpoint(String path) {
+		return path.startsWith("/api/coordinator/projects/bulk") || path.startsWith("/api/coordinator/schedules");
+	}
+
 	private int resolveMaxRequests(String path) {
-		if (path.startsWith("/api/auth/") || "/api/login".equals(path)) {
+		if (isAuthEndpoint(path)) {
 			return Math.min(defaultMaxRequests, 10);
 		}
-		if (path.startsWith("/api/coordinator/projects/bulk") || path.startsWith("/api/coordinator/schedules")) {
+		if (isBulkEndpoint(path)) {
 			return Math.min(defaultMaxRequests, 10);
 		}
 		return defaultMaxRequests;
