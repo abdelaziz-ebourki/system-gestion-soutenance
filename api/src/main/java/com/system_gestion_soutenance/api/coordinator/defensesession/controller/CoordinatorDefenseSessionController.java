@@ -53,6 +53,7 @@ public class CoordinatorDefenseSessionController {
 	}
 
 	@PostMapping
+	@PreAuthorize("hasRole('COORDINATOR')")
 	@Operation(summary = "Create a new defense session")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Defense session created successfully"),

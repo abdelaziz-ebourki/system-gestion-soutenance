@@ -10,4 +10,6 @@ public interface NotificationRepository extends JpaRepository<AppNotification, L
 	List<AppNotification> findAllByOrderByTimestampDesc();
 
 	Page<AppNotification> findAllByOrderByTimestampDesc(Pageable pageable);
+
+	Page<AppNotification> findByUserIdOrUserIdIsNullOrderByTimestampDesc(Long userId, Pageable pageable);
 }

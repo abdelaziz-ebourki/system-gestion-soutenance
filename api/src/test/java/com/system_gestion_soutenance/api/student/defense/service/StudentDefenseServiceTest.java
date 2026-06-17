@@ -167,7 +167,7 @@ class StudentDefenseServiceTest {
 		teacher.setFirstName("Jane");
 		teacher.setLastName("Smith");
 
-		JuryMember member = new JuryMember(null, teacher, "Président", null);
+		JuryMember member = new JuryMember(null, teacher, "Président", null, null, null, null);
 
 		Defense defense = new Defense();
 		defense.setDate(LocalDate.of(2026, 6, 15));

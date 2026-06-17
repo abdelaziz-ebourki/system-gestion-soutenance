@@ -11,7 +11,10 @@ public record CreateJuryRequest(
 
 	@Schema(description = "Membre du jury")
 	public record MemberEntry(
-			@Schema(description = "ID de l'enseignant", example = "1") @NotNull(message = "L'enseignant est obligatoire") Long teacherId,
-			@Schema(description = "Rôle dans le jury", example = "Rapporteur") @NotNull(message = "Le rôle est obligatoire") String roleName) {
+			@Schema(description = "ID de l'enseignant (optionnel si externe)", example = "1") Long teacherId,
+			@Schema(description = "Rôle dans le jury", example = "Rapporteur") @NotNull(message = "Le rôle est obligatoire") String roleName,
+			@Schema(description = "Nom complet du membre externe", example = "Dr. Dupont") String externalName,
+			@Schema(description = "Institution du membre externe", example = "Université Paris-Saclay") String externalInstitution,
+			@Schema(description = "Email du membre externe", example = "dupont@univ-paris-saclay.fr") String externalEmail) {
 	}
 }

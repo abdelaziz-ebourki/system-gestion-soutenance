@@ -11,6 +11,9 @@ public interface JuryMemberMapper {
 
 	@Mapping(target = "teacherId", source = "teacher.id")
 	@Mapping(target = "teacherName", expression = "java(teacherName(member))")
+	@Mapping(target = "externalName", source = "externalName")
+	@Mapping(target = "externalInstitution", source = "externalInstitution")
+	@Mapping(target = "externalEmail", source = "externalEmail")
 	JuryResponse.MemberResponse toDto(JuryMember member);
 
 	default String teacherName(JuryMember member) {

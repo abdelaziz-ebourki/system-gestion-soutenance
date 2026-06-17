@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.student.defense.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse;
+import com.system_gestion_soutenance.api.student.defense.dto.StudentGradeResponse;
 import com.system_gestion_soutenance.api.student.defense.service.StudentDefenseService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,5 +33,18 @@ public class StudentDefenseController {
 					"User not authenticated");
 		}
 		return ApiResponse.success(studentDefenseService.getDefense(user.getId()));
+	}
+
+	@GetMapping("/grade")
+	@Operation(summary = "Get student grade", description = "Retrieves the weighted average score and mention for the connected student.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved grade"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Results not yet published")})
+	public ApiResponse<StudentGradeResponse> getGrade(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
+		return ApiResponse.success(studentDefenseService.getGrade(user.getId()));
 	}
 }
