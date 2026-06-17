@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.AuditLogMapper;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,9 +18,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/admin/audit-logs")
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Admin - Audit Logging", description = "Endpoints for viewing and creating system audit logs")
 public class AuditLogController {
 
@@ -37,8 +41,9 @@ public class AuditLogController {
 	@Operation(summary = "List audit logs", description = "Retrieves a paginated list of system audit logs.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved audit logs")})
-	public ApiResponse<PaginatedResponse<AuditLogDto>> findAll(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "20") int limit) {
+	public ApiResponse<PaginatedResponse<AuditLogDto>> findAll(
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+			@Parameter(description = "Items per page (1-500)") @RequestParam(defaultValue = "20") int limit) {
 		PaginatedResponse<AuditLog> response = service.getAuditLogs(page, limit);
 		List<AuditLogDto> items = response.items().stream().map(mapper::toDto).toList();
 		PaginatedResponse<AuditLogDto> mapped = new PaginatedResponse<>(items, response.total(), response.pageCount(),

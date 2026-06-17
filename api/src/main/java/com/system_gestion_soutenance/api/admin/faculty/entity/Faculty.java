@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "faculty")

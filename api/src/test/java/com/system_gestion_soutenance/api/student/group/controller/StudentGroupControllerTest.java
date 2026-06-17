@@ -71,12 +71,14 @@ class StudentGroupControllerTest {
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		Group group = new Group();
 		group.setId(1L);
-		group.setGroupName("Groupe de Alice");
-		when(studentGroupService.createGroup(1L)).thenReturn(group);
+		group.setGroupName("Groupe Alpha");
+		when(studentGroupService.createGroup(1L, "Groupe Alpha", 5L)).thenReturn(group);
 		when(studentGroupMapper.toDetails(group, 1L))
-				.thenReturn(new GroupDetailsResponse(1L, "Groupe de Alice", null, null, List.of()));
-		mockMvc.perform(post("/api/student/groups").with(authentication(auth)).with(csrf()))
-				.andExpect(status().isCreated()).andExpect(jsonPath("$.data.groupName").value("Groupe de Alice"));
+				.thenReturn(new GroupDetailsResponse(1L, "Groupe Alpha", null, null, List.of()));
+		mockMvc.perform(post("/api/student/groups").with(authentication(auth)).with(csrf())
+				.contentType("application/json").content("""
+						{"groupName":"Groupe Alpha","sessionId":5}""")).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.data.groupName").value("Groupe Alpha"));
 	}
 
 	@Test
@@ -94,5 +96,18 @@ class StudentGroupControllerTest {
 				.thenReturn(new GroupDetailsResponse(1L, "Groupe Test", null, null, List.of()));
 		mockMvc.perform(post("/api/student/groups/10/members").with(authentication(auth)).with(csrf()))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
+	}
+
+	@Test
+	void leaveGroup_returns200() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		doNothing().when(studentGroupService).leaveGroup(1L);
+
+		mockMvc.perform(delete("/api/student/groups/leave").with(authentication(auth)).with(csrf()))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
 	}
 }

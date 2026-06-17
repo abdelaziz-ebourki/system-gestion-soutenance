@@ -1,22 +1,33 @@
 package com.system_gestion_soutenance.api.student.document.controller;
 
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.StudentDocumentMapper;
 import com.system_gestion_soutenance.api.student.document.dto.StudentDocumentDto;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.service.StudentDocumentService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/student/documents")
+@PreAuthorize("hasRole('STUDENT')")
 @Tag(name = "Student - Document Management", description = "Endpoints for students to upload and view their documents")
 public class StudentDocumentController {
 
@@ -32,9 +43,18 @@ public class StudentDocumentController {
 	@Operation(summary = "List documents", description = "Retrieves all documents uploaded by the connected student.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved documents")})
-	public ApiResponse<List<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user) {
-		return ApiResponse
-				.success(studentDocumentService.findByStudent(user.getId()).stream().map(mapper::toDto).toList());
+	public ApiResponse<PaginatedResponse<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user,
+			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
+			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
+		PaginatedResponse<StudentDocument> result = studentDocumentService.findByStudent(user.getId(), page, limit);
+		List<StudentDocumentDto> items = result.items().stream().map(mapper::toDto).toList();
+		PaginatedResponse<StudentDocumentDto> mapped = new PaginatedResponse<>(items, result.total(),
+				result.pageCount(), result.currentPage(), result.size());
+		return ApiResponse.success(mapped);
 	}
 
 	@PostMapping("/{id}/attachments")
@@ -43,9 +63,38 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File uploaded successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or request"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found")})
-	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(@PathVariable Long id,
-			@RequestParam("file") MultipartFile file) {
-		StudentDocument doc = studentDocumentService.upload(id, file);
+	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(
+			@Parameter(description = "Document ID") @PathVariable Long id,
+			@Parameter(description = "File to upload") @RequestParam("file") MultipartFile file,
+			@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
+		StudentDocument doc = studentDocumentService.upload(id, user.getId(), file);
 		return ResponseEntity.ok(ApiResponse.success(mapper.toDto(doc)));
+	}
+
+	@GetMapping("/{id}/download")
+	@Operation(summary = "Download document file", description = "Downloads the submitted file for a document.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
+	public ResponseEntity<byte[]> download(@Parameter(description = "Document ID") @PathVariable Long id,
+			@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
+		byte[] content;
+		try {
+			content = studentDocumentService.download(id, user.getId());
+		} catch (EntityNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("attachment", "document-" + id + ".bin");
+		return new ResponseEntity<>(content, headers, HttpStatus.OK);
 	}
 }

@@ -34,6 +34,7 @@
         <Or>
             <Class name="com.system_gestion_soutenance.api.auth.controller.AuthController"/>
             <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+            <Class name="com.system_gestion_soutenance.api.coordinator.document.controller.DocumentDataController"/>
         </Or>
     </Match>
     <Match>
@@ -45,6 +46,18 @@
         <Or>
             <Class name="com.system_gestion_soutenance.api.admin.stats.service.StatsService"/>
             <Class name="com.system_gestion_soutenance.api.coordinator.stats.service.CoordinatorStatsService"/>
+            <Class name="com.system_gestion_soutenance.api.common.service.PdfGenerationService"/>
+        </Or>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+            <Class name="com.system_gestion_soutenance.api.user.service.UserAccountService"/>
         </Or>
     </Match>
 </FindBugsFilter>

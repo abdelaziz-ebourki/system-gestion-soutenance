@@ -2,7 +2,7 @@ package com.system_gestion_soutenance.api.coordinator.project.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
@@ -44,9 +44,9 @@ class ProjectRepositoryTest {
 		department.setFaculty(faculty);
 		em.persist(department);
 
-		Grade grade = new Grade();
-		grade.setName("Professeur");
-		em.persist(grade);
+		TeacherRank teacherRank = new TeacherRank();
+		teacherRank.setName("Professeur");
+		em.persist(teacherRank);
 
 		Major major = new Major();
 		major.setName("Génie Info");
@@ -63,7 +63,7 @@ class ProjectRepositoryTest {
 		teacher.setLastName("Martin");
 		teacher.setFirstName("Jean");
 		teacher.setActive(true);
-		teacher.setGrade(grade);
+		teacher.setTeacherRank(teacherRank);
 		teacher.setDepartment(department);
 		savedTeacher = em.persist(teacher);
 
@@ -88,7 +88,6 @@ class ProjectRepositoryTest {
 		project.setDefenseType("PFE");
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
 		em.persist(project);
 
 		em.flush();
@@ -99,18 +98,15 @@ class ProjectRepositoryTest {
 		assertEquals(1, result.size());
 		assertNotNull(result.get(0).getSupervisor());
 		assertEquals("Martin", result.get(0).getSupervisor().getLastName());
-		assertEquals(1, result.get(0).getStudents().size());
 	}
 
 	@Test
-	void findAllWithDetails_noStudents_returnsProjectWithNullCollections() {
+	void findAllWithDetails_noSupervisor_returnsProject() {
 		Project project = new Project();
 		project.setTitle("Solo Project");
-		project.setDescription("No students yet");
+		project.setDescription("No supervisor yet");
 		project.setDefenseType("PFE");
 		project.setStatus(ProjectStatus.PENDING);
-		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of());
 		em.persist(project);
 
 		em.flush();
@@ -130,7 +126,6 @@ class ProjectRepositoryTest {
 		project.setDefenseType("MEMOIRE");
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
 		em.persist(project);
 
 		em.flush();
@@ -140,25 +135,5 @@ class ProjectRepositoryTest {
 
 		assertEquals(1, result.size());
 		assertEquals("Teacher Project", result.get(0).getTitle());
-	}
-
-	@Test
-	void findByStudentsId_returnsProject() {
-		Project project = new Project();
-		project.setTitle("Student Project");
-		project.setDescription("Desc");
-		project.setDefenseType("PFE");
-		project.setStatus(ProjectStatus.PENDING);
-		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
-		em.persist(project);
-
-		em.flush();
-		em.clear();
-
-		List<Project> result = repository.findByStudentsId(savedStudent.getId());
-
-		assertEquals(1, result.size());
-		assertEquals("Student Project", result.get(0).getTitle());
 	}
 }

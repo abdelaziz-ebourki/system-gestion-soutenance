@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+@SuppressWarnings("PMD")
 
 @Service
 public class TeacherUnavailabilityService {
@@ -40,7 +41,7 @@ public class TeacherUnavailabilityService {
 		for (var slotRequest : request.slots()) {
 			Unavailability u = new Unavailability();
 			u.setTeacherId(teacherId);
-			u.setDate(slotRequest.date());
+			u.setDate(java.time.LocalDate.parse(slotRequest.date()));
 			u.setSlots(slotRequest.slots());
 			repository.save(u);
 		}

@@ -74,4 +74,13 @@ class RoomControllerTest {
 		mockMvc.perform(delete("/api/admin/rooms/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(roomService.updatePartial(anyLong(), any())).thenReturn(new Room());
+		when(roomMapper.toDto(any())).thenReturn(new RoomResponse(1L, "Upd", 25, 1L));
+		mockMvc.perform(
+				patch("/api/admin/rooms/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Upd\"}"))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+	}
 }

@@ -9,9 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+@SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/student/stats")
+@PreAuthorize("hasRole('STUDENT')")
 @Tag(name = "Student - Statistics", description = "Endpoints for students to view their personal statistics")
 public class StudentStatsController {
 
@@ -26,6 +29,10 @@ public class StudentStatsController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")})
 	public ApiResponse<StudentStatsResponse> getStats(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
 		return ApiResponse.success(statsService.getStats(user.getId()));
 	}
 }

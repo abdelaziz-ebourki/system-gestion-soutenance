@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.common.util;
 
 import org.springframework.stereotype.Component;
 import java.util.regex.Pattern;
+@SuppressWarnings("PMD")
 
 @Component
 public class PasswordValidator {

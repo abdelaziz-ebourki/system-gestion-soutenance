@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.service.DepartmentService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -34,9 +35,10 @@ class DepartmentControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(departmentService.findAll()).thenReturn(List.of(new Department()));
+		when(departmentService.findAll(0, 10))
+				.thenReturn(new PaginatedResponse<>(List.of(new Department()), 1, 1, 0, 10));
 		mockMvc.perform(get("/api/admin/departments")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.success").value(true));
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.items").isArray());
 	}
 
 	@Test
@@ -59,6 +61,14 @@ class DepartmentControllerTest {
 	void delete_returns200() throws Exception {
 		doNothing().when(departmentService).delete(1L);
 		mockMvc.perform(delete("/api/admin/departments/1")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
+	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(departmentService.updatePartial(anyLong(), any())).thenReturn(new Department());
+		mockMvc.perform(patch("/api/admin/departments/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"Upd\",\"code\":\"UP\"}")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
 	}
 }

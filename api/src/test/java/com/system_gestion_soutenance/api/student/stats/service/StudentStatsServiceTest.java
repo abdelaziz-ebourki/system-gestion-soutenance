@@ -5,13 +5,12 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.student.document.entity.StudentDocument;
 import com.system_gestion_soutenance.api.student.document.repository.StudentDocumentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,7 @@ class StudentStatsServiceTest {
 	@Mock
 	private GroupRepository groupRepository;
 	@Mock
-	private SlotAssignmentRepository slotAssignmentRepository;
+	private DefenseRepository defenseRepository;
 
 	@InjectMocks
 	private StudentStatsService service;
@@ -47,8 +46,8 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L), student(2L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc1, doc2));
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(slotAssignmentRepository.existsByProjectId(10L)).thenReturn(true);
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.existsByProject_Id(10L)).thenReturn(true);
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
 
@@ -68,7 +67,7 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of(doc));
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
 
@@ -86,8 +85,8 @@ class StudentStatsServiceTest {
 		group.setStudents(List.of(student(1L)));
 
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(slotAssignmentRepository.existsByProjectId(10L)).thenReturn(false);
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.existsByProject_Id(10L)).thenReturn(false);
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
 
@@ -97,7 +96,7 @@ class StudentStatsServiceTest {
 	@Test
 	void getStats_noGroup_returnsZeroMembers() {
 		when(documentRepository.findByStudentId(1L)).thenReturn(List.of());
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 
 		com.system_gestion_soutenance.api.student.stats.dto.StudentStatsResponse result = service.getStats(1L);
 

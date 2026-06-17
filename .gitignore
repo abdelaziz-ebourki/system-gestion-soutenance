@@ -11,3 +11,7 @@ target/
 # Node (for husky)
 node_modules/
 package-lock.json
+
+# Runtime artifacts
+server.pid
+*.log

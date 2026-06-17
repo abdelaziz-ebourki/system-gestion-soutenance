@@ -5,17 +5,15 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
-import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,18 +28,14 @@ class StudentDefenseServiceTest {
 	@Mock
 	private GroupRepository groupRepository;
 	@Mock
-	private ProjectRepository projectRepository;
-	@Mock
-	private JuryRepository juryRepository;
-	@Mock
-	private SlotAssignmentRepository slotAssignmentRepository;
+	private DefenseRepository defenseRepository;
 
 	@InjectMocks
 	private StudentDefenseService service;
 
 	@Test
 	void getDefense_noGroup_throws() {
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
@@ -49,7 +43,7 @@ class StudentDefenseServiceTest {
 	void getDefense_noProject_throws() {
 		Group group = new Group();
 		group.setStudents(List.of(student(1L)));
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
@@ -69,14 +63,12 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		SlotAssignment slot = new SlotAssignment();
-		slot.setProjectId(10L);
-		slot.setDate("2026-06-15");
-		slot.setTime("09:00");
+		Defense defense = new Defense();
+		defense.setDate(LocalDate.of(2026, 6, 15));
+		defense.setTime(LocalTime.of(9, 0));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of(slot));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
@@ -98,9 +90,8 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
@@ -116,16 +107,17 @@ class StudentDefenseServiceTest {
 		JuryMember member = new JuryMember();
 		member.setTeacher(null);
 
-		Jury jury = new Jury();
-		jury.setMembers(List.of(member));
+		Defense defense = new Defense();
+		defense.setDate(LocalDate.of(2026, 6, 15));
+		defense.setTime(LocalTime.of(9, 0));
+		defense.setMembers(List.of(member));
 
 		Group group = new Group();
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
-		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
@@ -138,17 +130,17 @@ class StudentDefenseServiceTest {
 		project.setId(10L);
 		project.setTitle("Projet Test");
 
+		Defense defense = new Defense();
+		defense.setDate(LocalDate.of(2026, 6, 15));
+		defense.setTime(LocalTime.of(9, 0));
+		defense.setRoom(null);
+
 		Group group = new Group();
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		SlotAssignment slot = new SlotAssignment();
-		slot.setProjectId(10L);
-		slot.setRoom(null);
-
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of(slot));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
@@ -160,13 +152,12 @@ class StudentDefenseServiceTest {
 		Group group = new Group();
 		group.setStudents(null);
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 
 		assertThrows(EntityNotFoundException.class, () -> service.getDefense(1L));
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void getDefense_withJuryTeacher_putsMemberInResult() {
 		Project project = new Project();
 		project.setId(10L);
@@ -176,20 +167,19 @@ class StudentDefenseServiceTest {
 		teacher.setFirstName("Jane");
 		teacher.setLastName("Smith");
 
-		JuryMember member = new JuryMember();
-		member.setTeacher(teacher);
-		member.setRoleName("Président");
+		JuryMember member = new JuryMember(null, teacher, "Président", null, null, null, null);
 
-		Jury jury = new Jury();
-		jury.setMembers(List.of(member));
+		Defense defense = new Defense();
+		defense.setDate(LocalDate.of(2026, 6, 15));
+		defense.setTime(LocalTime.of(9, 0));
+		defense.setMembers(List.of(member));
 
 		Group group = new Group();
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(juryRepository.findByProjectId(10L)).thenReturn(List.of(jury));
-		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 
@@ -211,9 +201,8 @@ class StudentDefenseServiceTest {
 		group.setProject(project);
 		group.setStudents(List.of(student(1L)));
 
-		when(groupRepository.findByStudentId(1L)).thenReturn(Optional.of(group));
-		when(juryRepository.findByProjectId(10L)).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectId(10L)).thenReturn(List.of());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(defenseRepository.findByProject(project)).thenReturn(Optional.empty());
 
 		com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse result = service.getDefense(1L);
 

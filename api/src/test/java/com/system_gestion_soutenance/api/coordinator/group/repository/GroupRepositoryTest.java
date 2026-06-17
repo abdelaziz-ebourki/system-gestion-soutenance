@@ -2,7 +2,7 @@ package com.system_gestion_soutenance.api.coordinator.group.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
@@ -46,9 +46,9 @@ class GroupRepositoryTest {
 		department.setFaculty(faculty);
 		em.persist(department);
 
-		Grade grade = new Grade();
-		grade.setName("Professeur");
-		em.persist(grade);
+		TeacherRank teacherRank = new TeacherRank();
+		teacherRank.setName("Professeur");
+		em.persist(teacherRank);
 
 		Major major = new Major();
 		major.setName("Génie Info");
@@ -65,7 +65,7 @@ class GroupRepositoryTest {
 		teacher.setLastName("Martin");
 		teacher.setFirstName("Jean");
 		teacher.setActive(true);
-		teacher.setGrade(grade);
+		teacher.setTeacherRank(teacherRank);
 		teacher.setDepartment(department);
 		savedTeacher = em.persist(teacher);
 
@@ -105,7 +105,7 @@ class GroupRepositoryTest {
 	}
 
 	@Test
-	void findByStudentId_returnsGroup() {
+	void findFirstByStudentsIdOrderByIdAsc_returnsGroup() {
 		Project project = createProject("Projet B");
 		em.persist(project);
 
@@ -118,15 +118,15 @@ class GroupRepositoryTest {
 		em.flush();
 		em.clear();
 
-		Optional<Group> result = repository.findByStudentId(savedStudent.getId());
+		Optional<Group> result = repository.findFirstByStudentsIdOrderByIdAsc(savedStudent.getId());
 
 		assertTrue(result.isPresent());
 		assertEquals("Groupe 2", result.get().getGroupName());
 	}
 
 	@Test
-	void findByStudentId_noMatch_returnsEmpty() {
-		Optional<Group> result = repository.findByStudentId(999L);
+	void findFirstByStudentsIdOrderByIdAsc_noMatch_returnsEmpty() {
+		Optional<Group> result = repository.findFirstByStudentsIdOrderByIdAsc(999L);
 		assertTrue(result.isEmpty());
 	}
 
@@ -157,7 +157,6 @@ class GroupRepositoryTest {
 		project.setDefenseType("PFE");
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
 		return project;
 	}
 }

@@ -14,6 +14,8 @@
 	<name>api</name>
 	<properties>
 		<java.version>17</java.version>
+		<mockito.version>5.23.0</mockito.version>
+		<byte-buddy.version>1.17.7</byte-buddy.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -83,9 +85,23 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.openhtmltopdf</groupId>
+			<artifactId>openhtmltopdf-pdfbox</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>1.6.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xhtmlrenderer</groupId>
+			<artifactId>flying-saucer-pdf</artifactId>
+			<version>9.9.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -133,7 +149,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.8.15</version>
 				<configuration>
 					<excludes>
 						<exclude>**/dto/**</exclude>
@@ -229,12 +245,14 @@
 				<version>3.28.0</version>
 				<configuration>
 					<failOnViolation>true</failOnViolation>
+					<targetJdk>17</targetJdk>
 					<rulesets>
-						<ruleset>pmd-ruleset-default.xml</ruleset>
+						<ruleset>pmd-ruleset.xml</ruleset>
 					</rulesets>
-					<excludes>
-						<exclude>**/seed/**</exclude>
-					</excludes>
+				<excludes>
+					<exclude>**/seed/**</exclude>
+					<exclude>**/*MapperImpl.java</exclude>
+				</excludes>
 				</configuration>
 				<executions>
 					<execution>

@@ -40,7 +40,9 @@ class AuthControllerTest {
 
 		mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("""
 				{"email":"admin@test.com","password":"password"}
-				""")).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("jwt-token"));
+				""")).andExpect(status().isOk()).andExpect(jsonPath("$.user").exists())
+				.andExpect(jsonPath("$.token").doesNotExist()).andExpect(cookie().httpOnly("jwt_token", true))
+				.andExpect(cookie().secure("jwt_token", true));
 	}
 
 	@Test

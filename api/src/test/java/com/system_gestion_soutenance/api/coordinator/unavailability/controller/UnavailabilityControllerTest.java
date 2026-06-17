@@ -51,11 +51,15 @@ class UnavailabilityControllerTest {
 
 	@Test
 	void findAll_returnsUnavailabilityRecords() throws Exception {
-		Unavailability record = new Unavailability(1L, 10L, "2025-06-01", List.of("08:00", "10:00"));
+		Unavailability record = new Unavailability();
+		record.setId(1L);
+		record.setTeacherId(10L);
+		record.setDate(java.time.LocalDate.of(2025, 6, 1));
+		record.setSlots(List.of("08:00", "10:00"));
 		when(repository.findAll()).thenReturn(List.of(record));
 		when(unavailabilityMapper.toDto(record))
 				.thenReturn(new com.system_gestion_soutenance.api.coordinator.unavailability.dto.UnavailabilityDto(1L,
-						10L, "2025-06-01", List.of("08:00", "10:00")));
+						10L, java.time.LocalDate.of(2025, 6, 1), List.of("08:00", "10:00")));
 
 		mockMvc.perform(get("/api/coordinator/unavailability")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[0].teacherId").value(10L))

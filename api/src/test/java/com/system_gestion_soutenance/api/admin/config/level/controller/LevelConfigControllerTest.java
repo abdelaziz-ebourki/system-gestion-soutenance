@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.service.LevelConfigService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
@@ -34,9 +35,9 @@ class LevelConfigControllerTest {
 
 	@Test
 	void findAll_returnsList() throws Exception {
-		when(levelConfigService.findAll()).thenReturn(List.of(new Level()));
+		when(levelConfigService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(new Level()), 1, 1, 0, 10));
 		mockMvc.perform(get("/api/admin/config/levels")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.success").value(true));
+				.andExpect(jsonPath("$.success").value(true)).andExpect(jsonPath("$.data.items").isArray());
 	}
 
 	@Test
@@ -60,5 +61,12 @@ class LevelConfigControllerTest {
 		doNothing().when(levelConfigService).delete(1L);
 		mockMvc.perform(delete("/api/admin/config/levels/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));
+	}
+
+	@Test
+	void patch_returns200() throws Exception {
+		when(levelConfigService.updatePartial(anyLong(), any())).thenReturn(new Level());
+		mockMvc.perform(patch("/api/admin/config/levels/1").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"S7\"}")).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
 	}
 }

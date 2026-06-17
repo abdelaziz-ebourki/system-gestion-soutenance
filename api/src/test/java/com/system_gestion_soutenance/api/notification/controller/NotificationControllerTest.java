@@ -10,6 +10,8 @@ import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
+import com.system_gestion_soutenance.api.notification.service.NotificationService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,25 +46,27 @@ class NotificationControllerTest {
 	@Test
 	void findAll_returnsList() throws Exception {
 		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "Test", "Message", LocalDateTime.now(),
-				false, null, null);
+				false, null, null, null);
 		AppNotification n2 = new AppNotification(2L, NotificationType.WARNING, "Test 2", "Message 2",
-				LocalDateTime.now(), true, null, null);
-		when(repository.findAllByOrderByTimestampDesc()).thenReturn(List.of(n1, n2));
+				LocalDateTime.now(), true, null, null, null);
+		when(notificationService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(n1, n2), 2, 1, 0, 10));
 		when(appNotificationMapper.toDto(n1))
 				.thenReturn(new com.system_gestion_soutenance.api.notification.dto.AppNotificationDto(1L, "info",
-						"Test", "Message", n1.getTimestamp(), false, null, null));
+						"Test", "Message", n1.getTimestamp(), false, null, null, null));
 		when(appNotificationMapper.toDto(n2))
 				.thenReturn(new com.system_gestion_soutenance.api.notification.dto.AppNotificationDto(2L, "warning",
-						"Test 2", "Message 2", n2.getTimestamp(), true, null, null));
+						"Test 2", "Message 2", n2.getTimestamp(), true, null, null, null));
 
-		mockMvc.perform(get("/api/notifications")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
-				.andExpect(jsonPath("$[0].title").value("Test")).andExpect(jsonPath("$[1].title").value("Test 2"));
+		mockMvc.perform(get("/api/notifications")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].title").value("Test"))
+				.andExpect(jsonPath("$.data.items[1].title").value("Test 2"));
 	}
 
 	@Test
 	void markRead_returns204() throws Exception {
 		AppNotification notification = new AppNotification(1L, NotificationType.INFO, "Test", "Message",
-				LocalDateTime.now(), false, null, null);
+				LocalDateTime.now(), false, null, null, null);
 		when(repository.findById(1L)).thenReturn(Optional.of(notification));
 
 		mockMvc.perform(patch("/api/notifications/1/read")).andExpect(status().isNoContent());
@@ -82,9 +86,9 @@ class NotificationControllerTest {
 	@Test
 	void markAllRead_returns204() throws Exception {
 		AppNotification n1 = new AppNotification(1L, NotificationType.INFO, "A", "Msg", LocalDateTime.now(), false,
-				null, null);
+				null, null, null);
 		AppNotification n2 = new AppNotification(2L, NotificationType.INFO, "B", "Msg", LocalDateTime.now(), false,
-				null, null);
+				null, null, null);
 		when(repository.findAll()).thenReturn(List.of(n1, n2));
 
 		mockMvc.perform(patch("/api/notifications/read-all")).andExpect(status().isNoContent());

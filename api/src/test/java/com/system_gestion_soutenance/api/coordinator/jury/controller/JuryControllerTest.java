@@ -9,12 +9,12 @@ import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.CreateJuryRequest;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.JuryResponse;
 import com.system_gestion_soutenance.api.coordinator.jury.dto.UpdateJuryRequest;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.service.JuryService;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.service.DefenseService;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.JuryMapper;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class JuryControllerTest {
 	private ObjectMapper objectMapper;
 
 	@MockitoBean
-	private JuryService juryService;
+	private DefenseService defenseService;
 
 	@MockitoBean
 	private JwtTokenProvider jwtTokenProvider;
@@ -62,26 +62,24 @@ class JuryControllerTest {
 
 	@Test
 	void findAll_returnsJuries() throws Exception {
-		Jury jury = new Jury();
-		jury.setId(1L);
-		when(juryService.findAll()).thenReturn(List.of(jury));
-		when(juryMapper.toDto(jury))
-				.thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
+		Defense defense = mock(Defense.class);
+		when(defense.getId()).thenReturn(1L);
+		when(defenseService.getSchedule(0, 10)).thenReturn(new PaginatedResponse<>(List.of(defense), 1, 1, 0, 10));
+		when(juryMapper.toDto(defense)).thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", List.of()));
 
 		mockMvc.perform(get("/api/coordinator/juries")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.size()").value(1))
-				.andExpect(jsonPath("$.data[0].projectTitle").value("Projet Test"));
+				.andExpect(jsonPath("$.data.items").isArray())
+				.andExpect(jsonPath("$.data.items[0].projectTitle").value("Projet Test"));
 	}
 
 	@Test
 	void create_returnsCreated() throws Exception {
-		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
-		CreateJuryRequest request = new CreateJuryRequest(1L, 1L, List.of(member));
-		Jury jury = new Jury();
-		jury.setId(1L);
-		when(juryService.create(any())).thenReturn(jury);
-		when(juryMapper.toDto(jury))
-				.thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président", null, null, null);
+		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
+		Defense defense = mock(Defense.class);
+		when(defense.getId()).thenReturn(1L);
+		when(defenseService.createJury(any())).thenReturn(defense);
+		when(juryMapper.toDto(defense)).thenReturn(new JuryResponse(1L, 1L, "Projet Test", "Soutenance", List.of()));
 
 		mockMvc.perform(post("/api/coordinator/juries").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -90,12 +88,11 @@ class JuryControllerTest {
 
 	@Test
 	void update_returnsJury() throws Exception {
-		UpdateJuryRequest updates = new UpdateJuryRequest(2L, 1L, List.of());
-		Jury jury = new Jury();
-		jury.setId(1L);
-		when(juryService.update(eq(1L), any())).thenReturn(jury);
-		when(juryMapper.toDto(jury))
-				.thenReturn(new JuryResponse(1L, 2L, "Projet Test", "Soutenance", 1L, "Template", List.of()));
+		UpdateJuryRequest updates = new UpdateJuryRequest(2L, List.of());
+		Defense defense = mock(Defense.class);
+		when(defense.getId()).thenReturn(1L);
+		when(defenseService.updateJury(eq(1L), any())).thenReturn(defense);
+		when(juryMapper.toDto(defense)).thenReturn(new JuryResponse(1L, 2L, "Projet Test", "Soutenance", List.of()));
 
 		mockMvc.perform(put("/api/coordinator/juries/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk())
@@ -104,7 +101,9 @@ class JuryControllerTest {
 
 	@Test
 	void delete_returns200() throws Exception {
-		doNothing().when(juryService).delete(1L);
+		Defense defense = mock(Defense.class);
+		when(defense.getId()).thenReturn(1L);
+		when(defenseService.clearJuryMembers(1L)).thenReturn(defense);
 
 		mockMvc.perform(delete("/api/coordinator/juries/1")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.success").value(true));

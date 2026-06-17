@@ -2,14 +2,9 @@ package com.system_gestion_soutenance.api.seed;
 
 import com.system_gestion_soutenance.api.admin.audit.entity.AuditLog;
 import com.system_gestion_soutenance.api.admin.audit.repository.AuditLogRepository;
-import com.system_gestion_soutenance.api.admin.config.document.entity.DocumentConfig;
-import com.system_gestion_soutenance.api.admin.config.document.repository.DocumentConfigRepository;
-import com.system_gestion_soutenance.api.admin.config.email.entity.EmailConfig;
-import com.system_gestion_soutenance.api.admin.config.email.repository.EmailConfigRepository;
-import com.system_gestion_soutenance.api.admin.config.general.entity.GeneralSettings;
-import com.system_gestion_soutenance.api.admin.config.general.repository.GeneralSettingsRepository;
-import com.system_gestion_soutenance.api.admin.config.grade.entity.Grade;
-import com.system_gestion_soutenance.api.admin.config.grade.repository.GradeRepository;
+
+import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.TeacherRank;
+import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.JuryRoleTemplate;
 import com.system_gestion_soutenance.api.admin.config.juryrole.entity.TemplateRole;
 import com.system_gestion_soutenance.api.admin.config.juryrole.repository.JuryRoleTemplateRepository;
@@ -17,8 +12,6 @@ import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
@@ -31,16 +24,15 @@ import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
+
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.entity.NotificationType;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
@@ -59,6 +51,7 @@ import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -75,7 +68,7 @@ public class DataInitializer implements CommandLineRunner {
 
 	private final MajorRepository majorRepo;
 	private final LevelRepository levelRepo;
-	private final GradeRepository gradeRepo;
+	private final TeacherRankRepository teacherRankRepo;
 	private final FacultyRepository facultyRepo;
 	private final DepartmentRepository departmentRepo;
 	private final UserRepository userRepo;
@@ -85,33 +78,26 @@ public class DataInitializer implements CommandLineRunner {
 	private final JuryRoleTemplateRepository juryRoleTemplateRepo;
 	private final DefenseSessionRepository defenseSessionRepo;
 	private final ProjectRepository projectRepo;
-	private final JuryRepository juryRepo;
+	private final DefenseRepository defenseRepo;
 	private final GroupRepository groupRepo;
-	private final SlotAssignmentRepository slotAssignmentRepo;
 	private final UnavailabilityRepository unavailabilityRepo;
 	private final EvaluationRepository evaluationRepo;
 	private final StudentDocumentRepository studentDocumentRepo;
 	private final NotificationRepository notificationRepo;
 	private final AuditLogRepository auditLogRepo;
-	private final EmailConfigRepository emailConfigRepo;
-	private final DocumentConfigRepository documentConfigRepo;
-	private final GeneralSettingsRepository generalSettingsRepo;
-	private final DefenseSettingsRepository defenseSettingsRepo;
 
 	@SuppressWarnings("checkstyle:ParameterNumber")
-	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, GradeRepository gradeRepo,
+	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, TeacherRankRepository teacherRankRepo,
 			FacultyRepository facultyRepo, DepartmentRepository departmentRepo, UserRepository userRepo,
 			TeacherRepository teacherRepo, StudentRepository studentRepo, RoomRepository roomRepo,
 			JuryRoleTemplateRepository juryRoleTemplateRepo, DefenseSessionRepository defenseSessionRepo,
-			ProjectRepository projectRepo, JuryRepository juryRepo, GroupRepository groupRepo,
-			SlotAssignmentRepository slotAssignmentRepo, UnavailabilityRepository unavailabilityRepo,
-			EvaluationRepository evaluationRepo, StudentDocumentRepository studentDocumentRepo,
-			NotificationRepository notificationRepo, AuditLogRepository auditLogRepo,
-			EmailConfigRepository emailConfigRepo, DocumentConfigRepository documentConfigRepo,
-			GeneralSettingsRepository generalSettingsRepo, DefenseSettingsRepository defenseSettingsRepo) {
+			ProjectRepository projectRepo, DefenseRepository defenseRepo, GroupRepository groupRepo,
+			UnavailabilityRepository unavailabilityRepo, EvaluationRepository evaluationRepo,
+			StudentDocumentRepository studentDocumentRepo, NotificationRepository notificationRepo,
+			AuditLogRepository auditLogRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
-		this.gradeRepo = gradeRepo;
+		this.teacherRankRepo = teacherRankRepo;
 		this.facultyRepo = facultyRepo;
 		this.departmentRepo = departmentRepo;
 		this.userRepo = userRepo;
@@ -121,18 +107,13 @@ public class DataInitializer implements CommandLineRunner {
 		this.juryRoleTemplateRepo = juryRoleTemplateRepo;
 		this.defenseSessionRepo = defenseSessionRepo;
 		this.projectRepo = projectRepo;
-		this.juryRepo = juryRepo;
+		this.defenseRepo = defenseRepo;
 		this.groupRepo = groupRepo;
-		this.slotAssignmentRepo = slotAssignmentRepo;
 		this.unavailabilityRepo = unavailabilityRepo;
 		this.evaluationRepo = evaluationRepo;
 		this.studentDocumentRepo = studentDocumentRepo;
 		this.notificationRepo = notificationRepo;
 		this.auditLogRepo = auditLogRepo;
-		this.emailConfigRepo = emailConfigRepo;
-		this.documentConfigRepo = documentConfigRepo;
-		this.generalSettingsRepo = generalSettingsRepo;
-		this.defenseSettingsRepo = defenseSettingsRepo;
 	}
 
 	@Override
@@ -141,20 +122,24 @@ public class DataInitializer implements CommandLineRunner {
 		if (majorRepo.count() > 0)
 			return;
 
-		// Phase 1: Singleton configs
-		emailConfigRepo
-				.save(new EmailConfig(1L, "", 587, "", "", "FSBM Soutenance", "noreply@soutenance.univh2c.ma", "tls"));
-		documentConfigRepo.save(new DocumentConfig(1L, 10, "pdf,doc,docx", 5));
-		generalSettingsRepo
-				.save(new GeneralSettings(1L, "Université Hassan II", "", "Africa/Casablanca", "DD/MM/YYYY", true));
-		defenseSettingsRepo.save(new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-03-01", "2026-05-01"));
+		// Phase 2: Faculty
+		Faculty f1 = new Faculty();
+		f1.setName("Faculté des Sciences Ben M'Sik");
+		f1.setCode("FSBM");
+		f1 = facultyRepo.save(f1);
 
-		// Phase 2: Reference data
-		Major m1 = majorRepo.save(new Major(null, "Génie Informatique"));
-		Major m2 = majorRepo.save(new Major(null, "Génie Industriel"));
-		Major m3 = majorRepo.save(new Major(null, "Génie Civil"));
-		Major m4 = majorRepo.save(new Major(null, "Génie Électrique"));
-		Major m5 = majorRepo.save(new Major(null, "Management"));
+		// Phase 3: Departments
+		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
+		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
+		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
+		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
+
+		// Phase 4: Reference data
+		Major m1 = majorRepo.save(new Major(null, "Génie Informatique", dInfo));
+		Major m2 = majorRepo.save(new Major(null, "Génie Industriel", dMath));
+		Major m3 = majorRepo.save(new Major(null, "Génie Civil", dPhys));
+		Major m4 = majorRepo.save(new Major(null, "Génie Électrique", dBio));
+		Major m5 = majorRepo.save(new Major(null, "Management", dInfo));
 		List<Major> majors = List.of(m1, m2, m3, m4, m5);
 
 		Level n1 = levelRepo.save(new Level(null, "Licence"));
@@ -162,22 +147,10 @@ public class DataInitializer implements CommandLineRunner {
 		Level n3 = levelRepo.save(new Level(null, "Doctorat"));
 		List<Level> levels = List.of(n1, n2, n3);
 
-		Grade g1 = gradeRepo.save(new Grade(null, "PES"));
-		Grade g2 = gradeRepo.save(new Grade(null, "PH"));
-		Grade g3 = gradeRepo.save(new Grade(null, "PA"));
-		List<Grade> grades = List.of(g1, g2, g3);
-
-		// Phase 4: Faculty
-		Faculty f1 = new Faculty();
-		f1.setName("Faculté des Sciences Ben M'Sik");
-		f1.setCode("FSBM");
-		f1 = facultyRepo.save(f1);
-
-		// Phase 5: Departments (no head yet)
-		Department dInfo = departmentRepo.save(new Department(null, "Informatique", "INFO", null, f1));
-		Department dMath = departmentRepo.save(new Department(null, "Mathématiques", "MATH", null, f1));
-		Department dPhys = departmentRepo.save(new Department(null, "Physique", "PHYS", null, f1));
-		Department dBio = departmentRepo.save(new Department(null, "Biologie", "BIO", null, f1));
+		TeacherRank g1 = teacherRankRepo.save(new TeacherRank(null, "PES"));
+		TeacherRank g2 = teacherRankRepo.save(new TeacherRank(null, "PH"));
+		TeacherRank g3 = teacherRankRepo.save(new TeacherRank(null, "PA"));
+		List<TeacherRank> teacherRanks = List.of(g1, g2, g3);
 
 		// Phase 6: Users
 		User admin = new User();
@@ -198,18 +171,18 @@ public class DataInitializer implements CommandLineRunner {
 		coord.setActive(true);
 		coord = userRepo.save(coord);
 
-		Teacher teacherT3 = saveTeacher("Ben Ali", "Ali", "teacher@univh2c.ma", grades.get(0), dInfo);
-		Teacher teacherT4 = saveTeacher("Alami", "Moussa", "moussa@univh2c.ma", grades.get(1), dMath);
-		Teacher teacherT5 = saveTeacher("El Ghazi", "Hassan", "hassan@univh2c.ma", grades.get(2), dPhys);
-		Teacher teacherT6 = saveTeacher("Benkirane", "Jamila", "jamila@univh2c.ma", grades.get(0), dBio);
-		Teacher teacherT7 = saveTeacher("El Ouafi", "Rachid", "rachid@univh2c.ma", grades.get(1), dInfo);
-		Teacher teacherT8 = saveTeacher("El Fekkak", "Khadija", "khadija@univh2c.ma", grades.get(2), dMath);
-		Teacher teacherT9 = saveTeacher("Ben Omar", "Nabil", "nabil@univh2c.ma", grades.get(0), dPhys);
-		Teacher teacherT10 = saveTeacher("El Kholti", "Samira", "samira@univh2c.ma", grades.get(1), dBio);
-		Teacher teacherT11 = saveTeacher("El Idrissi", "Abdellah", "abdellah@univh2c.ma", grades.get(2), dInfo);
-		Teacher teacherT12 = saveTeacher("Bensouda", "Fatiha", "fatiha@univh2c.ma", grades.get(0), dMath);
-		Teacher teacherT13 = saveTeacher("El Mourabit", "Karim", "karim@univh2c.ma", grades.get(1), dPhys);
-		Teacher teacherT14 = saveTeacher("El Hassani", "Latifa", "latifa@univh2c.ma", grades.get(2), dBio);
+		Teacher teacherT3 = saveTeacher("Ben Ali", "Ali", "teacher@univh2c.ma", teacherRanks.get(0), dInfo);
+		Teacher teacherT4 = saveTeacher("Alami", "Moussa", "moussa@univh2c.ma", teacherRanks.get(1), dMath);
+		Teacher teacherT5 = saveTeacher("El Ghazi", "Hassan", "hassan@univh2c.ma", teacherRanks.get(2), dPhys);
+		Teacher teacherT6 = saveTeacher("Benkirane", "Jamila", "jamila@univh2c.ma", teacherRanks.get(0), dBio);
+		Teacher teacherT7 = saveTeacher("El Ouafi", "Rachid", "rachid@univh2c.ma", teacherRanks.get(1), dInfo);
+		Teacher teacherT8 = saveTeacher("El Fekkak", "Khadija", "khadija@univh2c.ma", teacherRanks.get(2), dMath);
+		Teacher teacherT9 = saveTeacher("Ben Omar", "Nabil", "nabil@univh2c.ma", teacherRanks.get(0), dPhys);
+		Teacher teacherT10 = saveTeacher("El Kholti", "Samira", "samira@univh2c.ma", teacherRanks.get(1), dBio);
+		Teacher teacherT11 = saveTeacher("El Idrissi", "Abdellah", "abdellah@univh2c.ma", teacherRanks.get(2), dInfo);
+		Teacher teacherT12 = saveTeacher("Bensouda", "Fatiha", "fatiha@univh2c.ma", teacherRanks.get(0), dMath);
+		Teacher teacherT13 = saveTeacher("El Mourabit", "Karim", "karim@univh2c.ma", teacherRanks.get(1), dPhys);
+		Teacher teacherT14 = saveTeacher("El Hassani", "Latifa", "latifa@univh2c.ma", teacherRanks.get(2), dBio);
 
 		List<Teacher> teachers = List.of(teacherT3, teacherT4, teacherT5, teacherT6, teacherT7, teacherT8, teacherT9,
 				teacherT10, teacherT11, teacherT12, teacherT13, teacherT14);
@@ -222,9 +195,6 @@ public class DataInitializer implements CommandLineRunner {
 		departmentRepo.saveAll(List.of(dInfo, dMath, dPhys, dBio));
 
 		// Phase 8: Students (100)
-		record StudentSeed(String lastName, String firstName, String email, String cne, Major major, Level level) {
-		}
-
 		String[][] studentData = {{"Khalid", "Mohamed", "student", "E13000999"},
 				{"Benali", "Salma", "student1", "E1300001"}, {"Fassi", "Yassine", "student2", "E1300002"},
 				{"Tazi", "Fatima", "student3", "E1300003"}, {"Mansouri", "Mehdi", "student4", "E1300004"},
@@ -286,9 +256,10 @@ public class DataInitializer implements CommandLineRunner {
 			String ln = studentData[i][0];
 			String email = studentData[i][2] + "@univh2c.ma";
 			String cne = studentData[i][3];
+			String codeApogee = "APG" + String.format("%05d", i + 1);
 			Major major = majors.get(studentMajorIndices[i % 10]);
 			Level level = levels.get(studentLevelIndices[i % 10]);
-			students.add(saveStudent(ln, fn, email, cne, major, level));
+			students.add(saveStudent(ln, fn, email, cne, codeApogee, major, level));
 		}
 
 		List<Student> studentsList = students;
@@ -319,28 +290,152 @@ public class DataInitializer implements CommandLineRunner {
 		coeffs.put("Rapporteur", 35);
 		coeffs.put("Examinateur", 35);
 
-		DefenseSession ds1 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2025",
-				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
-				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
-		DefenseSession ds2 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Automne 2025",
-				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25)));
-		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
-				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
-				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10)));
-		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
-				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
-				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15)));
+		DefenseSession ds1 = new DefenseSession();
+		ds1.setName("Soutenance PFE Printemps 2025");
+		ds1.setDefenseType(DefenseType.PFE);
+		ds1.setStatus(DefenseSessionStatus.COMPLETED);
+		ds1.setMaxGroupSize(3);
+		ds1.setDefenseDuration(30);
+		ds1.setBreakDuration(10);
+		ds1.setSubmissionDeadline(LocalDate.of(2025, 5, 15));
+		ds1.setEvaluationCoefficients(coeffs);
+		ds1.setJuryRoleTemplate(jrtPfe);
+		ds1.setStartDate(LocalDate.of(2025, 6, 1));
+		ds1.setEndDate(LocalDate.of(2025, 6, 30));
+		ds1.setFrozen(true);
+		ds1.setAllowSupervisorInJury(false);
+		ds1.setResultsPublished(false);
+		ds1.setApprovedBy(admin.getId());
+		ds1.setApprovedAt(LocalDateTime.of(2025, 5, 10, 9, 0));
+		ds1.setStartTime("08:00");
+		ds1.setEndTime("18:00");
+		ds1.setGroupCreationStartDate("2026-03-01");
+		ds1.setGroupCreationEndDate("2026-05-01");
+		ds1.setRapportCoefficient(30);
+		ds1.setSoutenanceCoefficient(70);
+		ds1 = defenseSessionRepo.save(ds1);
+		DefenseSession ds2 = new DefenseSession();
+		ds2.setName("Soutenance PFE Automne 2025");
+		ds2.setDefenseType(DefenseType.PFE);
+		ds2.setStatus(DefenseSessionStatus.COMPLETED);
+		ds2.setMaxGroupSize(3);
+		ds2.setDefenseDuration(30);
+		ds2.setBreakDuration(10);
+		ds2.setSubmissionDeadline(LocalDate.of(2025, 12, 15));
+		ds2.setEvaluationCoefficients(coeffs);
+		ds2.setJuryRoleTemplate(jrtPfe);
+		ds2.setStartDate(LocalDate.of(2026, 1, 5));
+		ds2.setEndDate(LocalDate.of(2026, 1, 25));
+		ds2.setFrozen(true);
+		ds2.setAllowSupervisorInJury(false);
+		ds2.setResultsPublished(false);
+		ds2.setApprovedBy(admin.getId());
+		ds2.setApprovedAt(LocalDateTime.of(2025, 12, 10, 9, 0));
+		ds2.setStartTime("08:00");
+		ds2.setEndTime("18:00");
+		ds2.setGroupCreationStartDate("2026-03-01");
+		ds2.setGroupCreationEndDate("2026-05-01");
+		ds2.setRapportCoefficient(30);
+		ds2.setSoutenanceCoefficient(70);
+		ds2 = defenseSessionRepo.save(ds2);
+		DefenseSession ds3 = new DefenseSession();
+		ds3.setName("Soutenance PFE Printemps 2026");
+		ds3.setDefenseType(DefenseType.PFE);
+		ds3.setStatus(DefenseSessionStatus.ACTIVE);
+		ds3.setMaxGroupSize(3);
+		ds3.setDefenseDuration(30);
+		ds3.setBreakDuration(10);
+		ds3.setSubmissionDeadline(LocalDate.of(2026, 6, 1));
+		ds3.setEvaluationCoefficients(coeffs);
+		ds3.setJuryRoleTemplate(jrtPfe);
+		ds3.setStartDate(LocalDate.of(2026, 6, 15));
+		ds3.setEndDate(LocalDate.of(2026, 7, 10));
+		ds3.setFrozen(false);
+		ds3.setAllowSupervisorInJury(false);
+		ds3.setResultsPublished(false);
+		ds3.setStartTime("08:00");
+		ds3.setEndTime("18:00");
+		ds3.setGroupCreationStartDate("2026-03-01");
+		ds3.setGroupCreationEndDate("2026-05-01");
+		ds3.setRapportCoefficient(30);
+		ds3.setSoutenanceCoefficient(70);
+		ds3.setGroupFormationStartDate(LocalDate.of(2026, 6, 1));
+		ds3.setGroupFormationEndDate(LocalDate.of(2026, 7, 5));
+		ds3 = defenseSessionRepo.save(ds3);
+		DefenseSession ds4 = new DefenseSession();
+		ds4.setName("Soutenance Mémoire Printemps 2026");
+		ds4.setDefenseType(DefenseType.MEMOIRE);
+		ds4.setStatus(DefenseSessionStatus.SCHEDULED);
+		ds4.setMaxGroupSize(4);
+		ds4.setDefenseDuration(45);
+		ds4.setBreakDuration(15);
+		ds4.setSubmissionDeadline(LocalDate.of(2026, 6, 1));
+		ds4.setEvaluationCoefficients(coeffs);
+		ds4.setJuryRoleTemplate(jrtMemoire);
+		ds4.setStartDate(LocalDate.of(2026, 6, 20));
+		ds4.setEndDate(LocalDate.of(2026, 7, 15));
+		ds4.setFrozen(false);
+		ds4.setAllowSupervisorInJury(false);
+		ds4.setResultsPublished(false);
+		ds4.setApprovedBy(admin.getId());
+		ds4.setApprovedAt(LocalDateTime.of(2026, 6, 10, 9, 0));
+		ds4.setStartTime("08:00");
+		ds4.setEndTime("18:00");
+		ds4.setGroupCreationStartDate("2026-03-01");
+		ds4.setGroupCreationEndDate("2026-05-01");
+		ds4.setRapportCoefficient(30);
+		ds4.setSoutenanceCoefficient(70);
+		ds4 = defenseSessionRepo.save(ds4);
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
 		coeffs2.put("Rapporteur", 30);
 		coeffs2.put("Examinateur", 45);
-		DefenseSession ds5 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Thèse Printemps 2026",
-				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
-				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5)));
-		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
-				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15)));
+		DefenseSession ds5 = new DefenseSession();
+		ds5.setName("Soutenance Thèse Printemps 2026");
+		ds5.setDefenseType(DefenseType.THESE);
+		ds5.setStatus(DefenseSessionStatus.SCHEDULED);
+		ds5.setMaxGroupSize(1);
+		ds5.setDefenseDuration(60);
+		ds5.setBreakDuration(20);
+		ds5.setSubmissionDeadline(LocalDate.of(2026, 5, 15));
+		ds5.setEvaluationCoefficients(coeffs2);
+		ds5.setJuryRoleTemplate(jrtThese);
+		ds5.setStartDate(LocalDate.of(2026, 6, 10));
+		ds5.setEndDate(LocalDate.of(2026, 7, 5));
+		ds5.setFrozen(false);
+		ds5.setAllowSupervisorInJury(false);
+		ds5.setResultsPublished(false);
+		ds5.setApprovedBy(admin.getId());
+		ds5.setApprovedAt(LocalDateTime.of(2026, 5, 20, 9, 0));
+		ds5.setStartTime("08:00");
+		ds5.setEndTime("18:00");
+		ds5.setGroupCreationStartDate("2026-03-01");
+		ds5.setGroupCreationEndDate("2026-05-01");
+		ds5.setRapportCoefficient(30);
+		ds5.setSoutenanceCoefficient(70);
+		ds5 = defenseSessionRepo.save(ds5);
+		DefenseSession ds6 = new DefenseSession();
+		ds6.setName("Soutenance Rattrapage 2026");
+		ds6.setDefenseType(DefenseType.PFE);
+		ds6.setStatus(DefenseSessionStatus.DRAFT);
+		ds6.setMaxGroupSize(3);
+		ds6.setDefenseDuration(30);
+		ds6.setBreakDuration(10);
+		ds6.setSubmissionDeadline(LocalDate.of(2026, 8, 15));
+		ds6.setEvaluationCoefficients(coeffs);
+		ds6.setJuryRoleTemplate(jrtPfe);
+		ds6.setStartDate(LocalDate.of(2026, 9, 1));
+		ds6.setEndDate(LocalDate.of(2026, 9, 15));
+		ds6.setFrozen(false);
+		ds6.setAllowSupervisorInJury(false);
+		ds6.setResultsPublished(false);
+		ds6.setStartTime("08:00");
+		ds6.setEndTime("18:00");
+		ds6.setGroupCreationStartDate("2026-03-01");
+		ds6.setGroupCreationEndDate("2026-05-01");
+		ds6.setRapportCoefficient(30);
+		ds6.setSoutenanceCoefficient(70);
+		ds6 = defenseSessionRepo.save(ds6);
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -423,56 +518,44 @@ public class DataInitializer implements CommandLineRunner {
 
 		List<Project> projects = new ArrayList<>();
 		for (ProjSeed ps : projSeeds) {
-			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, new ArrayList<>());
+			Project p = new Project();
+			p.setTitle(ps.title);
+			p.setDescription(ps.desc);
+			p.setDefenseType(ps.dtype);
+			p.setStatus(ps.status);
+			p.setSupervisor(ps.sup);
+			p.setStudents(new ArrayList<>());
 			projects.add(projectRepo.save(p));
 		}
 
-		// Phase 14: Project-Student links
-		int[][] projStudentMap = {{0}, {2, 3}, {5, 6, 7}, {8}, {11, 12}, {14, 15, 16}, {17}, {20, 21}, {23, 24, 25},
-				{26}, {29, 30}, {32, 33, 34}, {35}, {38, 39}, {41, 42, 43}, {44}, {47, 48}, {50, 51, 52}, {53},
-				{56, 57}, {59, 60, 61}, {62}, {65, 66}, {68, 69, 70}, {71}};
-		for (int pi = 0; pi < projStudentMap.length; pi++) {
-			Project p = projects.get(pi);
-			List<Student> pStudents = new ArrayList<>();
-			for (int si : projStudentMap[pi]) {
-				pStudents.add(studentsList.get(si));
+		// Phase 15: Defenses (Unified Jury and Slots)
+		int[] defenseProjectIds = {1, 3, 4, 6, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24};
+		String[][] juryCompositions = {{"Président", "Rapporteur", "Examinateur"}, {"Président", "Examinateur"},
+				{"Président", "Rapporteur", "Examinateur", "Membre"}, {"Président", "Rapporteur"},
+				{"Président", "Examinateur", "Membre"}, {"Président", "Rapporteur", "Examinateur"},
+				{"Président", "Examinateur"}, {"Président", "Rapporteur", "Examinateur", "Membre"},
+				{"Président", "Rapporteur"}, {"Président", "Examinateur", "Membre"},
+				{"Président", "Rapporteur", "Examinateur"}, {"Président", "Examinateur"},
+				{"Président", "Rapporteur", "Examinateur", "Membre"}, {"Président", "Rapporteur"},
+				{"Président", "Examinateur", "Membre"}};
+		List<Defense> defenses = new ArrayList<>();
+		for (int i = 0; i < defenseProjectIds.length; i++) {
+			Project project = projects.get(defenseProjectIds[i]);
+			Defense d = new Defense();
+			d.setProject(project);
+			d.setDate(LocalDate.now());
+			d.setTime(LocalTime.of(9, 0));
+			d.setRoom(rooms.get(i % rooms.size()));
+
+			List<JuryMember> members = new ArrayList<>();
+			String[] roles = juryCompositions[i % juryCompositions.length];
+			for (int j = 0; j < roles.length; j++) {
+				members.add(
+						new JuryMember(null, teachers.get((i + j) % teachers.size()), roles[j], d, null, null, null));
 			}
-			p.setStudents(pStudents);
-			projectRepo.save(p);
-		}
+			d.setMembers(members);
 
-		// Phase 15: Juries + JuryMembers
-		int[] juryProjectIds = {1, 3, 4, 6, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24};
-		List<Jury> juries = new ArrayList<>();
-		for (int jpi : juryProjectIds) {
-			juries.add(juryRepo.save(new Jury(null, projects.get(jpi), jrtPfe, new ArrayList<>())));
-		}
-
-		record JmSeed(int juryIdx, String role, int teacherIdx) {
-		}
-		JmSeed[] jmSeeds = {new JmSeed(0, "Président", 1), new JmSeed(0, "Rapporteur", 2),
-				new JmSeed(0, "Examinateur", 3), new JmSeed(1, "Président", 5), new JmSeed(1, "Rapporteur", 6),
-				new JmSeed(1, "Examinateur", 7), new JmSeed(2, "Président", 9), new JmSeed(2, "Rapporteur", 10),
-				new JmSeed(2, "Examinateur", 11), new JmSeed(3, "Président", 1), new JmSeed(3, "Rapporteur", 2),
-				new JmSeed(3, "Examinateur", 3), new JmSeed(4, "Président", 5), new JmSeed(4, "Rapporteur", 6),
-				new JmSeed(4, "Examinateur", 7), new JmSeed(5, "Président", 9), new JmSeed(5, "Rapporteur", 10),
-				new JmSeed(5, "Examinateur", 11), new JmSeed(6, "Président", 1), new JmSeed(6, "Rapporteur", 2),
-				new JmSeed(6, "Examinateur", 3), new JmSeed(7, "Président", 5), new JmSeed(7, "Rapporteur", 6),
-				new JmSeed(7, "Examinateur", 7), new JmSeed(8, "Président", 9), new JmSeed(8, "Rapporteur", 10),
-				new JmSeed(8, "Examinateur", 11), new JmSeed(8, "Examinateur", 0), new JmSeed(9, "Président", 2),
-				new JmSeed(9, "Rapporteur", 3), new JmSeed(9, "Examinateur", 4), new JmSeed(9, "Examinateur", 5),
-				new JmSeed(10, "Président", 7), new JmSeed(10, "Rapporteur", 8), new JmSeed(10, "Examinateur", 9),
-				new JmSeed(10, "Examinateur", 10), new JmSeed(11, "Président", 0), new JmSeed(11, "Rapporteur", 1),
-				new JmSeed(11, "Examinateur", 2), new JmSeed(11, "Examinateur", 3), new JmSeed(12, "Président", 5),
-				new JmSeed(12, "Rapporteur", 6), new JmSeed(12, "Examinateur", 7), new JmSeed(12, "Examinateur", 8),
-				new JmSeed(13, "Président", 10), new JmSeed(13, "Rapporteur", 11), new JmSeed(13, "Examinateur", 0),
-				new JmSeed(13, "Examinateur", 1), new JmSeed(14, "Président", 3), new JmSeed(14, "Rapporteur", 4),
-				new JmSeed(14, "Rapporteur", 5), new JmSeed(14, "Examinateur", 6), new JmSeed(14, "Examinateur", 7),};
-		for (JmSeed jms : jmSeeds) {
-			Jury jury = juries.get(jms.juryIdx);
-			JuryMember jm = new JuryMember(null, jury, jms.role, teachers.get(jms.teacherIdx));
-			jury.getMembers().add(jm);
-			juryRepo.save(jury);
+			defenses.add(defenseRepo.save(d));
 		}
 
 		// Phase 16: Groups
@@ -518,74 +601,17 @@ public class DataInitializer implements CommandLineRunner {
 				new GrpSeed("Groupe H1", 13, 2, new int[]{51, 52, 53, 54}),
 				new GrpSeed("Groupe H2", 14, 3, new int[]{55, 56}),};
 		for (GrpSeed gs : grpSeeds) {
-			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(),
-					dsArr[gs.sessionIdx].getId());
+			Group g = new Group();
+			g.setGroupName(gs.name);
+			g.setProject(projects.get(gs.projIdx));
+			g.setStudents(new ArrayList<>());
+			g.setDefenseSession(dsArr[gs.sessionIdx]);
+			g.setLeaderId(studentsList.get(gs.studentIdxs[0]).getId());
+			g.setStatus(com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus.ACTIVE);
 			for (int si : gs.studentIdxs) {
 				g.getStudents().add(studentsList.get(si));
 			}
 			groupRepo.save(g);
-		}
-
-		// Phase 17: Slot Assignments
-		Room r1 = rooms.get(0), r2 = rooms.get(1), r3 = rooms.get(2), r4 = rooms.get(3), r5 = rooms.get(4),
-				r6 = rooms.get(5), r7 = rooms.get(6), r8 = rooms.get(7), r9 = rooms.get(8), r10 = rooms.get(9),
-				r11 = rooms.get(10), r12 = rooms.get(11);
-
-		record SlotSeed(String title, String date, String time, int projIdx, Room room) {
-		}
-		SlotSeed[] slotSeeds = {new SlotSeed("Soutenance proj-1", "2026-06-15", "08:00", 0, r1),
-				new SlotSeed("Soutenance proj-2", "2026-06-16", "08:30", 1, r2),
-				new SlotSeed("Soutenance proj-3", "2026-06-17", "09:00", 2, r3),
-				new SlotSeed("Soutenance proj-4", "2026-06-18", "09:30", 3, r4),
-				new SlotSeed("Soutenance proj-5", "2026-06-19", "10:00", 4, r5),
-				new SlotSeed("Soutenance proj-6", "2026-06-22", "10:30", 5, r6),
-				new SlotSeed("Soutenance proj-7", "2026-06-23", "11:00", 6, r7),
-				new SlotSeed("Soutenance proj-8", "2026-06-24", "11:30", 7, r8),
-				new SlotSeed("Soutenance proj-9", "2026-06-25", "13:00", 8, r9),
-				new SlotSeed("Soutenance proj-10", "2026-06-26", "13:30", 9, r10),
-				new SlotSeed("Soutenance proj-11", "2026-06-15", "14:00", 10, r11),
-				new SlotSeed("Soutenance proj-12", "2026-06-16", "14:30", 11, r12),
-				new SlotSeed("Soutenance proj-13", "2026-06-17", "15:00", 12, r1),
-				new SlotSeed("Soutenance proj-14", "2026-06-18", "15:30", 13, r2),
-				new SlotSeed("Soutenance proj-15", "2026-06-19", "16:00", 14, r3),
-				new SlotSeed("Soutenance proj-16", "2026-06-22", "16:30", 15, r4),
-				new SlotSeed("Soutenance proj-17", "2026-06-23", "08:00", 16, r5),
-				new SlotSeed("Soutenance proj-18", "2026-06-24", "08:30", 17, r6),
-				new SlotSeed("Soutenance proj-19", "2026-06-25", "09:00", 18, r7),
-				new SlotSeed("Soutenance proj-20", "2026-06-26", "09:30", 19, r8),
-				new SlotSeed("Soutenance proj-21", "2026-06-15", "10:00", 20, r9),
-				new SlotSeed("Soutenance proj-22", "2026-06-16", "10:30", 21, r10),
-				new SlotSeed("Soutenance proj-23", "2026-06-17", "11:00", 22, r11),
-				new SlotSeed("Soutenance proj-24", "2026-06-18", "11:30", 23, r12),
-				new SlotSeed("Soutenance proj-25", "2026-06-19", "13:00", 24, r1),
-				new SlotSeed("Soutenance proj-1", "2026-06-22", "13:30", 0, r2),
-				new SlotSeed("Soutenance proj-2", "2026-06-23", "14:00", 1, r3),
-				new SlotSeed("Soutenance proj-3", "2026-06-24", "14:30", 2, r4),
-				new SlotSeed("Soutenance proj-4", "2026-06-25", "15:00", 3, r5),
-				new SlotSeed("Soutenance proj-5", "2026-06-26", "15:30", 4, r6),
-				new SlotSeed("Soutenance proj-6", "2026-06-15", "16:00", 5, r7),
-				new SlotSeed("Soutenance proj-7", "2026-06-16", "16:30", 6, r8),
-				new SlotSeed("Soutenance proj-8", "2026-06-17", "08:00", 7, r9),
-				new SlotSeed("Soutenance proj-9", "2026-06-18", "08:30", 8, r10),
-				new SlotSeed("Soutenance proj-10", "2026-06-19", "09:00", 9, r11),
-				new SlotSeed("Soutenance proj-11", "2026-06-22", "09:30", 10, r12),
-				new SlotSeed("Soutenance proj-12", "2026-06-23", "10:00", 11, r1),
-				new SlotSeed("Soutenance proj-13", "2026-06-24", "10:30", 12, r2),
-				new SlotSeed("Soutenance proj-14", "2026-06-25", "11:00", 13, r3),
-				new SlotSeed("Soutenance proj-15", "2026-06-26", "11:30", 14, r4),
-				new SlotSeed("Soutenance proj-16", "2026-06-15", "13:00", 15, r5),
-				new SlotSeed("Soutenance proj-17", "2026-06-16", "13:30", 16, r6),
-				new SlotSeed("Soutenance proj-18", "2026-06-17", "14:00", 17, r7),
-				new SlotSeed("Soutenance proj-19", "2026-06-18", "14:30", 18, r8),
-				new SlotSeed("Soutenance proj-20", "2026-06-19", "15:00", 19, r9),
-				new SlotSeed("Soutenance proj-21", "2026-06-22", "15:30", 20, r10),
-				new SlotSeed("Soutenance proj-22", "2026-06-23", "16:00", 21, r11),
-				new SlotSeed("Soutenance proj-23", "2026-06-24", "16:30", 22, r12),
-				new SlotSeed("Soutenance proj-24", "2026-06-25", "08:00", 23, r1),
-				new SlotSeed("Soutenance proj-25", "2026-06-26", "08:30", 24, r2),};
-		for (SlotSeed ss : slotSeeds) {
-			slotAssignmentRepo.save(
-					new SlotAssignment(null, ss.title, ss.date, ss.time, projects.get(ss.projIdx).getId(), ss.room));
 		}
 
 		// Phase 18: Unavailabilities
@@ -657,8 +683,10 @@ public class DataInitializer implements CommandLineRunner {
 			for (int s = 6; s < ud.length; s++) {
 				slots.add(unavailSlots[ud[s]][0]);
 			}
-			Unavailability u = new Unavailability(null, teachers.get(ud[0]).getId(),
-					String.format("%04d-%02d-%02d", ud[2], ud[3], ud[4]), slots);
+			Unavailability u = new Unavailability();
+			u.setTeacherId(teachers.get(ud[0]).getId());
+			u.setDate(java.time.LocalDate.of(ud[2], ud[3], ud[4]));
+			u.setSlots(slots);
 			unavails.add(u);
 		}
 		unavailabilityRepo.saveAll(unavails);
@@ -729,8 +757,13 @@ public class DataInitializer implements CommandLineRunner {
 				new EvalSeed(teachers.get(5).getId(), ds5.getId(), projects.get(4).getId(), "Examinateur", 13.4,
 						EvaluationStatus.SUBMITTED, LocalDateTime.of(2026, 6, 20, 10, 0)));
 		for (EvalSeed es : evalSeeds) {
-			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, es.pid, es.role, es.score, "Évaluation complète.",
-					es.status, es.submitted));
+			Defense defense = defenseRepo.findByProject(projectRepo.findById(es.pid).orElse(null)).orElse(null);
+			if (defense == null) {
+				continue;
+			}
+			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role,
+					com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType.SOUTENANCE, es.score,
+					"Évaluation complète.", es.status, es.submitted, null));
 		}
 
 		// Phase 20: Student Documents
@@ -822,8 +855,8 @@ public class DataInitializer implements CommandLineRunner {
 					? "/uploads/" + studentsList.get((int) (doc.sid - studentsList.get(0).getId())) + "/"
 							+ doc.name.toLowerCase().replace(" ", "_") + ".pdf"
 					: null;
-			studentDocumentRepo.save(new StudentDocument(null, doc.sid, doc.name, doc.type, "2026-06-01", doc.status,
-					doc.submitted, fp));
+			studentDocumentRepo.save(new StudentDocument(null, doc.sid, doc.name, doc.type,
+					java.time.LocalDate.parse("2026-06-01"), doc.status, doc.submitted, fp));
 		}
 
 		// Phase 21: Notifications
@@ -893,39 +926,101 @@ public class DataInitializer implements CommandLineRunner {
 						"Message détaillé pour soutenance annulée.", 19, 5, false, "coord@univh2c.ma"),};
 		for (NotifSeed ns : notifSeeds) {
 			notificationRepo.save(new AppNotification(null, ns.type, ns.title, ns.msg,
-					LocalDateTime.of(2026, ns.month, ns.day, 8 + (ns.day % 8), 0), ns.read, "/dashboard", ns.actor));
+					LocalDateTime.of(2026, ns.month, ns.day, 8 + (ns.day % 8), 0), ns.read, null, "/dashboard",
+					ns.actor));
 		}
 
 		// Phase 22: Audit Logs
-		record AuditSeed(String action, String entity, String entityId, String performedBy, int day) {
-		}
-		AuditSeed[] auditSeeds = {new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 10),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 11),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 12),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 13),
-				new AuditSeed("REJECT", "Jury", "", "admin@univh2c.ma", 14),
-				new AuditSeed("ARCHIVE", "User", "", "admin@univh2c.ma", 15),
-				new AuditSeed("ACTIVATE", "Room", "", "admin@univh2c.ma", 16),
-				new AuditSeed("DEACTIVATE", "Document", "", "admin@univh2c.ma", 17),
-				new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 18),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 19),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 20),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 21),
-				new AuditSeed("REJECT", "Jury", "", "admin@univh2c.ma", 22),
-				new AuditSeed("ARCHIVE", "User", "", "admin@univh2c.ma", 23),
-				new AuditSeed("ACTIVATE", "Room", "", "admin@univh2c.ma", 24),
-				new AuditSeed("DEACTIVATE", "Document", "", "admin@univh2c.ma", 25),
-				new AuditSeed("CREATE", "Project", "", "admin@univh2c.ma", 26),
-				new AuditSeed("UPDATE", "Student", "", "admin@univh2c.ma", 27),
-				new AuditSeed("DELETE", "DefenseSession", "", "admin@univh2c.ma", 28),
-				new AuditSeed("APPROVE", "DefenseSession", "", "admin@univh2c.ma", 29),};
-		for (int i = 0; i < auditSeeds.length; i++) {
-			AuditSeed as2 = auditSeeds[i];
-			String details = "Action " + as2.action.toLowerCase() + " effectuée sur " + as2.entity.toLowerCase() + " "
-					+ as2.entityId + ".";
-			auditLogRepo.save(new AuditLog(null, as2.action, as2.entity, (long) (i + 1), as2.performedBy, details,
-					LocalDateTime.of(2026, 5, as2.day, 9 + (i % 8), 30)));
-		}
+		auditLogRepo.save(new AuditLog(null, "CREATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Création de la session de soutenance 'Soutenance PFE Printemps 2026'",
+				LocalDateTime.of(2026, 3, 10, 9, 15)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Modification des paramètres de la session 'Soutenance PFE Printemps 2026' (durée de soutenance: 30min)",
+				LocalDateTime.of(2026, 3, 12, 10, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Project", projects.get(0).getId(), "coord@univh2c.ma",
+				"Création du projet 'Système de Gestion des Soutenances' pour l'étudiant Khalid Mohamed",
+				LocalDateTime.of(2026, 3, 15, 11, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Project", projects.get(1).getId(), "coord@univh2c.ma",
+				"Création du projet 'Application E-commerce Mobile' pour le groupe de Benali Salma et Fassi Yassine",
+				LocalDateTime.of(2026, 3, 18, 14, 20)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(1).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Application E-commerce Mobile' — statut changé de PENDING vers APPROVED",
+				LocalDateTime.of(2026, 3, 20, 9, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Group", null, "coord@univh2c.ma",
+				"Création du groupe 'Groupe Alpha' (2 étudiants) pour le projet 'Système de Gestion des Soutenances'",
+				LocalDateTime.of(2026, 3, 22, 15, 45)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Group", null, "coord@univh2c.ma",
+				"Création du groupe 'Groupe Beta' (3 étudiants) pour le projet 'Application E-commerce Mobile'",
+				LocalDateTime.of(2026, 3, 22, 16, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds1.getId(), "admin@univh2c.ma",
+				"Clôture de la session 'Soutenance PFE Printemps 2025' — passage au statut COMPLETED",
+				LocalDateTime.of(2026, 4, 1, 8, 30)));
+		auditLogRepo.save(new AuditLog(null, "APPROVE", "DefenseSession", ds4.getId(), "admin@univh2c.ma",
+				"Approbation de la session 'Soutenance Mémoire Printemps 2026' — statut changé vers SCHEDULED",
+				LocalDateTime.of(2026, 4, 5, 9, 15)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Defense", null, "coord@univh2c.ma",
+				"Planification de la soutenance du projet 'Système de Gestion des Soutenances' en salle Amphi A",
+				LocalDateTime.of(2026, 4, 10, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Teacher", teacherT3.getId(), "admin@univh2c.ma",
+				"Mise à jour du département de l'enseignant Ben Ali — transfert vers le département Informatique",
+				LocalDateTime.of(2026, 4, 12, 11, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "JuryRoleTemplate", jrtPfe.getId(), "admin@univh2c.ma",
+				"Création du template jury 'Template PFE' avec 3 rôles (Président, Rapporteur, Examinateur)",
+				LocalDateTime.of(2026, 4, 15, 14, 0)));
+		auditLogRepo.save(new AuditLog(null, "SUBMIT", "StudentDocument", null, "student@univh2c.ma",
+				"Soumission du document 'Rapport PFE' par l'étudiant Khalid Mohamed",
+				LocalDateTime.of(2026, 5, 25, 14, 10)));
+		auditLogRepo.save(new AuditLog(null, "SUBMIT", "StudentDocument", null, "student1@univh2c.ma",
+				"Soumission du document 'Fiche de synthèse' par l'étudiant Benali Salma",
+				LocalDateTime.of(2026, 5, 25, 14, 25)));
+		auditLogRepo.save(new AuditLog(null, "PUBLISH", "Evaluation", null, "teacher@univh2c.ma",
+				"Publication de l'évaluation du projet 'Système de Gestion des Soutenances' — note: 16.4/20",
+				LocalDateTime.of(2026, 6, 1, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "PUBLISH", "Evaluation", null, "moussa@univh2c.ma",
+				"Publication de l'évaluation du projet 'Application E-commerce Mobile' — note: 10.3/20",
+				LocalDateTime.of(2026, 6, 1, 10, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(5).getId(), "admin@univh2c.ma",
+				"Rejet du projet 'Système de Recommandation de Cours' — motif: insuffisance de détails techniques",
+				LocalDateTime.of(2026, 6, 3, 9, 45)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Defense", null, "coord@univh2c.ma",
+				"Planification de la soutenance du projet 'Application E-commerce Mobile' en salle Salle 101",
+				LocalDateTime.of(2026, 6, 5, 11, 15)));
+		auditLogRepo.save(new AuditLog(null, "FREEZE", "DefenseSession", ds3.getId(), "admin@univh2c.ma",
+				"Gel de la session 'Soutenance PFE Printemps 2026' — les notes ne peuvent plus être modifiées",
+				LocalDateTime.of(2026, 6, 10, 8, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Student", studentsList.get(95).getId(), "admin@univh2c.ma",
+				"Création de l'étudiant Amrani Layla (codeApogee: APG00096) — niveau Master, filière Génie Informatique",
+				LocalDateTime.of(2026, 6, 12, 15, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Room", rooms.get(0).getId(), "admin@univh2c.ma",
+				"Mise à jour de la salle 'Amphi A' — capacité modifiée de 200 à 220 places",
+				LocalDateTime.of(2026, 6, 14, 10, 0)));
+		auditLogRepo.save(new AuditLog(null, "DELETE", "DefenseSession", ds6.getId(), "coord@univh2c.ma",
+				"Suppression de la session 'Soutenance Rattrapage 2026' — pas de groupes assignés",
+				LocalDateTime.of(2026, 6, 15, 16, 0)));
+		auditLogRepo.save(new AuditLog(null, "APPROVE", "Project", projects.get(8).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Assistant Virtuel pour Bibliothèque' — statut changé vers APPROVED",
+				LocalDateTime.of(2026, 6, 16, 9, 30)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "DefenseSession", ds3.getId(), "coord@univh2c.ma",
+				"Modification de la date de début de la session 'Soutenance PFE Printemps 2026' au 1er juillet 2026",
+				LocalDateTime.of(2026, 6, 18, 14, 0)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Notification", null, "coord@univh2c.ma",
+				"Envoi de notification de rappel aux étudiants pour la soumission des documents avant le 1er juillet",
+				LocalDateTime.of(2026, 6, 20, 11, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE_STATUS", "Project", projects.get(15).getId(), "admin@univh2c.ma",
+				"Approbation du projet 'Jeu Sérieux pour l'Apprentissage de la Programmation' — statut changé vers APPROVED",
+				LocalDateTime.of(2026, 6, 22, 10, 15)));
+		auditLogRepo.save(new AuditLog(null, "ASSIGN", "Defense", null, "coord@univh2c.ma",
+				"Affectation de l'enseignant El Ghazi Hassan comme Président du jury pour la soutenance du projet 'Plateforme IoT pour Smart Campus'",
+				LocalDateTime.of(2026, 6, 25, 9, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Student", studentsList.get(2).getId(), "admin@univh2c.ma",
+				"Mise à jour du niveau de l'étudiant Fassi Yassine — passage de Licence à Master",
+				LocalDateTime.of(2026, 6, 27, 15, 30)));
+		auditLogRepo.save(new AuditLog(null, "CREATE", "Faculty", f1.getId(), "admin@univh2c.ma",
+				"Création de la faculté 'Faculté des Sciences Ben M'Sik' (code: FSBM)",
+				LocalDateTime.of(2026, 3, 5, 8, 0)));
+		auditLogRepo.save(new AuditLog(null, "UPDATE", "Department", dInfo.getId(), "admin@univh2c.ma",
+				"Désignation de Benkirane Jamila comme chef du département Informatique",
+				LocalDateTime.of(2026, 3, 7, 10, 0)));
 
 		System.out.println(">>> Seed data inserted successfully <<<");
 	}
@@ -934,7 +1029,8 @@ public class DataInitializer implements CommandLineRunner {
 		return userRepo.save(user);
 	}
 
-	private Teacher saveTeacher(String lastName, String firstName, String email, Grade grade, Department dept) {
+	private Teacher saveTeacher(String lastName, String firstName, String email, TeacherRank teacherRank,
+			Department dept) {
 		Teacher t = new Teacher();
 		t.setLastName(lastName);
 		t.setFirstName(firstName);
@@ -942,12 +1038,13 @@ public class DataInitializer implements CommandLineRunner {
 		t.setPassword(PASSWORD);
 		t.setRole(Role.TEACHER);
 		t.setActive(true);
-		t.setGrade(grade);
+		t.setTeacherRank(teacherRank);
 		t.setDepartment(dept);
 		return teacherRepo.save(t);
 	}
 
-	private Student saveStudent(String lastName, String firstName, String email, String cne, Major major, Level level) {
+	private Student saveStudent(String lastName, String firstName, String email, String cne, String codeApogee,
+			Major major, Level level) {
 		Student s = new Student();
 		s.setLastName(lastName);
 		s.setFirstName(firstName);
@@ -956,6 +1053,7 @@ public class DataInitializer implements CommandLineRunner {
 		s.setRole(Role.STUDENT);
 		s.setActive(true);
 		s.setCne(cne);
+		s.setCodeApogee(codeApogee);
 		s.setMajor(major);
 		s.setLevel(level);
 		return studentRepo.save(s);

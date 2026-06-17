@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.5; }
+        h1 { font-size: 18px; text-align: center; color: #1a237e; margin-bottom: 5px; }
+        h2 { font-size: 14px; color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 4px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table, th, td { border: 1px solid #999; }
+        th, td { padding: 6px 8px; text-align: left; font-size: 11px; }
+        th { background-color: #e8eaf6; font-weight: bold; color: #1a237e; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #1a237e; padding-bottom: 15px; }
+        .info-row { margin-bottom: 4px; }
+        .info-label { font-weight: bold; display: inline-block; width: 160px; }
+        .grade-table td:last-child { text-align: center; font-weight: bold; }
+        .decision-box { border: 2px solid #1a237e; padding: 10px; text-align: center; margin-top: 15px; font-size: 14px; font-weight: bold; }
+        .signature-block { margin-top: 40px; display: flex; justify-content: space-between; }
+        .signature-box { width: 180px; text-align: center; font-size: 11px; }
+        .signature-line { border-top: 1px solid #333; margin-top: 60px; padding-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 th:text="${institutionName} ?: 'Universit&#233;'">Universit&#233;</h1>
+        <h1>Proc&#232;s-Verbal de Soutenance</h1>
+    </div>
+
+    <h2>Identification du Projet</h2>
+    <div style="margin-top: 10px;">
+        <div class="info-row">
+            <span class="info-label">Intitul&#233; du projet :</span>
+            <span th:text="${pv.grade.projectTitle}">Titre du projet</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">&#201;tudiant(s) :</span>
+            <span th:text="${#strings.listJoin(pv.studentNames, ', ')}">Noms des &#233;tudiants</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Encadrant :</span>
+            <span th:text="${pv.supervisorName}">Nom de l'encadrant</span>
+        </div>
+    </div>
+
+    <h2>Composition du Jury</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>R&#244;le</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="member : ${pv.juryMembers}">
+                <td th:text="${member.teacherName}">Nom du membre</td>
+                <td th:text="${member.roleName}">R&#244;le</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>D&#233;lib&#233;ration</h2>
+    <table class="grade-table">
+        <thead>
+            <tr>
+                <th>Intitul&#233;</th>
+                <th style="width: 100px; text-align: center;">Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td th:text="${pv.grade.projectTitle}">Titre du projet</td>
+                <td style="text-align: center;" th:text="${pv.grade.finalScore}">0.0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="decision-box">
+        D&#233;cision : <span th:text="${pv.grade.decision}">En attente</span>
+    </div>
+
+    <div style="margin-top: 20px; font-size: 11px;">
+        <p>Le pr&#233;sent proc&#232;s-verbal est &#233;tabli pour servir et valoir ce que de droit.</p>
+    </div>
+
+    <div class="signature-block">
+        <div class="signature-box">
+            <div class="signature-line">Le/La Pr&#233;sident(e)</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Le/La Rapporteur</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">L'Examinateur</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #666;">
+        <p>Fait le &#95;&#95;&#95;&#95;/&#95;&#95;/&#95;&#95;&#95;&#95;</p>
+    </div>
+</body>
+</html>

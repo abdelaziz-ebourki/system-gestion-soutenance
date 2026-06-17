@@ -2,51 +2,45 @@ package com.system_gestion_soutenance.api.coordinator.conflict.service;
 
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
-import com.system_gestion_soutenance.api.admin.room.entity.Room;
-import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
 import com.system_gestion_soutenance.api.coordinator.unavailability.repository.UnavailabilityRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictSlot;
 import com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest;
 import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class ConflictDetectionService {
 
-	private static final Logger log = LoggerFactory.getLogger(ConflictDetectionService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ConflictDetectionService.class);
 
-	private final SlotAssignmentRepository slotAssignmentRepository;
-	private final RoomRepository roomRepository;
-	private final GroupRepository groupRepository;
+	private final DefenseRepository defenseRepository;
 	private final ProjectRepository projectRepository;
-	private final JuryRepository juryRepository;
+	private final GroupRepository groupRepository;
 	private final UnavailabilityRepository unavailabilityRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
 
-	public ConflictDetectionService(SlotAssignmentRepository slotAssignmentRepository, RoomRepository roomRepository,
-			GroupRepository groupRepository, ProjectRepository projectRepository, JuryRepository juryRepository,
-			UnavailabilityRepository unavailabilityRepository, DefenseSessionRepository defenseSessionRepository) {
-		this.slotAssignmentRepository = slotAssignmentRepository;
-		this.roomRepository = roomRepository;
-		this.groupRepository = groupRepository;
+	public ConflictDetectionService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
+			GroupRepository groupRepository, UnavailabilityRepository unavailabilityRepository,
+			DefenseSessionRepository defenseSessionRepository) {
+		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
-		this.juryRepository = juryRepository;
+		this.groupRepository = groupRepository;
 		this.unavailabilityRepository = unavailabilityRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 	}
@@ -54,36 +48,62 @@ public class ConflictDetectionService {
 	public List<ConflictDetailResponse> validate(ScheduleRequest request, String defenseSessionId) {
 		Map<String, ConflictSlot> mergedSchedule = new LinkedHashMap<>();
 
-		for (SlotAssignment existing : slotAssignmentRepository.findAll()) {
+		int defenseDuration = resolveDefenseDuration(defenseSessionId);
+
+		List<Defense> existingDefenses = defenseRepository.findAllWithMembers();
+		for (Defense existing : existingDefenses) {
+			String startTime = existing.getTime().toString();
 			mergedSchedule.put(String.valueOf(existing.getId()),
-					new ConflictSlot(String.valueOf(existing.getId()), existing.getTitle(), existing.getDate(),
-							existing.getTime(), String.valueOf(existing.getProjectId()),
+					new ConflictSlot(String.valueOf(existing.getId()),
+							existing.getProject() != null ? existing.getProject().getTitle() : "",
+							existing.getDate().toString(), startTime, computeEndTime(startTime, defenseDuration),
+							String.valueOf(existing.getProjectId()),
 							existing.getRoom() != null ? String.valueOf(existing.getRoom().getId()) : null));
 		}
+
+		Map<Long, Set<String>> juryTeacherIdsByProject = precomputeJuryTeacherIds(existingDefenses);
 
 		for (int i = 0; i < request.slots().size(); i++) {
 			var slot = request.slots().get(i);
 			String tempId = "new_" + i;
 			mergedSchedule.put(tempId,
 					new ConflictSlot(tempId, slot.title(), slot.date(), slot.time(),
+							computeEndTime(slot.time(), defenseDuration),
 							slot.projectId() == null ? null : String.valueOf(slot.projectId()),
 							slot.roomId() == null ? null : String.valueOf(slot.roomId())));
 		}
 
-		return runAllChecks(mergedSchedule, defenseSessionId);
+		return runAllChecks(mergedSchedule, defenseSessionId, juryTeacherIdsByProject);
 	}
 
-	private List<ConflictDetailResponse> runAllChecks(Map<String, ConflictSlot> schedule, String defenseSessionId) {
+	private Map<Long, Set<String>> precomputeJuryTeacherIds(List<Defense> defenses) {
+		Map<Long, Set<String>> map = new HashMap<>();
+		for (Defense defense : defenses) {
+			if (defense.getProject() == null) {
+				continue;
+			}
+			Set<String> ids = new HashSet<>();
+			for (JuryMember member : defense.getMembers()) {
+				if (member.getTeacher() != null) {
+					ids.add(String.valueOf(member.getTeacher().getId()));
+				}
+			}
+			map.put(defense.getProject().getId(), ids);
+		}
+		return map;
+	}
+
+	private List<ConflictDetailResponse> runAllChecks(Map<String, ConflictSlot> schedule, String defenseSessionId,
+			Map<Long, Set<String>> juryTeacherIdsByProject) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 
 		conflicts.addAll(checkProjectAlreadyScheduled(schedule));
 		conflicts.addAll(checkSlotOccupied(schedule));
-		conflicts.addAll(checkRoomCapacity(schedule));
 		conflicts.addAll(checkDateOutOfBounds(schedule, defenseSessionId));
-		conflicts.addAll(checkTeacherDoubleBooked(schedule));
+		conflicts.addAll(checkTeacherDoubleBooked(schedule, juryTeacherIdsByProject));
 		conflicts.addAll(checkSupervisorConflict(schedule));
-		conflicts.addAll(checkBreakInterval(schedule, defenseSessionId));
-		conflicts.addAll(checkTeacherUnavailable(schedule));
+		conflicts.addAll(checkTeacherUnavailable(schedule, juryTeacherIdsByProject));
+		conflicts.addAll(checkStudentDoubleBooked(schedule));
 
 		return conflicts;
 	}
@@ -111,7 +131,7 @@ public class ConflictDetectionService {
 
 	private List<ConflictDetailResponse> checkSlotOccupied(Map<String, ConflictSlot> schedule) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
-		Set<String> seen = new HashSet<>();
+		Map<String, List<Map.Entry<String, ConflictSlot>>> byDateRoom = new HashMap<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
@@ -119,41 +139,24 @@ public class ConflictDetectionService {
 			String date = data.date();
 			String roomId = data.roomId();
 			String time = data.time();
-			String key = date + "|" + roomId + "|" + time;
-
-			if (seen.contains(key)) {
-				conflicts.add(createConflict(
-						"slot_occupied", "error", "Un autre projet occupe deja ce creneau (date: " + date + ", salle: "
-								+ roomId + ", horaire: " + time + ")",
-						slotId, "Choisissez une autre date, salle ou horaire"));
-			}
-			seen.add(key);
-		}
-		return conflicts;
-	}
-
-	private List<ConflictDetailResponse> checkRoomCapacity(Map<String, ConflictSlot> schedule) {
-		List<ConflictDetailResponse> conflicts = new ArrayList<>();
-
-		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
-			String slotId = entry.getKey();
-			ConflictSlot data = entry.getValue();
-			String projectId = data.projectId();
-			String roomId = data.roomId();
-			if (projectId == null || roomId == null)
+			String endTime = data.endTime();
+			if (date == null || roomId == null || time == null)
 				continue;
 
-			Room room = roomRepository.findById(Long.valueOf(roomId)).orElse(null);
-			if (room == null)
-				continue;
-
-			int studentCount = getStudentCountForProject(projectId);
-			if (studentCount > room.getCapacity()) {
-				conflicts.add(createConflict("room_capacity", "error",
-						"Capacite de la salle insuffisante: " + studentCount + " etudiants pour " + room.getCapacity()
-								+ " places",
-						slotId, "Choisissez une salle plus grande ou reduisez la taille du groupe"));
+			String key = date + "|" + roomId;
+			List<Map.Entry<String, ConflictSlot>> existing = byDateRoom.getOrDefault(key, new ArrayList<>());
+			for (Map.Entry<String, ConflictSlot> prev : existing) {
+				ConflictSlot prevData = prev.getValue();
+				if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+					conflicts.add(createConflict("slot_occupied", "error",
+							"Un autre projet occupe deja ce creneau (date: " + date + ", salle: " + roomId
+									+ ", horaire: " + time + ")",
+							slotId, "Choisissez une autre date, salle ou horaire"));
+					break;
+				}
 			}
+			existing.add(entry);
+			byDateRoom.put(key, existing);
 		}
 		return conflicts;
 	}
@@ -184,34 +187,48 @@ public class ConflictDetectionService {
 							slotId, "Choisissez une date entre " + ds.getStartDate() + " et " + ds.getEndDate()));
 				}
 			} catch (DateTimeParseException e) {
-				log.warn("Invalid date format: {}", dateStr, e);
+				LOG.warn("Invalid date format: {}", dateStr, e);
 			}
 		}
 		return conflicts;
 	}
 
-	private List<ConflictDetailResponse> checkTeacherDoubleBooked(Map<String, ConflictSlot> schedule) {
+	private List<ConflictDetailResponse> checkTeacherDoubleBooked(Map<String, ConflictSlot> schedule,
+			Map<Long, Set<String>> juryTeacherIdsByProject) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
-		Map<String, String> dateTeacherSlot = new HashMap<>();
+		Map<String, List<Map.Entry<String, ConflictSlot>>> dateTeacherSlots = new HashMap<>();
+		Set<String> reportedSlotIds = new HashSet<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
 			ConflictSlot data = entry.getValue();
 			String projectId = data.projectId();
 			String date = data.date();
-			if (projectId == null || date == null)
+			String time = data.time();
+			String endTime = data.endTime();
+			if (projectId == null || date == null || time == null || endTime == null)
 				continue;
 
-			Set<String> teacherIds = getJuryTeacherIds(projectId);
+			Set<String> teacherIds = juryTeacherIdsByProject.getOrDefault(Long.valueOf(projectId), Set.of());
 			for (String tid : teacherIds) {
 				String key = date + "|" + tid;
-				if (dateTeacherSlot.containsKey(key)) {
-					conflicts.add(createConflict("teacher_double_booked", "error",
-							"Un enseignant est deja assigne a un autre projet le " + date, slotId,
-							"Verifiez la disponibilite des enseignants"));
-				} else {
-					dateTeacherSlot.put(key, slotId);
+				List<Map.Entry<String, ConflictSlot>> existing = dateTeacherSlots.getOrDefault(key, new ArrayList<>());
+				for (Map.Entry<String, ConflictSlot> prev : existing) {
+					ConflictSlot prevData = prev.getValue();
+					if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+						if (!reportedSlotIds.contains(slotId)) {
+							conflicts
+									.add(createConflict("teacher_double_booked", "error",
+											"Un enseignant est deja assigne a un autre projet le " + date + " de "
+													+ time + " a " + endTime,
+											slotId, "Verifiez la disponibilite des enseignants"));
+							reportedSlotIds.add(slotId);
+						}
+						break;
+					}
 				}
+				existing.add(entry);
+				dateTeacherSlots.put(key, existing);
 			}
 		}
 		return conflicts;
@@ -219,14 +236,16 @@ public class ConflictDetectionService {
 
 	private List<ConflictDetailResponse> checkSupervisorConflict(Map<String, ConflictSlot> schedule) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
-		Map<String, String> dateSupervisorSlot = new HashMap<>();
+		Map<String, List<Map.Entry<String, ConflictSlot>>> dateSupervisorSlots = new HashMap<>();
 
 		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
 			String slotId = entry.getKey();
 			ConflictSlot data = entry.getValue();
 			String projectId = data.projectId();
 			String date = data.date();
-			if (projectId == null || date == null)
+			String time = data.time();
+			String endTime = data.endTime();
+			if (projectId == null || date == null || time == null || endTime == null)
 				continue;
 
 			Project project = projectRepository.findById(Long.valueOf(projectId)).orElse(null);
@@ -235,65 +254,25 @@ public class ConflictDetectionService {
 
 			String supervisorId = String.valueOf(project.getSupervisor().getId());
 			String key = date + "|" + supervisorId;
-
-			if (dateSupervisorSlot.containsKey(key)) {
-				conflicts.add(createConflict("supervisor_conflict", "warning",
-						"L'encadrant est deja assigne a un autre projet le " + date, slotId,
-						"Verifiez la disponibilite de l'encadrant"));
-			} else {
-				dateSupervisorSlot.put(key, slotId);
-			}
-		}
-		return conflicts;
-	}
-
-	private List<ConflictDetailResponse> checkBreakInterval(Map<String, ConflictSlot> schedule,
-			String defenseSessionId) {
-		List<ConflictDetailResponse> conflicts = new ArrayList<>();
-		int breakDuration = 15;
-
-		if (defenseSessionId != null) {
-			DefenseSession ds = defenseSessionRepository.findById(Long.valueOf(defenseSessionId)).orElse(null);
-			if (ds != null)
-				breakDuration = ds.getBreakDuration();
-		}
-
-		Map<String, List<Map.Entry<String, ConflictSlot>>> byDateRoom = new HashMap<>();
-		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
-			ConflictSlot data = entry.getValue();
-			String date = data.date();
-			String roomId = data.roomId();
-			String key = date + "|" + roomId;
-			byDateRoom.computeIfAbsent(key, k -> new ArrayList<>()).add(entry);
-		}
-
-		for (Map.Entry<String, List<Map.Entry<String, ConflictSlot>>> group : byDateRoom.entrySet()) {
-			List<Map.Entry<String, ConflictSlot>> slots = group.getValue();
-			slots.sort(Comparator.comparing(e -> e.getValue().time()));
-
-			for (int i = 1; i < slots.size(); i++) {
-				String prevTime = slots.get(i - 1).getValue().time();
-				String currTime = slots.get(i).getValue().time();
-				if (prevTime == null || currTime == null)
-					continue;
-
-				try {
-					long gap = ChronoUnit.MINUTES.between(LocalTime.parse(prevTime), LocalTime.parse(currTime));
-					if (gap < breakDuration) {
-						conflicts.add(createConflict("break_violation", "warning",
-								"Intervalle insuffisant entre les creneaux: " + gap + " min au lieu de " + breakDuration
-										+ " min",
-								slots.get(i).getKey(), "Ajoutez un ecart d'au moins " + breakDuration + " minutes"));
-					}
-				} catch (DateTimeParseException e) {
-					log.warn("Invalid time format: prev={}, curr={}", prevTime, currTime, e);
+			List<Map.Entry<String, ConflictSlot>> existing = dateSupervisorSlots.getOrDefault(key, new ArrayList<>());
+			for (Map.Entry<String, ConflictSlot> prev : existing) {
+				ConflictSlot prevData = prev.getValue();
+				if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+					conflicts.add(createConflict(
+							"supervisor_conflict", "warning", "L'encadrant est deja assigne a un autre projet le "
+									+ date + " de " + time + " a " + endTime,
+							slotId, "Verifiez la disponibilite de l'encadrant"));
+					break;
 				}
 			}
+			existing.add(entry);
+			dateSupervisorSlots.put(key, existing);
 		}
 		return conflicts;
 	}
 
-	private List<ConflictDetailResponse> checkTeacherUnavailable(Map<String, ConflictSlot> schedule) {
+	private List<ConflictDetailResponse> checkTeacherUnavailable(Map<String, ConflictSlot> schedule,
+			Map<Long, Set<String>> juryTeacherIdsByProject) {
 		List<ConflictDetailResponse> conflicts = new ArrayList<>();
 		List<Unavailability> unavailabilityList = unavailabilityRepository.findAll();
 
@@ -306,10 +285,10 @@ public class ConflictDetectionService {
 			if (projectId == null || date == null || time == null)
 				continue;
 
-			Set<String> teacherIds = getJuryTeacherIds(projectId);
+			Set<String> teacherIds = juryTeacherIdsByProject.getOrDefault(Long.valueOf(projectId), Set.of());
 			for (String tid : teacherIds) {
 				for (Unavailability ua : unavailabilityList) {
-					if (!String.valueOf(ua.getTeacherId()).equals(tid) || !ua.getDate().equals(date))
+					if (!String.valueOf(ua.getTeacherId()).equals(tid) || !ua.getDate().toString().equals(date))
 						continue;
 					if (ua.getSlots() != null && ua.getSlots().contains(time)) {
 						conflicts.add(createConflict("teacher_unavailable", "error",
@@ -322,33 +301,86 @@ public class ConflictDetectionService {
 		return conflicts;
 	}
 
-	private int getStudentCountForProject(String projectId) {
-		var groups = groupRepository.findByProjectId(Long.valueOf(projectId));
+	private List<ConflictDetailResponse> checkStudentDoubleBooked(Map<String, ConflictSlot> schedule) {
+		List<ConflictDetailResponse> conflicts = new ArrayList<>();
+		Map<String, List<Map.Entry<String, ConflictSlot>>> dateStudentSlots = new HashMap<>();
+		Set<String> reportedSlotIds = new HashSet<>();
 
-		for (var g : groups) {
-			if (g.getStudents() != null && !g.getStudents().isEmpty())
-				return g.getStudents().size();
-		}
-		Project project = projectRepository.findById(Long.valueOf(projectId)).orElse(null);
-		if (project != null && project.getStudents() != null)
-			return project.getStudents().size();
-		return 0;
-	}
+		for (Map.Entry<String, ConflictSlot> entry : schedule.entrySet()) {
+			String slotId = entry.getKey();
+			ConflictSlot data = entry.getValue();
+			String projectId = data.projectId();
+			String date = data.date();
+			String time = data.time();
+			String endTime = data.endTime();
+			if (projectId == null || date == null || time == null || endTime == null)
+				continue;
 
-	private Set<String> getJuryTeacherIds(String projectId) {
-		Set<String> ids = new HashSet<>();
-		for (Jury jury : juryRepository.findByProjectId(Long.valueOf(projectId))) {
-			for (JuryMember member : jury.getMembers()) {
-				if (member.getTeacher() != null) {
-					ids.add(String.valueOf(member.getTeacher().getId()));
+			List<Group> groups = groupRepository.findByProjectId(Long.valueOf(projectId));
+			for (Group group : groups) {
+				if (group.getStudents() == null)
+					continue;
+				for (var student : group.getStudents()) {
+					String studentId = String.valueOf(student.getId());
+					String key = date + "|" + studentId;
+					List<Map.Entry<String, ConflictSlot>> existing = dateStudentSlots.getOrDefault(key,
+							new ArrayList<>());
+					for (Map.Entry<String, ConflictSlot> prev : existing) {
+						ConflictSlot prevData = prev.getValue();
+						if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+							if (!reportedSlotIds.contains(slotId)) {
+								conflicts.add(createConflict("student_double_booked", "error",
+										"Un etudiant est deja assigne a un autre projet le " + date + " de " + time
+												+ " a " + endTime,
+										slotId, "Verifiez l'assignation des etudiants aux projets"));
+								reportedSlotIds.add(slotId);
+							}
+							break;
+						}
+					}
+					existing.add(entry);
+					dateStudentSlots.put(key, existing);
 				}
 			}
 		}
-		return ids;
+		return conflicts;
 	}
 
 	private ConflictDetailResponse createConflict(String type, String severity, String message, String slot,
 			String resolution) {
 		return new ConflictDetailResponse(type, severity, message, slot, resolution);
+	}
+
+	private int resolveDefenseDuration(String defenseSessionId) {
+		if (defenseSessionId != null) {
+			DefenseSession ds = defenseSessionRepository.findById(Long.valueOf(defenseSessionId)).orElse(null);
+			if (ds != null && ds.getDefenseDuration() > 0)
+				return ds.getDefenseDuration();
+		}
+		return 60;
+	}
+
+	private String computeEndTime(String startTime, int durationMinutes) {
+		if (startTime == null)
+			return null;
+		try {
+			LocalTime start = LocalTime.parse(startTime);
+			return start.plusMinutes(durationMinutes).toString();
+		} catch (DateTimeParseException e) {
+			LOG.warn("Invalid time format: {}", startTime, e);
+			return null;
+		}
+	}
+
+	private boolean timeRangesOverlap(String startA, String endA, String startB, String endB) {
+		try {
+			LocalTime a1 = LocalTime.parse(startA);
+			LocalTime a2 = LocalTime.parse(endA);
+			LocalTime b1 = LocalTime.parse(startB);
+			LocalTime b2 = LocalTime.parse(endB);
+			return a1.isBefore(b2) && b1.isBefore(a2);
+		} catch (DateTimeParseException e) {
+			return false;
+		}
 	}
 }

@@ -1,11 +1,13 @@
 package com.system_gestion_soutenance.api.teacher.evaluation.entity;
 
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "evaluation")
@@ -25,11 +27,16 @@ public class Evaluation {
 	@Column(name = "defense_session_id", nullable = false)
 	private Long defenseSessionId;
 
-	@Column(name = "project_id", nullable = false)
-	private Long projectId;
+	@ManyToOne
+	@JoinColumn(name = "defense_id", nullable = false)
+	private Defense defense;
 
 	@Column(nullable = false)
 	private String role;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private EvaluationType type = EvaluationType.SOUTENANCE;
 
 	private Double score;
 
@@ -42,4 +49,8 @@ public class Evaluation {
 
 	@Column(name = "submitted_at")
 	private LocalDateTime submittedAt;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "attendance_status")
+	private EvaluationAttendanceStatus attendanceStatus;
 }

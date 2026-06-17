@@ -6,6 +6,7 @@ import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryReposit
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.stats.dto.CoordinatorStatsResponse;
 import org.springframework.stereotype.Service;
+@SuppressWarnings("PMD")
 
 @Service
 public class CoordinatorStatsService {

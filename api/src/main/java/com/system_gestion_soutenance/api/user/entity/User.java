@@ -5,6 +5,7 @@ import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "users")

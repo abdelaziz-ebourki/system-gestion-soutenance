@@ -7,31 +7,30 @@ import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSess
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.Jury;
-import com.system_gestion_soutenance.api.coordinator.jury.entity.JuryMember;
-import com.system_gestion_soutenance.api.coordinator.jury.repository.JuryRepository;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
+import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
-import com.system_gestion_soutenance.api.coordinator.schedule.entity.SlotAssignment;
-import com.system_gestion_soutenance.api.coordinator.schedule.repository.SlotAssignmentRepository;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType;
 import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class CoordinatorGradeServiceTest {
 
-	private final JuryRepository juryRepository = mock(JuryRepository.class);
+	private final DefenseRepository defenseRepository = mock(DefenseRepository.class);
 	private final EvaluationRepository evaluationRepository = mock(EvaluationRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
-	private final SlotAssignmentRepository slotAssignmentRepository = mock(SlotAssignmentRepository.class);
 
-	private final CoordinatorGradeService service = new CoordinatorGradeService(juryRepository, evaluationRepository,
-			defenseSessionRepository, groupRepository, slotAssignmentRepository);
+	private final CoordinatorGradeService service = new CoordinatorGradeService(defenseRepository, evaluationRepository,
+			defenseSessionRepository, groupRepository);
 
 	private Teacher mockTeacher(Long id) {
 		Teacher t = mock(Teacher.class);
@@ -49,8 +48,8 @@ class CoordinatorGradeServiceTest {
 	}
 
 	@Test
-	void getGrades_noJuries_returnsEmpty() {
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of());
+	void getGrades_noDefenses_returnsEmpty() {
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		assertTrue(service.getGrades().isEmpty());
 	}
@@ -60,17 +59,14 @@ class CoordinatorGradeServiceTest {
 		Teacher teacher = mockTeacher(10L);
 		Project project = mockProject(1L);
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("président");
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "président", null, null, null, null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
 
@@ -84,29 +80,29 @@ class CoordinatorGradeServiceTest {
 		Teacher teacher = mockTeacher(10L);
 		Project project = mockProject(1L);
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("président");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member));
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "président", null, null, null, null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
 		ds.setEvaluationCoefficients(Map.of("président", 2));
+		ds.setRapportCoefficient(0);
+		ds.setSoutenanceCoefficient(100);
 
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getDefenseSessionId()).thenReturn(1L);
-		when(eval.getProjectId()).thenReturn(1L);
+		when(eval.getDefense()).thenReturn(defense);
+		when(eval.getType()).thenReturn(EvaluationType.SOUTENANCE);
 
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of(eval));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
 		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
 
@@ -116,25 +112,18 @@ class CoordinatorGradeServiceTest {
 	}
 
 	@Test
-	void getGrades_usesDefenseDateFromSlot() {
+	void getGrades_usesDefenseDate() {
 		Teacher teacher = mockTeacher(10L);
 		Project project = mockProject(1L);
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("président");
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "président", null, null, null, null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
-		SlotAssignment slot = mock(SlotAssignment.class);
-		when(slot.getProjectId()).thenReturn(1L);
-		when(slot.getDate()).thenReturn("2025-06-15");
-
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of(slot));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
 
@@ -143,31 +132,34 @@ class CoordinatorGradeServiceTest {
 
 	@Test
 	void computeStatus_partialEvaluations_returnsPending() {
-		Teacher teacher = mockTeacher(10L);
+		Teacher teacher1 = mockTeacher(10L);
 		Teacher teacher2 = mockTeacher(20L);
 		Project project = mockProject(1L);
 
-		JuryMember member1 = mock(JuryMember.class);
-		when(member1.getTeacher()).thenReturn(teacher);
-		when(member1.getRoleName()).thenReturn("président");
-
-		JuryMember member2 = mock(JuryMember.class);
-		when(member2.getTeacher()).thenReturn(teacher2);
-		when(member2.getRoleName()).thenReturn("examinateur");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member1, member2));
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher1, "président", null, null, null, null),
+						new JuryMember(null, teacher2, "examinateur", null, null, null, null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
-		when(eval.getProjectId()).thenReturn(1L);
+		when(eval.getType()).thenReturn(EvaluationType.SOUTENANCE);
+		when(eval.getDefense()).thenReturn(defense);
+		when(eval.getDefenseSessionId()).thenReturn(1L);
 
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of(eval));
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of());
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setRapportCoefficient(0);
+		ds.setSoutenanceCoefficient(100);
+		ds.setEvaluationCoefficients(Map.of("président", 1, "examinateur", 1));
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
+		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
 
 		var result = service.getGrades();
 
@@ -175,58 +167,29 @@ class CoordinatorGradeServiceTest {
 	}
 
 	@Test
-	void findDefenseDate_noMatchingSlot_returnsNull() {
-		Teacher teacher = mockTeacher(10L);
-		Project project = mockProject(1L);
-
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("président");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
-		SlotAssignment slot = mock(SlotAssignment.class);
-		when(slot.getProjectId()).thenReturn(99L);
-		when(slot.getDate()).thenReturn("2025-06-15");
-
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of());
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of(slot));
-
-		var result = service.getGrades();
-
-		assertNull(result.get(0).defenseDate());
-	}
-
-	@Test
 	void computeWeightedScore_withNullCoefficient_usesZero() {
 		Teacher teacher = mockTeacher(10L);
 		Project project = mockProject(1L);
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("unknown_role");
-
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member));
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "unknown_role", null, null, null, null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getDefenseSessionId()).thenReturn(1L);
-		when(eval.getProjectId()).thenReturn(1L);
+		when(eval.getDefense()).thenReturn(defense);
 
 		DefenseSession ds = new DefenseSession();
 		ds.setEvaluationCoefficients(Map.of());
 
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of(eval));
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
 		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
 
@@ -238,25 +201,75 @@ class CoordinatorGradeServiceTest {
 		Teacher teacher = mockTeacher(10L);
 		Project project = mockProject(1L);
 
-		JuryMember member = mock(JuryMember.class);
-		when(member.getTeacher()).thenReturn(teacher);
-		when(member.getRoleName()).thenReturn("président");
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "président", null, null, null, null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
 
-		Jury jury = mock(Jury.class);
-		when(jury.getProject()).thenReturn(project);
-		when(jury.getMembers()).thenReturn(List.of(member));
-
+		DefenseSession ds = new DefenseSession();
+		ds.setId(5L);
 		Group group = mock(Group.class);
-		when(group.getSessionId()).thenReturn(5L);
+		when(group.getDefenseSession()).thenReturn(ds);
 
-		when(juryRepository.findAllWithDetails()).thenReturn(List.of(jury));
-		when(evaluationRepository.findByProjectIdIn(any())).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of());
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
-		when(slotAssignmentRepository.findByProjectIdIn(any())).thenReturn(List.of());
 
 		var result = service.getGrades();
 
 		assertEquals(1, result.size());
 	}
 
+	@Test
+	void computeWeightedScore_withRapportAndSoutenance_usesCorrectFormula() {
+		Teacher teacher1 = mockTeacher(10L);
+		Teacher teacher2 = mockTeacher(20L);
+		Project project = mockProject(1L);
+
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, teacher1, "Président", null),
+				new JuryMember(null, teacher2, "Examinateur", null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
+
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setRapportCoefficient(30);
+		ds.setSoutenanceCoefficient(70);
+		ds.setEvaluationCoefficients(Map.of("Président", 2, "Examinateur", 1));
+
+		Evaluation rapportEval = mock(Evaluation.class);
+		when(rapportEval.getType()).thenReturn(EvaluationType.RAPPORT);
+		when(rapportEval.getScore()).thenReturn(16.0);
+		when(rapportEval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(rapportEval.getDefense()).thenReturn(defense);
+		when(rapportEval.getDefenseSessionId()).thenReturn(1L);
+
+		Evaluation soutenance1 = mock(Evaluation.class);
+		when(soutenance1.getType()).thenReturn(EvaluationType.SOUTENANCE);
+		when(soutenance1.getTeacherId()).thenReturn(10L);
+		when(soutenance1.getScore()).thenReturn(14.0);
+		when(soutenance1.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(soutenance1.getDefense()).thenReturn(defense);
+		when(soutenance1.getDefenseSessionId()).thenReturn(1L);
+
+		Evaluation soutenance2 = mock(Evaluation.class);
+		when(soutenance2.getType()).thenReturn(EvaluationType.SOUTENANCE);
+		when(soutenance2.getTeacherId()).thenReturn(20L);
+		when(soutenance2.getScore()).thenReturn(11.0);
+		when(soutenance2.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(soutenance2.getDefense()).thenReturn(defense);
+		when(soutenance2.getDefenseSessionId()).thenReturn(1L);
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(rapportEval, soutenance1, soutenance2));
+		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
+
+		var result = service.getGrades();
+
+		// avgSoutenance = (14*2 + 11*1) / 3 = 39 / 3 = 13.0
+		// finalScore = (16 * 30 + 13 * 70) / 100 = (480 + 910) / 100 = 13.9
+		assertEquals(13.9, result.get(0).finalScore());
+	}
 }

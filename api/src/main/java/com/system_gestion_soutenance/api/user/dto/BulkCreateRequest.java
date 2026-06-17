@@ -7,6 +7,7 @@ import java.util.List;
 
 public record BulkCreateRequest(@NotEmpty List<@Valid BulkUserEntry> users, @NotBlank String role) {
 	public record BulkUserEntry(@NotBlank String lastName, @NotBlank String firstName, @NotBlank String email,
-			String cne, String majorName, String levelName, String gradeName, String departmentName) {
+			String cne, String codeApogee, String majorName, String levelName, String teacherRankName,
+			String departmentName) {
 	}
 }

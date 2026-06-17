@@ -1,11 +1,13 @@
 package com.system_gestion_soutenance.api.student.document.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+@SuppressWarnings("PMD")
 
 @Entity
 @Table(name = "student_document")
@@ -29,7 +31,7 @@ public class StudentDocument {
 	private String type;
 
 	@Column(nullable = false)
-	private String deadline;
+	private LocalDate deadline;
 
 	@Column(nullable = false)
 	private String status = "missing";
