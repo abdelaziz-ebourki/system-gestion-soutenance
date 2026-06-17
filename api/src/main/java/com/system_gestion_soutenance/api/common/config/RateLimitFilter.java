@@ -107,10 +107,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
 	private int resolveMaxRequests(String path) {
 		if (isAuthEndpoint(path)) {
-			return Math.min(defaultMaxRequests, 10);
+			return Math.min(defaultMaxRequests, 30);
 		}
 		if (isBulkEndpoint(path)) {
-			return Math.min(defaultMaxRequests, 10);
+			return Math.min(defaultMaxRequests, 30);
 		}
 		return defaultMaxRequests;
 	}
