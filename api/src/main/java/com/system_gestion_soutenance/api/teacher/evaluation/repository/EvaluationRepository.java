@@ -16,4 +16,10 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
 
 	List<Evaluation> findByDefenseIn(List<Defense> defenses);
 
+	List<Evaluation> findByDefenseAndType(Defense defense,
+			com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType type);
+
+	java.util.Optional<Evaluation> findByDefenseAndTeacherIdAndType(Defense defense, Long teacherId,
+			com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType type);
+
 }

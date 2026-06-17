@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-	private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 
 	private final MessageService messageService;
 
@@ -33,7 +33,7 @@ public class EmailService {
 	@Async
 	public void sendEmail(String to, String subject, String body) {
 		if (mailSender == null) {
-			log.info("[Mock Email] To: {} | Subject: {} | Body: {}", to, subject, body);
+			LOG.info("[Mock Email] To: {} | Subject: {} | Body: {}", to, subject, body);
 			return;
 		}
 		try {
@@ -44,9 +44,9 @@ public class EmailService {
 			helper.setText(body, true);
 			helper.setFrom(fromAddress);
 			mailSender.send(message);
-			log.info("Email sent successfully to {}", to);
+			LOG.info("Email sent successfully to {}", to);
 		} catch (MessagingException | MailException e) {
-			log.error("Failed to send email to {}: {}", to, e.getMessage());
+			LOG.error("Failed to send email to {}: {}", to, e.getMessage());
 		}
 	}
 

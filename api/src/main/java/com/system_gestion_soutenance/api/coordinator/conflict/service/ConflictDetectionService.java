@@ -1,12 +1,12 @@
 package com.system_gestion_soutenance.api.coordinator.conflict.service;
 
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
+import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.unavailability.entity.Unavailability;
@@ -31,18 +31,18 @@ public class ConflictDetectionService {
 
 	private final DefenseRepository defenseRepository;
 	private final ProjectRepository projectRepository;
+	private final GroupRepository groupRepository;
 	private final UnavailabilityRepository unavailabilityRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
-	private final DefenseSettingsRepository defenseSettingsRepository;
 
 	public ConflictDetectionService(DefenseRepository defenseRepository, ProjectRepository projectRepository,
-			UnavailabilityRepository unavailabilityRepository, DefenseSessionRepository defenseSessionRepository,
-			DefenseSettingsRepository defenseSettingsRepository) {
+			GroupRepository groupRepository, UnavailabilityRepository unavailabilityRepository,
+			DefenseSessionRepository defenseSessionRepository) {
 		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
+		this.groupRepository = groupRepository;
 		this.unavailabilityRepository = unavailabilityRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
-		this.defenseSettingsRepository = defenseSettingsRepository;
 	}
 
 	public List<ConflictDetailResponse> validate(ScheduleRequest request, String defenseSessionId) {
@@ -316,30 +316,31 @@ public class ConflictDetectionService {
 			if (projectId == null || date == null || time == null || endTime == null)
 				continue;
 
-			Project project = projectRepository.findById(Long.valueOf(projectId)).orElse(null);
-			if (project == null || project.getStudents() == null)
-				continue;
-
-			for (var student : project.getStudents()) {
-				String studentId = String.valueOf(student.getId());
-				String key = date + "|" + studentId;
-				List<Map.Entry<String, ConflictSlot>> existing = dateStudentSlots.getOrDefault(key, new ArrayList<>());
-				for (Map.Entry<String, ConflictSlot> prev : existing) {
-					ConflictSlot prevData = prev.getValue();
-					if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
-						if (!reportedSlotIds.contains(slotId)) {
-							conflicts
-									.add(createConflict("student_double_booked", "error",
-											"Un etudiant est deja assigne a un autre projet le " + date + " de " + time
-													+ " a " + endTime,
-											slotId, "Verifiez l'assignation des etudiants aux projets"));
-							reportedSlotIds.add(slotId);
+			List<Group> groups = groupRepository.findByProjectId(Long.valueOf(projectId));
+			for (Group group : groups) {
+				if (group.getStudents() == null)
+					continue;
+				for (var student : group.getStudents()) {
+					String studentId = String.valueOf(student.getId());
+					String key = date + "|" + studentId;
+					List<Map.Entry<String, ConflictSlot>> existing = dateStudentSlots.getOrDefault(key,
+							new ArrayList<>());
+					for (Map.Entry<String, ConflictSlot> prev : existing) {
+						ConflictSlot prevData = prev.getValue();
+						if (timeRangesOverlap(time, endTime, prevData.time(), prevData.endTime())) {
+							if (!reportedSlotIds.contains(slotId)) {
+								conflicts.add(createConflict("student_double_booked", "error",
+										"Un etudiant est deja assigne a un autre projet le " + date + " de " + time
+												+ " a " + endTime,
+										slotId, "Verifiez l'assignation des etudiants aux projets"));
+								reportedSlotIds.add(slotId);
+							}
+							break;
 						}
-						break;
 					}
+					existing.add(entry);
+					dateStudentSlots.put(key, existing);
 				}
-				existing.add(entry);
-				dateStudentSlots.put(key, existing);
 			}
 		}
 		return conflicts;
@@ -356,9 +357,6 @@ public class ConflictDetectionService {
 			if (ds != null && ds.getDefenseDuration() > 0)
 				return ds.getDefenseDuration();
 		}
-		DefenseSettings settings = defenseSettingsRepository.findById(1L).orElse(null);
-		if (settings != null && settings.getDefenseDuration() > 0)
-			return settings.getDefenseDuration();
 		return 60;
 	}
 

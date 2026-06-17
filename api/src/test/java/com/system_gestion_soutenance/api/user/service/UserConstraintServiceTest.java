@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.user.service;
 
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,6 +26,8 @@ class UserConstraintServiceTest {
 	private DefenseRepository defenseRepository;
 	@Mock
 	private ProjectRepository projectRepository;
+	@Mock
+	private GroupRepository groupRepository;
 
 	@InjectMocks
 	private UserConstraintService userConstraintService;
@@ -77,19 +81,19 @@ class UserConstraintServiceTest {
 	@Test
 	void checkStudentDeletionConstraints_Success() {
 		Long studentId = 1L;
-		when(projectRepository.findByStudentsId(studentId)).thenReturn(List.of());
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId)).thenReturn(Optional.empty());
 
 		assertDoesNotThrow(() -> userConstraintService.checkStudentDeletionConstraints(studentId));
 	}
 
 	@Test
-	void checkStudentDeletionConstraints_IsLinkedToProject_ThrowsException() {
+	void checkStudentDeletionConstraints_IsLinkedToGroup_ThrowsException() {
 		Long studentId = 1L;
-		when(projectRepository.findByStudentsId(studentId))
-				.thenReturn(List.of(new com.system_gestion_soutenance.api.coordinator.project.entity.Project()));
+		com.system_gestion_soutenance.api.coordinator.group.entity.Group group = new com.system_gestion_soutenance.api.coordinator.group.entity.Group();
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId)).thenReturn(Optional.of(group));
 
 		ResourceConflictException ex = assertThrows(ResourceConflictException.class,
 				() -> userConstraintService.checkStudentDeletionConstraints(studentId));
-		assertTrue(ex.getMessage().contains("lié à des projets"));
+		assertTrue(ex.getMessage().contains("lié à des groupes"));
 	}
 }

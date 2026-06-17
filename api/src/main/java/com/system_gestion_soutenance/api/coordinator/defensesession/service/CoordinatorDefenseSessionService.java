@@ -81,6 +81,10 @@ public class CoordinatorDefenseSessionService {
 				request.submissionDeadline() != null ? LocalDate.parse(request.submissionDeadline()) : null);
 		ds.setStartDate(LocalDate.parse(request.startDate()));
 		ds.setEndDate(LocalDate.parse(request.endDate()));
+		ds.setStartTime(request.startTime());
+		ds.setEndTime(request.endTime());
+		ds.setGroupCreationStartDate(request.groupCreationStartDate());
+		ds.setGroupCreationEndDate(request.groupCreationEndDate());
 
 		if (request.juryRoleTemplateId() != null) {
 			JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.juryRoleTemplateId())
@@ -124,6 +128,10 @@ public class CoordinatorDefenseSessionService {
 				request.submissionDeadline() != null ? LocalDate.parse(request.submissionDeadline()) : null);
 		ds.setStartDate(LocalDate.parse(request.startDate()));
 		ds.setEndDate(LocalDate.parse(request.endDate()));
+		ds.setStartTime(request.startTime());
+		ds.setEndTime(request.endTime());
+		ds.setGroupCreationStartDate(request.groupCreationStartDate());
+		ds.setGroupCreationEndDate(request.groupCreationEndDate());
 
 		if (request.juryRoleTemplateId() != null) {
 			JuryRoleTemplate template = juryRoleTemplateRepository.findById(request.juryRoleTemplateId())

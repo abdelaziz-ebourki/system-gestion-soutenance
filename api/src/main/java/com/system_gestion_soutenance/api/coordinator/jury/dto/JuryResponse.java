@@ -14,6 +14,9 @@ public record JuryResponse(@Schema(description = "Identifiant du jury", example 
 	@Schema(description = "Réponse d'un membre du jury")
 	public record MemberResponse(@Schema(description = "Rôle dans le jury", example = "Rapporteur") String roleName,
 			@Schema(description = "ID de l'enseignant", example = "1") Long teacherId,
-			@Schema(description = "Nom de l'enseignant", example = "Dr. Dupont") String teacherName) {
+			@Schema(description = "Nom de l'enseignant", example = "Dr. Dupont") String teacherName,
+			@Schema(description = "Nom complet du membre externe", example = "Dr. Dupont") String externalName,
+			@Schema(description = "Institution du membre externe", example = "Université Paris-Saclay") String externalInstitution,
+			@Schema(description = "Email du membre externe", example = "dupont@univ-paris-saclay.fr") String externalEmail) {
 	}
 }

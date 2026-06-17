@@ -21,6 +21,13 @@ public record DefenseSessionDto(
 		@Schema(description = "Start date of the defense session", example = "2026-03-01") LocalDate startDate,
 		@Schema(description = "End date of the defense session", example = "2026-03-15") LocalDate endDate,
 		@Schema(description = "Whether the session is frozen", example = "false") boolean isFrozen,
+		@Schema(description = "Allow supervisor in jury", example = "false") boolean allowSupervisorInJury,
 		@Schema(description = "ID of the user who approved the session", example = "1") Long approvedBy,
-		@Schema(description = "Timestamp when the session was approved", example = "2026-01-20T14:00:00") LocalDateTime approvedAt) {
+		@Schema(description = "Timestamp when the session was approved", example = "2026-01-20T14:00:00") LocalDateTime approvedAt,
+		@Schema(description = "Start time for defense slots", example = "08:00") String startTime,
+		@Schema(description = "End time for defense slots", example = "18:00") String endTime,
+		@Schema(description = "Group creation period start date", example = "2026-03-01") String groupCreationStartDate,
+		@Schema(description = "Group creation period end date", example = "2026-05-01") String groupCreationEndDate,
+		@Schema(description = "Coefficient for rapport (report) grade", example = "30") int rapportCoefficient,
+		@Schema(description = "Coefficient for soutenance (oral defense) grade", example = "70") int soutenanceCoefficient) {
 }

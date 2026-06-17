@@ -34,6 +34,10 @@ public class Evaluation {
 	@Column(nullable = false)
 	private String role;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private EvaluationType type = EvaluationType.SOUTENANCE;
+
 	private Double score;
 
 	@Column(columnDefinition = "TEXT")

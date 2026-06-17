@@ -2,8 +2,6 @@ package com.system_gestion_soutenance.api.coordinator.defense.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
@@ -44,7 +42,6 @@ public class DefenseService {
 	private final DefenseRepository defenseRepository;
 	private final RoomRepository roomRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
-	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
 	private final ApplicationEventPublisher eventPublisher;
@@ -52,14 +49,12 @@ public class DefenseService {
 	private final TeacherRepository teacherRepository;
 
 	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
-			DefenseSessionRepository defenseSessionRepository, DefenseSettingsRepository defenseSettingsRepository,
-			ProjectRepository projectRepository, GroupRepository groupRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService,
+			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
+			GroupRepository groupRepository, ApplicationEventPublisher eventPublisher, SecurityService securityService,
 			TeacherRepository teacherRepository) {
 		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
-		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
 		this.eventPublisher = eventPublisher;
@@ -137,13 +132,10 @@ public class DefenseService {
 		Defense defense = defenseRepository.findByProject(project).orElseThrow(
 				() -> new InvalidBusinessStateException("Aucun créneau de soutenance assigné à ce projet"));
 
+		validateSupervisorNotInJury(project, request.members());
 		validateNoDuplicateTeachers(request.members());
 
-		List<JuryMember> members = request.members().stream().map(m -> {
-			var teacher = teacherRepository.findById(m.teacherId())
-					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
-			return new JuryMember(teacher, m.roleName());
-		}).toList();
+		List<JuryMember> members = request.members().stream().map(m -> mapToJuryMember(m, defense)).toList();
 
 		defense.setMembers(members);
 		return defenseRepository.save(defense);
@@ -155,23 +147,69 @@ public class DefenseService {
 		Defense defense = defenseRepository.findById(defenseId)
 				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
 
+		Project project = defense.getProject();
 		if (updates.projectId() != null) {
-			Project project = projectRepository.findById(updates.projectId())
+			project = projectRepository.findById(updates.projectId())
 					.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
 			defense.setProject(project);
 		}
 
 		if (updates.members() != null) {
+			validateSupervisorNotInJury(project, updates.members());
 			validateNoDuplicateTeachers(updates.members());
-			List<JuryMember> members = updates.members().stream().map(m -> {
-				var teacher = teacherRepository.findById(m.teacherId()).orElseThrow(
-						() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
-				return new JuryMember(teacher, m.roleName());
-			}).toList();
+			List<JuryMember> members = updates.members().stream().map(m -> mapToJuryMember(m, defense)).toList();
 			defense.setMembers(members);
 		}
 
 		return defenseRepository.save(defense);
+	}
+
+	private JuryMember mapToJuryMember(Object m, Defense defense) {
+		if (m instanceof CreateJuryRequest.MemberEntry entry) {
+			return createJuryMember(entry.teacherId(), entry.roleName(), entry.externalName(),
+					entry.externalInstitution(), entry.externalEmail(), defense);
+		} else if (m instanceof UpdateJuryRequest.MemberEntry entry) {
+			return createJuryMember(entry.teacherId(), entry.roleName(), entry.externalName(),
+					entry.externalInstitution(), entry.externalEmail(), defense);
+		}
+		throw new InvalidBusinessStateException("Type de membre invalide");
+	}
+
+	private JuryMember createJuryMember(Long teacherId, String roleName, String externalName,
+			String externalInstitution, String externalEmail, Defense defense) {
+		if (externalName != null && !externalName.isBlank()) {
+			return new JuryMember(null, null, roleName, defense, externalName, externalInstitution, externalEmail);
+		}
+		var teacher = teacherRepository.findById(teacherId)
+				.orElseThrow(() -> new InvalidBusinessStateException("Enseignant introuvable: " + teacherId));
+		return new JuryMember(null, teacher, roleName, defense, null, null, null);
+	}
+
+	private void validateSupervisorNotInJury(Project project, List<?> members) {
+		if (project == null || project.getSupervisor() == null) {
+			return;
+		}
+		List<Group> groups = groupRepository.findByProjectId(project.getId());
+		if (groups.isEmpty()) {
+			return;
+		}
+		DefenseSession session = groups.get(0).getDefenseSession();
+		if (session == null || session.isAllowSupervisorInJury()) {
+			return;
+		}
+		Long supervisorId = project.getSupervisor().getId();
+		for (Object m : members) {
+			Long tid = null;
+			if (m instanceof CreateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
+			} else if (m instanceof UpdateJuryRequest.MemberEntry entry) {
+				tid = entry.teacherId();
+			}
+			if (tid != null && tid.equals(supervisorId)) {
+				throw new InvalidBusinessStateException(
+						"Un enseignant ne peut pas être à la fois encadrant et membre du jury pour le même projet");
+			}
+		}
 	}
 
 	@Audited(action = "DELETE", entity = "Defense")
@@ -216,16 +254,17 @@ public class DefenseService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc()
-				.orElseThrow(() -> new EntityNotFoundException("Paramètres de soutenance non trouvés"));
+		if (ds.getStartTime() == null || ds.getEndTime() == null) {
+			throw new InvalidBusinessStateException("Les horaires de la session ne sont pas configurés");
+		}
 
 		List<Room> rooms = roomRepository.findAll();
 		if (rooms.isEmpty()) {
 			throw new InvalidBusinessStateException("Aucune salle disponible");
 		}
 
-		LocalTime startTime = LocalTime.parse(settings.getStartTime());
-		LocalTime endTime = LocalTime.parse(settings.getEndTime());
+		LocalTime startTime = LocalTime.parse(ds.getStartTime());
+		LocalTime endTime = LocalTime.parse(ds.getEndTime());
 		int slotDuration = ds.getDefenseDuration();
 		int breakMinutes = ds.getBreakDuration();
 
@@ -245,8 +284,6 @@ public class DefenseService {
 					.filter(g -> g.getProject() != null && g.getProject().getId().equals(p.getId())).toList();
 			if (!projectGroups.isEmpty()) {
 				count = projectGroups.get(0).getStudents() != null ? projectGroups.get(0).getStudents().size() : 0;
-			} else if (p.getStudents() != null) {
-				count = p.getStudents().size();
 			}
 			projectStudentCounts.put(p.getId(), count);
 		}
@@ -304,8 +341,6 @@ public class DefenseService {
 			if (g.getStudents() != null)
 				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 		}
-		if (project.getStudents() != null)
-			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 		return List.of();
 	}
 
@@ -318,6 +353,9 @@ public class DefenseService {
 			} else if (m instanceof UpdateJuryRequest.MemberEntry entry) {
 				tid = entry.teacherId();
 			} else {
+				continue;
+			}
+			if (tid == null) {
 				continue;
 			}
 			if (!teacherIds.add(tid)) {
