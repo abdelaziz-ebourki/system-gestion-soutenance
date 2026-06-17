@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/projects")
+@PreAuthorize("hasAnyRole('COORDINATOR', 'ADMIN')")
 @Tag(name = "Coordinator - Project Management", description = "Endpoints for managing student projects")
 public class ProjectController {
 

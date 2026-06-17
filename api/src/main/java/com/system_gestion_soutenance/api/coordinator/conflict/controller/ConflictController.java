@@ -10,10 +10,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/coordinator/conflicts")
+@PreAuthorize("hasAnyRole('COORDINATOR', 'ADMIN')")
 @Tag(name = "Coordinator - Conflicts", description = "Schedule Conflict Detection & Validation")
 public class ConflictController {
 

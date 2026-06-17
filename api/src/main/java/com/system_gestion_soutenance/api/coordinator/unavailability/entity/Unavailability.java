@@ -1,8 +1,8 @@
 package com.system_gestion_soutenance.api.coordinator.unavailability.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Unavailability {
 
 	@Id
@@ -24,7 +23,7 @@ public class Unavailability {
 	private Long teacherId;
 
 	@Column(nullable = false)
-	private String date;
+	private LocalDate date;
 
 	@ElementCollection
 	@CollectionTable(name = "unavailability_slots", joinColumns = @JoinColumn(name = "unavailability_id"))

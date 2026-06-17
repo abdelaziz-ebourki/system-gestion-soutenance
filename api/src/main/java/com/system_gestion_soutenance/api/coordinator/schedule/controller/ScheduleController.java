@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/coordinator/schedules")
+@PreAuthorize("hasAnyRole('COORDINATOR', 'ADMIN')")
 @Tag(name = "Coordinator - Scheduling", description = "Endpoints for managing the defense schedule")
 public class ScheduleController {
 

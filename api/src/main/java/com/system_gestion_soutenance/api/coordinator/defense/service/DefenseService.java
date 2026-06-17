@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.repository.Defense
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.DefenseStatus;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -212,16 +213,45 @@ public class DefenseService {
 		}
 	}
 
+	@Audited(action = "CANCEL", entity = "Defense")
 	@Audited(action = "DELETE", entity = "Defense")
 	@Transactional
 	public void cancelDefense(Long defenseId) {
 		Defense defense = defenseRepository.findById(defenseId)
 				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
 
-		defenseRepository.delete(defense);
+		defense.setStatus(DefenseStatus.CANCELLED);
+		defenseRepository.save(defense);
 
 		eventPublisher.publishEvent(new DefenseCancelledEvent(securityService.getCurrentUserEmail(), defense.getId(),
 				defense.getDate(), defense.getTime()));
+	}
+
+	@Audited(action = "UPDATE_STATUS", entity = "Defense")
+	@Transactional
+	public Defense updateStatus(Long defenseId, DefenseStatus newStatus) {
+		Defense defense = defenseRepository.findById(defenseId)
+				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
+		defense.setStatus(newStatus);
+		return defenseRepository.save(defense);
+	}
+
+	@Audited(action = "START_SESSION", entity = "DefenseSession")
+	@Transactional
+	public List<Defense> startSession(Long sessionId) {
+		List<Group> groups = groupRepository.findByDefenseSessionId(sessionId);
+		List<Long> projectIds = groups.stream().filter(g -> g.getProject() != null).map(g -> g.getProject().getId())
+				.distinct().toList();
+
+		List<Defense> updated = new ArrayList<>();
+		for (Defense defense : defenseRepository.findAllWithMembers()) {
+			if (defense.getProject() != null && projectIds.contains(defense.getProject().getId())
+					&& defense.getStatus() == DefenseStatus.SCHEDULED) {
+				defense.setStatus(DefenseStatus.IN_PROGRESS);
+				updated.add(defenseRepository.save(defense));
+			}
+		}
+		return updated;
 	}
 
 	@Audited(action = "UPDATE", entity = "Jury")

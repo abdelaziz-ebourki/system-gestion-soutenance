@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Defense {
 
 	@Id
@@ -42,6 +40,9 @@ public class Defense {
 	@OneToMany(mappedBy = "defense", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<JuryMember> members = new ArrayList<>();
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private DefenseStatus status = DefenseStatus.SCHEDULED;
 	@Column(name = "final_score")
 	private Double finalScore;
 

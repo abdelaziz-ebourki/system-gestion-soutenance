@@ -23,7 +23,11 @@ class TeacherUnavailabilityServiceTest {
 
 	@Test
 	void getByTeacher_returnsSlotsByDate() {
-		Unavailability ua = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00", "09:00"));
+		Unavailability ua = new Unavailability();
+		ua.setId(1L);
+		ua.setTeacherId(1L);
+		ua.setDate(java.time.LocalDate.of(2026, 6, 1));
+		ua.setSlots(List.of("08:00", "09:00"));
 		when(repository.findAll()).thenReturn(List.of(ua));
 
 		List<Unavailability> result = service.getByTeacher(1L);
@@ -43,7 +47,11 @@ class TeacherUnavailabilityServiceTest {
 
 	@Test
 	void getByTeacher_withOtherTeacherUnavailability_returnsEmpty() {
-		Unavailability ua = new Unavailability(1L, 2L, "2026-06-01", List.of("08:00"));
+		Unavailability ua = new Unavailability();
+		ua.setId(1L);
+		ua.setTeacherId(2L);
+		ua.setDate(java.time.LocalDate.of(2026, 6, 1));
+		ua.setSlots(List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(ua));
 
 		List<Unavailability> result = service.getByTeacher(1L);
@@ -53,7 +61,11 @@ class TeacherUnavailabilityServiceTest {
 
 	@Test
 	void saveForTeacher_withExistingForOtherTeacher_onlyDeletesOwn() {
-		Unavailability existing = new Unavailability(1L, 2L, "2026-06-01", List.of("08:00"));
+		Unavailability existing = new Unavailability();
+		existing.setId(1L);
+		existing.setTeacherId(2L);
+		existing.setDate(java.time.LocalDate.of(2026, 6, 1));
+		existing.setSlots(List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(existing));
 
 		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest request = new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest(
@@ -67,7 +79,11 @@ class TeacherUnavailabilityServiceTest {
 
 	@Test
 	void saveForTeacher_deletesExistingAndSaves() {
-		Unavailability existing = new Unavailability(1L, 1L, "2026-06-01", List.of("08:00"));
+		Unavailability existing = new Unavailability();
+		existing.setId(1L);
+		existing.setTeacherId(1L);
+		existing.setDate(java.time.LocalDate.of(2026, 6, 1));
+		existing.setSlots(List.of("08:00"));
 		when(repository.findAll()).thenReturn(List.of(existing));
 
 		com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest request = new com.system_gestion_soutenance.api.teacher.unavailability.dto.TeacherUnavailabilityRequest(

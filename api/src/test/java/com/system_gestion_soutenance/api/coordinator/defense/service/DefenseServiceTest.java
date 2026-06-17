@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.admin.defensesession.repository.Defense
 import com.system_gestion_soutenance.api.admin.room.entity.Room;
 import com.system_gestion_soutenance.api.admin.room.repository.RoomRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
+import com.system_gestion_soutenance.api.coordinator.defense.entity.DefenseStatus;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -140,19 +141,94 @@ class DefenseServiceTest {
 	}
 
 	@Test
-	void cancelDefense_existingDefense_deletesAndNotifies() {
+	void cancelDefense_existingDefense_setsCancelledAndNotifies() {
 		Defense defense = mock(Defense.class);
 		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 1));
 		when(defense.getTime()).thenReturn(java.time.LocalTime.of(9, 0));
 		when(defense.getId()).thenReturn(1L);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		service.cancelDefense(1L);
 
-		verify(defenseRepository).delete(defense);
+		verify(defense).setStatus(DefenseStatus.CANCELLED);
+		verify(defenseRepository).save(defense);
 		verify(eventPublisher, times(1))
 				.publishEvent(any(com.system_gestion_soutenance.api.notification.event.DomainEvent.class));
+	}
+
+	@Test
+	void updateStatus_validTransition_returnsUpdatedDefense() {
+		Defense defense = mock(Defense.class);
+		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
+		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
+
+		var result = service.updateStatus(1L, DefenseStatus.IN_PROGRESS);
+
+		assertNotNull(result);
+		verify(defense).setStatus(DefenseStatus.IN_PROGRESS);
+		verify(defenseRepository).save(defense);
+	}
+
+	@Test
+	void updateStatus_defenseNotFound_throwsException() {
+		when(defenseRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(EntityNotFoundException.class, () -> service.updateStatus(99L, DefenseStatus.COMPLETED));
+	}
+
+	@Test
+	void startSession_updatesScheduledDefenses() {
+		com.system_gestion_soutenance.api.user.entity.Student student = new com.system_gestion_soutenance.api.user.entity.Student();
+		student.setId(1L);
+
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(10L);
+
+		Group group = new Group(null, "Groupe A", project, List.of(student), 1L, student.getId());
+		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getStatus()).thenReturn(DefenseStatus.SCHEDULED);
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
+
+		var result = service.startSession(1L);
+
+		assertFalse(result.isEmpty());
+		verify(defense).setStatus(DefenseStatus.IN_PROGRESS);
+		verify(defenseRepository).save(defense);
+	}
+
+	@Test
+	void startSession_ignoresCancelledDefenses() {
+		Project project = mock(Project.class);
+		when(project.getId()).thenReturn(10L);
+
+		Group group = new Group(null, "Groupe A", project, List.of(), 1L, 1L);
+		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getStatus()).thenReturn(DefenseStatus.CANCELLED);
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+
+		var result = service.startSession(1L);
+
+		assertTrue(result.isEmpty());
+		verify(defenseRepository, never()).save(any());
+	}
+
+	@Test
+	void startSession_sessionNotFound_returnsEmpty() {
+		when(groupRepository.findBySessionId(99L)).thenReturn(List.of());
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
+
+		var result = service.startSession(99L);
+
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

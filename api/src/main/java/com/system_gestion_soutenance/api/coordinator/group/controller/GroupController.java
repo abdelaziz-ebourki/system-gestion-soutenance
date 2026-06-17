@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/groups")
+@PreAuthorize("hasAnyRole('COORDINATOR', 'ADMIN')")
 @Tag(name = "Coordinator - Group Management", description = "Endpoints for managing student groups")
 public class GroupController {
 

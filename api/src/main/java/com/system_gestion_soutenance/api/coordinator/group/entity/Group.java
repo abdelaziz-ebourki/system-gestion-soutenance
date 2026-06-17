@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @SuppressWarnings("PMD")
 
 @Entity
-@Table(name = "coordinator_group")
+@Table(name = "coordinator_group", uniqueConstraints = {@UniqueConstraint(columnNames = {"session_id", "group_name"})})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +21,7 @@ public class Group {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "group_name", unique = true)
+	@Column(name = "group_name")
 	private String groupName;
 
 	@ManyToOne

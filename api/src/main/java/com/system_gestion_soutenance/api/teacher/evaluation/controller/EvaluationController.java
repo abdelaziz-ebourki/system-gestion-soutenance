@@ -20,10 +20,12 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/teacher/evaluations")
+@PreAuthorize("hasRole('TEACHER')")
 @Tag(name = "Teacher - Evaluation Management", description = "Endpoints for teachers to submit and view evaluations")
 public class EvaluationController {
 

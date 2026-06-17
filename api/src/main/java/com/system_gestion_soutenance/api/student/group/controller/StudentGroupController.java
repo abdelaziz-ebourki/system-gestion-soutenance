@@ -16,10 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/student/groups")
+@PreAuthorize("hasRole('STUDENT')")
 @Tag(name = "Student - Group Management", description = "Endpoints for students to manage their defense groups")
 public class StudentGroupController {
 

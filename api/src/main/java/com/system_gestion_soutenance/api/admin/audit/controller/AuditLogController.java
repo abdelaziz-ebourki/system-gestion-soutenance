@@ -18,10 +18,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/admin/audit-logs")
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Admin - Audit Logging", description = "Endpoints for viewing and creating system audit logs")
 public class AuditLogController {
 
