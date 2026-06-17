@@ -4959,7 +4959,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/coordinator/groups/{{approveGroupId}}/approve",
+              "raw": "{{base_url}}/api/coordinator/groups/39/approve",
               "host": [
                 "{{base_url}}"
               ],
@@ -4967,7 +4967,7 @@
                 "api",
                 "coordinator",
                 "groups",
-                "{{approveGroupId}}",
+                "39",
                 "approve"
               ]
             }
@@ -5006,7 +5006,7 @@
               }
             ],
             "url": {
-"raw": "{{base_url}}/api/coordinator/groups/{{rejectGroupId}}/reject",
+"raw": "{{base_url}}/api/coordinator/groups/40/reject",
               "host": [
                 "{{base_url}}"
               ],
@@ -5014,7 +5014,7 @@
                 "api",
                 "coordinator",
                 "groups",
-                "{{rejectGroupId}}",
+                "40",
                 "reject"
               ]
             }
@@ -5068,7 +5068,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{{studentToAssign}}"
+              "raw": "72"
             }
           }
         },
@@ -5107,7 +5107,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/coordinator/groups/{{groupId}}/members/{{studentToRemove}}",
+              "raw": "{{base_url}}/api/coordinator/groups/3/members/22",
               "host": [
                 "{{base_url}}"
               ],
@@ -5115,9 +5115,9 @@
                 "api",
                 "coordinator",
                 "groups",
-                "{{groupId}}",
+                "3",
                 "members",
-                "{{studentToRemove}}"
+                "22"
               ]
             }
           }
