@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Système Gestion Soutenance",
-    "description": "Complete API collection for the Système Gestion Soutenance project. Covers 100+ endpoints with happy path, validation error, 404, and RBAC scenarios.",
+    "name": "Syst\u00e8me Gestion Soutenance",
+    "description": "Complete API collection for the Syst\u00e8me Gestion Soutenance project. Covers 100+ endpoints with happy path, validation error, 404, and RBAC scenarios.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "opencode"
   },
@@ -5050,8 +5050,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5106,8 +5106,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5154,8 +5154,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5202,8 +5202,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5260,8 +5260,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5309,8 +5309,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5365,8 +5365,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5414,8 +5414,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5464,8 +5464,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5521,8 +5521,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5578,8 +5578,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5626,8 +5626,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5673,8 +5673,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5719,8 +5719,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5763,8 +5763,8 @@
             "method": "POST",
             "header": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -5821,8 +5821,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
                 "type": "text"
               }
             ],
@@ -6222,8 +6222,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{student_token}}",
                 "type": "text"
               }
             ],
@@ -6268,8 +6268,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{student_token}}",
                 "type": "text"
               }
             ],
@@ -6313,8 +6313,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{student_token}}",
                 "type": "text"
               }
             ],
@@ -6682,8 +6682,8 @@
                 "type": "text"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
+                "key": "Cookie",
+                "value": "jwt_token={{teacher_token}}",
                 "type": "text"
               }
             ],
