@@ -170,7 +170,7 @@ public class DocumentDataService {
 	}
 
 	private List<SlotDetails> buildGroupedSlots(Long defenseSessionId) {
-		List<Long> projectIds = groupRepository.findBySessionId(defenseSessionId).stream()
+		List<Long> projectIds = groupRepository.findByDefenseSessionId(defenseSessionId).stream()
 				.filter(g -> g.getProject() != null).map(g -> g.getProject().getId()).distinct().toList();
 
 		List<SlotDetails> slots = new ArrayList<>();
@@ -202,11 +202,6 @@ public class DocumentDataService {
 						.collect(Collectors.toList());
 			}
 		}
-		Project project = projectRepository.findById(projectId).orElse(null);
-		if (project != null && project.getStudents() != null) {
-			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName())
-					.collect(Collectors.toList());
-		}
 		return List.of();
 	}
 
@@ -218,8 +213,8 @@ public class DocumentDataService {
 	private DefenseSession findDefenseSession(Long projectId) {
 		List<Group> groups = groupRepository.findByProjectId(projectId);
 		for (Group g : groups) {
-			if (g.getSessionId() != null) {
-				return defenseSessionRepository.findById(g.getSessionId()).orElse(null);
+			if (g.getDefenseSession() != null) {
+				return g.getDefenseSession();
 			}
 		}
 		return null;

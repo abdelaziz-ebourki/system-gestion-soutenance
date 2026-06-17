@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.group.entity;
 
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import jakarta.persistence.*;
@@ -33,8 +34,9 @@ public class Group {
 	@JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
 	private List<Student> students;
 
-	@Column(name = "session_id")
-	private Long sessionId;
+	@ManyToOne
+	@JoinColumn(name = "session_id")
+	private DefenseSession defenseSession;
 
 	@Column(name = "leader_id")
 	private Long leaderId;

@@ -10,11 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 	List<Project> findBySupervisorId(Long supervisorId);
 
-	List<Project> findByStudentsId(Long studentId);
-
-	@Query("SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.students LEFT JOIN FETCH p.supervisor")
+	@Query("SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.supervisor")
 	List<Project> findAllWithDetails();
 
-	@Query(value = "SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.students LEFT JOIN FETCH p.supervisor", countQuery = "SELECT COUNT(p) FROM Project p")
+	@Query(value = "SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.supervisor", countQuery = "SELECT COUNT(p) FROM Project p")
 	Page<Project> findAllWithDetails(Pageable pageable);
 }

@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.user.service;
 
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.common.exception.ResourceConflictException;
 import org.springframework.stereotype.Service;
@@ -13,12 +14,14 @@ public class UserConstraintService {
 	private final DepartmentRepository departmentRepository;
 	private final DefenseRepository defenseRepository;
 	private final ProjectRepository projectRepository;
+	private final GroupRepository groupRepository;
 
 	public UserConstraintService(DepartmentRepository departmentRepository, DefenseRepository defenseRepository,
-			ProjectRepository projectRepository) {
+			ProjectRepository projectRepository, GroupRepository groupRepository) {
 		this.departmentRepository = departmentRepository;
 		this.defenseRepository = defenseRepository;
 		this.projectRepository = projectRepository;
+		this.groupRepository = groupRepository;
 	}
 
 	public void checkTeacherDeletionConstraints(Long teacherId) {
@@ -35,8 +38,8 @@ public class UserConstraintService {
 	}
 
 	public void checkStudentDeletionConstraints(Long studentId) {
-		if (!projectRepository.findByStudentsId(studentId).isEmpty()) {
-			throw new ResourceConflictException("Impossible de supprimer cet étudiant car il est lié à des projets");
+		if (groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).isPresent()) {
+			throw new ResourceConflictException("Impossible de supprimer cet étudiant car il est lié à des groupes");
 		}
 	}
 }

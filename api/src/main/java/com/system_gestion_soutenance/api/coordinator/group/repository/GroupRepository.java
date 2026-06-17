@@ -1,5 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.group.repository;
 
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,9 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
 	List<Group> findByProjectIdIn(List<Long> projectIds);
 
-	List<Group> findBySessionId(Long sessionId);
+	List<Group> findByDefenseSessionId(Long defenseSessionId);
+
+	List<Group> findByDefenseSession(DefenseSession defenseSession);
 
 	Optional<Group> findFirstByStudentsIdOrderByIdAsc(Long studentId);
 

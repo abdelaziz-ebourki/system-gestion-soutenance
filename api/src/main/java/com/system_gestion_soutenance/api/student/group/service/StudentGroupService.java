@@ -1,7 +1,5 @@
 package com.system_gestion_soutenance.api.student.group.service;
 
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
@@ -28,19 +26,16 @@ public class StudentGroupService {
 
 	private final GroupRepository groupRepository;
 	private final StudentRepository studentRepository;
-	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final StudentGroupMapper studentGroupMapper;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
-			DefenseSettingsRepository defenseSettingsRepository, DefenseSessionRepository defenseSessionRepository,
-			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher,
-			SecurityService securityService) {
+			DefenseSessionRepository defenseSessionRepository, StudentGroupMapper studentGroupMapper,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
-		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.studentGroupMapper = studentGroupMapper;
 		this.eventPublisher = eventPublisher;
@@ -63,9 +58,9 @@ public class StudentGroupService {
 			}
 		}
 
-		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
-		String startDate = ds != null ? ds.getGroupCreationStartDate() : "";
-		String endDate = ds != null ? ds.getGroupCreationEndDate() : "";
+		DefenseSession activeSession = resolveActiveSession();
+		String startDate = activeSession != null ? activeSession.getGroupCreationStartDate() : "";
+		String endDate = activeSession != null ? activeSession.getGroupCreationEndDate() : "";
 
 		return new StudentGroupWorkspaceResponse(currentDetails, available, startDate, endDate,
 				isCreationOpen(startDate, endDate));
@@ -89,7 +84,7 @@ public class StudentGroupService {
 		group.setGroupName(String.format("Groupe_%d", groupRepository.count() + 1));
 		group.setStudents(new ArrayList<>(List.of(student)));
 		group.setLeaderId(studentId);
-		group.setSessionId(activeSession != null ? activeSession.getId() : null);
+		group.setDefenseSession(activeSession);
 		return groupRepository.save(group);
 	}
 
@@ -114,7 +109,7 @@ public class StudentGroupService {
 		if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
 			throw new InvalidBusinessStateException("Vous êtes déjà dans ce groupe");
 		}
-		int maxSize = resolveMaxGroupSize(group.getSessionId());
+		int maxSize = resolveMaxGroupSize(group.getDefenseSession());
 		if (maxSize > 0 && group.getStudents().size() >= maxSize) {
 			throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");
 		}
@@ -126,20 +121,17 @@ public class StudentGroupService {
 		return defenseSessionRepository.findActiveSession(LocalDate.now()).orElse(null);
 	}
 
-	private int resolveMaxGroupSize(Long sessionId) {
-		if (sessionId != null) {
-			DefenseSession ds = defenseSessionRepository.findById(sessionId).orElse(null);
-			if (ds != null && ds.getMaxGroupSize() > 0)
-				return ds.getMaxGroupSize();
-		}
+	private int resolveMaxGroupSize(DefenseSession defenseSession) {
+		if (defenseSession != null && defenseSession.getMaxGroupSize() > 0)
+			return defenseSession.getMaxGroupSize();
 		return 0;
 	}
 
 	private boolean isCreationPeriodOpen() {
-		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
-		if (ds == null)
+		DefenseSession activeSession = resolveActiveSession();
+		if (activeSession == null)
 			return false;
-		return isCreationOpen(ds.getGroupCreationStartDate(), ds.getGroupCreationEndDate());
+		return isCreationOpen(activeSession.getGroupCreationStartDate(), activeSession.getGroupCreationEndDate());
 	}
 
 	@Transactional

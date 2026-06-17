@@ -38,8 +38,8 @@ class ProjectServiceTest {
 	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
 	private final SecurityService securityService = mock(SecurityService.class);
 
-	private final ProjectService service = new ProjectService(projectRepository, teacherRepository, studentRepository,
-			groupRepository, defenseRepository, eventPublisher, securityService);
+	private final ProjectService service = new ProjectService(projectRepository, teacherRepository, groupRepository,
+			defenseRepository, eventPublisher, securityService);
 
 	@Test
 	void findAll_returnsAllProjects() {
@@ -49,7 +49,6 @@ class ProjectServiceTest {
 		when(project.getDescription()).thenReturn("Description");
 		when(project.getDefenseType()).thenReturn("PFE");
 		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
-		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
 		when(projectRepository.findAllWithDetails()).thenReturn(List.of(project));
 
@@ -78,7 +77,6 @@ class ProjectServiceTest {
 		when(savedProject.getDefenseType()).thenReturn("PFE");
 		when(savedProject.getStatus()).thenReturn(ProjectStatus.PENDING);
 		when(savedProject.getSupervisor()).thenReturn(supervisor);
-		when(savedProject.getStudents()).thenReturn(List.of(student));
 
 		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
 		when(studentRepository.findAllById(List.of(10L))).thenReturn(List.of(student));
@@ -112,7 +110,6 @@ class ProjectServiceTest {
 		when(savedProject.getDescription()).thenReturn("Desc");
 		when(savedProject.getDefenseType()).thenReturn("PFE");
 		when(savedProject.getStatus()).thenReturn(ProjectStatus.PENDING);
-		when(savedProject.getStudents()).thenReturn(List.of());
 		when(savedProject.getSupervisor()).thenReturn(supervisor);
 
 		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
@@ -134,7 +131,6 @@ class ProjectServiceTest {
 		when(project.getDescription()).thenReturn("Desc");
 		when(project.getDefenseType()).thenReturn("PFE");
 		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
-		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
 
 		var result = service.update(1L,
@@ -202,7 +198,6 @@ class ProjectServiceTest {
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet");
 		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
-		when(project.getStudents()).thenReturn(List.of());
 		when(project.getSupervisor()).thenReturn(null);
 
 		Page<Project> page = new PageImpl<>(List.of(project));

@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectResponse
 import com.system_gestion_soutenance.api.coordinator.project.dto.ProjectStatusUpdateRequest;
 import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,9 +36,25 @@ public class ProjectController {
 	private final ProjectService projectService;
 	private final ProjectMapper projectMapper;
 
-	public ProjectController(ProjectService projectService, ProjectMapper projectMapper) {
+	private final GroupRepository groupRepository;
+
+	public ProjectController(ProjectService projectService, ProjectMapper projectMapper,
+			GroupRepository groupRepository) {
 		this.projectService = projectService;
 		this.projectMapper = projectMapper;
+		this.groupRepository = groupRepository;
+	}
+
+	private Map<Long, List<String>> buildProjectStudentNames(List<Project> projects) {
+		Map<Long, List<String>> result = new java.util.HashMap<>();
+		List<Long> projectIds = projects.stream().map(Project::getId).toList();
+		groupRepository.findByProjectIdIn(projectIds).forEach(g -> {
+			if (g.getProject() != null && g.getStudents() != null) {
+				result.put(g.getProject().getId(),
+						g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList());
+			}
+		});
+		return result;
 	}
 
 	@GetMapping
@@ -49,8 +66,9 @@ public class ProjectController {
 			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		PaginatedResponse<Project> result = projectService.findAll(page, limit);
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(result.items());
-		List<ProjectResponse> items = result.items().stream().map(p -> projectMapper.toDto(p, projectGroupIds))
-				.toList();
+		Map<Long, List<String>> projectStudentNames = buildProjectStudentNames(result.items());
+		List<ProjectResponse> items = result.items().stream()
+				.map(p -> projectMapper.toDto(p, projectGroupIds, projectStudentNames)).toList();
 		PaginatedResponse<ProjectResponse> mapped = new PaginatedResponse<>(items, result.total(), result.pageCount(),
 				result.currentPage(), result.size());
 		return ApiResponse.success("Liste des projets récupérée avec succès", mapped);
@@ -63,8 +81,8 @@ public class ProjectController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid project data")})
 	public ResponseEntity<ApiResponse<ProjectResponse>> create(@Valid @RequestBody CreateProjectRequest request) {
 		Project project = projectService.create(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(
-				ApiResponse.success("Projet créé avec succès", projectMapper.toDto(project, Collections.emptyMap())));
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Projet créé avec succès",
+				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())));
 	}
 
 	@PostMapping("/bulk")
@@ -89,7 +107,7 @@ public class ProjectController {
 			@Valid @RequestBody UpdateProjectRequest updates) {
 		Project project = projectService.update(id, updates);
 		return ApiResponse.success("Projet mis à jour avec succès",
-				projectMapper.toDto(project, Collections.emptyMap()));
+				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@PatchMapping("/{id}/status")
@@ -102,7 +120,8 @@ public class ProjectController {
 	public ApiResponse<ProjectResponse> updateStatus(@Parameter(description = "Project ID") @PathVariable Long id,
 			@Valid @RequestBody ProjectStatusUpdateRequest request) {
 		Project project = projectService.updateStatus(id, request.status());
-		return ApiResponse.success("Statut du projet mis à jour", projectMapper.toDto(project, Collections.emptyMap()));
+		return ApiResponse.success("Statut du projet mis à jour",
+				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@DeleteMapping("/{id}")

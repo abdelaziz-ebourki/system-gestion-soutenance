@@ -121,10 +121,9 @@ class TeacherScheduleServiceTest {
 	}
 
 	@Test
-	void getSchedule_withNullProjectStudents_returnsEmptyNames() {
+	void getSchedule_withNoGroupStudents_returnsEmptyNames() {
 		Teacher supervisor = teacher(1L);
 		Project project = project(10L, "Projet", supervisor);
-		project.setStudents(null);
 
 		Defense def = defense(10L, "2026-06-01", "09:00");
 

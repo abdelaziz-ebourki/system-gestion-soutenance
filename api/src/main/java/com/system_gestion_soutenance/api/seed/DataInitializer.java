@@ -12,8 +12,6 @@ import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
@@ -87,7 +85,6 @@ public class DataInitializer implements CommandLineRunner {
 	private final StudentDocumentRepository studentDocumentRepo;
 	private final NotificationRepository notificationRepo;
 	private final AuditLogRepository auditLogRepo;
-	private final DefenseSettingsRepository defenseSettingsRepo;
 
 	@SuppressWarnings("checkstyle:ParameterNumber")
 	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, TeacherRankRepository teacherRankRepo,
@@ -97,7 +94,7 @@ public class DataInitializer implements CommandLineRunner {
 			ProjectRepository projectRepo, DefenseRepository defenseRepo, GroupRepository groupRepo,
 			UnavailabilityRepository unavailabilityRepo, EvaluationRepository evaluationRepo,
 			StudentDocumentRepository studentDocumentRepo, NotificationRepository notificationRepo,
-			AuditLogRepository auditLogRepo, DefenseSettingsRepository defenseSettingsRepo) {
+			AuditLogRepository auditLogRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
 		this.teacherRankRepo = teacherRankRepo;
@@ -117,7 +114,6 @@ public class DataInitializer implements CommandLineRunner {
 		this.studentDocumentRepo = studentDocumentRepo;
 		this.notificationRepo = notificationRepo;
 		this.auditLogRepo = auditLogRepo;
-		this.defenseSettingsRepo = defenseSettingsRepo;
 	}
 
 	@Override
@@ -125,9 +121,6 @@ public class DataInitializer implements CommandLineRunner {
 	public void run(String... args) {
 		if (majorRepo.count() > 0)
 			return;
-
-		// Phase 1: Singleton configs
-		defenseSettingsRepo.save(new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-03-01", "2026-05-01"));
 
 		// Phase 2: Faculty
 		Faculty f1 = new Faculty();
@@ -300,18 +293,19 @@ public class DataInitializer implements CommandLineRunner {
 		DefenseSession ds1 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2025",
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
 				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, admin.getId(),
-				LocalDateTime.of(2025, 5, 10, 9, 0)));
-		DefenseSession ds2 = defenseSessionRepo.save(
-				new DefenseSession(null, "Soutenance PFE Automne 2025", DefenseType.PFE, DefenseSessionStatus.COMPLETED,
-						3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe, LocalDate.of(2026, 1, 5),
-						LocalDate.of(2026, 1, 25), true, admin.getId(), LocalDateTime.of(2025, 12, 10, 9, 0)));
-		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
-				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
-				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10), false, null, null));
+				LocalDateTime.of(2025, 5, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds2 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Automne 2025",
+				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe,
+				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25), true, admin.getId(),
+				LocalDateTime.of(2025, 12, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds3 = defenseSessionRepo.save(
+				new DefenseSession(null, "Soutenance PFE Printemps 2026", DefenseType.PFE, DefenseSessionStatus.ACTIVE,
+						3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe, LocalDate.of(2026, 6, 15),
+						LocalDate.of(2026, 7, 10), false, null, null, "08:00", "18:00", "2026-03-01", "2026-05-01"));
 		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
 				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
 				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, admin.getId(),
-				LocalDateTime.of(2026, 6, 10, 9, 0)));
+				LocalDateTime.of(2026, 6, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
 		coeffs2.put("Rapporteur", 30);
@@ -319,10 +313,11 @@ public class DataInitializer implements CommandLineRunner {
 		DefenseSession ds5 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Thèse Printemps 2026",
 				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
 				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, admin.getId(),
-				LocalDateTime.of(2026, 5, 20, 9, 0)));
-		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
-				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15), false, null, null));
+				LocalDateTime.of(2026, 5, 20, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds6 = defenseSessionRepo.save(
+				new DefenseSession(null, "Soutenance Rattrapage 2026", DefenseType.PFE, DefenseSessionStatus.DRAFT, 3,
+						30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe, LocalDate.of(2026, 9, 1),
+						LocalDate.of(2026, 9, 15), false, null, null, "08:00", "18:00", "2026-03-01", "2026-05-01"));
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -405,22 +400,8 @@ public class DataInitializer implements CommandLineRunner {
 
 		List<Project> projects = new ArrayList<>();
 		for (ProjSeed ps : projSeeds) {
-			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, new ArrayList<>(), null);
+			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, null);
 			projects.add(projectRepo.save(p));
-		}
-
-		// Phase 14: Project-Student links
-		int[][] projStudentMap = {{0}, {2, 3}, {5, 6, 7}, {8}, {11, 12}, {14, 15, 16}, {17}, {20, 21}, {23, 24, 25},
-				{26}, {29, 30}, {32, 33, 34}, {35}, {38, 39}, {41, 42, 43}, {44}, {47, 48}, {50, 51, 52}, {53},
-				{56, 57}, {59, 60, 61}, {62}, {65, 66}, {68, 69, 70}, {71}};
-		for (int pi = 0; pi < projStudentMap.length; pi++) {
-			Project p = projects.get(pi);
-			List<Student> pStudents = new ArrayList<>();
-			for (int si : projStudentMap[pi]) {
-				pStudents.add(studentsList.get(si));
-			}
-			p.setStudents(pStudents);
-			projectRepo.save(p);
 		}
 
 		// Phase 15: Defenses (Unified Jury and Slots)
@@ -445,7 +426,7 @@ public class DataInitializer implements CommandLineRunner {
 			List<JuryMember> members = new ArrayList<>();
 			String[] roles = juryCompositions[i % juryCompositions.length];
 			for (int j = 0; j < roles.length; j++) {
-				members.add(new JuryMember(teachers.get((i + j) % teachers.size()), roles[j]));
+				members.add(new JuryMember(null, teachers.get((i + j) % teachers.size()), roles[j], d));
 			}
 			d.setMembers(members);
 
@@ -495,8 +476,8 @@ public class DataInitializer implements CommandLineRunner {
 				new GrpSeed("Groupe H1", 13, 2, new int[]{51, 52, 53, 54}),
 				new GrpSeed("Groupe H2", 14, 3, new int[]{55, 56}),};
 		for (GrpSeed gs : grpSeeds) {
-			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(),
-					dsArr[gs.sessionIdx].getId(), studentsList.get(gs.studentIdxs[0]).getId());
+			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(), dsArr[gs.sessionIdx],
+					studentsList.get(gs.studentIdxs[0]).getId());
 			for (int si : gs.studentIdxs) {
 				g.getStudents().add(studentsList.get(si));
 			}

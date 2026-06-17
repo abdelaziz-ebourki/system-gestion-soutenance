@@ -39,7 +39,7 @@ class GroupServiceTest {
 		when(group.getGroupName()).thenReturn("Groupe A");
 		when(group.getProject()).thenReturn(null);
 		when(group.getStudents()).thenReturn(List.of());
-		when(group.getSessionId()).thenReturn(null);
+		when(group.getDefenseSession()).thenReturn(null);
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
 
 		var result = service.findAll();
@@ -64,7 +64,10 @@ class GroupServiceTest {
 		when(savedGroup.getGroupName()).thenReturn("Groupe A");
 		when(savedGroup.getProject()).thenReturn(project);
 		when(savedGroup.getStudents()).thenReturn(List.of(student));
-		when(savedGroup.getSessionId()).thenReturn(100L);
+
+		DefenseSession ds = mock(DefenseSession.class);
+		when(ds.getId()).thenReturn(100L);
+		when(savedGroup.getDefenseSession()).thenReturn(ds);
 		when(savedGroup.getLeaderId()).thenReturn(1L);
 
 		when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
@@ -99,7 +102,7 @@ class GroupServiceTest {
 		when(savedGroup.getGroupName()).thenReturn("Groupe");
 		when(savedGroup.getProject()).thenReturn(project);
 		when(savedGroup.getStudents()).thenReturn(List.of());
-		when(savedGroup.getSessionId()).thenReturn(null);
+		when(savedGroup.getDefenseSession()).thenReturn(null);
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.save(any(Group.class))).thenReturn(savedGroup);

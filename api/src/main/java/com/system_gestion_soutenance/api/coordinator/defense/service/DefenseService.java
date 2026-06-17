@@ -2,8 +2,6 @@ package com.system_gestion_soutenance.api.coordinator.defense.service;
 
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
@@ -44,7 +42,6 @@ public class DefenseService {
 	private final DefenseRepository defenseRepository;
 	private final RoomRepository roomRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
-	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final ProjectRepository projectRepository;
 	private final GroupRepository groupRepository;
 	private final ApplicationEventPublisher eventPublisher;
@@ -52,14 +49,12 @@ public class DefenseService {
 	private final TeacherRepository teacherRepository;
 
 	public DefenseService(DefenseRepository defenseRepository, RoomRepository roomRepository,
-			DefenseSessionRepository defenseSessionRepository, DefenseSettingsRepository defenseSettingsRepository,
-			ProjectRepository projectRepository, GroupRepository groupRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService,
+			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
+			GroupRepository groupRepository, ApplicationEventPublisher eventPublisher, SecurityService securityService,
 			TeacherRepository teacherRepository) {
 		this.defenseRepository = defenseRepository;
 		this.roomRepository = roomRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
-		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.projectRepository = projectRepository;
 		this.groupRepository = groupRepository;
 		this.eventPublisher = eventPublisher;
@@ -142,7 +137,7 @@ public class DefenseService {
 		List<JuryMember> members = request.members().stream().map(m -> {
 			var teacher = teacherRepository.findById(m.teacherId())
 					.orElseThrow(() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
-			return new JuryMember(teacher, m.roleName());
+			return new JuryMember(null, teacher, m.roleName(), defense);
 		}).toList();
 
 		defense.setMembers(members);
@@ -166,7 +161,7 @@ public class DefenseService {
 			List<JuryMember> members = updates.members().stream().map(m -> {
 				var teacher = teacherRepository.findById(m.teacherId()).orElseThrow(
 						() -> new InvalidBusinessStateException("Enseignant introuvable: " + m.teacherId()));
-				return new JuryMember(teacher, m.roleName());
+				return new JuryMember(null, teacher, m.roleName(), defense);
 			}).toList();
 			defense.setMembers(members);
 		}
@@ -216,16 +211,17 @@ public class DefenseService {
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
 
-		DefenseSettings settings = defenseSettingsRepository.findFirstByOrderByIdAsc()
-				.orElseThrow(() -> new EntityNotFoundException("Paramètres de soutenance non trouvés"));
+		if (ds.getStartTime() == null || ds.getEndTime() == null) {
+			throw new InvalidBusinessStateException("Les horaires de la session ne sont pas configurés");
+		}
 
 		List<Room> rooms = roomRepository.findAll();
 		if (rooms.isEmpty()) {
 			throw new InvalidBusinessStateException("Aucune salle disponible");
 		}
 
-		LocalTime startTime = LocalTime.parse(settings.getStartTime());
-		LocalTime endTime = LocalTime.parse(settings.getEndTime());
+		LocalTime startTime = LocalTime.parse(ds.getStartTime());
+		LocalTime endTime = LocalTime.parse(ds.getEndTime());
 		int slotDuration = ds.getDefenseDuration();
 		int breakMinutes = ds.getBreakDuration();
 
@@ -245,8 +241,6 @@ public class DefenseService {
 					.filter(g -> g.getProject() != null && g.getProject().getId().equals(p.getId())).toList();
 			if (!projectGroups.isEmpty()) {
 				count = projectGroups.get(0).getStudents() != null ? projectGroups.get(0).getStudents().size() : 0;
-			} else if (p.getStudents() != null) {
-				count = p.getStudents().size();
 			}
 			projectStudentCounts.put(p.getId(), count);
 		}
@@ -304,8 +298,6 @@ public class DefenseService {
 			if (g.getStudents() != null)
 				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 		}
-		if (project.getStudents() != null)
-			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 		return List.of();
 	}
 

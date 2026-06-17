@@ -67,9 +67,11 @@ public class GroupService {
 			students = studentRepository.findAllById(request.studentIds());
 		}
 
+		DefenseSession defenseSession = null;
 		if (request.sessionId() != null) {
-			DefenseSession ds = defenseSessionRepository.findById(request.sessionId()).orElse(null);
-			if (ds != null && ds.getMaxGroupSize() > 0 && students.size() > ds.getMaxGroupSize()) {
+			defenseSession = defenseSessionRepository.findById(request.sessionId()).orElse(null);
+			if (defenseSession != null && defenseSession.getMaxGroupSize() > 0
+					&& students.size() > defenseSession.getMaxGroupSize()) {
 				throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");
 			}
 		}
@@ -91,7 +93,7 @@ public class GroupService {
 		group.setGroupName(request.groupName());
 		group.setProject(project);
 		group.setStudents(students);
-		group.setSessionId(request.sessionId());
+		group.setDefenseSession(defenseSession);
 		group.setLeaderId(leaderId);
 
 		return groupRepository.save(group);
