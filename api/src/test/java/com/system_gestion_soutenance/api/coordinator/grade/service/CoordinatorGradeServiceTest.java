@@ -238,6 +238,7 @@ class CoordinatorGradeServiceTest {
 		when(rapportEval.getScore()).thenReturn(16.0);
 		when(rapportEval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(rapportEval.getDefense()).thenReturn(defense);
+		when(rapportEval.getDefenseSessionId()).thenReturn(1L);
 
 		Evaluation soutenance1 = mock(Evaluation.class);
 		when(soutenance1.getType()).thenReturn(EvaluationType.SOUTENANCE);
@@ -245,6 +246,7 @@ class CoordinatorGradeServiceTest {
 		when(soutenance1.getScore()).thenReturn(14.0);
 		when(soutenance1.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(soutenance1.getDefense()).thenReturn(defense);
+		when(soutenance1.getDefenseSessionId()).thenReturn(1L);
 
 		Evaluation soutenance2 = mock(Evaluation.class);
 		when(soutenance2.getType()).thenReturn(EvaluationType.SOUTENANCE);
@@ -252,6 +254,7 @@ class CoordinatorGradeServiceTest {
 		when(soutenance2.getScore()).thenReturn(11.0);
 		when(soutenance2.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(soutenance2.getDefense()).thenReturn(defense);
+		when(soutenance2.getDefenseSessionId()).thenReturn(1L);
 
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(rapportEval, soutenance1, soutenance2));
