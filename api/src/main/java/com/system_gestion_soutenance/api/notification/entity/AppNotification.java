@@ -36,6 +36,9 @@ public class AppNotification {
 	@Column(nullable = false)
 	private boolean read;
 
+	@Column(name = "user_id")
+	private Long userId;
+
 	@Column(name = "action_link")
 	private String actionLink;
 

@@ -292,19 +292,19 @@ public class DataInitializer implements CommandLineRunner {
 
 		DefenseSession ds1 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2025",
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
-				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, admin.getId(),
+				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, false, false, admin.getId(),
 				LocalDateTime.of(2025, 5, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
 		DefenseSession ds2 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Automne 2025",
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25), true, admin.getId(),
+				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25), true, false, false, admin.getId(),
 				LocalDateTime.of(2025, 12, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
-		DefenseSession ds3 = defenseSessionRepo.save(
-				new DefenseSession(null, "Soutenance PFE Printemps 2026", DefenseType.PFE, DefenseSessionStatus.ACTIVE,
-						3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe, LocalDate.of(2026, 6, 15),
-						LocalDate.of(2026, 7, 10), false, null, null, "08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
+				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
+				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10), false, false, false, null, null, "08:00", "18:00",
+				"2026-03-01", "2026-05-01"));
 		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
 				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
-				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, admin.getId(),
+				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, false, false, admin.getId(),
 				LocalDateTime.of(2026, 6, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
@@ -312,12 +312,12 @@ public class DataInitializer implements CommandLineRunner {
 		coeffs2.put("Examinateur", 45);
 		DefenseSession ds5 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Thèse Printemps 2026",
 				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
-				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, admin.getId(),
+				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, false, false, admin.getId(),
 				LocalDateTime.of(2026, 5, 20, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
-		DefenseSession ds6 = defenseSessionRepo.save(
-				new DefenseSession(null, "Soutenance Rattrapage 2026", DefenseType.PFE, DefenseSessionStatus.DRAFT, 3,
-						30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe, LocalDate.of(2026, 9, 1),
-						LocalDate.of(2026, 9, 15), false, null, null, "08:00", "18:00", "2026-03-01", "2026-05-01"));
+		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
+				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
+				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15), false, false, false, null, null, "08:00", "18:00",
+				"2026-03-01", "2026-05-01"));
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -426,7 +426,8 @@ public class DataInitializer implements CommandLineRunner {
 			List<JuryMember> members = new ArrayList<>();
 			String[] roles = juryCompositions[i % juryCompositions.length];
 			for (int j = 0; j < roles.length; j++) {
-				members.add(new JuryMember(null, teachers.get((i + j) % teachers.size()), roles[j], d));
+				members.add(
+						new JuryMember(null, teachers.get((i + j) % teachers.size()), roles[j], d, null, null, null));
 			}
 			d.setMembers(members);
 
@@ -793,7 +794,8 @@ public class DataInitializer implements CommandLineRunner {
 						"Message détaillé pour soutenance annulée.", 19, 5, false, "coord@univh2c.ma"),};
 		for (NotifSeed ns : notifSeeds) {
 			notificationRepo.save(new AppNotification(null, ns.type, ns.title, ns.msg,
-					LocalDateTime.of(2026, ns.month, ns.day, 8 + (ns.day % 8), 0), ns.read, "/dashboard", ns.actor));
+					LocalDateTime.of(2026, ns.month, ns.day, 8 + (ns.day % 8), 0), ns.read, null, "/dashboard",
+					ns.actor));
 		}
 
 		// Phase 22: Audit Logs

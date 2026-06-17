@@ -108,7 +108,8 @@ class DocumentDataServiceTest {
 
 		Project project = mockProject(1L, "Projet", supervisor);
 		Defense defense = mockDefense(10L, 1L, room);
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, supervisor, "président", null)));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, supervisor, "président", null, null, null, null)));
 
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -155,7 +156,8 @@ class DocumentDataServiceTest {
 		when(supervisor.getFirstName()).thenReturn("John");
 		when(supervisor.getLastName()).thenReturn("Doe");
 
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, supervisor, "président", null)));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, supervisor, "président", null, null, null, null)));
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
@@ -290,7 +292,8 @@ class DocumentDataServiceTest {
 
 		Project project = mockProject(1L, "Projet", teacher);
 		Defense defense = mockDefense(10L, 1L, null);
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, teacher, "président", null)));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "président", null, null, null, null)));
 
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -451,7 +454,8 @@ class DocumentDataServiceTest {
 		Project project = mockProject(1L, "Projet", null);
 
 		Defense defense = mock(Defense.class);
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, teacher, "examinateur", null)));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "examinateur", null, null, null, null)));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
