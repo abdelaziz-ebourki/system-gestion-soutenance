@@ -41,7 +41,7 @@ class NotificationServiceTest {
 	@BeforeEach
 	void setUp() {
 		notification = new AppNotification(1L, NotificationType.INFO, "Title", "Message", LocalDateTime.now(), false,
-				null, null);
+				null, null, null);
 
 		activeUser = new User();
 		activeUser.setEmail("active@test.com");

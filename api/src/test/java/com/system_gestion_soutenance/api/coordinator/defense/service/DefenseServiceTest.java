@@ -90,7 +90,7 @@ class DefenseServiceTest {
 
 		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 
-		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 
 		var result = service.createJury(request);
@@ -114,8 +114,8 @@ class DefenseServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(mock(Defense.class)));
 
-		CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président");
-		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
+		CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président", null, null, null);
+		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(m1, m2));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
@@ -272,7 +272,7 @@ class DefenseServiceTest {
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(mock(Defense.class)));
 		when(teacherRepository.findById(5L)).thenReturn(Optional.empty());
 
-		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
@@ -303,7 +303,7 @@ class DefenseServiceTest {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
 
-		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "président");
+		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "président", null, null, null);
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
 
 		when(teacherRepository.findById(5L)).thenReturn(Optional.empty());
@@ -316,8 +316,8 @@ class DefenseServiceTest {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
 
-		UpdateJuryRequest.MemberEntry m1 = new UpdateJuryRequest.MemberEntry(5L, "président");
-		UpdateJuryRequest.MemberEntry m2 = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
+		UpdateJuryRequest.MemberEntry m1 = new UpdateJuryRequest.MemberEntry(5L, "président", null, null, null);
+		UpdateJuryRequest.MemberEntry m2 = new UpdateJuryRequest.MemberEntry(5L, "examinateur", null, null, null);
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(m1, m2));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.updateJury(1L, request));
@@ -515,7 +515,7 @@ class DefenseServiceTest {
 		when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
 		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 
-		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
+		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "examinateur", null, null, null);
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
 
 		var result = service.updateJury(1L, request);

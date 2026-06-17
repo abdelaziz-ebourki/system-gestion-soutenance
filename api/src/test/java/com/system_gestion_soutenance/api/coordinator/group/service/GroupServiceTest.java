@@ -19,6 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.coordinator.group.document.GroupDocumentService;
 
 class GroupServiceTest {
 
@@ -28,9 +29,10 @@ class GroupServiceTest {
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
 	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
 	private final SecurityService securityService = mock(SecurityService.class);
+	private final GroupDocumentService groupDocumentService = mock(GroupDocumentService.class);
 
 	private final GroupService service = new GroupService(groupRepository, projectRepository, studentRepository,
-			defenseSessionRepository, eventPublisher, securityService);
+			defenseSessionRepository, eventPublisher, securityService, groupDocumentService);
 
 	@Test
 	void findAll_returnsAllGroups() {
