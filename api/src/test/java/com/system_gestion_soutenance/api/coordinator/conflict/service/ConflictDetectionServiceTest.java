@@ -314,7 +314,11 @@ class ConflictDetectionServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
-		Unavailability ua = new Unavailability(1L, 5L, "2025-06-01", List.of("10:00"));
+		Unavailability ua = new Unavailability();
+		ua.setId(1L);
+		ua.setTeacherId(5L);
+		ua.setDate(java.time.LocalDate.of(2025, 6, 1));
+		ua.setSlots(List.of("10:00"));
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 
 		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
@@ -342,7 +346,11 @@ class ConflictDetectionServiceTest {
 
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 
-		Unavailability ua = new Unavailability(1L, 5L, "2025-06-01", List.of("09:00"));
+		Unavailability ua = new Unavailability();
+		ua.setId(1L);
+		ua.setTeacherId(5L);
+		ua.setDate(java.time.LocalDate.of(2025, 6, 1));
+		ua.setSlots(List.of("09:00"));
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 
 		var schedule = singleSlot("1", "1", "2025-06-01", "09:00");
@@ -428,7 +436,11 @@ class ConflictDetectionServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
-		Unavailability ua = new Unavailability(1L, 5L, "2025-06-01", null);
+		Unavailability ua = new Unavailability();
+		ua.setId(1L);
+		ua.setTeacherId(5L);
+		ua.setDate(java.time.LocalDate.of(2025, 6, 1));
+		ua.setSlots(null);
 		when(unavailabilityRepository.findAll()).thenReturn(List.of(ua));
 
 		var result = service.validate(singleSlot("1", "1", "2025-06-01", "09:00"), null);

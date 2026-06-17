@@ -41,7 +41,7 @@ public class TeacherUnavailabilityService {
 		for (var slotRequest : request.slots()) {
 			Unavailability u = new Unavailability();
 			u.setTeacherId(teacherId);
-			u.setDate(slotRequest.date());
+			u.setDate(java.time.LocalDate.parse(slotRequest.date()));
 			u.setSlots(slotRequest.slots());
 			repository.save(u);
 		}

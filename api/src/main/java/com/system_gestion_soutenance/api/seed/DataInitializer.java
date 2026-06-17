@@ -405,7 +405,13 @@ public class DataInitializer implements CommandLineRunner {
 
 		List<Project> projects = new ArrayList<>();
 		for (ProjSeed ps : projSeeds) {
-			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, new ArrayList<>(), null);
+			Project p = new Project();
+			p.setTitle(ps.title);
+			p.setDescription(ps.desc);
+			p.setDefenseType(ps.dtype);
+			p.setStatus(ps.status);
+			p.setSupervisor(ps.sup);
+			p.setStudents(new ArrayList<>());
 			projects.add(projectRepo.save(p));
 		}
 
@@ -572,8 +578,10 @@ public class DataInitializer implements CommandLineRunner {
 			for (int s = 6; s < ud.length; s++) {
 				slots.add(unavailSlots[ud[s]][0]);
 			}
-			Unavailability u = new Unavailability(null, teachers.get(ud[0]).getId(),
-					String.format("%04d-%02d-%02d", ud[2], ud[3], ud[4]), slots);
+			Unavailability u = new Unavailability();
+			u.setTeacherId(teachers.get(ud[0]).getId());
+			u.setDate(java.time.LocalDate.of(ud[2], ud[3], ud[4]));
+			u.setSlots(slots);
 			unavails.add(u);
 		}
 		unavailabilityRepo.saveAll(unavails);

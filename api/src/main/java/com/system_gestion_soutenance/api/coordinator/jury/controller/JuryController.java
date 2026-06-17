@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/coordinator/juries")
+@PreAuthorize("hasAnyRole('COORDINATOR', 'ADMIN')")
 @Tag(name = "Coordinator - Jury Management", description = "Endpoints for managing defense juries")
 public class JuryController {
 

@@ -22,10 +22,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/student/documents")
+@PreAuthorize("hasRole('STUDENT')")
 @Tag(name = "Student - Document Management", description = "Endpoints for students to upload and view their documents")
 public class StudentDocumentController {
 

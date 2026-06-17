@@ -62,10 +62,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		String path = request.getRequestURI();
-		if (!path.startsWith("/api/auth/") && !"/api/login".equals(path)) {
+		boolean isBulkEndpoint = path.startsWith("/api/coordinator/projects/bulk")
+				|| path.startsWith("/api/coordinator/schedules");
+		if (!path.startsWith("/api/auth/") && !"/api/login".equals(path) && !isBulkEndpoint) {
 			filterChain.doFilter(request, response);
 			return;
 		}
+
+		int effectiveMax = isBulkEndpoint ? Math.min(maxRequests, 10) : maxRequests;
 
 		String clientIp = getClientIp(request);
 		long now = System.currentTimeMillis();
@@ -75,7 +79,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 						: existing);
 
 		int currentCount = counter.count.incrementAndGet();
-		if (currentCount > maxRequests) {
+		if (currentCount > effectiveMax) {
 			response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			objectMapper.writeValue(response.getWriter(),

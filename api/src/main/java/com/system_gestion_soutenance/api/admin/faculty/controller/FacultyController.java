@@ -19,10 +19,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/admin/faculties")
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Admin - Faculty Management", description = "Endpoints for managing academic faculties")
 public class FacultyController {
 

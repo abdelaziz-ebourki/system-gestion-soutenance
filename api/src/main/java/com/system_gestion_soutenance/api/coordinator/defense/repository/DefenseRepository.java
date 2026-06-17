@@ -21,9 +21,9 @@ public interface DefenseRepository extends JpaRepository<Defense, Long> {
 
 	long countByMembers_Teacher_Id(Long teacherId);
 
-	@Query("SELECT DISTINCT d FROM Defense d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.room LEFT JOIN FETCH d.members")
+	@Query("SELECT DISTINCT d FROM Defense d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.room LEFT JOIN FETCH d.members WHERE d.status <> 'CANCELLED'")
 	List<Defense> findAllWithMembers();
 
-	@Query(value = "SELECT DISTINCT d FROM Defense d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.room LEFT JOIN FETCH d.members", countQuery = "SELECT COUNT(d) FROM Defense d")
+	@Query(value = "SELECT DISTINCT d FROM Defense d LEFT JOIN FETCH d.project LEFT JOIN FETCH d.room LEFT JOIN FETCH d.members WHERE d.status <> 'CANCELLED'", countQuery = "SELECT COUNT(d) FROM Defense d WHERE d.status <> 'CANCELLED'")
 	Page<Defense> findAllWithMembers(Pageable pageable);
 }

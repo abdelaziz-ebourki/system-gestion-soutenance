@@ -19,10 +19,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/admin/config/teacher-ranks")
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Admin - Teacher Ranks", description = "Teacher Rank Management")
 public class TeacherRankConfigController {
 

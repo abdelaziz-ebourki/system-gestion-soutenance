@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.system_gestion_soutenance.api.common.exception.BaseBusinessException;
 import com.system_gestion_soutenance.api.common.service.PdfGenerationService;
 import java.util.Map;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/student/convocations")
+@PreAuthorize("hasRole('STUDENT')")
 @Tag(name = "Student - Convocation Management", description = "Endpoints for generating the convocation PDF")
 public class ConvocationController {
 

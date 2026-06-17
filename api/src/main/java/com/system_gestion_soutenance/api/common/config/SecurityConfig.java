@@ -70,12 +70,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/login").permitAll()
 						.requestMatchers("/api/auth/**").permitAll().requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs.yml")
-						.permitAll().requestMatchers("/actuator/health").permitAll()
-						.requestMatchers("/api/admin/rooms/**").hasAnyRole("ADMIN", "COORDINATOR")
-						.requestMatchers("/api/admin/**").hasRole("ADMIN").requestMatchers("/api/coordinator/**")
-						.hasAnyRole("ADMIN", "COORDINATOR").requestMatchers("/api/teacher/**").hasRole("TEACHER")
-						.requestMatchers("/api/student/**").hasRole("STUDENT").requestMatchers("/api/notifications/**")
-						.authenticated().anyRequest().authenticated())
+						.permitAll().requestMatchers("/actuator/health").permitAll().anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();

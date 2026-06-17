@@ -14,6 +14,8 @@
 	<name>api</name>
 	<properties>
 		<java.version>17</java.version>
+		<mockito.version>5.23.0</mockito.version>
+		<byte-buddy.version>1.17.7</byte-buddy.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -147,7 +149,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.8.15</version>
 				<configuration>
 					<excludes>
 						<exclude>**/dto/**</exclude>

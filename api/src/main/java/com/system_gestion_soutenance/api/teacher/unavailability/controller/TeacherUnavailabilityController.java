@@ -15,10 +15,12 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/teacher/unavailabilities")
+@PreAuthorize("hasRole('TEACHER')")
 @Tag(name = "Teacher - Unavailability Management", description = "Endpoints for teachers to manage their unavailability slots")
 public class TeacherUnavailabilityController {
 
@@ -31,7 +33,9 @@ public class TeacherUnavailabilityController {
 	private static TeacherUnavailabilityResponse toResponse(List<Unavailability> entities) {
 		Map<String, List<String>> slotsByDate = new LinkedHashMap<>();
 		for (Unavailability u : entities) {
-			slotsByDate.put(u.getDate(), u.getSlots());
+			if (u.getDate() != null) {
+				slotsByDate.put(u.getDate().toString(), u.getSlots());
+			}
 		}
 		return new TeacherUnavailabilityResponse(slotsByDate);
 	}

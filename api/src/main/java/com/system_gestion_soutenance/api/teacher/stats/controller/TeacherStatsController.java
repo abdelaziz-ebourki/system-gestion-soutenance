@@ -9,10 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
 
 @RestController
 @RequestMapping("/api/teacher/stats")
+@PreAuthorize("hasRole('TEACHER')")
 @Tag(name = "Teacher - Statistics", description = "Endpoints for teachers to view their personal statistics")
 public class TeacherStatsController {
 

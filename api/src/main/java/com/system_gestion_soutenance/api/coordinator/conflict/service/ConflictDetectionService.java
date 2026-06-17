@@ -288,7 +288,7 @@ public class ConflictDetectionService {
 			Set<String> teacherIds = juryTeacherIdsByProject.getOrDefault(Long.valueOf(projectId), Set.of());
 			for (String tid : teacherIds) {
 				for (Unavailability ua : unavailabilityList) {
-					if (!String.valueOf(ua.getTeacherId()).equals(tid) || !ua.getDate().equals(date))
+					if (!String.valueOf(ua.getTeacherId()).equals(tid) || !ua.getDate().toString().equals(date))
 						continue;
 					if (ua.getSlots() != null && ua.getSlots().contains(time)) {
 						conflicts.add(createConflict("teacher_unavailable", "error",

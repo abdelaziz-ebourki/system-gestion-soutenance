@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Defense {
 
 	@Id
@@ -42,6 +40,19 @@ public class Defense {
 	@ElementCollection
 	@CollectionTable(name = "defense_members", joinColumns = @JoinColumn(name = "defense_id"))
 	private List<JuryMember> members = new ArrayList<>();
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private DefenseStatus status = DefenseStatus.SCHEDULED;
+
+	@Column(name = "final_score")
+	private Double finalScore;
+
+	@Column(name = "mention")
+	private String mention;
+
+	@Column(name = "deliberation_comment", columnDefinition = "TEXT")
+	private String deliberationComment;
 
 	public Long getProjectId() {
 		return project != null ? project.getId() : null;
