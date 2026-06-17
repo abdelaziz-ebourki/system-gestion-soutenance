@@ -14,4 +14,4 @@ package-lock.json
 
 # Runtime artifacts
 server.pid
-*.log
+*.logopencode.json

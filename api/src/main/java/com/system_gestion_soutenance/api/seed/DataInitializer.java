@@ -524,7 +524,6 @@ public class DataInitializer implements CommandLineRunner {
 			p.setDefenseType(ps.dtype);
 			p.setStatus(ps.status);
 			p.setSupervisor(ps.sup);
-			p.setStudents(new ArrayList<>());
 			projects.add(projectRepo.save(p));
 		}
 

@@ -43,6 +43,7 @@ public class TeacherProjectController {
 			@Valid @RequestBody TeacherProposeProjectRequest request) {
 		Project project = projectService.proposeByTeacher(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
-				"Proposition de projet soumise avec succès", projectMapper.toDto(project, Collections.emptyMap())));
+				"Proposition de projet soumise avec succès",
+				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())));
 	}
 }

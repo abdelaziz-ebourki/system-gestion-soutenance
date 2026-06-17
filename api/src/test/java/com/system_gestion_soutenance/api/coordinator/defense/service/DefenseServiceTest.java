@@ -186,8 +186,10 @@ class DefenseServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(10L);
 
-		Group group = new Group(null, "Groupe A", project, List.of(student), 1L, student.getId());
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+		when(group.getStudents()).thenReturn(List.of(student));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 
 		Defense defense = mock(Defense.class);
 		when(defense.getProject()).thenReturn(project);
@@ -207,8 +209,10 @@ class DefenseServiceTest {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(10L);
 
-		Group group = new Group(null, "Groupe A", project, List.of(), 1L, 1L);
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+		when(group.getStudents()).thenReturn(List.of());
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 
 		Defense defense = mock(Defense.class);
 		when(defense.getProject()).thenReturn(project);
@@ -223,7 +227,7 @@ class DefenseServiceTest {
 
 	@Test
 	void startSession_sessionNotFound_returnsEmpty() {
-		when(groupRepository.findBySessionId(99L)).thenReturn(List.of());
+		when(groupRepository.findByDefenseSessionId(99L)).thenReturn(List.of());
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
 
 		var result = service.startSession(99L);

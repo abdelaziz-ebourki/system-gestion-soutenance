@@ -214,7 +214,6 @@ public class DefenseService {
 	}
 
 	@Audited(action = "CANCEL", entity = "Defense")
-	@Audited(action = "DELETE", entity = "Defense")
 	@Transactional
 	public void cancelDefense(Long defenseId) {
 		Defense defense = defenseRepository.findById(defenseId)

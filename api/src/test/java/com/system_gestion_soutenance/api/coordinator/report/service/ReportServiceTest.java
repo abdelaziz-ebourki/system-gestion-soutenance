@@ -60,7 +60,7 @@ class ReportServiceTest {
 		when(group.getProject()).thenReturn(mock(Project.class));
 		when(group.getProject().getId()).thenReturn(10L);
 		when(group.getStudents()).thenReturn(List.of());
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(10L);
@@ -107,7 +107,7 @@ class ReportServiceTest {
 		Group group = mock(Group.class);
 		when(group.getProject()).thenReturn(project);
 		when(group.getStudents()).thenReturn(List.of());
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 
 		Defense cancelled = mock(Defense.class);
 		when(cancelled.getProject()).thenReturn(project);
@@ -148,7 +148,7 @@ class ReportServiceTest {
 		Group group = mock(Group.class);
 		when(group.getProject()).thenReturn(mock(Project.class));
 		when(group.getProject().getId()).thenReturn(10L);
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(10L);

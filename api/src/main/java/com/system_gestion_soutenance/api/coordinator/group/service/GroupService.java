@@ -233,7 +233,7 @@ public class GroupService {
 
 	@Transactional(readOnly = true)
 	public List<Student> getUngroupedStudents(Long sessionId) {
-		List<Group> sessionGroups = groupRepository.findBySessionId(sessionId);
+		List<Group> sessionGroups = groupRepository.findByDefenseSessionId(sessionId);
 		List<Student> allStudents = studentRepository.findAll();
 		List<Long> groupedStudentIds = sessionGroups.stream().filter(g -> g.getStatus() == GroupStatus.ACTIVE)
 				.flatMap(g -> g.getStudents() != null

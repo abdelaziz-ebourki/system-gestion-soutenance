@@ -142,7 +142,7 @@ public class ProjectController {
 		Project project = projectService.updateStatus(id,
 				com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus.PENDING);
 		return ApiResponse.success("Proposition validée avec succès",
-				projectMapper.toDto(project, Collections.emptyMap()));
+				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@PatchMapping("/{id}/reject-proposal")
@@ -154,7 +154,7 @@ public class ProjectController {
 	public ApiResponse<ProjectResponse> rejectProposal(@Parameter(description = "Project ID") @PathVariable Long id) {
 		Project project = projectService.updateStatus(id,
 				com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus.REJECTED);
-		return ApiResponse.success("Proposition rejetée", projectMapper.toDto(project, Collections.emptyMap()));
+		return ApiResponse.success("Proposition rejetée", projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@PatchMapping("/{id}/confirm-supervision")
@@ -166,7 +166,7 @@ public class ProjectController {
 	public ApiResponse<ProjectResponse> confirmSupervision(
 			@Parameter(description = "Project ID") @PathVariable Long id) {
 		Project project = projectService.confirmSupervision(id);
-		return ApiResponse.success("Encadrement confirmé", projectMapper.toDto(project, Collections.emptyMap()));
+		return ApiResponse.success("Encadrement confirmé", projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@PatchMapping("/{id}/decline-supervision")
@@ -178,7 +178,7 @@ public class ProjectController {
 	public ApiResponse<ProjectResponse> declineSupervision(
 			@Parameter(description = "Project ID") @PathVariable Long id) {
 		Project project = projectService.declineSupervision(id);
-		return ApiResponse.success("Encadrement décliné", projectMapper.toDto(project, Collections.emptyMap()));
+		return ApiResponse.success("Encadrement décliné", projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@DeleteMapping("/{id}")

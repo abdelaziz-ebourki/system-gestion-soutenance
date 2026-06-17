@@ -10,6 +10,7 @@ import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import java.time.LocalDate;
@@ -35,6 +36,8 @@ class StudentGroupServiceTest {
 	private StudentRepository studentRepository;
 	@Mock
 	private DefenseSessionRepository defenseSessionRepository;
+	@Mock
+	private ProjectRepository projectRepository;
 	@Mock
 	private StudentGroupMapper studentGroupMapper;
 	@Mock
@@ -65,15 +68,15 @@ class StudentGroupServiceTest {
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
 
 		DefenseSession activeSession = new DefenseSession();
-		activeSession.setGroupFormationStartDate(LocalDate.of(2025, 1, 1));
-		activeSession.setGroupFormationEndDate(LocalDate.of(2025, 12, 31));
+		activeSession.setGroupFormationStartDate(LocalDate.now().minusDays(1));
+		activeSession.setGroupFormationEndDate(LocalDate.now().plusDays(1));
 		when(defenseSessionRepository.findAll()).thenReturn(List.of(activeSession));
 
 		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
 				.getWorkspace(1L);
 
-		assertEquals("2025-01-01", result.groupCreationStartDate());
-		assertEquals("2025-12-31", result.groupCreationEndDate());
+		assertEquals(LocalDate.now().minusDays(1).toString(), result.groupCreationStartDate());
+		assertEquals(LocalDate.now().plusDays(1).toString(), result.groupCreationEndDate());
 	}
 
 	@Test
@@ -222,7 +225,6 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -245,7 +247,6 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
@@ -326,7 +327,6 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 
 		InvalidBusinessStateException ex = assertThrows(InvalidBusinessStateException.class,
@@ -350,7 +350,6 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -375,7 +374,6 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
 		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
 		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 

@@ -64,7 +64,7 @@ public class ReportService {
 		DefenseSession session = defenseSessionRepository.findById(sessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session non trouvée"));
 
-		List<Group> groups = groupRepository.findBySessionId(sessionId);
+		List<Group> groups = groupRepository.findByDefenseSessionId(sessionId);
 		List<Long> projectIds = groups.stream().filter(g -> g.getProject() != null).map(g -> g.getProject().getId())
 				.distinct().toList();
 
@@ -134,7 +134,7 @@ public class ReportService {
 
 	@Transactional(readOnly = true)
 	public List<GradeHistoryResponse> getGradeHistory(Long sessionId) {
-		List<Group> groups = groupRepository.findBySessionId(sessionId);
+		List<Group> groups = groupRepository.findByDefenseSessionId(sessionId);
 		List<Long> projectIds = groups.stream().filter(g -> g.getProject() != null).map(g -> g.getProject().getId())
 				.distinct().toList();
 
@@ -190,9 +190,6 @@ public class ReportService {
 			if (g.getStudents() != null && !g.getStudents().isEmpty()) {
 				return g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 			}
-		}
-		if (project.getStudents() != null) {
-			return project.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList();
 		}
 		return List.of();
 	}

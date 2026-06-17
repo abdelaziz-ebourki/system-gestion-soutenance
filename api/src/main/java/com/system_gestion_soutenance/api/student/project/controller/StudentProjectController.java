@@ -50,7 +50,9 @@ public class StudentProjectController {
 		}
 		List<Project> projects = projectService.findByStatus(statusEnum);
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(projects);
-		List<ProjectResponse> items = projects.stream().map(p -> projectMapper.toDto(p, projectGroupIds)).toList();
+		Map<Long, List<String>> projectStudentNames = projectService.buildProjectStudentNamesMap(projects);
+		List<ProjectResponse> items = projects.stream()
+				.map(p -> projectMapper.toDto(p, projectGroupIds, projectStudentNames)).toList();
 		return ApiResponse.success(items);
 	}
 }

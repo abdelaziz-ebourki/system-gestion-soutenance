@@ -87,6 +87,22 @@ public class ProjectService {
 				.collect(Collectors.toMap(g -> g.getProject().getId(), g -> g.getId(), (a, b) -> a));
 	}
 
+	public Map<Long, List<String>> buildProjectStudentNamesMap(List<Project> projects) {
+		List<Long> projectIds = projects.stream().map(Project::getId).toList();
+		if (projectIds.isEmpty())
+			return Map.of();
+		return groupRepository.findByProjectIdIn(projectIds).stream().filter(g -> g.getProject() != null)
+				.collect(Collectors.toMap(g -> g.getProject().getId(),
+						g -> g.getStudents() != null
+								? g.getStudents().stream().map(s -> s.getFirstName() + " " + s.getLastName()).toList()
+								: List.of(),
+						(a, b) -> {
+							List<String> merged = new ArrayList<>(a);
+							merged.addAll(b);
+							return merged;
+						}));
+	}
+
 	@Audited(action = "PROPOSE", entity = "Project")
 	@Transactional
 	public Project proposeByTeacher(
