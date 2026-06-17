@@ -2,6 +2,7 @@ package com.system_gestion_soutenance.api.coordinator.group.controller;
 
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.dto.GroupResponse;
+import com.system_gestion_soutenance.api.coordinator.group.dto.UpdateGroupProjectRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
 import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
@@ -57,6 +58,20 @@ public class GroupController {
 		Group group = groupService.create(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.success("Groupe créé avec succès", groupMapper.toDto(group)));
+	}
+
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Update group project", description = "Assign or update the project linked to an existing group.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group project updated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group or project not found")})
+	public ResponseEntity<ApiResponse<GroupResponse>> updateProject(
+			@Parameter(description = "Group ID") @PathVariable Long id,
+			@Valid @RequestBody UpdateGroupProjectRequest request) {
+		Group group = groupService.updateProject(id, request.projectId());
+		return ResponseEntity
+				.ok(ApiResponse.success("Projet du groupe mis à jour avec succès", groupMapper.toDto(group)));
 	}
 
 	@DeleteMapping("/{id}")

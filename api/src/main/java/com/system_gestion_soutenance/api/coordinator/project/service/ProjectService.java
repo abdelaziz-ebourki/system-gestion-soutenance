@@ -14,7 +14,9 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
+import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.notification.event.ProjectProposedEvent;
 import com.system_gestion_soutenance.api.notification.event.ProjectStatusChangedEvent;
@@ -39,16 +41,18 @@ public class ProjectService {
 	private final DefenseRepository defenseRepository;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
+	private final UserRepository userRepository;
 
 	public ProjectService(ProjectRepository projectRepository, TeacherRepository teacherRepository,
 			GroupRepository groupRepository, DefenseRepository defenseRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			ApplicationEventPublisher eventPublisher, SecurityService securityService, UserRepository userRepository) {
 		this.projectRepository = projectRepository;
 		this.teacherRepository = teacherRepository;
 		this.groupRepository = groupRepository;
 		this.defenseRepository = defenseRepository;
 		this.eventPublisher = eventPublisher;
 		this.securityService = securityService;
+		this.userRepository = userRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -159,10 +163,12 @@ public class ProjectService {
 		for (BulkProjectEntry entry : request.projects()) {
 			line++;
 			try {
-				Teacher supervisor = teacherRepository.findById(entry.supervisorId()).orElse(null);
+				Teacher supervisor = resolveSupervisor(entry);
 				if (supervisor == null) {
-					errors.add(new BulkImportResult.BulkImportError(line,
-							"Encadrant introuvable avec l'id " + entry.supervisorId()));
+					String detail = entry.supervisorEmail() != null
+							? "Encadrant introuvable avec l'email " + entry.supervisorEmail()
+							: "Encadrant introuvable avec l'id " + entry.supervisorId();
+					errors.add(new BulkImportResult.BulkImportError(line, detail));
 					continue;
 				}
 
@@ -181,6 +187,19 @@ public class ProjectService {
 		}
 
 		return new BulkImportResult(request.projects().size(), created.size(), created, errors);
+	}
+
+	private Teacher resolveSupervisor(BulkProjectEntry entry) {
+		if (entry.supervisorId() != null) {
+			return teacherRepository.findById(entry.supervisorId()).orElse(null);
+		}
+		if (entry.supervisorEmail() != null) {
+			User user = userRepository.findByEmail(entry.supervisorEmail()).orElse(null);
+			if (user instanceof Teacher teacher) {
+				return teacher;
+			}
+		}
+		return null;
 	}
 
 }
