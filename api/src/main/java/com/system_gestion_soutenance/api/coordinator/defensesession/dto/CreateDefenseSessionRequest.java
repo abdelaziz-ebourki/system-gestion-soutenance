@@ -17,5 +17,9 @@ public record CreateDefenseSessionRequest(
 		@Schema(description = "Coefficients d'évaluation", example = "{\"Technique\": 4, \"Présentation\": 3}") Map<String, Integer> evaluationCoefficients,
 		@Schema(description = "ID du modèle de rôle jury", example = "1") Long juryRoleTemplateId,
 		@Schema(description = "Date de début de la session", example = "2025-06-15") @NotBlank String startDate,
-		@Schema(description = "Date de fin de la session", example = "2025-06-30") @NotBlank String endDate) {
+		@Schema(description = "Date de fin de la session", example = "2025-06-30") @NotBlank String endDate,
+		@Schema(description = "Heure de début des soutenances", example = "08:00") String startTime,
+		@Schema(description = "Heure de fin des soutenances", example = "18:00") String endTime,
+		@Schema(description = "Date de début de création des groupes", example = "2026-03-01") String groupCreationStartDate,
+		@Schema(description = "Date de fin de création des groupes", example = "2026-05-01") String groupCreationEndDate) {
 }

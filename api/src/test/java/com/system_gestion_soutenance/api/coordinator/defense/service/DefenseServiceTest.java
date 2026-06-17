@@ -3,8 +3,6 @@ package com.system_gestion_soutenance.api.coordinator.defense.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
@@ -37,7 +35,6 @@ class DefenseServiceTest {
 	private final DefenseRepository defenseRepository = mock(DefenseRepository.class);
 	private final RoomRepository roomRepository = mock(RoomRepository.class);
 	private final DefenseSessionRepository defenseSessionRepository = mock(DefenseSessionRepository.class);
-	private final DefenseSettingsRepository defenseSettingsRepository = mock(DefenseSettingsRepository.class);
 	private final ProjectRepository projectRepository = mock(ProjectRepository.class);
 	private final GroupRepository groupRepository = mock(GroupRepository.class);
 	private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
@@ -45,8 +42,8 @@ class DefenseServiceTest {
 	private final TeacherRepository teacherRepository = mock(TeacherRepository.class);
 
 	private final DefenseService service = new DefenseService(defenseRepository, roomRepository,
-			defenseSessionRepository, defenseSettingsRepository, projectRepository, groupRepository, eventPublisher,
-			securityService, teacherRepository);
+			defenseSessionRepository, projectRepository, groupRepository, eventPublisher, securityService,
+			teacherRepository);
 
 	@Test
 	void getSchedule_returnsAllDefenses() {
@@ -94,7 +91,7 @@ class DefenseServiceTest {
 
 		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 
-		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 
 		var result = service.createJury(request);
@@ -118,8 +115,8 @@ class DefenseServiceTest {
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(mock(Defense.class)));
 
-		CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président");
-		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur");
+		CreateJuryRequest.MemberEntry m1 = new CreateJuryRequest.MemberEntry(5L, "président", null, null, null);
+		CreateJuryRequest.MemberEntry m2 = new CreateJuryRequest.MemberEntry(5L, "examinateur", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(m1, m2));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
@@ -248,10 +245,8 @@ class DefenseServiceTest {
 		ds.setEndDate(LocalDate.of(2025, 6, 1));
 		ds.setDefenseDuration(30);
 		ds.setBreakDuration(15);
-
-		DefenseSettings settings = new DefenseSettings();
-		settings.setStartTime("09:00");
-		settings.setEndTime("12:00");
+		ds.setStartTime("09:00");
+		ds.setEndTime("12:00");
 
 		Room room = new Room();
 		room.setId(1L);
@@ -267,7 +262,6 @@ class DefenseServiceTest {
 		when(defense.getMembers()).thenReturn(List.of(mock(JuryMember.class)));
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(room));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
@@ -354,7 +348,7 @@ class DefenseServiceTest {
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(mock(Defense.class)));
 		when(teacherRepository.findById(5L)).thenReturn(Optional.empty());
 
-		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président");
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(5L, "président", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.createJury(request));
@@ -385,7 +379,7 @@ class DefenseServiceTest {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
 
-		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "président");
+		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "président", null, null, null);
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
 
 		when(teacherRepository.findById(5L)).thenReturn(Optional.empty());
@@ -398,8 +392,8 @@ class DefenseServiceTest {
 		Defense defense = mock(Defense.class);
 		when(defenseRepository.findById(1L)).thenReturn(Optional.of(defense));
 
-		UpdateJuryRequest.MemberEntry m1 = new UpdateJuryRequest.MemberEntry(5L, "président");
-		UpdateJuryRequest.MemberEntry m2 = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
+		UpdateJuryRequest.MemberEntry m1 = new UpdateJuryRequest.MemberEntry(5L, "président", null, null, null);
+		UpdateJuryRequest.MemberEntry m2 = new UpdateJuryRequest.MemberEntry(5L, "examinateur", null, null, null);
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(m1, m2));
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.updateJury(1L, request));
@@ -455,13 +449,10 @@ class DefenseServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setStartDate(LocalDate.of(2025, 6, 1));
 		ds.setEndDate(LocalDate.of(2025, 6, 1));
-
-		DefenseSettings settings = new DefenseSettings();
-		settings.setStartTime("09:00");
-		settings.setEndTime("12:00");
+		ds.setStartTime("09:00");
+		ds.setEndTime("12:00");
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of());
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
@@ -473,16 +464,14 @@ class DefenseServiceTest {
 		ds.setStartDate(LocalDate.of(2025, 6, 1));
 		ds.setEndDate(LocalDate.of(2025, 6, 1));
 
-		DefenseSettings settings = new DefenseSettings();
-		settings.setStartTime("09:00");
-		settings.setEndTime("12:00");
+		ds.setStartTime("09:00");
+		ds.setEndTime("12:00");
 
 		Room room = new Room();
 		room.setId(1L);
 		room.setCapacity(10);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(room));
 		when(projectRepository.findAll()).thenReturn(List.of());
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());
@@ -496,11 +485,11 @@ class DefenseServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setStartDate(LocalDate.of(2025, 6, 1));
 		ds.setEndDate(LocalDate.of(2025, 6, 1));
+		// startTime and endTime not set (null) to trigger exception
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.empty());
 
-		assertThrows(EntityNotFoundException.class, () -> service.autoGenerate(1L));
+		assertThrows(InvalidBusinessStateException.class, () -> service.autoGenerate(1L));
 	}
 
 	@Test
@@ -543,7 +532,6 @@ class DefenseServiceTest {
 	void buildStudentNamesMap_withProjectsAndGroups_returnsNames() {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
-		when(project.getStudents()).thenReturn(List.of());
 		when(project.getTitle()).thenReturn("Projet");
 
 		com.system_gestion_soutenance.api.user.entity.Student student = new com.system_gestion_soutenance.api.user.entity.Student();
@@ -562,16 +550,19 @@ class DefenseServiceTest {
 	}
 
 	@Test
-	void buildStudentNamesMap_withProjectHavingDirectStudents_returnsNames() {
+	void buildStudentNamesMap_withGroups_returnsNames() {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
 
 		com.system_gestion_soutenance.api.user.entity.Student student = new com.system_gestion_soutenance.api.user.entity.Student();
 		student.setFirstName("Bob");
 		student.setLastName("Jones");
-		when(project.getStudents()).thenReturn(List.of(student));
 
-		when(groupRepository.findByProjectIdIn(List.of(1L))).thenReturn(List.of());
+		Group group = mock(Group.class);
+		when(group.getProject()).thenReturn(project);
+		when(group.getStudents()).thenReturn(List.of(student));
+
+		when(groupRepository.findByProjectIdIn(List.of(1L))).thenReturn(List.of(group));
 
 		var result = service.buildStudentNamesMap(Map.of(1L, project));
 
@@ -582,7 +573,6 @@ class DefenseServiceTest {
 	void buildStudentNamesMap_withNoGroupsOrStudents_returnsEmptyList() {
 		Project project = mock(Project.class);
 		when(project.getId()).thenReturn(1L);
-		when(project.getStudents()).thenReturn(null);
 
 		when(groupRepository.findByProjectIdIn(List.of(1L))).thenReturn(List.of());
 
@@ -601,7 +591,7 @@ class DefenseServiceTest {
 		when(teacherRepository.findById(5L)).thenReturn(Optional.of(teacher));
 		when(defenseRepository.save(any(Defense.class))).thenReturn(defense);
 
-		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "examinateur");
+		UpdateJuryRequest.MemberEntry member = new UpdateJuryRequest.MemberEntry(5L, "examinateur", null, null, null);
 		UpdateJuryRequest request = new UpdateJuryRequest(null, List.of(member));
 
 		var result = service.updateJury(1L, request);
@@ -630,9 +620,8 @@ class DefenseServiceTest {
 		ds.setStartDate(LocalDate.of(2025, 6, 1));
 		ds.setEndDate(LocalDate.of(2025, 6, 1));
 
-		DefenseSettings settings = new DefenseSettings();
-		settings.setStartTime("09:00");
-		settings.setEndTime("12:00");
+		ds.setStartTime("09:00");
+		ds.setEndTime("12:00");
 
 		Room room = new Room();
 		room.setId(1L);
@@ -643,7 +632,6 @@ class DefenseServiceTest {
 		when(project.getStatus()).thenReturn(ProjectStatus.PENDING);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(defenseSettingsRepository.findFirstByOrderByIdAsc()).thenReturn(Optional.of(settings));
 		when(roomRepository.findAll()).thenReturn(List.of(room));
 		when(projectRepository.findAll()).thenReturn(List.of(project));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of());

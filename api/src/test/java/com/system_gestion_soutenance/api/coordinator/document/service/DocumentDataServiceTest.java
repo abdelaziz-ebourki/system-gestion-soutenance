@@ -39,7 +39,6 @@ class DocumentDataServiceTest {
 		when(p.getId()).thenReturn(id);
 		when(p.getTitle()).thenReturn(title);
 		when(p.getSupervisor()).thenReturn(supervisor);
-		when(p.getStudents()).thenReturn(List.of());
 		return p;
 	}
 
@@ -109,7 +108,8 @@ class DocumentDataServiceTest {
 
 		Project project = mockProject(1L, "Projet", supervisor);
 		Defense defense = mockDefense(10L, 1L, room);
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(supervisor, "président")));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, supervisor, "président", null, null, null, null)));
 
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -122,7 +122,7 @@ class DocumentDataServiceTest {
 	}
 
 	@Test
-	void getStudentNames_usesProjectFallback() {
+	void getStudentNames_usesGroupFallback() {
 		Defense defense = mockDefense(10L, 1L, null);
 		Project project = mockProject(1L, "Projet", null);
 
@@ -130,11 +130,13 @@ class DocumentDataServiceTest {
 		when(student.getFirstName()).thenReturn("Alice");
 		when(student.getLastName()).thenReturn("Test");
 
+		Group group = mock(Group.class);
+		when(group.getStudents()).thenReturn(List.of(student));
+
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
+		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
-		when(project.getStudents()).thenReturn(List.of(student));
 
 		DefenseIdsRequest request = new DefenseIdsRequest(null, 1L);
 		var result = service.evaluationSheets(request);
@@ -148,13 +150,14 @@ class DocumentDataServiceTest {
 		Project project = mockProject(1L, "Projet", null);
 
 		Group group = mock(Group.class);
-		when(group.getSessionId()).thenReturn(null);
+		when(group.getDefenseSession()).thenReturn(null);
 
 		Teacher supervisor = mock(Teacher.class);
 		when(supervisor.getFirstName()).thenReturn("John");
 		when(supervisor.getLastName()).thenReturn("Doe");
 
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(supervisor, "président")));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, supervisor, "président", null, null, null, null)));
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of(group));
@@ -237,7 +240,7 @@ class DocumentDataServiceTest {
 		when(group.getProject()).thenReturn(project);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
@@ -264,7 +267,7 @@ class DocumentDataServiceTest {
 		when(group.getProject()).thenReturn(project);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
@@ -289,7 +292,8 @@ class DocumentDataServiceTest {
 
 		Project project = mockProject(1L, "Projet", teacher);
 		Defense defense = mockDefense(10L, 1L, null);
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(teacher, "président")));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "président", null, null, null, null)));
 
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -336,7 +340,7 @@ class DocumentDataServiceTest {
 		when(group.getProject()).thenReturn(project);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 		when(groupRepository.findByProjectId(1L)).thenReturn(List.of());
@@ -372,7 +376,7 @@ class DocumentDataServiceTest {
 		when(group.getProject()).thenReturn(projectInSession);
 
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(ds));
-		when(groupRepository.findBySessionId(1L)).thenReturn(List.of(group));
+		when(groupRepository.findByDefenseSessionId(1L)).thenReturn(List.of(group));
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defenseInSession, defenseOther));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(projectInSession));
 		when(projectRepository.findById(2L)).thenReturn(Optional.of(projectOther));
@@ -399,7 +403,7 @@ class DocumentDataServiceTest {
 		ds.setEvaluationCoefficients(new java.util.LinkedHashMap<>(Map.of("Présentation", 3, "Code", 2)));
 
 		Group group = mock(Group.class);
-		when(group.getSessionId()).thenReturn(1L);
+		when(group.getDefenseSession()).thenReturn(ds);
 
 		when(defenseRepository.findById(10L)).thenReturn(Optional.of(defense));
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -450,7 +454,8 @@ class DocumentDataServiceTest {
 		Project project = mockProject(1L, "Projet", null);
 
 		Defense defense = mock(Defense.class);
-		when(defense.getMembers()).thenReturn(List.of(new JuryMember(teacher, "examinateur")));
+		when(defense.getMembers())
+				.thenReturn(List.of(new JuryMember(null, teacher, "examinateur", null, null, null, null)));
 		when(defenseRepository.findByProject(project)).thenReturn(Optional.of(defense));
 
 		when(projectRepository.findById(1L)).thenReturn(Optional.of(project));

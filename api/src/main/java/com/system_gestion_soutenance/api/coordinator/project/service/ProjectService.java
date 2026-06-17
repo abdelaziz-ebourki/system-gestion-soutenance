@@ -13,10 +13,10 @@ import com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRe
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
-import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
-import com.system_gestion_soutenance.api.user.repository.StudentRepository;
+import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
+import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.notification.event.ProjectProposedEvent;
 import com.system_gestion_soutenance.api.notification.event.ProjectStatusChangedEvent;
@@ -37,22 +37,22 @@ public class ProjectService {
 
 	private final ProjectRepository projectRepository;
 	private final TeacherRepository teacherRepository;
-	private final StudentRepository studentRepository;
 	private final GroupRepository groupRepository;
 	private final DefenseRepository defenseRepository;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
+	private final UserRepository userRepository;
 
 	public ProjectService(ProjectRepository projectRepository, TeacherRepository teacherRepository,
-			StudentRepository studentRepository, GroupRepository groupRepository, DefenseRepository defenseRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			GroupRepository groupRepository, DefenseRepository defenseRepository,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService, UserRepository userRepository) {
 		this.projectRepository = projectRepository;
 		this.teacherRepository = teacherRepository;
-		this.studentRepository = studentRepository;
 		this.groupRepository = groupRepository;
 		this.defenseRepository = defenseRepository;
 		this.eventPublisher = eventPublisher;
 		this.securityService = securityService;
+		this.userRepository = userRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -66,6 +66,19 @@ public class ProjectService {
 				projectPage.getTotalPages(), page, limit);
 	}
 
+	@Transactional(readOnly = true)
+	public List<Project> findByStatus(ProjectStatus status) {
+		return projectRepository.findByStatus(status);
+	}
+
+	@Transactional(readOnly = true)
+	public PaginatedResponse<Project> findAllByStatus(ProjectStatus status, int page, int limit) {
+		org.springframework.data.domain.Page<Project> projectPage = projectRepository.findByStatus(status,
+				org.springframework.data.domain.PageRequest.of(page, limit));
+		return new PaginatedResponse<>(projectPage.getContent(), projectPage.getTotalElements(),
+				projectPage.getTotalPages(), page, limit);
+	}
+
 	public Map<Long, Long> buildProjectGroupIdMap(List<Project> projects) {
 		List<Long> projectIds = projects.stream().map(Project::getId).toList();
 		if (projectIds.isEmpty())
@@ -74,16 +87,33 @@ public class ProjectService {
 				.collect(Collectors.toMap(g -> g.getProject().getId(), g -> g.getId(), (a, b) -> a));
 	}
 
+	@Audited(action = "PROPOSE", entity = "Project")
+	@Transactional
+	public Project proposeByTeacher(
+			com.system_gestion_soutenance.api.coordinator.project.dto.TeacherProposeProjectRequest request) {
+		Teacher teacher = teacherRepository.findById(securityService.getCurrentUserId())
+				.orElseThrow(() -> new InvalidBusinessStateException("Enseignant introuvable"));
+
+		Project project = new Project();
+		project.setTitle(request.title());
+		project.setDescription(request.description());
+		project.setDefenseType(request.defenseType());
+		project.setMaxStudents(request.maxStudents());
+		project.setProposedByTeacherId(teacher.getId());
+		project.setSupervisor(teacher);
+		project.setStatus(ProjectStatus.PROPOSED);
+
+		Project saved = projectRepository.save(project);
+		eventPublisher.publishEvent(new ProjectProposedEvent(securityService.getCurrentUserEmail(), saved.getId(),
+				saved.getTitle(), teacher.getFirstName() + " " + teacher.getLastName()));
+		return saved;
+	}
+
 	@Audited(action = "CREATE", entity = "Project")
 	@Transactional
 	public Project create(CreateProjectRequest request) {
 		Teacher supervisor = teacherRepository.findById(request.supervisorId())
 				.orElseThrow(() -> new InvalidBusinessStateException("Encadrant introuvable"));
-
-		List<Student> students = Collections.emptyList();
-		if (request.studentIds() != null) {
-			students = studentRepository.findAllById(request.studentIds());
-		}
 
 		Project project = new Project();
 		project.setTitle(request.title());
@@ -91,14 +121,15 @@ public class ProjectService {
 		project.setDefenseType(request.defenseType());
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(supervisor);
-		project.setStudents(students);
+
+		if (request.coSupervisorIds() != null) {
+			List<Teacher> coSupervisors = teacherRepository.findAllById(request.coSupervisorIds());
+			project.setCoSupervisors(coSupervisors);
+		}
 
 		Project saved = projectRepository.save(project);
-		String studentName = students.isEmpty()
-				? "Divers"
-				: students.get(0).getFirstName() + " " + students.get(0).getLastName();
 		eventPublisher.publishEvent(new ProjectProposedEvent(securityService.getCurrentUserEmail(), saved.getId(),
-				saved.getTitle(), studentName));
+				saved.getTitle(), "Divers"));
 		return saved;
 	}
 
@@ -114,7 +145,36 @@ public class ProjectService {
 			project.setDescription(updates.description());
 		if (updates.defenseType() != null)
 			project.setDefenseType(updates.defenseType());
+		if (updates.coSupervisorIds() != null) {
+			List<Teacher> coSupervisors = teacherRepository.findAllById(updates.coSupervisorIds());
+			project.setCoSupervisors(coSupervisors);
+		}
 
+		return projectRepository.save(project);
+	}
+
+	@Audited(action = "CONFIRM_SUPERVISION", entity = "Project")
+	@Transactional
+	public Project confirmSupervision(Long id) {
+		Project project = projectRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
+		if (project.getSupervisor() == null) {
+			throw new InvalidBusinessStateException("Ce projet n'a pas d'encadrant assigné");
+		}
+		project.setStatus(ProjectStatus.APPROVED);
+		return projectRepository.save(project);
+	}
+
+	@Audited(action = "DECLINE_SUPERVISION", entity = "Project")
+	@Transactional
+	public Project declineSupervision(Long id) {
+		Project project = projectRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Projet non trouvé"));
+		if (project.getSupervisor() == null) {
+			throw new InvalidBusinessStateException("Ce projet n'a pas d'encadrant assigné");
+		}
+		project.setSupervisor(null);
+		project.setStatus(ProjectStatus.PENDING);
 		return projectRepository.save(project);
 	}
 
@@ -127,6 +187,10 @@ public class ProjectService {
 		ProjectStatus current = project.getStatus();
 		if (current == newStatus) {
 			throw new InvalidBusinessStateException("Le projet est déjà à l'état " + newStatus.name());
+		}
+		if (current == ProjectStatus.PROPOSED && newStatus != ProjectStatus.PENDING
+				&& newStatus != ProjectStatus.REJECTED) {
+			throw new InvalidBusinessStateException("Un projet proposé ne peut être validé ou rejeté uniquement");
 		}
 		if (current == ProjectStatus.PENDING && newStatus != ProjectStatus.APPROVED
 				&& newStatus != ProjectStatus.REJECTED) {
@@ -172,24 +236,13 @@ public class ProjectService {
 		for (BulkProjectEntry entry : request.projects()) {
 			line++;
 			try {
-				Teacher supervisor = teacherRepository.findById(entry.supervisorId()).orElse(null);
+				Teacher supervisor = resolveSupervisor(entry);
 				if (supervisor == null) {
-					errors.add(new BulkImportResult.BulkImportError(line,
-							"Encadrant introuvable avec l'id " + entry.supervisorId()));
+					String detail = entry.supervisorEmail() != null
+							? "Encadrant introuvable avec l'email " + entry.supervisorEmail()
+							: "Encadrant introuvable avec l'id " + entry.supervisorId();
+					errors.add(new BulkImportResult.BulkImportError(line, detail));
 					continue;
-				}
-
-				List<Student> students = Collections.emptyList();
-				if (entry.studentIds() != null && !entry.studentIds().isEmpty()) {
-					students = new ArrayList<>(studentRepository.findAllById(entry.studentIds()));
-					if (students.size() != entry.studentIds().size()) {
-						List<Long> foundIds = students.stream().map(Student::getId).toList();
-						List<Long> missingIds = entry.studentIds().stream().filter(id -> !foundIds.contains(id))
-								.toList();
-						errors.add(new BulkImportResult.BulkImportError(line,
-								"Étudiants introuvables avec les ids: " + missingIds));
-						continue;
-					}
 				}
 
 				Project project = new Project();
@@ -198,7 +251,6 @@ public class ProjectService {
 				project.setDefenseType(entry.defenseType());
 				project.setStatus(ProjectStatus.PENDING);
 				project.setSupervisor(supervisor);
-				project.setStudents(students);
 
 				Project saved = projectRepository.save(project);
 				created.add(new BulkProjectResponse(saved.getId(), saved.getTitle()));
@@ -208,6 +260,19 @@ public class ProjectService {
 		}
 
 		return new BulkImportResult(request.projects().size(), created.size(), created, errors);
+	}
+
+	private Teacher resolveSupervisor(BulkProjectEntry entry) {
+		if (entry.supervisorId() != null) {
+			return teacherRepository.findById(entry.supervisorId()).orElse(null);
+		}
+		if (entry.supervisorEmail() != null) {
+			User user = userRepository.findByEmail(entry.supervisorEmail()).orElse(null);
+			if (user instanceof Teacher teacher) {
+				return teacher;
+			}
+		}
+		return null;
 	}
 
 }

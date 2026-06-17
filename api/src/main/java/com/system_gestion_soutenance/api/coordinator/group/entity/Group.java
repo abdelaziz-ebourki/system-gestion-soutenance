@@ -1,10 +1,10 @@
 package com.system_gestion_soutenance.api.coordinator.group.entity;
 
+import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import jakarta.persistence.*;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Group {
 
 	@Id
@@ -33,9 +32,14 @@ public class Group {
 	@JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
 	private List<Student> students;
 
-	@Column(name = "session_id")
-	private Long sessionId;
+	@ManyToOne
+	@JoinColumn(name = "session_id")
+	private DefenseSession defenseSession;
 
 	@Column(name = "leader_id")
 	private Long leaderId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private GroupStatus status = GroupStatus.PENDING;
 }

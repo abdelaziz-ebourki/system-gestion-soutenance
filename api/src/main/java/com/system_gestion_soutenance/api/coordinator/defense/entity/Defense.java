@@ -37,14 +37,12 @@ public class Defense {
 	@JoinColumn(name = "room_id")
 	private Room room;
 
-	@ElementCollection
-	@CollectionTable(name = "defense_members", joinColumns = @JoinColumn(name = "defense_id"))
+	@OneToMany(mappedBy = "defense", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<JuryMember> members = new ArrayList<>();
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private DefenseStatus status = DefenseStatus.SCHEDULED;
-
 	@Column(name = "final_score")
 	private Double finalScore;
 
