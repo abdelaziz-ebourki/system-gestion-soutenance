@@ -1,6 +1,5 @@
 package com.system_gestion_soutenance.api.coordinator.project.entity;
 
-import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import jakarta.persistence.*;
@@ -41,8 +40,8 @@ public class Project {
 	private Teacher supervisor;
 
 	@ManyToMany
-	@JoinTable(name = "project_students", joinColumns = @JoinColumn(name = "project_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
-	private List<Student> students;
+	@JoinTable(name = "project_supervisors", joinColumns = @JoinColumn(name = "project_id"), inverseJoinColumns = @JoinColumn(name = "teacher_id"))
+	private List<Teacher> coSupervisors;
 
 	@OneToOne(mappedBy = "project")
 	private Defense defense;

@@ -88,7 +88,6 @@ class ProjectRepositoryTest {
 		project.setDefenseType("PFE");
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
 		em.persist(project);
 
 		em.flush();
@@ -99,18 +98,15 @@ class ProjectRepositoryTest {
 		assertEquals(1, result.size());
 		assertNotNull(result.get(0).getSupervisor());
 		assertEquals("Martin", result.get(0).getSupervisor().getLastName());
-		assertEquals(1, result.get(0).getStudents().size());
 	}
 
 	@Test
-	void findAllWithDetails_noStudents_returnsProjectWithNullCollections() {
+	void findAllWithDetails_noSupervisor_returnsProject() {
 		Project project = new Project();
 		project.setTitle("Solo Project");
-		project.setDescription("No students yet");
+		project.setDescription("No supervisor yet");
 		project.setDefenseType("PFE");
 		project.setStatus(ProjectStatus.PENDING);
-		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of());
 		em.persist(project);
 
 		em.flush();
@@ -130,7 +126,6 @@ class ProjectRepositoryTest {
 		project.setDefenseType("MEMOIRE");
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
 		em.persist(project);
 
 		em.flush();
@@ -140,25 +135,5 @@ class ProjectRepositoryTest {
 
 		assertEquals(1, result.size());
 		assertEquals("Teacher Project", result.get(0).getTitle());
-	}
-
-	@Test
-	void findByStudentsId_returnsProject() {
-		Project project = new Project();
-		project.setTitle("Student Project");
-		project.setDescription("Desc");
-		project.setDefenseType("PFE");
-		project.setStatus(ProjectStatus.PENDING);
-		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
-		em.persist(project);
-
-		em.flush();
-		em.clear();
-
-		List<Project> result = repository.findByStudentsId(savedStudent.getId());
-
-		assertEquals(1, result.size());
-		assertEquals("Student Project", result.get(0).getTitle());
 	}
 }

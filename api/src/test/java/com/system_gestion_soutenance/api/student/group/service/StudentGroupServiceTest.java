@@ -46,9 +46,41 @@ class StudentGroupServiceTest {
 	private StudentGroupService service;
 
 	@Test
+	void getWorkspace_withNullActiveSession_usesDefaults() {
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
+		when(defenseSessionRepository.findAll()).thenReturn(List.of());
+
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
+
+		assertEquals("", result.groupCreationStartDate());
+		assertEquals("", result.groupCreationEndDate());
+		assertFalse(result.isGroupCreationOpen());
+	}
+
+	@Test
+	void getWorkspace_withActiveSession_returnsDates() {
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
+
+		DefenseSession activeSession = new DefenseSession();
+		activeSession.setGroupFormationStartDate(LocalDate.of(2025, 1, 1));
+		activeSession.setGroupFormationEndDate(LocalDate.of(2025, 12, 31));
+		when(defenseSessionRepository.findAll()).thenReturn(List.of(activeSession));
+
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
+
+		assertEquals("2025-01-01", result.groupCreationStartDate());
+		assertEquals("2025-12-31", result.groupCreationEndDate());
+	}
+
+	@Test
 	void getWorkspace_noGroup_returnsNullCurrent() {
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of());
+		when(defenseSessionRepository.findAll()).thenReturn(List.of());
 
 		var result = service.getWorkspace(1L);
 
@@ -71,6 +103,7 @@ class StudentGroupServiceTest {
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
 		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group, other));
+		when(defenseSessionRepository.findAll()).thenReturn(List.of());
 		when(studentGroupMapper.toDetails(group, 1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L,
 						"Groupe Test", null, null, List.of()));
@@ -80,6 +113,31 @@ class StudentGroupServiceTest {
 		assertNotNull(result.currentGroup());
 		assertEquals(1, result.availableGroups().size());
 		assertEquals(20L, result.availableGroups().get(0).id());
+	}
+
+	@Test
+	void getWorkspace_groupWithNullProject_returnsNullProjectTitle() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setGroupName("Groupe Test");
+		group.setStudents(List.of(student));
+		group.setProject(null);
+
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+		when(groupRepository.findAllWithDetails()).thenReturn(List.of(group));
+		when(defenseSessionRepository.findAll()).thenReturn(List.of());
+		when(studentGroupMapper.toDetails(group, 1L)).thenReturn(
+				new com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse(10L, "Groupe Test", null,
+						null, List.of(new com.system_gestion_soutenance.api.student.group.dto.GroupMemberResponse(1L,
+								"Alice Test", null, "member"))));
+
+		com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse result = service
+				.getWorkspace(1L);
+
+		com.system_gestion_soutenance.api.student.group.dto.GroupDetailsResponse current = result.currentGroup();
+		assertNull(current.projectTitle());
+		assertNull(current.supervisorName());
 	}
 
 	@Test
@@ -100,7 +158,7 @@ class StudentGroupServiceTest {
 
 		assertEquals("Groupe Alpha", result.getGroupName());
 		assertEquals(1L, result.getLeaderId());
-		assertEquals(5L, result.getSessionId());
+		assertEquals(5L, result.getDefenseSession().getId());
 		assertEquals(GroupStatus.PENDING, result.getStatus());
 	}
 
@@ -135,6 +193,20 @@ class StudentGroupServiceTest {
 	}
 
 	@Test
+	void createGroup_studentNotFound_throws() {
+		DefenseSession session = new DefenseSession();
+		session.setId(5L);
+		session.setGroupFormationStartDate(LocalDate.now().minusDays(1));
+		session.setGroupFormationEndDate(LocalDate.now().plusDays(1));
+
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
+		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
+		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L, "Groupe", 5L));
+	}
+
+	@Test
 	void joinGroup_success() {
 		Student student = student(1L, "Alice", "Test");
 		DefenseSession session = new DefenseSession();
@@ -144,7 +216,7 @@ class StudentGroupServiceTest {
 
 		Group group = new Group();
 		group.setId(10L);
-		group.setSessionId(5L);
+		group.setDefenseSession(session);
 		group.setGroupName("Groupe Test");
 		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "Test"))));
 
@@ -168,7 +240,7 @@ class StudentGroupServiceTest {
 
 		Group group = new Group();
 		group.setId(10L);
-		group.setSessionId(5L);
+		group.setDefenseSession(session);
 		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "Test"))));
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
@@ -196,6 +268,49 @@ class StudentGroupServiceTest {
 	}
 
 	@Test
+	void joinGroup_studentNotFound_throws() {
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>());
+
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
+	}
+
+	@Test
+	void joinGroup_withNullStudentList_initializesList() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setGroupName("Groupe Test");
+		group.setStudents(null);
+
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
+		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
+		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		Group result = service.joinGroup(10L, 1L);
+
+		assertEquals(1, result.getStudents().size());
+	}
+
+	@Test
+	void joinGroup_alreadyInSpecificGroup_throws() {
+		Student student = student(1L, "Alice", "Test");
+		Group group = new Group();
+		group.setId(10L);
+		group.setStudents(new ArrayList<>(List.of(student)));
+
+		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.of(group));
+
+		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
+	}
+
+	@Test
 	void joinGroup_atMaxSize_throws() {
 		Student student = student(1L, "Alice", "Test");
 		DefenseSession session = new DefenseSession();
@@ -206,7 +321,7 @@ class StudentGroupServiceTest {
 
 		Group group = new Group();
 		group.setId(10L);
-		group.setSessionId(5L);
+		group.setDefenseSession(session);
 		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "T"), student(3L, "Carol", "T"))));
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
@@ -230,7 +345,7 @@ class StudentGroupServiceTest {
 
 		Group group = new Group();
 		group.setId(10L);
-		group.setSessionId(5L);
+		group.setDefenseSession(session);
 		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "T"))));
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
@@ -255,7 +370,7 @@ class StudentGroupServiceTest {
 
 		Group group = new Group();
 		group.setId(10L);
-		group.setSessionId(5L);
+		group.setDefenseSession(session);
 		group.setStudents(new ArrayList<>(List.of(student(2L, "Bob", "T"))));
 
 		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
@@ -267,65 +382,6 @@ class StudentGroupServiceTest {
 		Group result = service.joinGroup(10L, 1L);
 
 		assertEquals(2, result.getStudents().size());
-	}
-
-	@Test
-	void joinGroup_withNullStudentList_initializesList() {
-		Student student = student(1L, "Alice", "Test");
-		DefenseSession session = new DefenseSession();
-		session.setId(5L);
-		session.setGroupFormationStartDate(LocalDate.now().minusDays(1));
-		session.setGroupFormationEndDate(LocalDate.now().plusDays(1));
-
-		Group group = new Group();
-		group.setId(10L);
-		group.setSessionId(5L);
-		group.setGroupName("Groupe Test");
-		group.setStudents(null);
-
-		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
-		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-		when(groupRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-
-		Group result = service.joinGroup(10L, 1L);
-
-		assertEquals(1, result.getStudents().size());
-	}
-
-	@Test
-	void createGroup_studentNotFound_throws() {
-		DefenseSession session = new DefenseSession();
-		session.setId(5L);
-		session.setGroupFormationStartDate(LocalDate.now().minusDays(1));
-		session.setGroupFormationEndDate(LocalDate.now().plusDays(1));
-
-		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
-		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
-
-		assertThrows(InvalidBusinessStateException.class, () -> service.createGroup(1L, "Groupe", 5L));
-	}
-
-	@Test
-	void joinGroup_studentNotFound_throws() {
-		DefenseSession session = new DefenseSession();
-		session.setId(5L);
-		session.setGroupFormationStartDate(LocalDate.now().minusDays(1));
-		session.setGroupFormationEndDate(LocalDate.now().plusDays(1));
-
-		Group group = new Group();
-		group.setId(10L);
-		group.setSessionId(5L);
-		group.setStudents(new ArrayList<>());
-
-		when(groupRepository.findFirstByStudentsIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
-		when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
-		when(defenseSessionRepository.findById(5L)).thenReturn(Optional.of(session));
-		when(studentRepository.findById(1L)).thenReturn(Optional.empty());
-
-		assertThrows(InvalidBusinessStateException.class, () -> service.joinGroup(10L, 1L));
 	}
 
 	@Test

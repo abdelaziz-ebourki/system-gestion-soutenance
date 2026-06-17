@@ -157,7 +157,6 @@ class GroupRepositoryTest {
 		project.setDefenseType("PFE");
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(savedTeacher);
-		project.setStudents(List.of(savedStudent));
 		return project;
 	}
 }

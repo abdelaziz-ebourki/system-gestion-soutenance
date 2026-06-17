@@ -59,7 +59,16 @@ public class StudentGroupService {
 			}
 		}
 
-		return new StudentGroupWorkspaceResponse(currentDetails, available, null, null, false);
+		DefenseSession activeSession = resolveActiveSession();
+		String startDate = activeSession != null && activeSession.getGroupFormationStartDate() != null
+				? activeSession.getGroupFormationStartDate().toString()
+				: "";
+		String endDate = activeSession != null && activeSession.getGroupFormationEndDate() != null
+				? activeSession.getGroupFormationEndDate().toString()
+				: "";
+
+		return new StudentGroupWorkspaceResponse(currentDetails, available, startDate, endDate,
+				isCreationOpen(startDate, endDate));
 	}
 
 	@Transactional
@@ -82,7 +91,7 @@ public class StudentGroupService {
 		group.setGroupName(groupName);
 		group.setStudents(new ArrayList<>(List.of(student)));
 		group.setLeaderId(studentId);
-		group.setSessionId(sessionId);
+		group.setDefenseSession(session);
 		group.setStatus(GroupStatus.PENDING);
 		return groupRepository.save(group);
 	}
@@ -96,7 +105,7 @@ public class StudentGroupService {
 		Group group = groupRepository.findById(groupId)
 				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
 
-		DefenseSession session = resolveSession(group.getSessionId());
+		DefenseSession session = group.getDefenseSession();
 		if (session != null && !isWithinGroupFormationWindow(session)) {
 			throw new InvalidBusinessStateException("La période de formation de groupes est fermée pour cette session");
 		}
@@ -118,12 +127,6 @@ public class StudentGroupService {
 		return groupRepository.save(group);
 	}
 
-	private DefenseSession resolveSession(Long sessionId) {
-		if (sessionId == null)
-			return null;
-		return defenseSessionRepository.findById(sessionId).orElse(null);
-	}
-
 	private int resolveMaxGroupSize(DefenseSession session) {
 		if (session != null && session.getMaxGroupSize() > 0)
 			return session.getMaxGroupSize();
@@ -137,6 +140,23 @@ public class StudentGroupService {
 			return false;
 		LocalDate now = LocalDate.now();
 		return !now.isBefore(session.getGroupFormationStartDate()) && !now.isAfter(session.getGroupFormationEndDate());
+	}
+
+	private DefenseSession resolveActiveSession() {
+		List<DefenseSession> sessions = defenseSessionRepository.findAll();
+		return sessions.stream().filter(s -> {
+			if (s.getGroupFormationStartDate() == null || s.getGroupFormationEndDate() == null)
+				return false;
+			LocalDate now = LocalDate.now();
+			return !now.isBefore(s.getGroupFormationStartDate()) && !now.isAfter(s.getGroupFormationEndDate());
+		}).findFirst().orElse(null);
+	}
+
+	private boolean isCreationOpen(String startDate, String endDate) {
+		if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty())
+			return false;
+		LocalDate now = LocalDate.now();
+		return !now.isBefore(LocalDate.parse(startDate)) && !now.isAfter(LocalDate.parse(endDate));
 	}
 
 	@Transactional

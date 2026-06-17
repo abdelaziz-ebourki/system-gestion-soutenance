@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.coordinator.group.service;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.coordinator.group.document.GroupDocumentService;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -15,6 +16,7 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.notification.event.StudentLeftGroupEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,16 +37,19 @@ public class GroupService {
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
+	private final GroupDocumentService groupDocumentService;
 
 	public GroupService(GroupRepository groupRepository, ProjectRepository projectRepository,
 			StudentRepository studentRepository, DefenseSessionRepository defenseSessionRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			ApplicationEventPublisher eventPublisher, SecurityService securityService,
+			GroupDocumentService groupDocumentService) {
 		this.groupRepository = groupRepository;
 		this.projectRepository = projectRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.eventPublisher = eventPublisher;
 		this.securityService = securityService;
+		this.groupDocumentService = groupDocumentService;
 	}
 
 	@Transactional(readOnly = true)
@@ -69,9 +74,11 @@ public class GroupService {
 			students = studentRepository.findAllById(request.studentIds());
 		}
 
+		DefenseSession defenseSession = null;
 		if (request.sessionId() != null) {
-			DefenseSession ds = defenseSessionRepository.findById(request.sessionId()).orElse(null);
-			if (ds != null && ds.getMaxGroupSize() > 0 && students.size() > ds.getMaxGroupSize()) {
+			defenseSession = defenseSessionRepository.findById(request.sessionId()).orElse(null);
+			if (defenseSession != null && defenseSession.getMaxGroupSize() > 0
+					&& students.size() > defenseSession.getMaxGroupSize()) {
 				throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");
 			}
 		}
@@ -93,7 +100,7 @@ public class GroupService {
 		group.setGroupName(request.groupName());
 		group.setProject(project);
 		group.setStudents(students);
-		group.setSessionId(request.sessionId());
+		group.setDefenseSession(defenseSession);
 		group.setLeaderId(leaderId);
 
 		return groupRepository.save(group);
@@ -131,6 +138,27 @@ public class GroupService {
 		groupRepository.save(group);
 		eventPublisher.publishEvent(
 				new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId, studentName, groupId));
+	}
+
+	@Audited(action = "UPDATE_PROJECT", entity = "Group")
+	@Transactional
+	public Group updateProject(Long id, Long projectId) {
+		Group group = groupRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
+		Project project = projectRepository.findById(projectId)
+				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
+		group.setProject(project);
+		Group saved = groupRepository.save(group);
+
+		List<com.system_gestion_soutenance.api.coordinator.group.document.GroupDocument> existing = groupDocumentService
+				.findByGroup(id);
+		if (existing.isEmpty()) {
+			LocalDate deadline = group.getDefenseSession() != null
+					? LocalDate.parse(group.getDefenseSession().getGroupCreationEndDate())
+					: null;
+			groupDocumentService.createDefaultDocuments(id, deadline);
+		}
+
+		return saved;
 	}
 
 	@Audited(action = "DELETE", entity = "Group")
@@ -194,9 +222,7 @@ public class GroupService {
 		if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
 			throw new InvalidBusinessStateException("L'étudiant est déjà dans ce groupe");
 		}
-		DefenseSession session = group.getSessionId() != null
-				? defenseSessionRepository.findById(group.getSessionId()).orElse(null)
-				: null;
+		DefenseSession session = group.getDefenseSession();
 		int maxSize = session != null && session.getMaxGroupSize() > 0 ? session.getMaxGroupSize() : 0;
 		if (maxSize > 0 && group.getStudents().size() >= maxSize) {
 			throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");

@@ -59,15 +59,11 @@ public class TeacherScheduleService {
 
 		Map<Long, List<String>> projectStudents = new HashMap<>();
 		for (Group group : groupRepository.findAll()) {
+			if (group.getProject() == null)
+				continue;
 			Long pid = group.getProject().getId();
 			if (projectIdsForTeacher.contains(pid)) {
-				projectStudents.put(pid, extractStudentNames(group.getStudents()));
-			}
-		}
-		for (Project project : allProjects) {
-			Long pid = project.getId();
-			if (projectIdsForTeacher.contains(pid) && !projectStudents.containsKey(pid)) {
-				projectStudents.put(pid, extractStudentNames(project.getStudents()));
+				projectStudents.computeIfAbsent(pid, k -> extractStudentNames(group.getStudents()));
 			}
 		}
 

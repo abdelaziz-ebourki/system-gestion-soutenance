@@ -10,5 +10,6 @@ public record EvaluationResponse(@Schema(description = "Identifiant unique de l'
 		@Schema(description = "Note finale du projet sur 20", example = "15.5") Double finalGrade,
 		@Schema(description = "Commentaire de l'évaluateur", example = "Excellent travail") String comment,
 		@Schema(description = "Statut de l'évaluation", example = "VALIDE") String status,
-		@Schema(description = "Statut de présence du candidat", example = "PRESENT") String attendanceStatus) {
+		@Schema(description = "Statut de présence du candidat", example = "PRESENT") String attendanceStatus,
+		@Schema(description = "Type d'évaluation", example = "SOUTENANCE") String type) {
 }

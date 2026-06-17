@@ -1,22 +1,24 @@
 package com.system_gestion_soutenance.api.notification.controller;
 
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
+import com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper;
 import com.system_gestion_soutenance.api.notification.dto.AppNotificationDto;
 import com.system_gestion_soutenance.api.notification.entity.AppNotification;
 import com.system_gestion_soutenance.api.notification.repository.NotificationRepository;
 import com.system_gestion_soutenance.api.notification.service.NotificationService;
-import com.system_gestion_soutenance.api.common.dto.ApiResponse;
-import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
-import com.system_gestion_soutenance.api.common.mapper.AppNotificationMapper;
+import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -37,14 +39,20 @@ public class NotificationController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List all notifications")
+	@Operation(summary = "List notifications for the connected user")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved notifications"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid query parameters")})
 	public ApiResponse<PaginatedResponse<AppNotificationDto>> findAll(
 			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
 			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
-		PaginatedResponse<AppNotification> result = notificationService.findAll(page, limit);
+		PaginatedResponse<AppNotification> result;
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof User user) {
+			result = notificationService.findAllByUser(user.getId(), page, limit);
+		} else {
+			result = notificationService.findAll(page, limit);
+		}
 		List<AppNotificationDto> items = result.items().stream().map(mapper::toDto).toList();
 		PaginatedResponse<AppNotificationDto> mapped = new PaginatedResponse<>(items, result.total(),
 				result.pageCount(), result.currentPage(), result.size());

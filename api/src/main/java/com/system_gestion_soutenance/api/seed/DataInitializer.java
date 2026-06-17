@@ -12,8 +12,6 @@ import com.system_gestion_soutenance.api.admin.config.level.entity.Level;
 import com.system_gestion_soutenance.api.admin.config.level.repository.LevelRepository;
 import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSessionStatus;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseType;
@@ -87,7 +85,6 @@ public class DataInitializer implements CommandLineRunner {
 	private final StudentDocumentRepository studentDocumentRepo;
 	private final NotificationRepository notificationRepo;
 	private final AuditLogRepository auditLogRepo;
-	private final DefenseSettingsRepository defenseSettingsRepo;
 
 	@SuppressWarnings("checkstyle:ParameterNumber")
 	public DataInitializer(MajorRepository majorRepo, LevelRepository levelRepo, TeacherRankRepository teacherRankRepo,
@@ -97,7 +94,7 @@ public class DataInitializer implements CommandLineRunner {
 			ProjectRepository projectRepo, DefenseRepository defenseRepo, GroupRepository groupRepo,
 			UnavailabilityRepository unavailabilityRepo, EvaluationRepository evaluationRepo,
 			StudentDocumentRepository studentDocumentRepo, NotificationRepository notificationRepo,
-			AuditLogRepository auditLogRepo, DefenseSettingsRepository defenseSettingsRepo) {
+			AuditLogRepository auditLogRepo) {
 		this.majorRepo = majorRepo;
 		this.levelRepo = levelRepo;
 		this.teacherRankRepo = teacherRankRepo;
@@ -117,7 +114,6 @@ public class DataInitializer implements CommandLineRunner {
 		this.studentDocumentRepo = studentDocumentRepo;
 		this.notificationRepo = notificationRepo;
 		this.auditLogRepo = auditLogRepo;
-		this.defenseSettingsRepo = defenseSettingsRepo;
 	}
 
 	@Override
@@ -125,9 +121,6 @@ public class DataInitializer implements CommandLineRunner {
 	public void run(String... args) {
 		if (majorRepo.count() > 0)
 			return;
-
-		// Phase 1: Singleton configs
-		defenseSettingsRepo.save(new DefenseSettings(1L, "08:00", "18:00", 30, 15, "2026-03-01", "2026-05-01"));
 
 		// Phase 2: Faculty
 		Faculty f1 = new Faculty();
@@ -310,8 +303,16 @@ public class DataInitializer implements CommandLineRunner {
 		ds1.setStartDate(LocalDate.of(2025, 6, 1));
 		ds1.setEndDate(LocalDate.of(2025, 6, 30));
 		ds1.setFrozen(true);
+		ds1.setAllowSupervisorInJury(false);
+		ds1.setResultsPublished(false);
 		ds1.setApprovedBy(admin.getId());
 		ds1.setApprovedAt(LocalDateTime.of(2025, 5, 10, 9, 0));
+		ds1.setStartTime("08:00");
+		ds1.setEndTime("18:00");
+		ds1.setGroupCreationStartDate("2026-03-01");
+		ds1.setGroupCreationEndDate("2026-05-01");
+		ds1.setRapportCoefficient(30);
+		ds1.setSoutenanceCoefficient(70);
 		defenseSessionRepo.save(ds1);
 		DefenseSession ds2 = new DefenseSession();
 		ds2.setName("Soutenance PFE Automne 2025");
@@ -326,8 +327,16 @@ public class DataInitializer implements CommandLineRunner {
 		ds2.setStartDate(LocalDate.of(2026, 1, 5));
 		ds2.setEndDate(LocalDate.of(2026, 1, 25));
 		ds2.setFrozen(true);
+		ds2.setAllowSupervisorInJury(false);
+		ds2.setResultsPublished(false);
 		ds2.setApprovedBy(admin.getId());
 		ds2.setApprovedAt(LocalDateTime.of(2025, 12, 10, 9, 0));
+		ds2.setStartTime("08:00");
+		ds2.setEndTime("18:00");
+		ds2.setGroupCreationStartDate("2026-03-01");
+		ds2.setGroupCreationEndDate("2026-05-01");
+		ds2.setRapportCoefficient(30);
+		ds2.setSoutenanceCoefficient(70);
 		defenseSessionRepo.save(ds2);
 		DefenseSession ds3 = new DefenseSession();
 		ds3.setName("Soutenance PFE Printemps 2026");
@@ -342,6 +351,14 @@ public class DataInitializer implements CommandLineRunner {
 		ds3.setStartDate(LocalDate.of(2026, 6, 15));
 		ds3.setEndDate(LocalDate.of(2026, 7, 10));
 		ds3.setFrozen(false);
+		ds3.setAllowSupervisorInJury(false);
+		ds3.setResultsPublished(false);
+		ds3.setStartTime("08:00");
+		ds3.setEndTime("18:00");
+		ds3.setGroupCreationStartDate("2026-03-01");
+		ds3.setGroupCreationEndDate("2026-05-01");
+		ds3.setRapportCoefficient(30);
+		ds3.setSoutenanceCoefficient(70);
 		ds3.setGroupFormationStartDate(LocalDate.of(2026, 6, 1));
 		ds3.setGroupFormationEndDate(LocalDate.of(2026, 7, 5));
 		defenseSessionRepo.save(ds3);
@@ -358,8 +375,16 @@ public class DataInitializer implements CommandLineRunner {
 		ds4.setStartDate(LocalDate.of(2026, 6, 20));
 		ds4.setEndDate(LocalDate.of(2026, 7, 15));
 		ds4.setFrozen(false);
+		ds4.setAllowSupervisorInJury(false);
+		ds4.setResultsPublished(false);
 		ds4.setApprovedBy(admin.getId());
 		ds4.setApprovedAt(LocalDateTime.of(2026, 6, 10, 9, 0));
+		ds4.setStartTime("08:00");
+		ds4.setEndTime("18:00");
+		ds4.setGroupCreationStartDate("2026-03-01");
+		ds4.setGroupCreationEndDate("2026-05-01");
+		ds4.setRapportCoefficient(30);
+		ds4.setSoutenanceCoefficient(70);
 		defenseSessionRepo.save(ds4);
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
@@ -378,8 +403,16 @@ public class DataInitializer implements CommandLineRunner {
 		ds5.setStartDate(LocalDate.of(2026, 6, 10));
 		ds5.setEndDate(LocalDate.of(2026, 7, 5));
 		ds5.setFrozen(false);
+		ds5.setAllowSupervisorInJury(false);
+		ds5.setResultsPublished(false);
 		ds5.setApprovedBy(admin.getId());
 		ds5.setApprovedAt(LocalDateTime.of(2026, 5, 20, 9, 0));
+		ds5.setStartTime("08:00");
+		ds5.setEndTime("18:00");
+		ds5.setGroupCreationStartDate("2026-03-01");
+		ds5.setGroupCreationEndDate("2026-05-01");
+		ds5.setRapportCoefficient(30);
+		ds5.setSoutenanceCoefficient(70);
 		defenseSessionRepo.save(ds5);
 		DefenseSession ds6 = new DefenseSession();
 		ds6.setName("Soutenance Rattrapage 2026");
@@ -394,6 +427,14 @@ public class DataInitializer implements CommandLineRunner {
 		ds6.setStartDate(LocalDate.of(2026, 9, 1));
 		ds6.setEndDate(LocalDate.of(2026, 9, 15));
 		ds6.setFrozen(false);
+		ds6.setAllowSupervisorInJury(false);
+		ds6.setResultsPublished(false);
+		ds6.setStartTime("08:00");
+		ds6.setEndTime("18:00");
+		ds6.setGroupCreationStartDate("2026-03-01");
+		ds6.setGroupCreationEndDate("2026-05-01");
+		ds6.setRapportCoefficient(30);
+		ds6.setSoutenanceCoefficient(70);
 		defenseSessionRepo.save(ds6);
 
 		// Phase 13: Projects
@@ -477,22 +518,8 @@ public class DataInitializer implements CommandLineRunner {
 
 		List<Project> projects = new ArrayList<>();
 		for (ProjSeed ps : projSeeds) {
-			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, new ArrayList<>(), null);
+			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, null);
 			projects.add(projectRepo.save(p));
-		}
-
-		// Phase 14: Project-Student links
-		int[][] projStudentMap = {{0}, {2, 3}, {5, 6, 7}, {8}, {11, 12}, {14, 15, 16}, {17}, {20, 21}, {23, 24, 25},
-				{26}, {29, 30}, {32, 33, 34}, {35}, {38, 39}, {41, 42, 43}, {44}, {47, 48}, {50, 51, 52}, {53},
-				{56, 57}, {59, 60, 61}, {62}, {65, 66}, {68, 69, 70}, {71}};
-		for (int pi = 0; pi < projStudentMap.length; pi++) {
-			Project p = projects.get(pi);
-			List<Student> pStudents = new ArrayList<>();
-			for (int si : projStudentMap[pi]) {
-				pStudents.add(studentsList.get(si));
-			}
-			p.setStudents(pStudents);
-			projectRepo.save(p);
 		}
 
 		// Phase 15: Defenses (Unified Jury and Slots)
@@ -517,7 +544,8 @@ public class DataInitializer implements CommandLineRunner {
 			List<JuryMember> members = new ArrayList<>();
 			String[] roles = juryCompositions[i % juryCompositions.length];
 			for (int j = 0; j < roles.length; j++) {
-				members.add(new JuryMember(teachers.get((i + j) % teachers.size()), roles[j]));
+				members.add(
+						new JuryMember(null, teachers.get((i + j) % teachers.size()), roles[j], d, null, null, null));
 			}
 			d.setMembers(members);
 
@@ -571,7 +599,7 @@ public class DataInitializer implements CommandLineRunner {
 			g.setGroupName(gs.name);
 			g.setProject(projects.get(gs.projIdx));
 			g.setStudents(new ArrayList<>());
-			g.setSessionId(dsArr[gs.sessionIdx].getId());
+			g.setDefenseSession(dsArr[gs.sessionIdx]);
 			g.setLeaderId(studentsList.get(gs.studentIdxs[0]).getId());
 			g.setStatus(com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus.ACTIVE);
 			for (int si : gs.studentIdxs) {
@@ -725,7 +753,8 @@ public class DataInitializer implements CommandLineRunner {
 			if (defense == null) {
 				continue;
 			}
-			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role, es.score,
+			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role,
+					com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType.SOUTENANCE, es.score,
 					"Évaluation complète.", es.status, es.submitted, null));
 		}
 
@@ -889,7 +918,8 @@ public class DataInitializer implements CommandLineRunner {
 						"Message détaillé pour soutenance annulée.", 19, 5, false, "coord@univh2c.ma"),};
 		for (NotifSeed ns : notifSeeds) {
 			notificationRepo.save(new AppNotification(null, ns.type, ns.title, ns.msg,
-					LocalDateTime.of(2026, ns.month, ns.day, 8 + (ns.day % 8), 0), ns.read, "/dashboard", ns.actor));
+					LocalDateTime.of(2026, ns.month, ns.day, 8 + (ns.day % 8), 0), ns.read, null, "/dashboard",
+					ns.actor));
 		}
 
 		// Phase 22: Audit Logs

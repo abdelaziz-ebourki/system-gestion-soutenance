@@ -74,7 +74,7 @@ class JuryControllerTest {
 
 	@Test
 	void create_returnsCreated() throws Exception {
-		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président");
+		CreateJuryRequest.MemberEntry member = new CreateJuryRequest.MemberEntry(1L, "président", null, null, null);
 		CreateJuryRequest request = new CreateJuryRequest(1L, List.of(member));
 		Defense defense = mock(Defense.class);
 		when(defense.getId()).thenReturn(1L);

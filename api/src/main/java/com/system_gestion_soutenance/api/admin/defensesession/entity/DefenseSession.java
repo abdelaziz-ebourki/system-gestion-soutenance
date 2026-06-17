@@ -66,6 +66,11 @@ public class DefenseSession {
 	@Column(name = "is_frozen")
 	private boolean isFrozen = false;
 
+	@Column(name = "allow_supervisor_in_jury")
+	private boolean allowSupervisorInJury = false;
+
+	@Column(name = "results_published")
+	private boolean resultsPublished = false;
 	@Column(name = "approved_by")
 	private Long approvedBy;
 
@@ -80,6 +85,24 @@ public class DefenseSession {
 
 	@Column(name = "group_formation_end_date")
 	private LocalDate groupFormationEndDate;
+
+	@Column(name = "start_time")
+	private String startTime;
+
+	@Column(name = "end_time")
+	private String endTime;
+
+	@Column(name = "group_creation_start_date")
+	private String groupCreationStartDate;
+
+	@Column(name = "group_creation_end_date")
+	private String groupCreationEndDate;
+
+	@Column(name = "rapport_coefficient")
+	private int rapportCoefficient = 30;
+
+	@Column(name = "soutenance_coefficient")
+	private int soutenanceCoefficient = 70;
 
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;

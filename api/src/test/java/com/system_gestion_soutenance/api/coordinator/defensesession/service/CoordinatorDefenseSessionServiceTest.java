@@ -46,7 +46,7 @@ class CoordinatorDefenseSessionServiceTest {
 	@Test
 	void create_withValidRequest_returnsSession() {
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session PFE", "PFE", null, 3, 30, 15,
-				null, null, null, "2025-06-01", "2025-06-30");
+				null, null, null, "2025-06-01", "2025-06-30", null, null, null, null);
 
 		DefenseSession saved = new DefenseSession();
 		saved.setId(1L);
@@ -74,7 +74,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "PFE", "DRAFT", 3, 30, 15,
-				null, Map.of("président", 2), 10L, "2025-06-01", "2025-06-30");
+				null, Map.of("président", 2), 10L, "2025-06-01", "2025-06-30", null, null, null, null);
 
 		DefenseSession saved = new DefenseSession();
 		saved.setId(1L);
@@ -103,7 +103,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(securityService.getCurrentUserEmail()).thenReturn("coord@test.com");
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "PFE", "DRAFT", 3, 30, 15,
-				null, null, 10L, "2025-06-01", "2025-06-30");
+				null, null, 10L, "2025-06-01", "2025-06-30", null, null, null, null);
 
 		DefenseSession saved = new DefenseSession();
 		saved.setId(1L);
@@ -120,7 +120,7 @@ class CoordinatorDefenseSessionServiceTest {
 	@Test
 	void create_invalidDefenseType_throwsException() {
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "INVALID", null, 3, 30, 15,
-				null, null, null, "2025-06-01", "2025-06-30");
+				null, null, null, "2025-06-01", "2025-06-30", null, null, null, null);
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
@@ -136,7 +136,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(existing));
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
-				null, null, null, "2025-07-01", "2025-07-31");
+				null, null, null, "2025-07-01", "2025-07-31", null, null, null, null);
 
 		when(defenseSessionRepository.save(any(DefenseSession.class))).thenReturn(existing);
 
@@ -150,7 +150,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(defenseSessionRepository.findById(99L)).thenReturn(Optional.empty());
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("X", "PFE", null, 1, 1, 1, null, null,
-				null, "2025-01-01", "2025-01-31");
+				null, "2025-01-01", "2025-01-31", null, null, null, null);
 
 		assertThrows(EntityNotFoundException.class, () -> service.update(99L, request));
 	}
@@ -167,7 +167,7 @@ class CoordinatorDefenseSessionServiceTest {
 	@Test
 	void create_withNullStatusAndSubmissionDeadline_setsDefaults() {
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Session", "PFE", null, 3, 30, 15, null,
-				null, null, "2025-06-01", "2025-06-30");
+				null, null, "2025-06-01", "2025-06-30", null, null, null, null);
 
 		DefenseSession saved = new DefenseSession();
 		saved.setId(1L);
@@ -191,7 +191,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(defenseSessionRepository.findById(1L)).thenReturn(Optional.of(existing));
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
-				null, null, null, "2025-07-01", "2025-07-31");
+				null, null, null, "2025-07-01", "2025-07-31", null, null, null, null);
 
 		when(defenseSessionRepository.save(existing)).thenReturn(existing);
 
@@ -221,7 +221,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(defenseSessionRepository.save(existing)).thenReturn(existing);
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
-				null, null, 10L, "2025-07-01", "2025-07-31");
+				null, null, 10L, "2025-07-01", "2025-07-31", null, null, null, null);
 
 		service.update(1L, request);
 
@@ -249,7 +249,7 @@ class CoordinatorDefenseSessionServiceTest {
 		when(defenseSessionRepository.save(existing)).thenReturn(existing);
 
 		CreateDefenseSessionRequest request = new CreateDefenseSessionRequest("Updated", "MEMOIRE", null, 4, 20, 10,
-				null, null, 10L, "2025-07-01", "2025-07-31");
+				null, null, 10L, "2025-07-01", "2025-07-31", null, null, null, null);
 
 		service.update(1L, request);
 

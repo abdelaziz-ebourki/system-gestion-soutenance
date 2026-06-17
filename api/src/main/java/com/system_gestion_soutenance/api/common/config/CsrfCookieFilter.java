@@ -13,27 +13,27 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class CsrfCookieFilter extends OncePerRequestFilter {
 
-	private static final Logger log = LoggerFactory.getLogger(CsrfCookieFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CsrfCookieFilter.class);
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
 
-		log.info("=== CsrfCookieFilter ===");
-		log.info("Method: {}", request.getMethod());
-		log.info("URI: {}", request.getRequestURI());
-		log.info("Cookies: {}", Arrays.toString(request.getCookies()));
-		log.info("X-XSRF-TOKEN header: {}", request.getHeader("X-XSRF-TOKEN"));
+		LOG.info("=== CsrfCookieFilter ===");
+		LOG.info("Method: {}", request.getMethod());
+		LOG.info("URI: {}", request.getRequestURI());
+		LOG.info("Cookies: {}", Arrays.toString(request.getCookies()));
+		LOG.info("X-XSRF-TOKEN header: {}", request.getHeader("X-XSRF-TOKEN"));
 
 		if (csrfToken != null) {
-			log.info("CSRF token found in request attribute");
+			LOG.info("CSRF token found in request attribute");
 			String tokenStr = csrfToken.getToken();
-			log.info("Token value: {}", tokenStr);
-			log.info("Header name expected: {}", csrfToken.getHeaderName());
-			log.info("Parameter name expected: {}", csrfToken.getParameterName());
+			LOG.info("Token value: {}", tokenStr);
+			LOG.info("Header name expected: {}", csrfToken.getHeaderName());
+			LOG.info("Parameter name expected: {}", csrfToken.getParameterName());
 		} else {
-			log.info("CSRF token NOT found in request attribute");
+			LOG.info("CSRF token NOT found in request attribute");
 		}
 
 		filterChain.doFilter(request, response);
