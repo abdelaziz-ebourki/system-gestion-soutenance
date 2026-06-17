@@ -20,7 +20,7 @@ public class JuryMember {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "teacher_id", nullable = false)
+	@JoinColumn(name = "teacher_id")
 	private Teacher teacher;
 
 	@Column(name = "role_name", nullable = false)
@@ -29,4 +29,13 @@ public class JuryMember {
 	@ManyToOne
 	@JoinColumn(name = "defense_id")
 	private Defense defense;
+
+	@Column(name = "external_name")
+	private String externalName;
+
+	@Column(name = "external_institution")
+	private String externalInstitution;
+
+	@Column(name = "external_email")
+	private String externalEmail;
 }

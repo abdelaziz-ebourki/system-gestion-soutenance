@@ -36,6 +36,14 @@ public class NotificationService {
 	}
 
 	@Transactional(readOnly = true)
+	public PaginatedResponse<AppNotification> findAllByUser(Long userId, int page, int limit) {
+		Page<AppNotification> notifPage = notificationRepository.findByUserIdOrUserIdIsNullOrderByTimestampDesc(userId,
+				PageRequest.of(page, limit));
+		return new PaginatedResponse<>(notifPage.getContent(), notifPage.getTotalElements(), notifPage.getTotalPages(),
+				page, limit);
+	}
+
+	@Transactional(readOnly = true)
 	public void sendNotificationEmail(Long notificationId) {
 		AppNotification notification = notificationRepository.findById(notificationId)
 				.orElseThrow(() -> new EntityNotFoundException("Notification non trouvée"));

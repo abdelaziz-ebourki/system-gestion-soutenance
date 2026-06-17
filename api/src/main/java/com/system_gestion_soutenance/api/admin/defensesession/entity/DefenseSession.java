@@ -68,6 +68,8 @@ public class DefenseSession {
 	@Column(name = "allow_supervisor_in_jury")
 	private boolean allowSupervisorInJury = false;
 
+	@Column(name = "results_published")
+	private boolean resultsPublished = false;
 	@Column(name = "approved_by")
 	private Long approvedBy;
 

@@ -3,6 +3,7 @@ package com.system_gestion_soutenance.api.coordinator.group.service;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
+import com.system_gestion_soutenance.api.coordinator.group.document.GroupDocumentService;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.coordinator.group.dto.CreateGroupRequest;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
@@ -14,6 +15,7 @@ import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.common.service.SecurityService;
 import com.system_gestion_soutenance.api.notification.event.StudentLeftGroupEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
@@ -33,16 +35,19 @@ public class GroupService {
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
+	private final GroupDocumentService groupDocumentService;
 
 	public GroupService(GroupRepository groupRepository, ProjectRepository projectRepository,
 			StudentRepository studentRepository, DefenseSessionRepository defenseSessionRepository,
-			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
+			ApplicationEventPublisher eventPublisher, SecurityService securityService,
+			GroupDocumentService groupDocumentService) {
 		this.groupRepository = groupRepository;
 		this.projectRepository = projectRepository;
 		this.studentRepository = studentRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.eventPublisher = eventPublisher;
 		this.securityService = securityService;
+		this.groupDocumentService = groupDocumentService;
 	}
 
 	@Transactional(readOnly = true)
@@ -131,6 +136,27 @@ public class GroupService {
 		groupRepository.save(group);
 		eventPublisher.publishEvent(
 				new StudentLeftGroupEvent(securityService.getCurrentUserEmail(), studentId, studentName, groupId));
+	}
+
+	@Audited(action = "UPDATE_PROJECT", entity = "Group")
+	@Transactional
+	public Group updateProject(Long id, Long projectId) {
+		Group group = groupRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
+		Project project = projectRepository.findById(projectId)
+				.orElseThrow(() -> new InvalidBusinessStateException("Projet introuvable"));
+		group.setProject(project);
+		Group saved = groupRepository.save(group);
+
+		List<com.system_gestion_soutenance.api.coordinator.group.document.GroupDocument> existing = groupDocumentService
+				.findByGroup(id);
+		if (existing.isEmpty()) {
+			LocalDate deadline = group.getDefenseSession() != null
+					? LocalDate.parse(group.getDefenseSession().getGroupCreationEndDate())
+					: null;
+			groupDocumentService.createDefaultDocuments(id, deadline);
+		}
+
+		return saved;
 	}
 
 	@Audited(action = "DELETE", entity = "Group")
