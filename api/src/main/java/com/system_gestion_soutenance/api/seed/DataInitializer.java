@@ -606,7 +606,9 @@ public class DataInitializer implements CommandLineRunner {
 			g.setStudents(new ArrayList<>());
 			g.setDefenseSession(dsArr[gs.sessionIdx]);
 			g.setLeaderId(studentsList.get(gs.studentIdxs[0]).getId());
-			g.setStatus(com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus.ACTIVE);
+			g.setStatus(gs.name().equals("Groupe H2")
+					? com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus.PENDING
+					: com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus.ACTIVE);
 			for (int si : gs.studentIdxs) {
 				g.getStudents().add(studentsList.get(si));
 			}

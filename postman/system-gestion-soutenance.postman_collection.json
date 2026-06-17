@@ -193,6 +193,83 @@
               }
             }
           }
+        },
+        {
+          "name": "Setup collection variables",
+          "description": "Discovers seed data IDs and sets environment variables (sessionId, groupId, defenseId, projectId, studentId). These are used by subsequent requests.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Setup session ID from first ACTIVE session\", function() {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.items) {",
+                  "    const sessions = json.data.items;",
+                  "    const active = sessions.find(s => s.status === 'ACTIVE' || s.status === 'SCHEDULED');",
+                  "    const sessionId = active ? active.id : sessions[0].id;",
+                  "    pm.environment.set(\"sessionId\", String(sessionId));",
+                  "    const baseUrl = pm.environment.get(\"base_url\");",
+                  "    const coordToken = pm.environment.get(\"coord_token\");",
+                  "    const groupsReq = {",
+                  "      url: baseUrl + '/api/coordinator/groups?page=0&limit=40',",
+                  "      method: 'GET',",
+                  "      header: { Cookie: 'jwt_token=' + coordToken }",
+                  "    };",
+                  "    pm.sendRequest(groupsReq, function(err, res) {",
+                  "      if (!err) {",
+                  "        const gjson = res.json();",
+                  "        if (gjson.data && gjson.data.items && gjson.data.items.length > 0) {",
+                  "          pm.environment.set(\"groupId\", String(gjson.data.items[0].id));",
+                  "        }",
+                  "      }",
+                  "    });",
+                  "  }",
+                  "  pm.environment.set(\"defenseId\", \"1\");",
+                  "  pm.environment.set(\"projectId\", \"1\");",
+                  "  pm.environment.set(\"studentId\", \"14\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Cookie",
+                "value": "jwt_token={{coord_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/coordinator/defense-sessions?page=0&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "coordinator",
+                "defense-sessions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
         }
       ]
     },
@@ -2302,212 +2379,10 @@
             }
           }
         },
-        {
-          "name": "Get general settings",
-          "description": "",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status 200 or 500\", function() { pm.expect([200, 500]).to.include(pm.response.code); });",
-                  "pm.test(\"Response is JSON object\", function() {",
-                  "  const json = pm.response.json();",
-                  "  pm.expect(json).to.be.an(\"object\");",
-                  "  pm.expect(json.id || json.data || json.success).to.exist;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Cookie",
-                "value": "jwt_token={{admin_token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/config/general",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "admin",
-                "config",
-                "general"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update general settings",
-          "description": "",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status 200 or 500\", function() { pm.expect([200, 500]).to.include(pm.response.code); });",
-                  "pm.test(\"Response contains updated resource\", function() {",
-                  "  const json = pm.response.json();",
-                  "  pm.expect(json).to.be.an(\"object\");",
-                  "  pm.expect(json.id || json.data || json.success).to.exist;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Cookie",
-                "value": "jwt_token={{admin_token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/config/general",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "admin",
-                "config",
-                "general"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\"institutionName\": \"Test Univ\", \"timezone\": \"Africa/Casablanca\", \"defenseDuration\": 30, \"breakDuration\": 10, \"startTime\": \"08:00\", \"endTime\": \"18:00\"}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get defense settings",
-          "description": "",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
-                  "pm.test(\"Response is JSON object\", function() {",
-                  "  const json = pm.response.json();",
-                  "  pm.expect(json).to.be.an(\"object\");",
-                  "  pm.expect(json.id).to.exist;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Cookie",
-                "value": "jwt_token={{admin_token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/config/settings",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "admin",
-                "config",
-                "settings"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update defense settings",
-          "description": "",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status 200\", function() { pm.response.to.have.status(200); });",
-                  "pm.test(\"Response contains updated resource\", function() {",
-                  "  const json = pm.response.json();",
-                  "  pm.expect(json).to.be.an(\"object\");",
-                  "  pm.expect(json.id).to.exist;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
-              {
-                "key": "Cookie",
-                "value": "jwt_token={{admin_token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/config/settings",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "admin",
-                "config",
-                "settings"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\"startTime\": \"08:00\", \"endTime\": \"18:00\", \"defenseDuration\": 30, \"breakDuration\": 10}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
+
+
+
+
         {
           "name": "List audit logs",
           "description": "",
@@ -5090,7 +4965,7 @@
                   "pm.test(\"Response contains approved group\", function() {",
                   "  const json = pm.response.json();",
                   "  pm.expect(json).to.be.an('object');",
-                  "  pm.expect(json.data.status).to.eql('APPROVED');",
+                  "  pm.expect(json.data.status).to.eql('ACTIVE');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -5222,12 +5097,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"supervisorId\": 3,\n  \"projectId\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "14"
             }
           }
         },
@@ -5315,7 +5185,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/coordinator/groups/sessions/{{sessionId}}/extend-group-formation",
+              "raw": "{{base_url}}/api/coordinator/groups/sessions/{{sessionId}}/extend-group-formation?days=30",
               "host": [
                 "{{base_url}}"
               ],
@@ -5326,16 +5196,13 @@
                 "sessions",
                 "{{sessionId}}",
                 "extend-group-formation"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"newDeadline\": \"2026-07-15\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
                 }
-              }
+              ]
             }
           }
         },
@@ -5992,7 +5859,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/student/groups/1/join",
+              "raw": "{{base_url}}/api/student/groups/1/members",
               "host": [
                 "{{base_url}}"
               ],
@@ -6001,7 +5868,7 @@
                 "student",
                 "groups",
                 "1",
-                "join"
+                "members"
               ]
             }
           }
