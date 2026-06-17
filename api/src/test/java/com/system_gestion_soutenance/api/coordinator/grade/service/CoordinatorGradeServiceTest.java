@@ -11,6 +11,7 @@ import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.JuryMember;
 import com.system_gestion_soutenance.api.coordinator.defense.repository.DefenseRepository;
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType;
 import com.system_gestion_soutenance.api.coordinator.grade.dto.GradeWeightedAverageResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
@@ -88,6 +89,8 @@ class CoordinatorGradeServiceTest {
 		DefenseSession ds = new DefenseSession();
 		ds.setId(1L);
 		ds.setEvaluationCoefficients(Map.of("président", 2));
+		ds.setRapportCoefficient(0);
+		ds.setSoutenanceCoefficient(100);
 
 		Evaluation eval = mock(Evaluation.class);
 		when(eval.getTeacherId()).thenReturn(10L);
@@ -95,6 +98,7 @@ class CoordinatorGradeServiceTest {
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
 		when(eval.getDefenseSessionId()).thenReturn(1L);
 		when(eval.getDefense()).thenReturn(defense);
+		when(eval.getType()).thenReturn(EvaluationType.SOUTENANCE);
 
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
@@ -143,10 +147,19 @@ class CoordinatorGradeServiceTest {
 		when(eval.getTeacherId()).thenReturn(10L);
 		when(eval.getScore()).thenReturn(15.0);
 		when(eval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(eval.getType()).thenReturn(EvaluationType.SOUTENANCE);
 		when(eval.getDefense()).thenReturn(defense);
+		when(eval.getDefenseSessionId()).thenReturn(1L);
+
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setRapportCoefficient(0);
+		ds.setSoutenanceCoefficient(100);
+		ds.setEvaluationCoefficients(Map.of("président", 1, "examinateur", 1));
 
 		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
 		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(eval));
+		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
 
 		var result = service.getGrades();
 
@@ -206,5 +219,57 @@ class CoordinatorGradeServiceTest {
 		var result = service.getGrades();
 
 		assertEquals(1, result.size());
+	}
+
+	@Test
+	void computeWeightedScore_withRapportAndSoutenance_usesCorrectFormula() {
+		Teacher teacher1 = mockTeacher(10L);
+		Teacher teacher2 = mockTeacher(20L);
+		Project project = mockProject(1L);
+
+		Defense defense = mock(Defense.class);
+		when(defense.getProject()).thenReturn(project);
+		when(defense.getMembers()).thenReturn(List.of(new JuryMember(null, teacher1, "Président", null),
+				new JuryMember(null, teacher2, "Examinateur", null)));
+		when(defense.getDate()).thenReturn(LocalDate.of(2025, 6, 15));
+
+		DefenseSession ds = new DefenseSession();
+		ds.setId(1L);
+		ds.setRapportCoefficient(30);
+		ds.setSoutenanceCoefficient(70);
+		ds.setEvaluationCoefficients(Map.of("Président", 2, "Examinateur", 1));
+
+		Evaluation rapportEval = mock(Evaluation.class);
+		when(rapportEval.getType()).thenReturn(EvaluationType.RAPPORT);
+		when(rapportEval.getScore()).thenReturn(16.0);
+		when(rapportEval.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(rapportEval.getDefense()).thenReturn(defense);
+		when(rapportEval.getDefenseSessionId()).thenReturn(1L);
+
+		Evaluation soutenance1 = mock(Evaluation.class);
+		when(soutenance1.getType()).thenReturn(EvaluationType.SOUTENANCE);
+		when(soutenance1.getTeacherId()).thenReturn(10L);
+		when(soutenance1.getScore()).thenReturn(14.0);
+		when(soutenance1.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(soutenance1.getDefense()).thenReturn(defense);
+		when(soutenance1.getDefenseSessionId()).thenReturn(1L);
+
+		Evaluation soutenance2 = mock(Evaluation.class);
+		when(soutenance2.getType()).thenReturn(EvaluationType.SOUTENANCE);
+		when(soutenance2.getTeacherId()).thenReturn(20L);
+		when(soutenance2.getScore()).thenReturn(11.0);
+		when(soutenance2.getStatus()).thenReturn(EvaluationStatus.SUBMITTED);
+		when(soutenance2.getDefense()).thenReturn(defense);
+		when(soutenance2.getDefenseSessionId()).thenReturn(1L);
+
+		when(defenseRepository.findAllWithMembers()).thenReturn(List.of(defense));
+		when(evaluationRepository.findByDefenseIn(any())).thenReturn(List.of(rapportEval, soutenance1, soutenance2));
+		when(defenseSessionRepository.findAllById(any())).thenReturn(List.of(ds));
+
+		var result = service.getGrades();
+
+		// avgSoutenance = (14*2 + 11*1) / 3 = 39 / 3 = 13.0
+		// finalScore = (16 * 30 + 13 * 70) / 100 = (480 + 910) / 100 = 13.9
+		assertEquals(13.9, result.get(0).finalScore());
 	}
 }

@@ -88,6 +88,12 @@ public class DefenseSession {
 	@Column(name = "group_creation_end_date")
 	private String groupCreationEndDate;
 
+	@Column(name = "rapport_coefficient")
+	private int rapportCoefficient = 30;
+
+	@Column(name = "soutenance_coefficient")
+	private int soutenanceCoefficient = 70;
+
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;
 	}

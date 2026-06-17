@@ -11,6 +11,7 @@ import com.system_gestion_soutenance.api.coordinator.project.repository.ProjectR
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationStatus;
+import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType;
 import com.system_gestion_soutenance.api.teacher.evaluation.repository.EvaluationRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -51,8 +52,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void findByTeacher_returnsList() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
 
 		assertEquals(1, service.findByTeacher(1L).size());
@@ -60,8 +61,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_success() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -80,8 +81,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_withNullScore_doesNotSetScore() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -99,8 +100,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_withNullComment_doesNotSetComment() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -125,8 +126,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_alreadySubmitted_throws() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", 12.0, null, EvaluationStatus.SUBMITTED,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, 12.0, null,
+				EvaluationStatus.SUBMITTED, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
 		assertThrows(InvalidBusinessStateException.class,
@@ -136,8 +137,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void findByTeacher_returnsListWithProject() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findByTeacherId(1L)).thenReturn(List.of(ev));
 
 		List<Evaluation> result = service.findByTeacher(1L);
@@ -147,8 +148,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_wrongTeacher_throws() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
 		assertThrows(UnauthorizedAccessException.class,
@@ -158,8 +159,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_frozenSession_throws() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 
 		DefenseSession ds = new DefenseSession();
@@ -174,8 +175,8 @@ class EvaluationServiceTest {
 
 	@Test
 	void submit_withAttendanceStatus_persistsAttendance() {
-		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", null, null, EvaluationStatus.PENDING,
-				null, null);
+		Evaluation ev = new Evaluation(1L, 1L, 1L, mockDefense(), "president", EvaluationType.SOUTENANCE, null, null,
+				EvaluationStatus.PENDING, null, null);
 		when(evaluationRepository.findById(1L)).thenReturn(Optional.of(ev));
 		when(evaluationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 		when(securityService.getCurrentUserEmail()).thenReturn("teacher@test.com");

@@ -293,19 +293,19 @@ public class DataInitializer implements CommandLineRunner {
 		DefenseSession ds1 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2025",
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
 				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, false, false, admin.getId(),
-				LocalDateTime.of(2025, 5, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+				LocalDateTime.of(2025, 5, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01", 30, 70));
 		DefenseSession ds2 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Automne 2025",
 				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe,
 				LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 25), true, false, false, admin.getId(),
-				LocalDateTime.of(2025, 12, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+				LocalDateTime.of(2025, 12, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01", 30, 70));
 		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
 				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
 				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10), false, false, false, null, null, "08:00", "18:00",
-				"2026-03-01", "2026-05-01"));
+				"2026-03-01", "2026-05-01", 30, 70));
 		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
 				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
 				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, false, false, admin.getId(),
-				LocalDateTime.of(2026, 6, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+				LocalDateTime.of(2026, 6, 10, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01", 30, 70));
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
 		coeffs2.put("Rapporteur", 30);
@@ -313,11 +313,11 @@ public class DataInitializer implements CommandLineRunner {
 		DefenseSession ds5 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Thèse Printemps 2026",
 				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
 				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, false, false, admin.getId(),
-				LocalDateTime.of(2026, 5, 20, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01"));
+				LocalDateTime.of(2026, 5, 20, 9, 0), "08:00", "18:00", "2026-03-01", "2026-05-01", 30, 70));
 		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
 				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
 				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15), false, false, false, null, null, "08:00", "18:00",
-				"2026-03-01", "2026-05-01"));
+				"2026-03-01", "2026-05-01", 30, 70));
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -630,7 +630,8 @@ public class DataInitializer implements CommandLineRunner {
 			if (defense == null) {
 				continue;
 			}
-			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role, es.score,
+			evaluationRepo.save(new Evaluation(null, es.tid, es.dsid, defense, es.role,
+					com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType.SOUTENANCE, es.score,
 					"Évaluation complète.", es.status, es.submitted, null));
 		}
 

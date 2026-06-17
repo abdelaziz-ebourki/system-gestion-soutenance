@@ -67,7 +67,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, false, null, null,
-						null, null, null, null));
+						null, null, null, null, 30, 70));
 
 		mockMvc.perform(get("/api/coordinator/defense-sessions")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.items").isArray())
@@ -85,7 +85,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Session PFE", "PFE", "CREATED", 3, 30, 15, null, null, null, null, null, false, false, null,
-						null, null, null, null, null));
+						null, null, null, null, null, 30, 70));
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated())
@@ -103,7 +103,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Updated Session", "MEMOIRE", "ACTIVE", 4, 20, 10, null, null, null, null, null, false, false,
-						null, null, null, null, null, null));
+						null, null, null, null, null, null, 30, 70));
 
 		mockMvc.perform(put("/api/coordinator/defense-sessions/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))).andExpect(status().isOk())
@@ -126,7 +126,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, false, null, null,
-						null, null, null, null));
+						null, null, null, null, 30, 70));
 
 		mockMvc.perform(post("/api/coordinator/defense-sessions/1/transition").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(Map.of("toStatus", "ACTIVE")))).andExpect(status().isOk())
@@ -143,7 +143,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, false, 1L,
-						java.time.LocalDateTime.of(2026, 6, 13, 9, 0), null, null, null, null));
+						java.time.LocalDateTime.of(2026, 6, 13, 9, 0), null, null, null, null, 30, 70));
 
 		mockMvc.perform(patch("/api/coordinator/defense-sessions/1/approve")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.approvedBy").value(1));
@@ -159,7 +159,7 @@ class CoordinatorDefenseSessionControllerTest {
 		when(defenseSessionMapper.toDto(ds))
 				.thenReturn(new com.system_gestion_soutenance.api.admin.defensesession.dto.DefenseSessionDto(1L,
 						"Session 1", "PFE", "ACTIVE", 3, 30, 15, null, null, null, null, null, false, false, null, null,
-						null, null, null, null));
+						null, null, null, null, 30, 70));
 
 		mockMvc.perform(patch("/api/coordinator/defense-sessions/1/revoke-approval")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.approvedBy").isEmpty());
