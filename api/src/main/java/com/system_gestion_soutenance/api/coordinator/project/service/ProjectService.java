@@ -87,6 +87,11 @@ public class ProjectService {
 		project.setStatus(ProjectStatus.PENDING);
 		project.setSupervisor(supervisor);
 
+		if (request.coSupervisorIds() != null) {
+			List<Teacher> coSupervisors = teacherRepository.findAllById(request.coSupervisorIds());
+			project.setCoSupervisors(coSupervisors);
+		}
+
 		Project saved = projectRepository.save(project);
 		eventPublisher.publishEvent(new ProjectProposedEvent(securityService.getCurrentUserEmail(), saved.getId(),
 				saved.getTitle(), "Divers"));
@@ -105,6 +110,10 @@ public class ProjectService {
 			project.setDescription(updates.description());
 		if (updates.defenseType() != null)
 			project.setDefenseType(updates.defenseType());
+		if (updates.coSupervisorIds() != null) {
+			List<Teacher> coSupervisors = teacherRepository.findAllById(updates.coSupervisorIds());
+			project.setCoSupervisors(coSupervisors);
+		}
 
 		return projectRepository.save(project);
 	}

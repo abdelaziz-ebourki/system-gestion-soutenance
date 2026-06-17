@@ -84,8 +84,8 @@ class ProjectServiceTest {
 		when(studentRepository.findAllById(List.of(10L))).thenReturn(List.of(student));
 		when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
 
-		CreateProjectRequest request = new CreateProjectRequest("New Project", "A description", 1L, "PFE",
-				List.of(10L));
+		CreateProjectRequest request = new CreateProjectRequest("New Project", "A description", 1L, "PFE", List.of(10L),
+				null);
 		var result = service.create(request);
 
 		assertEquals("New Project", result.getTitle());
@@ -96,7 +96,7 @@ class ProjectServiceTest {
 	void create_supervisorNotFound_throwsException() {
 		when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
 
-		CreateProjectRequest request = new CreateProjectRequest("Title", "Desc", 99L, "PFE", List.of());
+		CreateProjectRequest request = new CreateProjectRequest("Title", "Desc", 99L, "PFE", List.of(), null);
 
 		assertThrows(InvalidBusinessStateException.class, () -> service.create(request));
 	}
@@ -117,7 +117,7 @@ class ProjectServiceTest {
 		when(teacherRepository.findById(1L)).thenReturn(Optional.of(supervisor));
 		when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
 
-		CreateProjectRequest request = new CreateProjectRequest("Project", "Desc", 1L, "PFE", null);
+		CreateProjectRequest request = new CreateProjectRequest("Project", "Desc", 1L, "PFE", null, null);
 		var result = service.create(request);
 
 		assertEquals("Project", result.getTitle());
@@ -137,7 +137,7 @@ class ProjectServiceTest {
 
 		var result = service.update(1L,
 				new com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest("Updated", "Desc",
-						"PFE"));
+						"PFE", null));
 
 		verify(project).setTitle("Updated");
 		assertEquals("Updated", result.getTitle());
@@ -150,7 +150,7 @@ class ProjectServiceTest {
 		assertThrows(EntityNotFoundException.class,
 				() -> service.update(99L,
 						new com.system_gestion_soutenance.api.coordinator.project.dto.UpdateProjectRequest("X", "Desc",
-								"PFE")));
+								"PFE", null)));
 	}
 
 	@Test

@@ -15,6 +15,7 @@ public interface ProjectMapper {
 	@Mapping(target = "groupId", expression = "java(projectGroupIds != null ? projectGroupIds.get(project.getId()) : null)")
 	@Mapping(target = "supervisorName", expression = "java(resolveSupervisorName(project))")
 	@Mapping(target = "studentNames", expression = "java(projectStudentNames != null ? projectStudentNames.getOrDefault(project.getId(), List.of()) : List.of())")
+	@Mapping(target = "coSupervisors", expression = "java(mapCoSupervisors(project))")
 	ProjectResponse toDto(Project project, Map<Long, Long> projectGroupIds,
 			Map<Long, List<String>> projectStudentNames);
 
@@ -22,5 +23,12 @@ public interface ProjectMapper {
 		if (project.getSupervisor() == null)
 			return null;
 		return project.getSupervisor().getFirstName() + " " + project.getSupervisor().getLastName();
+	}
+
+	default List<ProjectResponse.CoSupervisorDto> mapCoSupervisors(Project project) {
+		if (project.getCoSupervisors() == null)
+			return List.of();
+		return project.getCoSupervisors().stream().map(t -> new ProjectResponse.CoSupervisorDto(t.getId(),
+				t.getFirstName() + " " + t.getLastName(), t.getEmail())).toList();
 	}
 }
