@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 @SuppressWarnings("PMD")
 
 @Entity
@@ -15,7 +17,6 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class DefenseSession {
 
 	@Id
@@ -75,6 +76,15 @@ public class DefenseSession {
 
 	@Column(name = "approved_at")
 	private LocalDateTime approvedAt;
+
+	@Column(name = "min_group_size")
+	private int minGroupSize = 1;
+
+	@Column(name = "group_formation_start_date")
+	private LocalDate groupFormationStartDate;
+
+	@Column(name = "group_formation_end_date")
+	private LocalDate groupFormationEndDate;
 
 	@Column(name = "start_time")
 	private String startTime;

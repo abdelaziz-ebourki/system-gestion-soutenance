@@ -5,7 +5,6 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import jakarta.persistence.*;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Group {
 
 	@Id
@@ -40,4 +38,8 @@ public class Group {
 
 	@Column(name = "leader_id")
 	private Long leaderId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private GroupStatus status = GroupStatus.PENDING;
 }

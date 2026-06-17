@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.coordinator.group.service.GroupService;
 import com.system_gestion_soutenance.api.common.dto.ApiResponse;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.GroupMapper;
+import com.system_gestion_soutenance.api.user.entity.Student;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -95,5 +97,65 @@ public class GroupController {
 			@Parameter(description = "Student ID") @PathVariable Long studentId) {
 		groupService.removeMember(id, studentId);
 		return ResponseEntity.ok(ApiResponse.success("Membre supprimé avec succès", null));
+	}
+
+	@PatchMapping("/{id}/approve")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Approve group", description = "Validates a PENDING group and sets its status to ACTIVE.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group approved successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Group is not PENDING")})
+	public ResponseEntity<ApiResponse<GroupResponse>> approveGroup(
+			@Parameter(description = "Group ID") @PathVariable Long id) {
+		Group group = groupService.approveGroup(id);
+		return ResponseEntity.ok(ApiResponse.success("Groupe approuvé avec succès", groupMapper.toDto(group)));
+	}
+
+	@PatchMapping("/{id}/reject")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Reject group", description = "Rejects a PENDING group and removes it.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Group rejected successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Group is not PENDING")})
+	public ResponseEntity<ApiResponse<Void>> rejectGroup(@Parameter(description = "Group ID") @PathVariable Long id) {
+		groupService.rejectGroup(id);
+		return ResponseEntity.ok(ApiResponse.success("Groupe rejeté avec succès", null));
+	}
+
+	@PostMapping("/{id}/assign")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Assign student to group", description = "Manually assigns a student to an existing group.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Student assigned successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Group is full or student already in a group")})
+	public ResponseEntity<ApiResponse<GroupResponse>> assignStudent(
+			@Parameter(description = "Group ID") @PathVariable Long id,
+			@Parameter(description = "Student ID") @RequestBody @NotNull Long studentId) {
+		Group group = groupService.assignStudentToGroup(studentId, id);
+		return ResponseEntity.ok(ApiResponse.success("Étudiant assigné avec succès", groupMapper.toDto(group)));
+	}
+
+	@PatchMapping("/sessions/{sessionId}/extend-group-formation")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Extend group formation deadline", description = "Extends the group formation end date by N days.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Deadline extended successfully")})
+	public ResponseEntity<ApiResponse<Void>> extendGroupFormation(
+			@Parameter(description = "Session ID") @PathVariable Long sessionId,
+			@Parameter(description = "Number of days to extend") @RequestParam @Min(1) int days) {
+		groupService.extendGroupFormation(sessionId, days);
+		return ResponseEntity.ok(ApiResponse.success("Date de formation prolongée avec succès", null));
+	}
+
+	@GetMapping("/sessions/{sessionId}/ungrouped-students")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "List ungrouped students", description = "Lists students not in any ACTIVE group for a session.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved ungrouped students")})
+	public ResponseEntity<ApiResponse<List<Long>>> getUngroupedStudents(
+			@Parameter(description = "Session ID") @PathVariable Long sessionId) {
+		List<Student> ungrouped = groupService.getUngroupedStudents(sessionId);
+		List<Long> ids = ungrouped.stream().map(Student::getId).toList();
+		return ResponseEntity.ok(ApiResponse.success("Étudiants non groupés récupérés avec succès", ids));
 	}
 }
