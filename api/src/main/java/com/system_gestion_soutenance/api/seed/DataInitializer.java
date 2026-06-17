@@ -313,7 +313,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds1.setGroupCreationEndDate("2026-05-01");
 		ds1.setRapportCoefficient(30);
 		ds1.setSoutenanceCoefficient(70);
-		defenseSessionRepo.save(ds1);
+		ds1 = defenseSessionRepo.save(ds1);
 		DefenseSession ds2 = new DefenseSession();
 		ds2.setName("Soutenance PFE Automne 2025");
 		ds2.setDefenseType(DefenseType.PFE);
@@ -337,7 +337,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds2.setGroupCreationEndDate("2026-05-01");
 		ds2.setRapportCoefficient(30);
 		ds2.setSoutenanceCoefficient(70);
-		defenseSessionRepo.save(ds2);
+		ds2 = defenseSessionRepo.save(ds2);
 		DefenseSession ds3 = new DefenseSession();
 		ds3.setName("Soutenance PFE Printemps 2026");
 		ds3.setDefenseType(DefenseType.PFE);
@@ -361,7 +361,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds3.setSoutenanceCoefficient(70);
 		ds3.setGroupFormationStartDate(LocalDate.of(2026, 6, 1));
 		ds3.setGroupFormationEndDate(LocalDate.of(2026, 7, 5));
-		defenseSessionRepo.save(ds3);
+		ds3 = defenseSessionRepo.save(ds3);
 		DefenseSession ds4 = new DefenseSession();
 		ds4.setName("Soutenance Mémoire Printemps 2026");
 		ds4.setDefenseType(DefenseType.MEMOIRE);
@@ -385,7 +385,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds4.setGroupCreationEndDate("2026-05-01");
 		ds4.setRapportCoefficient(30);
 		ds4.setSoutenanceCoefficient(70);
-		defenseSessionRepo.save(ds4);
+		ds4 = defenseSessionRepo.save(ds4);
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
 		coeffs2.put("Rapporteur", 30);
@@ -413,7 +413,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds5.setGroupCreationEndDate("2026-05-01");
 		ds5.setRapportCoefficient(30);
 		ds5.setSoutenanceCoefficient(70);
-		defenseSessionRepo.save(ds5);
+		ds5 = defenseSessionRepo.save(ds5);
 		DefenseSession ds6 = new DefenseSession();
 		ds6.setName("Soutenance Rattrapage 2026");
 		ds6.setDefenseType(DefenseType.PFE);
@@ -435,7 +435,7 @@ public class DataInitializer implements CommandLineRunner {
 		ds6.setGroupCreationEndDate("2026-05-01");
 		ds6.setRapportCoefficient(30);
 		ds6.setSoutenanceCoefficient(70);
-		defenseSessionRepo.save(ds6);
+		ds6 = defenseSessionRepo.save(ds6);
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -518,7 +518,13 @@ public class DataInitializer implements CommandLineRunner {
 
 		List<Project> projects = new ArrayList<>();
 		for (ProjSeed ps : projSeeds) {
-			Project p = new Project(null, ps.title, ps.desc, ps.dtype, ps.status, ps.sup, null);
+			Project p = new Project();
+			p.setTitle(ps.title);
+			p.setDescription(ps.desc);
+			p.setDefenseType(ps.dtype);
+			p.setStatus(ps.status);
+			p.setSupervisor(ps.sup);
+			p.setStudents(new ArrayList<>());
 			projects.add(projectRepo.save(p));
 		}
 

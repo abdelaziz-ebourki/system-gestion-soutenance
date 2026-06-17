@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.5; }
+        h1 { font-size: 18px; text-align: center; color: #1a237e; margin-bottom: 5px; }
+        h2 { font-size: 14px; text-align: center; color: #1a237e; margin-top: 10px; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #1a237e; padding-bottom: 15px; }
+        .content { margin: 30px 20px; }
+        .info-row { margin-bottom: 8px; }
+        .info-label { font-weight: bold; display: inline-block; width: 180px; }
+        .score-box { border: 2px solid #1a237e; padding: 15px; text-align: center; margin: 20px 0; font-size: 16px; }
+        .jury-list { list-style: none; padding: 0; }
+        .jury-list li { margin-bottom: 4px; }
+        .footer { margin-top: 50px; text-align: center; font-size: 10px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 th:text="${certificate.institutionName} ?: 'Universit&#233;'">Universit&#233;</h1>
+        <h1>Certificat de Notes</h1>
+    </div>
+
+    <div class="content">
+        <p>Je soussign&#233;, responsable de l'&#233;tablissement, certifie que :</p>
+
+        <div class="info-row">
+            <span class="info-label">&#201;tudiant :</span>
+            <span th:text="${certificate.studentName}">Nom de l'&#233;tudiant</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Projet :</span>
+            <span th:text="${certificate.projectTitle}">Titre du projet</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Type de soutenance :</span>
+            <span th:text="${certificate.defenseType}">Type</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date de soutenance :</span>
+            <span th:text="${certificate.defenseDate}">Date</span>
+        </div>
+
+        <div class="score-box">
+            <div>Note Finale : <strong th:text="${certificate.finalScore}">0.0</strong> / 20</div>
+            <div style="margin-top: 8px;">Mention : <strong th:text="${certificate.mention}">Mention</strong></div>
+        </div>
+
+        <h2>Composition du Jury</h2>
+        <ul class="jury-list">
+            <li th:each="member : ${certificate.juryMemberNames}" th:text="${member}">Membre du jury</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Ce certificat est d&#233;livr&#233; pour servir et valoir ce que de droit.</p>
+        <p>Fait le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">date</span></p>
+    </div>
+</body>
+</html>

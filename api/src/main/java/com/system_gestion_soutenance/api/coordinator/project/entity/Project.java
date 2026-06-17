@@ -4,7 +4,6 @@ import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.coordinator.defense.entity.Defense;
 import jakarta.persistence.*;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Project {
 
 	@Id
@@ -30,6 +28,12 @@ public class Project {
 
 	@Column(name = "defense_type", nullable = false)
 	private String defenseType;
+
+	@Column(name = "max_students")
+	private Integer maxStudents;
+
+	@Column(name = "proposed_by_teacher_id")
+	private Long proposedByTeacherId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)

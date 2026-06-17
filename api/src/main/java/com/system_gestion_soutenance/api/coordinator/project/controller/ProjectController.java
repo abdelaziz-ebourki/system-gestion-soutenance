@@ -58,13 +58,20 @@ public class ProjectController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List projects", description = "Retrieves all projects assigned for the current session.")
+	@Operation(summary = "List projects", description = "Retrieves all projects assigned for the current session, optionally filtered by status.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved projects")})
 	public ApiResponse<PaginatedResponse<ProjectResponse>> findAll(
+			@Parameter(description = "Filter by status") @RequestParam(required = false) String status,
 			@Parameter(description = "Page number") @RequestParam(defaultValue = "0") @Min(0) int page,
 			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
-		PaginatedResponse<Project> result = projectService.findAll(page, limit);
+		com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus statusEnum = status != null
+				? com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus
+						.valueOf(status.toUpperCase())
+				: null;
+		PaginatedResponse<Project> result = statusEnum != null
+				? projectService.findAllByStatus(statusEnum, page, limit)
+				: projectService.findAll(page, limit);
 		Map<Long, Long> projectGroupIds = projectService.buildProjectGroupIdMap(result.items());
 		Map<Long, List<String>> projectStudentNames = buildProjectStudentNames(result.items());
 		List<ProjectResponse> items = result.items().stream()
@@ -122,6 +129,55 @@ public class ProjectController {
 		Project project = projectService.updateStatus(id, request.status());
 		return ApiResponse.success("Statut du projet mis à jour",
 				projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap()));
+	}
+
+	@PatchMapping("/{id}/validate")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Validate proposal", description = "Validates a teacher-proposed project, moving it from PROPOSED to PENDING.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project validated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
+	public ApiResponse<ProjectResponse> validateProposal(@Parameter(description = "Project ID") @PathVariable Long id) {
+		Project project = projectService.updateStatus(id,
+				com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus.PENDING);
+		return ApiResponse.success("Proposition validée avec succès",
+				projectMapper.toDto(project, Collections.emptyMap()));
+	}
+
+	@PatchMapping("/{id}/reject-proposal")
+	@PreAuthorize("hasRole('COORDINATOR')")
+	@Operation(summary = "Reject proposal", description = "Rejects a teacher-proposed project, moving it from PROPOSED to REJECTED.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Proposal rejected successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
+	public ApiResponse<ProjectResponse> rejectProposal(@Parameter(description = "Project ID") @PathVariable Long id) {
+		Project project = projectService.updateStatus(id,
+				com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus.REJECTED);
+		return ApiResponse.success("Proposition rejetée", projectMapper.toDto(project, Collections.emptyMap()));
+	}
+
+	@PatchMapping("/{id}/confirm-supervision")
+	@PreAuthorize("hasAnyRole('TEACHER', 'COORDINATOR')")
+	@Operation(summary = "Confirm supervision", description = "Supervisor confirms their supervision of the project.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Supervision confirmed"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
+	public ApiResponse<ProjectResponse> confirmSupervision(
+			@Parameter(description = "Project ID") @PathVariable Long id) {
+		Project project = projectService.confirmSupervision(id);
+		return ApiResponse.success("Encadrement confirmé", projectMapper.toDto(project, Collections.emptyMap()));
+	}
+
+	@PatchMapping("/{id}/decline-supervision")
+	@PreAuthorize("hasAnyRole('TEACHER', 'COORDINATOR')")
+	@Operation(summary = "Decline supervision", description = "Supervisor declines their supervision of the project.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Supervision declined"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Project not found")})
+	public ApiResponse<ProjectResponse> declineSupervision(
+			@Parameter(description = "Project ID") @PathVariable Long id) {
+		Project project = projectService.declineSupervision(id);
+		return ApiResponse.success("Encadrement décliné", projectMapper.toDto(project, Collections.emptyMap()));
 	}
 
 	@DeleteMapping("/{id}")

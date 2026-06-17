@@ -104,6 +104,18 @@ public class DefenseSession {
 	@Column(name = "soutenance_coefficient")
 	private int soutenanceCoefficient = 70;
 
+	@Column(name = "deliberated_by")
+	private Long deliberatedBy;
+
+	@Column(name = "deliberated_at")
+	private LocalDateTime deliberatedAt;
+
+	@Column(name = "validated_by")
+	private Long validatedBy;
+
+	@Column(name = "validated_at")
+	private LocalDateTime validatedAt;
+
 	public Long getJuryRoleTemplateId() {
 		return juryRoleTemplate != null ? juryRoleTemplate.getId() : null;
 	}

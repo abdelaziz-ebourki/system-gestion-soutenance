@@ -76,7 +76,7 @@ class ProjectControllerTest {
 		when(project.getId()).thenReturn(1L);
 		when(project.getTitle()).thenReturn("Projet Test");
 
-		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", "PENDING", 1L, "Supervisor",
+		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", null, "PENDING", 1L, "Supervisor",
 				List.of(), List.of());
 
 		when(projectService.findAll(0, 10)).thenReturn(new PaginatedResponse<>(List.of(project), 1, 1, 0, 10));
@@ -93,7 +93,7 @@ class ProjectControllerTest {
 		CreateProjectRequest request = new CreateProjectRequest("New Project", "Description", 1L, "PFE", List.of(1L),
 				null);
 		Project project = mock(Project.class);
-		ProjectResponse dto = new ProjectResponse(1L, "New Project", "Desc", "PFE", "PENDING", 1L, "Supervisor",
+		ProjectResponse dto = new ProjectResponse(1L, "New Project", "Desc", "PFE", null, "PENDING", 1L, "Supervisor",
 				List.of(), List.of());
 
 		when(projectService.create(any())).thenReturn(project);
@@ -108,8 +108,8 @@ class ProjectControllerTest {
 	void update_returnsProject() throws Exception {
 		UpdateProjectRequest updates = new UpdateProjectRequest("Updated Project", "Desc", "PFE", null);
 		Project project = mock(Project.class);
-		ProjectResponse dto = new ProjectResponse(1L, "Updated Project", "Desc", "PFE", "PENDING", 1L, "Supervisor",
-				List.of(), List.of());
+		ProjectResponse dto = new ProjectResponse(1L, "Updated Project", "Desc", "PFE", null, "PENDING", 1L,
+				"Supervisor", List.of(), List.of());
 
 		when(projectService.update(eq(1L), any())).thenReturn(project);
 		when(projectMapper.toDto(project, Collections.emptyMap(), Collections.emptyMap())).thenReturn(dto);
@@ -130,7 +130,7 @@ class ProjectControllerTest {
 	@Test
 	void updateStatus_approve_returns200() throws Exception {
 		Project project = mock(Project.class);
-		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", "APPROVED", 1L, "Supervisor",
+		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", null, "APPROVED", 1L, "Supervisor",
 				List.of(), List.of());
 
 		when(projectService.updateStatus(eq(1L), eq(ProjectStatus.APPROVED))).thenReturn(project);
@@ -146,7 +146,7 @@ class ProjectControllerTest {
 	@Test
 	void updateStatus_reject_returns200() throws Exception {
 		Project project = mock(Project.class);
-		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", "REJECTED", 1L, "Supervisor",
+		ProjectResponse dto = new ProjectResponse(1L, "Projet Test", "Desc", "PFE", null, "REJECTED", 1L, "Supervisor",
 				List.of(), List.of());
 
 		when(projectService.updateStatus(eq(1L), eq(ProjectStatus.REJECTED))).thenReturn(project);

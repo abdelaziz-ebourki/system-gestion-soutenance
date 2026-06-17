@@ -1,6 +1,7 @@
 package com.system_gestion_soutenance.api.coordinator.project.repository;
 
 import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
+import com.system_gestion_soutenance.api.coordinator.project.entity.ProjectStatus;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +16,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
 	@Query(value = "SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.supervisor", countQuery = "SELECT COUNT(p) FROM Project p")
 	Page<Project> findAllWithDetails(Pageable pageable);
+
+	List<Project> findByStatus(ProjectStatus status);
+
+	Page<Project> findByStatus(ProjectStatus status, Pageable pageable);
 }

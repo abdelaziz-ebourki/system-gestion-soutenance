@@ -90,4 +90,36 @@ public class StudentGroupController {
 		studentGroupService.leaveGroup(user.getId());
 		return ResponseEntity.ok(ApiResponse.success("Vous avez quitté le groupe", null));
 	}
+
+	@PostMapping("/{id}/select-project/{projectId}")
+	@Operation(summary = "Select project", description = "Group leader selects a project for the group.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Project selected successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Selection not allowed"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group or project not found")})
+	public ApiResponse<GroupDetailsResponse> selectProject(@Parameter(description = "Group ID") @PathVariable Long id,
+			@Parameter(description = "Project ID") @PathVariable Long projectId, @AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
+		return ApiResponse.success(studentGroupMapper
+				.toDetails(studentGroupService.selectProject(id, projectId, user.getId()), user.getId()));
+	}
+
+	@PostMapping("/{id}/cancel-project-selection")
+	@Operation(summary = "Cancel project selection", description = "Group leader cancels the project selection for the group.")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Selection cancelled successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Not allowed"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
+	public ApiResponse<GroupDetailsResponse> cancelProjectSelection(
+			@Parameter(description = "Group ID") @PathVariable Long id, @AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
+					"User not authenticated");
+		}
+		return ApiResponse.success(studentGroupMapper
+				.toDetails(studentGroupService.cancelProjectSelection(id, user.getId()), user.getId()));
+	}
 }
