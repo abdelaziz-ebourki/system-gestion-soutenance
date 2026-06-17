@@ -76,7 +76,7 @@ public class CoordinatorGradeService {
 
 			List<IndividualScoreResponse> individualScores = buildIndividualScores(defense.getMembers(), evaluations);
 
-				DefenseSession session = defenseSessionRepository.findById(defenseSessionId).orElse(null);
+			DefenseSession session = defenseSessionRepository.findById(defenseSessionId).orElse(null);
 			String status = computeStatus(evaluations, defense.getMembers().size(), session);
 			Double finalScore = status.equals("completed")
 					? computeWeightedScore(defense.getMembers(), evaluations, coefficients, session)
@@ -113,13 +113,10 @@ public class CoordinatorGradeService {
 	}
 
 	private String computeStatus(List<Evaluation> evaluations, int totalMembers, DefenseSession session) {
-		boolean hasRapport = evaluations.stream().anyMatch(
-				e -> e.getType() == EvaluationType.RAPPORT && e.getStatus() == EvaluationStatus.SUBMITTED
-						&& e.getScore() != null);
-		long submittedSoutenance = evaluations.stream()
-				.filter(e -> e.getType() == EvaluationType.SOUTENANCE && e.getStatus() == EvaluationStatus.SUBMITTED
-						&& e.getScore() != null)
-				.count();
+		boolean hasRapport = evaluations.stream().anyMatch(e -> e.getType() == EvaluationType.RAPPORT
+				&& e.getStatus() == EvaluationStatus.SUBMITTED && e.getScore() != null);
+		long submittedSoutenance = evaluations.stream().filter(e -> e.getType() == EvaluationType.SOUTENANCE
+				&& e.getStatus() == EvaluationStatus.SUBMITTED && e.getScore() != null).count();
 		boolean allSoutenanceSubmitted = submittedSoutenance >= totalMembers;
 		if (!hasRapport && submittedSoutenance == 0)
 			return "no_evaluations";

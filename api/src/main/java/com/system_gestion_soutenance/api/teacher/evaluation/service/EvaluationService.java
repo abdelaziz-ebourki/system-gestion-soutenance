@@ -48,8 +48,7 @@ public class EvaluationService {
 	public EvaluationService(EvaluationRepository evaluationRepository,
 			DefenseSessionRepository defenseSessionRepository, ProjectRepository projectRepository,
 			DefenseRepository defenseRepository, GroupRepository groupRepository,
-			ApplicationEventPublisher eventPublisher,
-			SecurityService securityService) {
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.evaluationRepository = evaluationRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.projectRepository = projectRepository;
@@ -130,15 +129,14 @@ public class EvaluationService {
 		Defense defense = defenseRepository.findById(defenseId)
 				.orElseThrow(() -> new EntityNotFoundException("Soutenance non trouvée"));
 
-		JuryMember member = defense.getMembers().stream()
-				.filter(m -> m.getTeacher().getId().equals(currentUserId)).findFirst()
-				.orElseThrow(() -> new UnauthorizedAccessException(
+		JuryMember member = defense.getMembers().stream().filter(m -> m.getTeacher().getId().equals(currentUserId))
+				.findFirst().orElseThrow(() -> new UnauthorizedAccessException(
 						"Seul un membre du jury peut soumettre une évaluation SOUTENANCE"));
 
 		Long defenseSessionId = groupRepository.findByProjectId(defense.getProject().getId()).stream()
 				.map(g -> g.getDefenseSession() != null ? g.getDefenseSession().getId() : null).filter(Objects::nonNull)
-				.findFirst()
-				.orElseThrow(() -> new InvalidBusinessStateException("Aucune session de soutenance trouvée pour ce projet"));
+				.findFirst().orElseThrow(
+						() -> new InvalidBusinessStateException("Aucune session de soutenance trouvée pour ce projet"));
 
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));
@@ -190,9 +188,9 @@ public class EvaluationService {
 		}
 
 		Long defenseSessionId = groupRepository.findByProjectId(project.getId()).stream()
-				.map(g -> g.getDefenseSession() != null ? g.getDefenseSession().getId() : null)
-				.filter(Objects::nonNull).findFirst()
-				.orElseThrow(() -> new InvalidBusinessStateException("Aucune session de soutenance trouvée pour ce projet"));
+				.map(g -> g.getDefenseSession() != null ? g.getDefenseSession().getId() : null).filter(Objects::nonNull)
+				.findFirst().orElseThrow(
+						() -> new InvalidBusinessStateException("Aucune session de soutenance trouvée pour ce projet"));
 
 		DefenseSession ds = defenseSessionRepository.findById(defenseSessionId)
 				.orElseThrow(() -> new EntityNotFoundException("Session de soutenance non trouvée"));

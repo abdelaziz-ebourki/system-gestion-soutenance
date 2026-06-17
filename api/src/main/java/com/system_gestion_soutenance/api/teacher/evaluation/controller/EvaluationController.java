@@ -73,7 +73,8 @@ public class EvaluationController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Only jury members can submit defense evaluation"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense not found")})
-	public ApiResponse<EvaluationResponse> submitDefense(@Parameter(description = "Defense ID") @PathVariable Long defenseId,
+	public ApiResponse<EvaluationResponse> submitDefense(
+			@Parameter(description = "Defense ID") @PathVariable Long defenseId,
 			@Valid @RequestBody EvaluationSubmitRequest request, @AuthenticationPrincipal User user) {
 		Evaluation evaluation = evaluationService.submitDefense(defenseId, user.getId(), request);
 		Map<Long, Project> projectMap = evaluationService.buildProjectMap(List.of(evaluation));
