@@ -7,7 +7,6 @@ import com.system_gestion_soutenance.api.coordinator.project.entity.Project;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationResponse;
 import com.system_gestion_soutenance.api.teacher.evaluation.dto.EvaluationSubmitRequest;
 import com.system_gestion_soutenance.api.teacher.evaluation.entity.Evaluation;
-import com.system_gestion_soutenance.api.teacher.evaluation.entity.EvaluationType;
 import com.system_gestion_soutenance.api.teacher.evaluation.service.EvaluationService;
 import com.system_gestion_soutenance.api.user.entity.User;
 import java.util.List;
