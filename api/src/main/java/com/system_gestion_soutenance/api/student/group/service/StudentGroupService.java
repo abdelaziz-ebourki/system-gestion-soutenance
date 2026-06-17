@@ -1,11 +1,10 @@
 package com.system_gestion_soutenance.api.student.group.service;
 
-import com.system_gestion_soutenance.api.admin.config.settings.defense.entity.DefenseSettings;
-import com.system_gestion_soutenance.api.admin.config.settings.defense.repository.DefenseSettingsRepository;
 import com.system_gestion_soutenance.api.admin.defensesession.entity.DefenseSession;
 import com.system_gestion_soutenance.api.admin.defensesession.repository.DefenseSessionRepository;
 import com.system_gestion_soutenance.api.common.mapper.StudentGroupMapper;
 import com.system_gestion_soutenance.api.coordinator.group.entity.Group;
+import com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus;
 import com.system_gestion_soutenance.api.coordinator.group.repository.GroupRepository;
 import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
@@ -28,19 +27,16 @@ public class StudentGroupService {
 
 	private final GroupRepository groupRepository;
 	private final StudentRepository studentRepository;
-	private final DefenseSettingsRepository defenseSettingsRepository;
 	private final DefenseSessionRepository defenseSessionRepository;
 	private final StudentGroupMapper studentGroupMapper;
 	private final ApplicationEventPublisher eventPublisher;
 	private final SecurityService securityService;
 
 	public StudentGroupService(GroupRepository groupRepository, StudentRepository studentRepository,
-			DefenseSettingsRepository defenseSettingsRepository, DefenseSessionRepository defenseSessionRepository,
-			StudentGroupMapper studentGroupMapper, ApplicationEventPublisher eventPublisher,
-			SecurityService securityService) {
+			DefenseSessionRepository defenseSessionRepository, StudentGroupMapper studentGroupMapper,
+			ApplicationEventPublisher eventPublisher, SecurityService securityService) {
 		this.groupRepository = groupRepository;
 		this.studentRepository = studentRepository;
-		this.defenseSettingsRepository = defenseSettingsRepository;
 		this.defenseSessionRepository = defenseSessionRepository;
 		this.studentGroupMapper = studentGroupMapper;
 		this.eventPublisher = eventPublisher;
@@ -63,33 +59,31 @@ public class StudentGroupService {
 			}
 		}
 
-		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
-		String startDate = ds != null ? ds.getGroupCreationStartDate() : "";
-		String endDate = ds != null ? ds.getGroupCreationEndDate() : "";
-
-		return new StudentGroupWorkspaceResponse(currentDetails, available, startDate, endDate,
-				isCreationOpen(startDate, endDate));
+		return new StudentGroupWorkspaceResponse(currentDetails, available, null, null, false);
 	}
 
 	@Transactional
-	public Group createGroup(Long studentId) {
+	public Group createGroup(Long studentId, String groupName, Long sessionId) {
 		if (groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).isPresent()) {
 			throw new InvalidBusinessStateException("Vous êtes déjà membre d'un groupe");
 		}
-		if (!isCreationPeriodOpen()) {
-			throw new InvalidBusinessStateException("La période de création de groupes est fermée");
+
+		DefenseSession session = defenseSessionRepository.findById(sessionId)
+				.orElseThrow(() -> new EntityNotFoundException("Session introuvable"));
+
+		if (!isWithinGroupFormationWindow(session)) {
+			throw new InvalidBusinessStateException("La période de formation de groupes est fermée pour cette session");
 		}
 
 		Student student = studentRepository.findById(studentId)
 				.orElseThrow(() -> new InvalidBusinessStateException("Étudiant introuvable"));
 
-		DefenseSession activeSession = resolveActiveSession();
-
 		Group group = new Group();
-		group.setGroupName(String.format("Groupe_%d", groupRepository.count() + 1));
+		group.setGroupName(groupName);
 		group.setStudents(new ArrayList<>(List.of(student)));
 		group.setLeaderId(studentId);
-		group.setSessionId(activeSession != null ? activeSession.getId() : null);
+		group.setSessionId(sessionId);
+		group.setStatus(GroupStatus.PENDING);
 		return groupRepository.save(group);
 	}
 
@@ -98,12 +92,14 @@ public class StudentGroupService {
 		if (groupRepository.findFirstByStudentsIdOrderByIdAsc(studentId).isPresent()) {
 			throw new InvalidBusinessStateException("Vous êtes déjà membre d'un groupe");
 		}
-		if (!isCreationPeriodOpen()) {
-			throw new InvalidBusinessStateException("La période de création de groupes est fermée");
-		}
 
 		Group group = groupRepository.findById(groupId)
 				.orElseThrow(() -> new EntityNotFoundException("Groupe non trouvé"));
+
+		DefenseSession session = resolveSession(group.getSessionId());
+		if (session != null && !isWithinGroupFormationWindow(session)) {
+			throw new InvalidBusinessStateException("La période de formation de groupes est fermée pour cette session");
+		}
 
 		Student student = studentRepository.findById(studentId)
 				.orElseThrow(() -> new InvalidBusinessStateException("Étudiant introuvable"));
@@ -114,7 +110,7 @@ public class StudentGroupService {
 		if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
 			throw new InvalidBusinessStateException("Vous êtes déjà dans ce groupe");
 		}
-		int maxSize = resolveMaxGroupSize(group.getSessionId());
+		int maxSize = resolveMaxGroupSize(session);
 		if (maxSize > 0 && group.getStudents().size() >= maxSize) {
 			throw new InvalidBusinessStateException("Le groupe a atteint sa taille maximale");
 		}
@@ -122,24 +118,25 @@ public class StudentGroupService {
 		return groupRepository.save(group);
 	}
 
-	private DefenseSession resolveActiveSession() {
-		return defenseSessionRepository.findActiveSession(LocalDate.now()).orElse(null);
+	private DefenseSession resolveSession(Long sessionId) {
+		if (sessionId == null)
+			return null;
+		return defenseSessionRepository.findById(sessionId).orElse(null);
 	}
 
-	private int resolveMaxGroupSize(Long sessionId) {
-		if (sessionId != null) {
-			DefenseSession ds = defenseSessionRepository.findById(sessionId).orElse(null);
-			if (ds != null && ds.getMaxGroupSize() > 0)
-				return ds.getMaxGroupSize();
-		}
+	private int resolveMaxGroupSize(DefenseSession session) {
+		if (session != null && session.getMaxGroupSize() > 0)
+			return session.getMaxGroupSize();
 		return 0;
 	}
 
-	private boolean isCreationPeriodOpen() {
-		DefenseSettings ds = defenseSettingsRepository.findById(1L).orElse(null);
-		if (ds == null)
+	private boolean isWithinGroupFormationWindow(DefenseSession session) {
+		if (session == null)
 			return false;
-		return isCreationOpen(ds.getGroupCreationStartDate(), ds.getGroupCreationEndDate());
+		if (session.getGroupFormationStartDate() == null || session.getGroupFormationEndDate() == null)
+			return false;
+		LocalDate now = LocalDate.now();
+		return !now.isBefore(session.getGroupFormationStartDate()) && !now.isAfter(session.getGroupFormationEndDate());
 	}
 
 	@Transactional
@@ -173,14 +170,4 @@ public class StudentGroupService {
 				studentName, group.getId()));
 	}
 
-	private boolean isCreationOpen(String startDate, String endDate) {
-		try {
-			LocalDate now = LocalDate.now();
-			LocalDate start = LocalDate.parse(startDate);
-			LocalDate end = LocalDate.parse(endDate);
-			return !now.isBefore(start) && !now.isAfter(end);
-		} catch (Exception e) {
-			return false;
-		}
-	}
 }

@@ -297,32 +297,104 @@ public class DataInitializer implements CommandLineRunner {
 		coeffs.put("Rapporteur", 35);
 		coeffs.put("Examinateur", 35);
 
-		DefenseSession ds1 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2025",
-				DefenseType.PFE, DefenseSessionStatus.COMPLETED, 3, 30, 10, LocalDate.of(2025, 5, 15), coeffs, jrtPfe,
-				LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30), true, admin.getId(),
-				LocalDateTime.of(2025, 5, 10, 9, 0)));
-		DefenseSession ds2 = defenseSessionRepo.save(
-				new DefenseSession(null, "Soutenance PFE Automne 2025", DefenseType.PFE, DefenseSessionStatus.COMPLETED,
-						3, 30, 10, LocalDate.of(2025, 12, 15), coeffs, jrtPfe, LocalDate.of(2026, 1, 5),
-						LocalDate.of(2026, 1, 25), true, admin.getId(), LocalDateTime.of(2025, 12, 10, 9, 0)));
-		DefenseSession ds3 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance PFE Printemps 2026",
-				DefenseType.PFE, DefenseSessionStatus.ACTIVE, 3, 30, 10, LocalDate.of(2026, 6, 1), coeffs, jrtPfe,
-				LocalDate.of(2026, 6, 15), LocalDate.of(2026, 7, 10), false, null, null));
-		DefenseSession ds4 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Mémoire Printemps 2026",
-				DefenseType.MEMOIRE, DefenseSessionStatus.SCHEDULED, 4, 45, 15, LocalDate.of(2026, 6, 1), coeffs,
-				jrtMemoire, LocalDate.of(2026, 6, 20), LocalDate.of(2026, 7, 15), false, admin.getId(),
-				LocalDateTime.of(2026, 6, 10, 9, 0)));
+		DefenseSession ds1 = new DefenseSession();
+		ds1.setName("Soutenance PFE Printemps 2025");
+		ds1.setDefenseType(DefenseType.PFE);
+		ds1.setStatus(DefenseSessionStatus.COMPLETED);
+		ds1.setMaxGroupSize(3);
+		ds1.setDefenseDuration(30);
+		ds1.setBreakDuration(10);
+		ds1.setSubmissionDeadline(LocalDate.of(2025, 5, 15));
+		ds1.setEvaluationCoefficients(coeffs);
+		ds1.setJuryRoleTemplate(jrtPfe);
+		ds1.setStartDate(LocalDate.of(2025, 6, 1));
+		ds1.setEndDate(LocalDate.of(2025, 6, 30));
+		ds1.setFrozen(true);
+		ds1.setApprovedBy(admin.getId());
+		ds1.setApprovedAt(LocalDateTime.of(2025, 5, 10, 9, 0));
+		defenseSessionRepo.save(ds1);
+		DefenseSession ds2 = new DefenseSession();
+		ds2.setName("Soutenance PFE Automne 2025");
+		ds2.setDefenseType(DefenseType.PFE);
+		ds2.setStatus(DefenseSessionStatus.COMPLETED);
+		ds2.setMaxGroupSize(3);
+		ds2.setDefenseDuration(30);
+		ds2.setBreakDuration(10);
+		ds2.setSubmissionDeadline(LocalDate.of(2025, 12, 15));
+		ds2.setEvaluationCoefficients(coeffs);
+		ds2.setJuryRoleTemplate(jrtPfe);
+		ds2.setStartDate(LocalDate.of(2026, 1, 5));
+		ds2.setEndDate(LocalDate.of(2026, 1, 25));
+		ds2.setFrozen(true);
+		ds2.setApprovedBy(admin.getId());
+		ds2.setApprovedAt(LocalDateTime.of(2025, 12, 10, 9, 0));
+		defenseSessionRepo.save(ds2);
+		DefenseSession ds3 = new DefenseSession();
+		ds3.setName("Soutenance PFE Printemps 2026");
+		ds3.setDefenseType(DefenseType.PFE);
+		ds3.setStatus(DefenseSessionStatus.ACTIVE);
+		ds3.setMaxGroupSize(3);
+		ds3.setDefenseDuration(30);
+		ds3.setBreakDuration(10);
+		ds3.setSubmissionDeadline(LocalDate.of(2026, 6, 1));
+		ds3.setEvaluationCoefficients(coeffs);
+		ds3.setJuryRoleTemplate(jrtPfe);
+		ds3.setStartDate(LocalDate.of(2026, 6, 15));
+		ds3.setEndDate(LocalDate.of(2026, 7, 10));
+		ds3.setFrozen(false);
+		ds3.setGroupFormationStartDate(LocalDate.of(2026, 6, 1));
+		ds3.setGroupFormationEndDate(LocalDate.of(2026, 7, 5));
+		defenseSessionRepo.save(ds3);
+		DefenseSession ds4 = new DefenseSession();
+		ds4.setName("Soutenance Mémoire Printemps 2026");
+		ds4.setDefenseType(DefenseType.MEMOIRE);
+		ds4.setStatus(DefenseSessionStatus.SCHEDULED);
+		ds4.setMaxGroupSize(4);
+		ds4.setDefenseDuration(45);
+		ds4.setBreakDuration(15);
+		ds4.setSubmissionDeadline(LocalDate.of(2026, 6, 1));
+		ds4.setEvaluationCoefficients(coeffs);
+		ds4.setJuryRoleTemplate(jrtMemoire);
+		ds4.setStartDate(LocalDate.of(2026, 6, 20));
+		ds4.setEndDate(LocalDate.of(2026, 7, 15));
+		ds4.setFrozen(false);
+		ds4.setApprovedBy(admin.getId());
+		ds4.setApprovedAt(LocalDateTime.of(2026, 6, 10, 9, 0));
+		defenseSessionRepo.save(ds4);
 		Map<String, Integer> coeffs2 = new LinkedHashMap<>();
 		coeffs2.put("Président", 25);
 		coeffs2.put("Rapporteur", 30);
 		coeffs2.put("Examinateur", 45);
-		DefenseSession ds5 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Thèse Printemps 2026",
-				DefenseType.THESE, DefenseSessionStatus.SCHEDULED, 1, 60, 20, LocalDate.of(2026, 5, 15), coeffs2,
-				jrtThese, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 7, 5), false, admin.getId(),
-				LocalDateTime.of(2026, 5, 20, 9, 0)));
-		DefenseSession ds6 = defenseSessionRepo.save(new DefenseSession(null, "Soutenance Rattrapage 2026",
-				DefenseType.PFE, DefenseSessionStatus.DRAFT, 3, 30, 10, LocalDate.of(2026, 8, 15), coeffs, jrtPfe,
-				LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 15), false, null, null));
+		DefenseSession ds5 = new DefenseSession();
+		ds5.setName("Soutenance Thèse Printemps 2026");
+		ds5.setDefenseType(DefenseType.THESE);
+		ds5.setStatus(DefenseSessionStatus.SCHEDULED);
+		ds5.setMaxGroupSize(1);
+		ds5.setDefenseDuration(60);
+		ds5.setBreakDuration(20);
+		ds5.setSubmissionDeadline(LocalDate.of(2026, 5, 15));
+		ds5.setEvaluationCoefficients(coeffs2);
+		ds5.setJuryRoleTemplate(jrtThese);
+		ds5.setStartDate(LocalDate.of(2026, 6, 10));
+		ds5.setEndDate(LocalDate.of(2026, 7, 5));
+		ds5.setFrozen(false);
+		ds5.setApprovedBy(admin.getId());
+		ds5.setApprovedAt(LocalDateTime.of(2026, 5, 20, 9, 0));
+		defenseSessionRepo.save(ds5);
+		DefenseSession ds6 = new DefenseSession();
+		ds6.setName("Soutenance Rattrapage 2026");
+		ds6.setDefenseType(DefenseType.PFE);
+		ds6.setStatus(DefenseSessionStatus.DRAFT);
+		ds6.setMaxGroupSize(3);
+		ds6.setDefenseDuration(30);
+		ds6.setBreakDuration(10);
+		ds6.setSubmissionDeadline(LocalDate.of(2026, 8, 15));
+		ds6.setEvaluationCoefficients(coeffs);
+		ds6.setJuryRoleTemplate(jrtPfe);
+		ds6.setStartDate(LocalDate.of(2026, 9, 1));
+		ds6.setEndDate(LocalDate.of(2026, 9, 15));
+		ds6.setFrozen(false);
+		defenseSessionRepo.save(ds6);
 
 		// Phase 13: Projects
 		record ProjSeed(String title, String desc, String dtype, ProjectStatus status, Teacher sup) {
@@ -495,8 +567,13 @@ public class DataInitializer implements CommandLineRunner {
 				new GrpSeed("Groupe H1", 13, 2, new int[]{51, 52, 53, 54}),
 				new GrpSeed("Groupe H2", 14, 3, new int[]{55, 56}),};
 		for (GrpSeed gs : grpSeeds) {
-			Group g = new Group(null, gs.name, projects.get(gs.projIdx), new ArrayList<>(),
-					dsArr[gs.sessionIdx].getId(), studentsList.get(gs.studentIdxs[0]).getId());
+			Group g = new Group();
+			g.setGroupName(gs.name);
+			g.setProject(projects.get(gs.projIdx));
+			g.setStudents(new ArrayList<>());
+			g.setSessionId(dsArr[gs.sessionIdx].getId());
+			g.setLeaderId(studentsList.get(gs.studentIdxs[0]).getId());
+			g.setStatus(com.system_gestion_soutenance.api.coordinator.group.entity.GroupStatus.ACTIVE);
 			for (int si : gs.studentIdxs) {
 				g.getStudents().add(studentsList.get(si));
 			}

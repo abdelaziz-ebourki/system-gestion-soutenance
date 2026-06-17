@@ -71,12 +71,14 @@ class StudentGroupControllerTest {
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
 		Group group = new Group();
 		group.setId(1L);
-		group.setGroupName("Groupe de Alice");
-		when(studentGroupService.createGroup(1L)).thenReturn(group);
+		group.setGroupName("Groupe Alpha");
+		when(studentGroupService.createGroup(1L, "Groupe Alpha", 5L)).thenReturn(group);
 		when(studentGroupMapper.toDetails(group, 1L))
-				.thenReturn(new GroupDetailsResponse(1L, "Groupe de Alice", null, null, List.of()));
-		mockMvc.perform(post("/api/student/groups").with(authentication(auth)).with(csrf()))
-				.andExpect(status().isCreated()).andExpect(jsonPath("$.data.groupName").value("Groupe de Alice"));
+				.thenReturn(new GroupDetailsResponse(1L, "Groupe Alpha", null, null, List.of()));
+		mockMvc.perform(post("/api/student/groups").with(authentication(auth)).with(csrf())
+				.contentType("application/json").content("""
+						{"groupName":"Groupe Alpha","sessionId":5}""")).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.data.groupName").value("Groupe Alpha"));
 	}
 
 	@Test
