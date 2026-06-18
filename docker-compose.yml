@@ -1,31 +1,58 @@
 services:
+  db:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: defensedb
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   mailpit:
-    image: axllent/mailpit
+    image: axllent/mailpit:latest
+    restart: unless-stopped
     ports:
       - "1025:1025"
       - "8025:8025"
-    restart: unless-stopped
 
-  api:
+  app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: api
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - JWT_SECRET=s3cr3t-k3y-f0r-d3f3ns3-m4n4g3m3nt-syst3m-2026
-      - SPRING_MAIL_HOST=mailpit
-      - SPRING_MAIL_PORT=1025
-      - SPRING_MAIL_USERNAME=
-      - SPRING_MAIL_PASSWORD=
-      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=false
-      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=false
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: defensedb
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      SMTP_AUTH: false
+      SMTP_STARTTLS: false
+      MAIL_FROM: ${MAIL_FROM:-noreply@example.com}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:4173}
+      INSTITUTION_NAME: ${INSTITUTION_NAME:-Universit\u00E9 Hassan II}
+      INSTITUTION_LOGO_URL: ${INSTITUTION_LOGO_URL:-}
     depends_on:
-      - mailpit
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 15s
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+volumes:
+  mysql_data:
