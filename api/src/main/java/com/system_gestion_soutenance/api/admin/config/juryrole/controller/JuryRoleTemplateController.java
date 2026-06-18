@@ -23,7 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/admin/config/jury-role-templates")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'COORDINATOR')")
 @Tag(name = "Admin - Jury Role Templates", description = "Jury Role Template Management")
 public class JuryRoleTemplateController {
 
@@ -50,6 +50,7 @@ public class JuryRoleTemplateController {
 	}
 
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Create a new jury role template")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Jury role template created successfully"),
@@ -62,6 +63,7 @@ public class JuryRoleTemplateController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Update a jury role template")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury role template updated successfully"),
@@ -75,6 +77,7 @@ public class JuryRoleTemplateController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Delete a jury role template")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Jury role template deleted successfully"),

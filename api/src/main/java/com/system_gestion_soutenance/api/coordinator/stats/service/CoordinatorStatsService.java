@@ -27,9 +27,9 @@ public class CoordinatorStatsService {
 	public CoordinatorStatsResponse getStats() {
 		long totalProjects = projectRepository.count();
 		long totalGroups = groupRepository.count();
-		long totalDefenses = defenseRepository.count();
+		long totalJuries = defenseRepository.count();
 		long scheduledDefenses = defenseSessionRepository.count();
 
-		return new CoordinatorStatsResponse(totalProjects, totalGroups, totalDefenses, scheduledDefenses);
+		return new CoordinatorStatsResponse(totalProjects, totalGroups, totalJuries, scheduledDefenses);
 	}
 }
