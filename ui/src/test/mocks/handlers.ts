@@ -334,11 +334,9 @@ export const handlers = [
     HttpResponse.json({ id: 1, groupName: "Groupe Rejoint", members: [] }, { status: 201 }),
   ),
 
-  http.post("*/api/student/documents/:documentId/attachments", async ({ request }) => {
-    const body = await request.formData();
-    const file = body.get("file") as File | null;
-    return HttpResponse.json({ id: 1, name: file?.name ?? "uploaded-file", type: "upload", deadline: "2027-06-01", status: "submitted", submittedAt: new Date().toISOString(), studentId: 1, filePath: "" }, { status: 201 });
-  }),
+  http.post("*/api/student/documents/:documentId/attachments", () =>
+    HttpResponse.json({ id: 1, name: "test.pdf", type: "upload", deadline: "2027-06-01", status: "submitted", submittedAt: new Date().toISOString(), studentId: 1, filePath: "" }, { status: 201 }),
+  ),
 
   // Group documents
   http.get("*/api/groups/:groupId/documents", () =>
