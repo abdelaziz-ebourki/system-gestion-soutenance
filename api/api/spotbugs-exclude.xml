@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Method name="&lt;init&gt;"/>
+        <Or>
+            <Class name="~.*\.controller\..*"/>
+            <Class name="~.*\.dto\..*"/>
+            <Class name="~.*\.config\..*"/>
+        </Or>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Class name="~.*\.dto\..*"/>
+    </Match>
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+    <Match>
+        <Bug pattern="SS_SHOULD_BE_STATIC"/>
+    </Match>
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+    </Match>
+    <Match>
+        <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+    </Match>
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH"/>
+        <Class name="~.*\.common\.mapper\..*Impl"/>
+    </Match>
+    <Match>
+        <Bug pattern="UUF_UNUSED_FIELD"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.auth.controller.AuthController"/>
+            <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+            <Class name="com.system_gestion_soutenance.api.coordinator.document.controller.DocumentDataController"/>
+        </Or>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="com.system_gestion_soutenance.api.common.audit.AuditAspect"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.admin.stats.service.StatsService"/>
+            <Class name="com.system_gestion_soutenance.api.coordinator.stats.service.CoordinatorStatsService"/>
+            <Class name="com.system_gestion_soutenance.api.common.service.PdfGenerationService"/>
+        </Or>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <Class name="com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter"/>
+            <Class name="com.system_gestion_soutenance.api.user.service.UserAccountService"/>
+        </Or>
+    </Match>
+</FindBugsFilter>

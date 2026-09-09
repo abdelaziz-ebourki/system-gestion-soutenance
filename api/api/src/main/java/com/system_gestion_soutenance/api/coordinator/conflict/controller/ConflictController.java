@@ -1,0 +1,41 @@
+package com.system_gestion_soutenance.api.coordinator.conflict.controller;
+
+import com.system_gestion_soutenance.api.common.dto.ApiResponse;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
+import com.system_gestion_soutenance.api.coordinator.conflict.dto.ValidateScheduleRequest;
+import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+@SuppressWarnings("PMD")
+
+@RestController
+@RequestMapping("/api/coordinator/conflicts")
+@PreAuthorize("hasAnyRole('COORDINATOR', 'ADMIN')")
+@Tag(name = "Coordinator - Conflicts", description = "Schedule Conflict Detection & Validation")
+public class ConflictController {
+
+	private final ConflictDetectionService conflictDetectionService;
+
+	public ConflictController(ConflictDetectionService conflictDetectionService) {
+		this.conflictDetectionService = conflictDetectionService;
+	}
+
+	@PostMapping("/validate")
+	@Operation(summary = "Validate a schedule for conflicts")
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Validation completed successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
+	public ApiResponse<List<ConflictDetailResponse>> validate(@Valid @RequestBody ValidateScheduleRequest request) {
+		List<ConflictDetailResponse> conflicts = conflictDetectionService
+				.validate(
+						new com.system_gestion_soutenance.api.coordinator.schedule.dto.ScheduleRequest(
+								request.defenseSessionId(), request.schedule()),
+						String.valueOf(request.defenseSessionId()));
+		return ApiResponse.success(conflicts);
+	}
+}

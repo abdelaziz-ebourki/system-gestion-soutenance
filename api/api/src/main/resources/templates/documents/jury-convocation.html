@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #333; line-height: 1.5; }
+        h1 { font-size: 18px; text-align: center; color: #1a237e; margin-bottom: 5px; }
+        h2 { font-size: 14px; color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 4px; margin-top: 20px; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #1a237e; padding-bottom: 15px; }
+        .info-row { margin-bottom: 4px; }
+        .info-label { font-weight: bold; display: inline-block; width: 160px; }
+        .page-break { page-break-before: always; }
+        .signature-block { margin-top: 50px; display: flex; justify-content: space-between; }
+        .signature-box { width: 200px; text-align: center; font-size: 11px; }
+        .signature-line { border-top: 1px solid #333; margin-top: 50px; padding-top: 5px; }
+    </style>
+</head>
+<body>
+    <th:block th:each="conv, iterStat : ${convocations}">
+        <div th:classappend="${not iterStat.last} ? 'page-break' : ''">
+            <div class="header">
+                <h1 th:text="${institutionName} ?: 'Universit&#233;'">Universit&#233;</h1>
+                <h1>Convocation de Jur&#233;</h1>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div class="info-row">
+                    <span class="info-label">Membre du jury :</span>
+                    <span th:text="${conv.teacherName}">Nom du professeur</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">R&#244;le :</span>
+                    <span th:text="${conv.role}">R&#244;le</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Session :</span>
+                    <span th:text="${conv.defenseSessionName}">Nom de la session</span>
+                </div>
+            </div>
+
+            <h2>D&#233;tails de la Soutenance</h2>
+            <div style="margin-top: 10px;">
+                <div class="info-row">
+                    <span class="info-label">Projet :</span>
+                    <span th:text="${conv.projectTitle}">Titre du projet</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">&#201;tudiant(s) :</span>
+                    <span th:text="${#strings.listJoin(conv.studentNames, ', ')}">Noms des &#233;tudiants</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date :</span>
+                    <span th:text="${conv.date}">JJ/MM/AAAA</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Heure :</span>
+                    <span th:text="${conv.time}">HH:MM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Salle :</span>
+                    <span th:text="${conv.roomName}">Nom de la salle</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; font-size: 11px; color: #666;">
+                <p>Vous &#234;tes invit&#233;(e) &#224; participer en tant que membre du jury pour la soutenance susmentionn&#233;e.</p>
+                <p>Veuillez vous pr&#233;senter &#224; l'heure indiqu&#233;e avec les supports n&#233;cessaires.</p>
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-box">
+                    <div class="signature-line">Le/La Coordonnateur(trice)</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">Le/La Doyen(e)</div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>
