@@ -1,0 +1,37 @@
+name: Trigger E2E Tests
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup SSH key for e2e repo
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.E2E_SSH_KEY }}
+
+      - name: Sync source to e2e repo
+        run: |
+          git clone git@github.com:abdelaziz-ebourki/system-gestion-soutenance-e2e.git /tmp/e2e-repo
+          cd /tmp/e2e-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          rm -rf ui/
+          mkdir -p ui
+          rsync -a --exclude=.git --exclude=node_modules --exclude=dist --exclude=archive \
+            "${{ github.workspace }}/" ui/
+
+          git add ui/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "sync: ui-update ${{ github.sha }}"
+            git pull --rebase origin main
+            git push origin main
+          fi

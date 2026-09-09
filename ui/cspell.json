@@ -1,0 +1,66 @@
+{
+  "version": "0.2",
+  "locale": "en,fr",
+  "dictionaries": ["project-words", "fr-fr"],
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./.cspell/project-words.txt"
+    },
+    {
+      "name": "fr-fr",
+      "path": "./node_modules/@cspell/dict-fr-fr/fr-fr.trie.gz",
+      "description": "French Dictionary (France)"
+    }
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "public",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "*.svg",
+    "*.ico",
+    "*.woff2"
+  ],
+  "flagWords": [
+    "prets",
+    "creneaux",
+    "defendable",
+    "Occupe",
+    "constitue",
+    "proposes",
+    "repartissez",
+    "detecte",
+    "equilibrer",
+    "composes",
+    "apercu",
+    "eviter",
+    "memes",
+    "maturite",
+    "supprime",
+    "succes",
+    "cree",
+    "deja"
+  ],
+  "words": [
+    "dndkit",
+    "vaul",
+    "sonner",
+    "zxcvbn",
+    "clsx",
+    "recharts",
+    "tanstack",
+    "lucide",
+    "shadcn",
+    "tailwindcss",
+    "vite",
+    "msw",
+    "xlsx",
+    "phosphor",
+    "grotesk",
+    "garamond",
+    "baseui",
+    "cspell"
+  ]
+}
