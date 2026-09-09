@@ -48,6 +48,7 @@ jobs:
       DB_USERNAME: ci_app_user
       DB_PASSWORD: ci-postman-app-secret
       JWT_SECRET: ci-test-jwt-secret-for-github-actions-must-be-at-least-32-chars
+      DDL_AUTO: update
     steps:
       - uses: actions/checkout@v4
 
