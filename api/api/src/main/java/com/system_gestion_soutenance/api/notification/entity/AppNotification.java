@@ -30,10 +30,10 @@ public class AppNotification {
 	@Column(columnDefinition = "TEXT")
 	private String message;
 
-	@Column(nullable = false)
+	@Column(name = "created_at", nullable = false)
 	private LocalDateTime timestamp;
 
-	@Column(nullable = false)
+	@Column(name = "is_read", nullable = false)
 	private boolean read;
 
 	@Column(name = "user_id")
