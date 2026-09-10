@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
-import com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService;
+import com.system_gestion_soutenance.api.common.service.PdfGenerationService;
 import com.system_gestion_soutenance.api.coordinator.document.dto.*;
 import com.system_gestion_soutenance.api.coordinator.document.service.DocumentDataService;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
@@ -44,7 +44,7 @@ class DocumentDataControllerTest {
 	private UserRepository userRepository;
 
 	@MockitoBean
-	private DocumentGenerationService documentGenerationService;
+	private PdfGenerationService pdfGenerationService;
 
 	@BeforeEach
 	void setUp() {
@@ -119,7 +119,7 @@ class DocumentDataControllerTest {
 		when(documentDataService.evaluationSheets(any())).thenReturn(List
 				.of(new EvaluationSheetResponse(1L, "Projet", List.of("Alice"), "Super", "2025-06-01", "09:00", "Room1",
 						List.of(new EvaluationSheetResponse.JuryMemberResponse("Rapporteur", "Dr. X", 3)), Map.of())));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/evaluation-sheets/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -139,7 +139,7 @@ class DocumentDataControllerTest {
 	void evaluationSheetsPdf_withNullFields_handlesGracefully() throws Exception {
 		when(documentDataService.evaluationSheets(any()))
 				.thenReturn(List.of(new EvaluationSheetResponse(1L, null, null, null, null, null, null, null, null)));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/evaluation-sheets/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +149,7 @@ class DocumentDataControllerTest {
 	@Test
 	void attendanceListPdf_returnsPdf() throws Exception {
 		when(documentDataService.attendanceList(1L)).thenReturn(new AttendanceListResponse("Session PFE", List.of()));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/attendance-lists/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +160,7 @@ class DocumentDataControllerTest {
 	@Test
 	void attendanceListPdf_withNullFields_handlesGracefully() throws Exception {
 		when(documentDataService.attendanceList(1L)).thenReturn(new AttendanceListResponse(null, null));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/attendance-lists/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +171,7 @@ class DocumentDataControllerTest {
 	void juryConvocationsPdf_returnsPdf() throws Exception {
 		when(documentDataService.juryConvocations(any())).thenReturn(List.of(new JuryConvocationResponse("John",
 				"président", "Projet", List.of("Alice"), "2025-06-01", "09:00", "Room1", "Session PFE")));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/jury-convocations/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -191,7 +191,7 @@ class DocumentDataControllerTest {
 	void juryConvocationsPdf_withNullFields_handlesGracefully() throws Exception {
 		when(documentDataService.juryConvocations(any()))
 				.thenReturn(List.of(new JuryConvocationResponse(null, null, null, null, null, null, null, null)));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/jury-convocations/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -201,7 +201,7 @@ class DocumentDataControllerTest {
 	@Test
 	void schedulePdf_returnsPdf() throws Exception {
 		when(documentDataService.schedule(1L)).thenReturn(new ScheduleDocResponse("Session PFE", List.of()));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/schedule/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +214,7 @@ class DocumentDataControllerTest {
 		when(documentDataService.minutes(1L)).thenReturn(new MinutesResponse(
 				new MinutesResponse.Settings("Univ", "logo.png", "Europe/Paris", "dd/MM/yyyy"), null, List.of("Alice"),
 				"Super", List.of(new MinutesResponse.JuryMemberDetails("Rapporteur", "Dr. X"))));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/proces-verbal/pdf").contentType(MediaType.APPLICATION_JSON)
@@ -225,7 +225,7 @@ class DocumentDataControllerTest {
 	@Test
 	void procesVerbalPdf_withNullFields_handlesGracefully() throws Exception {
 		when(documentDataService.minutes(1L)).thenReturn(new MinutesResponse(null, null, null, null, null));
-		when(documentGenerationService.generatePdf(anyString(), anyMap()))
+		when(pdfGenerationService.generatePdf(anyString(), anyMap()))
 				.thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 
 		mockMvc.perform(post("/api/coordinator/documents/proces-verbal/pdf").contentType(MediaType.APPLICATION_JSON)

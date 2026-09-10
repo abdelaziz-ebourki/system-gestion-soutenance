@@ -1,6 +1,6 @@
 package com.system_gestion_soutenance.api.coordinator.document.controller;
 
-import com.system_gestion_soutenance.api.common.pdf.DocumentGenerationService;
+import com.system_gestion_soutenance.api.common.service.PdfGenerationService;
 import com.system_gestion_soutenance.api.coordinator.document.dto.AttendanceListResponse;
 import com.system_gestion_soutenance.api.coordinator.document.dto.DefenseIdsRequest;
 import com.system_gestion_soutenance.api.coordinator.document.dto.EvaluationSheetResponse;
@@ -35,12 +35,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class DocumentDataController {
 
 	private final DocumentDataService documentDataService;
-	private final DocumentGenerationService documentGenerationService;
+	private final PdfGenerationService pdfGenerationService;
 
 	public DocumentDataController(DocumentDataService documentDataService,
-			DocumentGenerationService documentGenerationService) {
+			PdfGenerationService pdfGenerationService) {
 		this.documentDataService = documentDataService;
-		this.documentGenerationService = documentGenerationService;
+		this.pdfGenerationService = pdfGenerationService;
 	}
 
 	@PostMapping("/evaluation-sheets")
@@ -73,7 +73,7 @@ public class DocumentDataController {
 				s.supervisorName() != null ? s.supervisorName() : "", "date", s.date() != null ? s.date() : "", "time",
 				s.time() != null ? s.time() : "", "room", s.roomName() != null ? s.roomName() : "", "juryMembers",
 				s.juryMembers() != null ? s.juryMembers() : List.of());
-		byte[] pdf = documentGenerationService.generatePdf("evaluation-sheet", data);
+		byte[] pdf = pdfGenerationService.generatePdf("evaluation-sheet", data);
 		return pdfResponse(pdf, "fiche-evaluation-" + request.projectId() + ".pdf");
 	}
 
@@ -98,7 +98,7 @@ public class DocumentDataController {
 		Map<String, Object> data = Map.of("sessionName",
 				attendance.defenseSessionName() != null ? attendance.defenseSessionName() : "", "slots",
 				attendance.slots() != null ? attendance.slots() : List.of());
-		byte[] pdf = documentGenerationService.generatePdf("attendance-list", data);
+		byte[] pdf = pdfGenerationService.generatePdf("attendance-list", data);
 		return pdfResponse(pdf, "liste-presence-" + request.defenseSessionId() + ".pdf");
 	}
 
@@ -133,7 +133,7 @@ public class DocumentDataController {
 				c.date() != null ? c.date() : "", "time", c.time() != null ? c.time() : "", "room",
 				c.roomName() != null ? c.roomName() : "", "sessionName",
 				c.defenseSessionName() != null ? c.defenseSessionName() : "");
-		byte[] pdf = documentGenerationService.generatePdf("jury-convocation", data);
+		byte[] pdf = pdfGenerationService.generatePdf("jury-convocation", data);
 		return pdfResponse(pdf, "convocation-jury-" + request.projectId() + ".pdf");
 	}
 
@@ -147,7 +147,7 @@ public class DocumentDataController {
 		Map<String, Object> data = Map.of("sessionName",
 				schedule.defenseSessionName() != null ? schedule.defenseSessionName() : "", "slots",
 				schedule.slots() != null ? schedule.slots() : List.of());
-		byte[] pdf = documentGenerationService.generatePdf("schedule", data);
+		byte[] pdf = pdfGenerationService.generatePdf("schedule", data);
 		return pdfResponse(pdf, "planning-" + request.defenseSessionId() + ".pdf");
 	}
 
@@ -173,7 +173,7 @@ public class DocumentDataController {
 				minutes.studentNames() != null ? minutes.studentNames() : List.of(), "supervisorName",
 				minutes.supervisorName() != null ? minutes.supervisorName() : "", "juryMembers",
 				minutes.juryMembers() != null ? minutes.juryMembers() : List.of());
-		byte[] pdf = documentGenerationService.generatePdf("proces-verbal", data);
+		byte[] pdf = pdfGenerationService.generatePdf("proces-verbal", data);
 		return pdfResponse(pdf, "pv-" + request.projectId() + ".pdf");
 	}
 

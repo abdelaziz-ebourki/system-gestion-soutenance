@@ -50,7 +50,7 @@ public class PdfGenerationService {
 			builder.run();
 			return outputStream.toByteArray();
 		} catch (IOException e) {
-			throw new PdfGenerationException("Échec de la génération du document PDF");
+			throw new PdfGenerationException("Échec de la génération du document PDF", e);
 		}
 	}
 

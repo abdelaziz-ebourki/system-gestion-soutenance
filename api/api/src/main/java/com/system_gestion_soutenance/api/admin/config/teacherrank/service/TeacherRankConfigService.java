@@ -6,18 +6,18 @@ import com.system_gestion_soutenance.api.admin.config.teacherrank.entity.Teacher
 import com.system_gestion_soutenance.api.admin.config.teacherrank.repository.TeacherRankRepository;
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
-import com.system_gestion_soutenance.api.common.service.BaseCrudService;
+import com.system_gestion_soutenance.api.common.service.AbstractNamedConfigService;
 import com.system_gestion_soutenance.api.user.repository.TeacherRepository;
-import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
 
 @Service
 @Transactional(readOnly = true)
-public class TeacherRankConfigService extends BaseCrudService<TeacherRank, Long, CreateTeacherRankRequest> {
+public class TeacherRankConfigService
+		extends AbstractNamedConfigService<TeacherRank, CreateTeacherRankRequest, UpdateTeacherRankRequest> {
 
 	private final TeacherRankRepository teacherRankRepository;
 	private final TeacherRepository teacherRepository;
@@ -29,44 +29,60 @@ public class TeacherRankConfigService extends BaseCrudService<TeacherRank, Long,
 	}
 
 	public PaginatedResponse<TeacherRank> findAll(int page, int limit) {
-		Page<TeacherRank> rankPage = teacherRankRepository.findAll(PageRequest.of(page, limit));
-		return new PaginatedResponse<>(rankPage.getContent(), rankPage.getTotalElements(), rankPage.getTotalPages(),
-				page, limit);
+		return findAllPaged(page, limit);
 	}
 
 	@Audited(action = "CREATE", entity = "TeacherRank")
 	@Transactional
 	public TeacherRank create(CreateTeacherRankRequest request) {
-		if (teacherRankRepository.findByName(request.name()).isPresent()) {
-			throw new InvalidBusinessStateException("Un rank avec ce nom existe déjà");
-		}
-
-		TeacherRank teacherRank = new TeacherRank();
-		teacherRank.setName(request.name());
-		return save(teacherRank);
+		return createNamed(request);
 	}
 
 	@Audited(action = "UPDATE", entity = "TeacherRank")
 	@Transactional
 	public TeacherRank update(Long id, CreateTeacherRankRequest request) {
-		TeacherRank teacherRank = findByIdOrThrow(id, "TeacherRank");
-		teacherRank.setName(request.name());
-		return save(teacherRank);
+		return updateNamed(id, request);
 	}
 
 	@Audited(action = "UPDATE", entity = "TeacherRank")
 	@Transactional
 	public TeacherRank updatePartial(Long id, UpdateTeacherRankRequest request) {
-		TeacherRank teacherRank = findByIdOrThrow(id, "TeacherRank");
-		if (request.name() != null) {
-			teacherRank.setName(request.name());
-		}
-		return save(teacherRank);
+		return updatePartialNamed(id, request);
 	}
 
 	@Audited(action = "DELETE", entity = "TeacherRank")
 	@Transactional
 	public void delete(Long id) {
-		deleteWithCheck(id, "TeacherRank", () -> !teacherRepository.findByTeacherRankId(id).isEmpty());
+		deleteNamed(id);
+	}
+
+	@Override
+	protected TeacherRank newEntity() {
+		return new TeacherRank();
+	}
+
+	@Override
+	protected void setName(TeacherRank entity, String name) {
+		entity.setName(name);
+	}
+
+	@Override
+	protected Optional<TeacherRank> findByName(String name) {
+		return teacherRankRepository.findByName(name);
+	}
+
+	@Override
+	protected String duplicateMessage() {
+		return "Un rank avec ce nom existe déjà";
+	}
+
+	@Override
+	protected String entityLabel() {
+		return "TeacherRank";
+	}
+
+	@Override
+	protected Supplier<Boolean> usageCheck(Long id) {
+		return () -> !teacherRepository.findByTeacherRankId(id).isEmpty();
 	}
 }
