@@ -22,7 +22,7 @@ export default defineConfig({
     ? undefined
     : [
         {
-          command: "sh -c 'cd ../api/api && ./mvnw -q spring-boot:run -Dspring-boot.run.profiles=test'",
+          command: "sh -c 'cd ../api && ./mvnw -q spring-boot:run -Dspring-boot.run.profiles=test'",
           url: "http://localhost:8080/actuator/health",
           timeout: 180_000,
           reuseExistingServer: true,

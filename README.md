@@ -5,7 +5,7 @@ Old repos deprecated, not deleted.
 
 | Package | Path | Stack | Port |
 |---|---|---|---|
-| API | `api/api/` (Maven root) | Spring Boot 3.4.6 → 4.x, Java 25, H2 dev / MySQL prod | 8080 |
+| API | `api/` (Maven root) | Spring Boot 3.4.6 → 4.x, Java 25, H2 dev / MySQL prod | 8080 |
 | UI | `ui/` | React 19, TS 6, Vite 8, Tailwind 4, TanStack Query v5 | 5173 |
 | E2E | `e2e/` | Playwright 1.52 (lean — no vendored clones) | — |
 
@@ -13,7 +13,7 @@ Old repos deprecated, not deleted.
 
 ```bash
 # API first
-cd api/api && ./mvnw spring-boot:run
+cd api && ./mvnw spring-boot:run
 # then UI
 cd ui && npm ci && npm run dev
 # E2E (uses webServer locally, MySQL service in CI)

@@ -54,7 +54,7 @@ jobs:
           java-version: 25
           distribution: temurin
           cache: maven
-          cache-dependency-path: api/api/pom.xml
+          cache-dependency-path: api/pom.xml
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4
@@ -66,7 +66,7 @@ jobs:
             e2e/package-lock.json
 
       - name: Build API
-        working-directory: api/api
+        working-directory: api
         env:
           JWT_SECRET: ci-e2e-jwt-secret-must-be-at-least-32-chars-long
         run: ./mvnw -q package -DskipTests -Dspring.profiles.active=test
@@ -88,7 +88,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Start API
-        working-directory: api/api
+        working-directory: api
         env:
           SPRING_PROFILES_ACTIVE: test
           JWT_SECRET: ci-e2e-jwt-secret-must-be-at-least-32-chars-long

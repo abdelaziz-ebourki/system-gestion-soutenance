@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: api/api
+        working-directory: api
     env:
       JWT_SECRET: ci-test-jwt-secret-for-github-actions-must-be-at-least-32-chars
 
