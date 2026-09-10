@@ -105,6 +105,6 @@ public class CoordinatorDeliberationService {
 			return "ASSEZ_BIEN";
 		if (score >= 10)
 			return "PASSABLE";
-		return "INSuffisant";
+		return "INSUFFISANT";
 	}
 }
