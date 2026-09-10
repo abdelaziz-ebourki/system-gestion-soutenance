@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class TeacherRankConfigService
-		extends AbstractNamedConfigService<TeacherRank, CreateTeacherRankRequest, UpdateTeacherRankRequest> {
+		extends
+			AbstractNamedConfigService<TeacherRank, CreateTeacherRankRequest, UpdateTeacherRankRequest> {
 
 	private final TeacherRankRepository teacherRankRepository;
 	private final TeacherRepository teacherRepository;

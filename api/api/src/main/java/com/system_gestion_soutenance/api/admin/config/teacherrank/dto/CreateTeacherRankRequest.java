@@ -7,5 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(description = "Request to create a new teacher rank")
 public record CreateTeacherRankRequest(
 		@Schema(description = "Name of the teacher rank", example = "Professor") @NotBlank String name)
-		implements NamedRequest {
+		implements
+			NamedRequest {
 }

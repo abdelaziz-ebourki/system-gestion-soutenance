@@ -16,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-public class LevelConfigService
-		extends AbstractNamedConfigService<Level, CreateLevelRequest, UpdateLevelRequest> {
+public class LevelConfigService extends AbstractNamedConfigService<Level, CreateLevelRequest, UpdateLevelRequest> {
 
 	private final LevelRepository levelRepository;
 	private final StudentRepository studentRepository;

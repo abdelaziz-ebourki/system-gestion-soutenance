@@ -13,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("PMD")
 
 public abstract class AbstractNamedConfigService<E, C extends NamedRequest, U extends NamedRequest>
-		extends BaseCrudService<E, Long, C> {
+		extends
+			BaseCrudService<E, Long, C> {
 
 	protected AbstractNamedConfigService(JpaRepository<E, Long> repository) {
 		super(repository);

@@ -37,8 +37,7 @@ public class DocumentDataController {
 	private final DocumentDataService documentDataService;
 	private final PdfGenerationService pdfGenerationService;
 
-	public DocumentDataController(DocumentDataService documentDataService,
-			PdfGenerationService pdfGenerationService) {
+	public DocumentDataController(DocumentDataService documentDataService, PdfGenerationService pdfGenerationService) {
 		this.documentDataService = documentDataService;
 		this.pdfGenerationService = pdfGenerationService;
 	}
