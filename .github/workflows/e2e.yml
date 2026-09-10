@@ -34,6 +34,16 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+      mailpit:
+        image: axllent/mailpit:v1.27.0
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd="wget -qO- http://localhost:8025/api/v1/info || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
@@ -82,20 +92,26 @@ jobs:
         env:
           SPRING_PROFILES_ACTIVE: test
           JWT_SECRET: ci-e2e-jwt-secret-must-be-at-least-32-chars-long
+          SMTP_HOST: localhost
+          SMTP_PORT: 1025
+          SMTP_AUTH: false
+          SMTP_STARTTLS: false
         run: |
-          java -jar target/*.jar --spring.profiles.active=test &
-          echo "Waiting for API to be ready..."
+          java -jar target/*.jar --spring.profiles.active=test > "$GITHUB_WORKSPACE/e2e-api.log" 2>&1 &
+          echo "Waiting for API to be ready (seed can take minutes on slow runners)..."
           for i in $(seq 1 60); do
             status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
+            echo "Attempt $i: status=$status"
             if [ "$status" = "200" ]; then
               echo "API is ready (attempt $i)"
               break
             fi
             if [ "$i" = "60" ]; then
-              echo "API failed to start within timeout"
+              echo "API failed to start within timeout — tail of e2e-api.log:"
+              tail -n 60 "$GITHUB_WORKSPACE/e2e-api.log" || true
               exit 1
             fi
-            sleep 2
+            sleep 5
           done
 
       - name: Start UI preview
