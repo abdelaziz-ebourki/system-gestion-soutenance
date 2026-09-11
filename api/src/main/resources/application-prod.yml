@@ -33,3 +33,7 @@ spring:
           auth: ${SMTP_AUTH:true}
           starttls:
             enable: ${SMTP_STARTTLS:true}
+
+app:
+  seed:
+    enabled: ${APP_SEED_ENABLED:false}
