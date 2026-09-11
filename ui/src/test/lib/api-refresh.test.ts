@@ -14,12 +14,10 @@ function jsonResponse(body: unknown, status = 200) {
 describe("API silent refresh", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
-    vi.useFakeTimers();
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -32,7 +30,6 @@ describe("API silent refresh", () => {
       .mockResolvedValueOnce(jsonResponse({ success: true, data: { id: 1 } }, 200));
 
     const promise = api<{ id: number }>("/student/stats");
-    await vi.runAllTimersAsync();
     const result = await promise;
 
     expect(result).toEqual({ id: 1 });
@@ -49,7 +46,6 @@ describe("API silent refresh", () => {
       .mockResolvedValueOnce(jsonResponse({ message: "invalid" }, 401));
 
     const promise = api("/student/stats");
-    await vi.runAllTimersAsync();
     await expect(promise).rejects.toMatchObject({ status: 401 });
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -64,7 +60,6 @@ describe("API silent refresh", () => {
     mockFetch.mockResolvedValueOnce(jsonResponse({ message: "bad" }, 401));
 
     const promise = api("/auth/login", { method: "POST", body: "{}" });
-    await vi.runAllTimersAsync();
     await expect(promise).rejects.toMatchObject({ status: 401 });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
