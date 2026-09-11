@@ -15,7 +15,7 @@ test.describe("auth", () => {
       await page.getByTestId("login-email-input").fill(email);
       await page.getByTestId("login-password-input").fill("1234");
       await page.getByTestId("login-submit-button").click();
-      await expect(page).toHaveURL(new RegExp(`^${landing}(/|$)`), { timeout: 15_000 });
+      await expect(page).toHaveURL(new RegExp(`${landing}(/|$)`), { timeout: 15_000 });
     });
   }
 
@@ -32,7 +32,7 @@ test.describe("auth", () => {
     await page.getByTestId("login-email-input").fill("admin@univh2c.ma");
     await page.getByTestId("login-password-input").fill("1234");
     await page.getByTestId("login-submit-button").click();
-    await expect(page).toHaveURL(/^\/admin(\/|$)/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/admin(\/|$)/, { timeout: 15_000 });
 
     const userMenu = page.getByTestId("nav-user-trigger");
     if (await userMenu.isVisible().catch(() => false)) {
