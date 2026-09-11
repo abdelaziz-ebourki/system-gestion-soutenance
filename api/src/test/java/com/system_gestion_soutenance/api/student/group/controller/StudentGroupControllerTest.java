@@ -16,14 +16,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = StudentGroupController.class)
 class StudentGroupControllerTest {
 
@@ -55,10 +56,11 @@ class StudentGroupControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(studentGroupService.getWorkspace(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.group.dto.StudentGroupWorkspaceResponse(null,
 						List.of(), null, null, true));
-		mockMvc.perform(get("/api/student/groups").with(authentication(auth))).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/groups")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.isGroupCreationOpen").value(true));
 	}
 
@@ -69,15 +71,15 @@ class StudentGroupControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		Group group = new Group();
 		group.setId(1L);
 		group.setGroupName("Groupe Alpha");
 		when(studentGroupService.createGroup(1L, "Groupe Alpha", 5L)).thenReturn(group);
 		when(studentGroupMapper.toDetails(group, 1L))
 				.thenReturn(new GroupDetailsResponse(1L, "Groupe Alpha", null, null, List.of()));
-		mockMvc.perform(post("/api/student/groups").with(authentication(auth)).with(csrf())
-				.contentType("application/json").content("""
-						{"groupName":"Groupe Alpha","sessionId":5}""")).andExpect(status().isCreated())
+		mockMvc.perform(post("/api/student/groups").with(csrf()).contentType("application/json").content("""
+				{"groupName":"Groupe Alpha","sessionId":5}""")).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.data.groupName").value("Groupe Alpha"));
 	}
 
@@ -88,14 +90,15 @@ class StudentGroupControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		Group group = new Group();
 		group.setId(1L);
 		group.setGroupName("Groupe Test");
 		when(studentGroupService.joinGroup(anyLong(), eq(1L))).thenReturn(group);
 		when(studentGroupMapper.toDetails(group, 1L))
 				.thenReturn(new GroupDetailsResponse(1L, "Groupe Test", null, null, List.of()));
-		mockMvc.perform(post("/api/student/groups/10/members").with(authentication(auth)).with(csrf()))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
+		mockMvc.perform(post("/api/student/groups/10/members").with(csrf())).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.groupName").value("Groupe Test"));
 	}
 
 	@Test
@@ -105,9 +108,10 @@ class StudentGroupControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		doNothing().when(studentGroupService).leaveGroup(1L);
 
-		mockMvc.perform(delete("/api/student/groups/leave").with(authentication(auth)).with(csrf()))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
+		mockMvc.perform(delete("/api/student/groups/leave").with(csrf())).andExpect(status().isOk())
+				.andExpect(jsonPath("$.success").value(true));
 	}
 }

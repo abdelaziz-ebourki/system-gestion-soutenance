@@ -3,7 +3,6 @@ package com.system_gestion_soutenance.api.teacher.unavailability.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
@@ -16,13 +15,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = TeacherUnavailabilityController.class)
 class TeacherUnavailabilityControllerTest {
 
@@ -52,8 +53,9 @@ class TeacherUnavailabilityControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(service.getByTeacher(1L)).thenReturn(List.of());
-		mockMvc.perform(get("/api/teacher/unavailabilities").with(authentication(auth))).andExpect(status().isOk());
+		mockMvc.perform(get("/api/teacher/unavailabilities")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -63,10 +65,11 @@ class TeacherUnavailabilityControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(service.saveForTeacher(anyLong(), any())).thenReturn(List.of());
 		mockMvc.perform(post("/api/teacher/unavailabilities").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}").with(authentication(auth))
-				.with(csrf())).andExpect(status().isOk());
+				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}").with(csrf()))
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -76,9 +79,10 @@ class TeacherUnavailabilityControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(service.saveForTeacher(anyLong(), any())).thenReturn(List.of());
 		mockMvc.perform(post("/api/teacher/unavailabilities").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}").with(authentication(auth))
-				.with(csrf())).andExpect(status().isOk());
+				.content("{\"slots\":[{\"date\":\"2026-06-01\",\"slots\":[\"08:00\"]}]}").with(csrf()))
+				.andExpect(status().isOk());
 	}
 }

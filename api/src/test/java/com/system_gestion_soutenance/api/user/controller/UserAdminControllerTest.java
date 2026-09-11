@@ -17,14 +17,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = UserAdminController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+		org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration.class,
+		org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterAutoConfiguration.class})
 class UserAdminControllerTest {
 
 	@Autowired

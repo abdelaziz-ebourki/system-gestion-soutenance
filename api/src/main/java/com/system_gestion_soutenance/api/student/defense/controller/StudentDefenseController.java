@@ -8,7 +8,7 @@ import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
@@ -29,7 +29,7 @@ public class StudentDefenseController {
 	@Operation(summary = "Get defense info", description = "Retrieves defense info (project, jury, schedule, status) for the connected student.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved defense info")})
-	public ApiResponse<StudentDefenseResponse> getDefense(@AuthenticationPrincipal User user) {
+	public ApiResponse<StudentDefenseResponse> getDefense(@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");
@@ -42,7 +42,7 @@ public class StudentDefenseController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved grade"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Results not yet published")})
-	public ApiResponse<StudentGradeResponse> getGrade(@AuthenticationPrincipal User user) {
+	public ApiResponse<StudentGradeResponse> getGrade(@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");

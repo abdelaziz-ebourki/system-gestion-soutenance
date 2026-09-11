@@ -4,7 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.common.mapper.ScheduleMapper;
 import com.system_gestion_soutenance.api.coordinator.conflict.dto.ConflictDetailResponse;
 import com.system_gestion_soutenance.api.coordinator.conflict.service.ConflictDetectionService;
@@ -20,16 +20,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = ScheduleController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+		org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration.class,
+		org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterAutoConfiguration.class})
 class ScheduleControllerTest {
 
 	@Autowired

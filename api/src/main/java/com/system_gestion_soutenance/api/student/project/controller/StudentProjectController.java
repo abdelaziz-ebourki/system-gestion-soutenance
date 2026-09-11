@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +38,7 @@ public class StudentProjectController {
 	@Operation(summary = "Browse available projects", description = "Retrieves projects available for selection, filtered by status.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved projects")})
-	public ApiResponse<List<ProjectResponse>> browse(@AuthenticationPrincipal User user,
+	public ApiResponse<List<ProjectResponse>> browse(@CurrentUser User user,
 			@RequestParam(defaultValue = "PENDING") String status) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(

@@ -10,7 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,7 +39,7 @@ public class ConvocationController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully generated PDF"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Convocation not available or student not scheduled")})
-	public ResponseEntity<byte[]> getConvocation(@AuthenticationPrincipal User user) {
+	public ResponseEntity<byte[]> getConvocation(@CurrentUser User user) {
 		Long studentId = user.getId();
 
 		StudentDefenseResponse defense;

@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.system_gestion_soutenance.api.user.entity.User;
@@ -51,7 +51,7 @@ public class GroupDocumentController {
 			@Parameter(description = "Group ID") @PathVariable Long id,
 			@Parameter(description = "Document type") @PathVariable GroupDocumentType type,
 			@Parameter(description = "File to upload") @RequestParam("file") MultipartFile file,
-			@AuthenticationPrincipal User user) {
+			@CurrentUser User user) {
 		if (user == null) {
 			throw new UnauthorizedException("User not authenticated");
 		}

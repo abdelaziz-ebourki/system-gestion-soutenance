@@ -7,7 +7,7 @@ import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
@@ -28,7 +28,7 @@ public class TeacherScheduleController {
 	@Operation(summary = "Get defense schedule", description = "Retrieves the defense schedule for the connected teacher.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved schedule")})
-	public ApiResponse<TeacherScheduleResponse> get(@AuthenticationPrincipal User user) {
+	public ApiResponse<TeacherScheduleResponse> get(@CurrentUser User user) {
 		return ApiResponse.success(scheduleService.getSchedule(user.getId()));
 	}
 }

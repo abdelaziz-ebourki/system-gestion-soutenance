@@ -20,7 +20,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 @SuppressWarnings("PMD")
 
@@ -130,7 +130,7 @@ public class CoordinatorDefenseSessionController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Defense session not found"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Unauthorized")})
 	public ApiResponse<DefenseSessionDto> approve(@Parameter(description = "Defense session ID") @PathVariable Long id,
-			@AuthenticationPrincipal User user) {
+			@CurrentUser User user) {
 		return ApiResponse.success(mapper.toDto(service.approve(id, user.getId())));
 	}
 

@@ -3,7 +3,6 @@ package com.system_gestion_soutenance.api.teacher.evaluation.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
@@ -21,13 +20,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = EvaluationController.class)
 class EvaluationControllerTest {
 
@@ -59,9 +60,10 @@ class EvaluationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(evaluationService.findByTeacher(1L, 0, 10)).thenReturn(new PaginatedResponse<>(List.of(), 0, 0, 0, 10));
 		when(evaluationService.buildProjectMap(any())).thenReturn(Map.of());
-		mockMvc.perform(get("/api/teacher/evaluations").with(authentication(auth))).andExpect(status().isOk());
+		mockMvc.perform(get("/api/teacher/evaluations")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -71,6 +73,7 @@ class EvaluationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.TEACHER);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_TEACHER")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		Defense defense = mock(Defense.class);
 		when(defense.getId()).thenReturn(1L);
 
@@ -82,7 +85,7 @@ class EvaluationControllerTest {
 		when(evaluationMapper.toDto(eq(evaluation), any())).thenReturn(
 				new EvaluationResponse(1L, 1L, "Project", 15.0, "Good", "SUBMITTED", "PRESENT", "SOUTENANCE"));
 		mockMvc.perform(post("/api/teacher/evaluations/1").contentType(MediaType.APPLICATION_JSON)
-				.content("{\"score\":15.0,\"comment\":\"Good\"}").with(authentication(auth)).with(csrf()))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+				.content("{\"score\":15.0,\"comment\":\"Good\"}").with(csrf())).andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.status").value("SUBMITTED"));
 	}
 }

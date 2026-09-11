@@ -18,7 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
@@ -43,7 +43,7 @@ public class StudentDocumentController {
 	@Operation(summary = "List documents", description = "Retrieves all documents uploaded by the connected student.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved documents")})
-	public ApiResponse<PaginatedResponse<StudentDocumentDto>> findByStudent(@AuthenticationPrincipal User user,
+	public ApiResponse<PaginatedResponse<StudentDocumentDto>> findByStudent(@CurrentUser User user,
 			@Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") @Min(0) int page,
 			@Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit) {
 		if (user == null) {
@@ -66,7 +66,7 @@ public class StudentDocumentController {
 	public ResponseEntity<ApiResponse<StudentDocumentDto>> upload(
 			@Parameter(description = "Document ID") @PathVariable Long id,
 			@Parameter(description = "File to upload") @RequestParam("file") MultipartFile file,
-			@AuthenticationPrincipal User user) {
+			@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");
@@ -81,7 +81,7 @@ public class StudentDocumentController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document or file not found")})
 	public ResponseEntity<byte[]> download(@Parameter(description = "Document ID") @PathVariable Long id,
-			@AuthenticationPrincipal User user) {
+			@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");

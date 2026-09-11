@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
@@ -37,7 +37,7 @@ public class StudentGroupController {
 	@Operation(summary = "Get group workspace", description = "Retrieves the workspace and group details for the connected student.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved workspace")})
-	public ApiResponse<StudentGroupWorkspaceResponse> getWorkspace(@AuthenticationPrincipal User user) {
+	public ApiResponse<StudentGroupWorkspaceResponse> getWorkspace(@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");
@@ -50,7 +50,7 @@ public class StudentGroupController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Group created successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Formation window closed or invalid request")})
-	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup(@AuthenticationPrincipal User user,
+	public ResponseEntity<ApiResponse<GroupDetailsResponse>> createGroup(@CurrentUser User user,
 			@Valid @RequestBody StudentCreateGroupRequest request) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
@@ -69,7 +69,7 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Group is full or student already in a group"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
 	public ApiResponse<GroupDetailsResponse> joinGroup(@Parameter(description = "Group ID") @PathVariable Long id,
-			@AuthenticationPrincipal User user) {
+			@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");
@@ -84,7 +84,7 @@ public class StudentGroupController {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully left the group"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Not in a group or group has a project")})
-	public ResponseEntity<ApiResponse<Void>> leaveGroup(@AuthenticationPrincipal User user) {
+	public ResponseEntity<ApiResponse<Void>> leaveGroup(@CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");
@@ -100,7 +100,7 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Selection not allowed"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group or project not found")})
 	public ApiResponse<GroupDetailsResponse> selectProject(@Parameter(description = "Group ID") @PathVariable Long id,
-			@Parameter(description = "Project ID") @PathVariable Long projectId, @AuthenticationPrincipal User user) {
+			@Parameter(description = "Project ID") @PathVariable Long projectId, @CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");
@@ -116,7 +116,7 @@ public class StudentGroupController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Not allowed"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Group not found")})
 	public ApiResponse<GroupDetailsResponse> cancelProjectSelection(
-			@Parameter(description = "Group ID") @PathVariable Long id, @AuthenticationPrincipal User user) {
+			@Parameter(description = "Group ID") @PathVariable Long id, @CurrentUser User user) {
 		if (user == null) {
 			throw new com.system_gestion_soutenance.api.common.exception.UnauthorizedException(
 					"User not authenticated");

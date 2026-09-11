@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
@@ -44,7 +44,7 @@ public class TeacherUnavailabilityController {
 	@Operation(summary = "Get unavailabilities", description = "Retrieves unavailability slots for the connected teacher.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved unavailabilities")})
-	public ApiResponse<TeacherUnavailabilityResponse> get(@AuthenticationPrincipal User user) {
+	public ApiResponse<TeacherUnavailabilityResponse> get(@CurrentUser User user) {
 		return ApiResponse.success(toResponse(service.getByTeacher(user.getId())));
 	}
 
@@ -54,7 +54,7 @@ public class TeacherUnavailabilityController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Unavailabilities saved successfully"),
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid unavailability data")})
 	public ApiResponse<TeacherUnavailabilityResponse> save(@Valid @RequestBody TeacherUnavailabilityRequest request,
-			@AuthenticationPrincipal User user) {
+			@CurrentUser User user) {
 		return ApiResponse.success(toResponse(service.saveForTeacher(user.getId(), request)));
 	}
 }

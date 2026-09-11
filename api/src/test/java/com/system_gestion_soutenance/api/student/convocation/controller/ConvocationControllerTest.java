@@ -3,7 +3,6 @@ package com.system_gestion_soutenance.api.student.convocation.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
@@ -16,7 +15,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = ConvocationController.class)
 class ConvocationControllerTest {
 
@@ -55,11 +56,12 @@ class ConvocationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(studentDefenseService.getDefense(1L)).thenReturn(
 				new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse("Project Title",
 						"Description", "Supervisor", List.of(), "2026-06-15", "10:00", "12:00", "Room 1", "scheduled",
 						null, null));
-		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isOk())
+		mockMvc.perform(get("/api/student/convocations")).andExpect(status().isOk())
 				.andExpect(content().contentType("application/pdf"));
 	}
 
@@ -70,8 +72,9 @@ class ConvocationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(studentDefenseService.getDefense(1L)).thenThrow(new EntityNotFoundException("Not found"));
-		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isNotFound());
+		mockMvc.perform(get("/api/student/convocations")).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -81,9 +84,10 @@ class ConvocationControllerTest {
 		user.setRole(com.system_gestion_soutenance.api.user.entity.Role.STUDENT);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
 				List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 		when(studentDefenseService.getDefense(1L))
 				.thenReturn(new com.system_gestion_soutenance.api.student.defense.dto.StudentDefenseResponse(null, null,
 						null, List.of(), null, null, null, null, "pending", null, null));
-		mockMvc.perform(get("/api/student/convocations").with(authentication(auth))).andExpect(status().isNotFound());
+		mockMvc.perform(get("/api/student/convocations")).andExpect(status().isNotFound());
 	}
 }

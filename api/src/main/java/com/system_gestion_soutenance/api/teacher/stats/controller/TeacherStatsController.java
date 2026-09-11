@@ -7,7 +7,7 @@ import com.system_gestion_soutenance.api.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.system_gestion_soutenance.api.common.security.CurrentUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 @SuppressWarnings("PMD")
@@ -28,7 +28,7 @@ public class TeacherStatsController {
 	@Operation(summary = "Get personal statistics", description = "Retrieves personal statistics for the connected teacher.")
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")})
-	public ApiResponse<TeacherStatsResponse> getStats(@AuthenticationPrincipal User user) {
+	public ApiResponse<TeacherStatsResponse> getStats(@CurrentUser User user) {
 		return ApiResponse.success(statsService.getStats(user.getId()));
 	}
 }

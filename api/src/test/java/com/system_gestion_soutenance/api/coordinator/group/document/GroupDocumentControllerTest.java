@@ -13,7 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,9 +22,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureJson
 @WebMvcTest(controllers = GroupDocumentController.class, excludeAutoConfiguration = {
-		org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-		org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class})
+		org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration.class,
+		org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterAutoConfiguration.class})
 class GroupDocumentControllerTest {
 
 	@Autowired
@@ -40,8 +42,10 @@ class GroupDocumentControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-				new com.system_gestion_soutenance.api.user.entity.User(), null, List.of()));
+		com.system_gestion_soutenance.api.user.entity.User user = new com.system_gestion_soutenance.api.user.entity.User();
+		user.setId(1L);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
 	}
 
 	@AfterEach

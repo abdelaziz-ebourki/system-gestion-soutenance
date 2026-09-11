@@ -1,6 +1,6 @@
 package com.system_gestion_soutenance.api.common.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.system_gestion_soutenance.api.auth.jwt.JwtAuthFilter;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.user.service.UserCacheService;
