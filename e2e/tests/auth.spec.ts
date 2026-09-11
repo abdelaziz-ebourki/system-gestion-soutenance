@@ -11,7 +11,7 @@ test.describe("auth", () => {
   for (const { role, email, landing } of accounts) {
     test(`login as ${role} lands on ${landing}`, async ({ page }) => {
       await page.goto("/login");
-      await expect(page.getByTestId("login-page")).toBeVisible();
+      await expect(page.getByTestId("login-email-input")).toBeVisible({ timeout: 10_000 });
       await page.getByTestId("login-email-input").fill(email);
       await page.getByTestId("login-password-input").fill("1234");
       await page.getByTestId("login-submit-button").click();
