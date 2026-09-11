@@ -83,6 +83,10 @@ jobs:
         working-directory: e2e
         run: npm ci
 
+      - name: Typecheck e2e suite
+        working-directory: e2e
+        run: npx tsc --noEmit
+
       - name: Install Playwright browsers
         working-directory: e2e
         run: npx playwright install chromium --with-deps
@@ -90,14 +94,22 @@ jobs:
       - name: Start API
         working-directory: api
         env:
-          SPRING_PROFILES_ACTIVE: test
+          SPRING_PROFILES_ACTIVE: prod
+          DDL_AUTO: update
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: defensedb
+          DB_USERNAME: e2e
+          DB_PASSWORD: e2e_secret
           JWT_SECRET: ci-e2e-jwt-secret-must-be-at-least-32-chars-long
           SMTP_HOST: localhost
           SMTP_PORT: 1025
           SMTP_AUTH: false
           SMTP_STARTTLS: false
+          MAIL_FROM: noreply@example.com
+          CORS_ORIGINS: http://localhost:5173
         run: |
-          java -jar target/*.jar --spring.profiles.active=test > "$GITHUB_WORKSPACE/e2e-api.log" 2>&1 &
+          java -jar target/*.jar --spring.profiles.active=prod > "$GITHUB_WORKSPACE/e2e-api.log" 2>&1 &
           echo "Waiting for API to be ready (seed can take minutes on slow runners)..."
           for i in $(seq 1 60); do
             status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
@@ -113,6 +125,16 @@ jobs:
             fi
             sleep 5
           done
+          echo "Asserting seed login works..."
+          login_status=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"admin@univh2c.ma","password":"1234"}')
+          if [ "$login_status" != "200" ]; then
+            echo "Seed login failed with status=$login_status — tail of e2e-api.log:"
+            tail -n 60 "$GITHUB_WORKSPACE/e2e-api.log" || true
+            exit 1
+          fi
+          echo "Seed login OK"
 
       - name: Start UI preview
         run: |
