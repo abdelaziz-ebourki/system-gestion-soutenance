@@ -82,13 +82,14 @@ class RefreshTokenServiceTest {
 	}
 
 	@Test
-	void rotate_revokedToken_revokesFamilyAndThrows401() {
+	void rotate_revokedToken_signalsReuseWithoutDeleting() {
 		RefreshToken stored = storedToken("reused-raw", 7L);
 		stored.setRevoked(true);
 		when(repository.findByTokenHash(TokenHasher.sha256Hex("reused-raw"))).thenReturn(Optional.of(stored));
 
-		assertThrows(UnauthorizedException.class, () -> service.rotate("reused-raw"));
-		verify(repository).deleteByUserId(7L);
+		RefreshReuseException reuse = assertThrows(RefreshReuseException.class, () -> service.rotate("reused-raw"));
+		assertEquals(7L, reuse.getUserId());
+		verify(repository, never()).deleteByUserId(any());
 	}
 
 	@Test

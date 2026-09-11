@@ -47,8 +47,7 @@ public class RefreshTokenService {
 				.orElseThrow(() -> new UnauthorizedException("Session invalide ou expirée"));
 
 		if (token.isRevoked()) {
-			repository.deleteByUserId(token.getUserId());
-			throw new UnauthorizedException("Session invalide ou expirée");
+			throw new RefreshReuseException(token.getUserId());
 		}
 		if (token.getExpiresAt() == null || Instant.now().isAfter(token.getExpiresAt())) {
 			repository.delete(token);

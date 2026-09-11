@@ -115,6 +115,15 @@ class AuthServiceTest {
 	}
 
 	@Test
+	void refresh_reusedToken_revokesFamilyAndThrows() {
+		when(refreshTokenService.rotate("stolen-refresh"))
+				.thenThrow(new com.system_gestion_soutenance.api.auth.refresh.service.RefreshReuseException(1L));
+
+		assertThrows(UnauthorizedException.class, () -> authService.refresh("stolen-refresh"));
+		verify(refreshTokenService).revokeAll(1L);
+	}
+
+	@Test
 	void refresh_inactiveUser_revokesAllAndThrows() {
 		User user = createActiveUser();
 		user.setActive(false);

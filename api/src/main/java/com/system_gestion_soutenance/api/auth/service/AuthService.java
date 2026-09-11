@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.auth.dto.VerifyRequest;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
 import com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService;
 import com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService.RotatedTokens;
+import com.system_gestion_soutenance.api.auth.refresh.service.RefreshReuseException;
 import com.system_gestion_soutenance.api.common.service.MessageService;
 import com.system_gestion_soutenance.api.common.util.TokenHasher;
 import com.system_gestion_soutenance.api.common.util.PasswordValidator;
@@ -85,7 +86,13 @@ public class AuthService {
 	}
 
 	public LoginResponse refresh(String rawRefreshToken) {
-		RotatedTokens rotated = refreshTokenService.rotate(rawRefreshToken);
+		RotatedTokens rotated;
+		try {
+			rotated = refreshTokenService.rotate(rawRefreshToken);
+		} catch (RefreshReuseException reuse) {
+			refreshTokenService.revokeAll(reuse.getUserId());
+			throw new UnauthorizedException("Session invalide ou expirée");
+		}
 		User user = userRepository.findById(rotated.userId())
 				.orElseThrow(() -> new UnauthorizedException("Session invalide ou expirée"));
 		if (!user.isActive()) {
