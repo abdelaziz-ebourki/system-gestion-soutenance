@@ -66,13 +66,7 @@ public class DocumentDataController {
 		if (sheets.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		EvaluationSheetResponse s = sheets.get(0);
-		Map<String, Object> data = Map.of("projectTitle", s.projectTitle() != null ? s.projectTitle() : "",
-				"studentNames", s.studentNames() != null ? s.studentNames() : List.of(), "supervisorName",
-				s.supervisorName() != null ? s.supervisorName() : "", "date", s.date() != null ? s.date() : "", "time",
-				s.time() != null ? s.time() : "", "room", s.roomName() != null ? s.roomName() : "", "juryMembers",
-				s.juryMembers() != null ? s.juryMembers() : List.of());
-		byte[] pdf = pdfGenerationService.generatePdf("evaluation-sheet", data);
+		byte[] pdf = pdfGenerationService.generatePdf("evaluation-sheet", Map.of("sheets", sheets));
 		return pdfResponse(pdf, "fiche-evaluation-" + request.projectId() + ".pdf");
 	}
 
@@ -94,10 +88,7 @@ public class DocumentDataController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> attendanceListPdf(@Valid @RequestBody SessionRequest request) {
 		AttendanceListResponse attendance = documentDataService.attendanceList(request.defenseSessionId());
-		Map<String, Object> data = Map.of("sessionName",
-				attendance.defenseSessionName() != null ? attendance.defenseSessionName() : "", "slots",
-				attendance.slots() != null ? attendance.slots() : List.of());
-		byte[] pdf = pdfGenerationService.generatePdf("attendance-list", data);
+		byte[] pdf = pdfGenerationService.generatePdf("attendance-list", Map.of("attendance", attendance));
 		return pdfResponse(pdf, "liste-presence-" + request.defenseSessionId() + ".pdf");
 	}
 
@@ -125,14 +116,8 @@ public class DocumentDataController {
 		if (convocations.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		JuryConvocationResponse c = convocations.get(0);
-		Map<String, Object> data = Map.of("teacherName", c.teacherName() != null ? c.teacherName() : "", "role",
-				c.role() != null ? c.role() : "", "projectTitle", c.projectTitle() != null ? c.projectTitle() : "",
-				"studentNames", c.studentNames() != null ? c.studentNames() : List.of(), "date",
-				c.date() != null ? c.date() : "", "time", c.time() != null ? c.time() : "", "room",
-				c.roomName() != null ? c.roomName() : "", "sessionName",
-				c.defenseSessionName() != null ? c.defenseSessionName() : "");
-		byte[] pdf = pdfGenerationService.generatePdf("jury-convocation", data);
+		byte[] pdf = pdfGenerationService.generatePdf("jury-convocation",
+				Map.of("convocations", convocations, "institutionName", documentDataService.getInstitutionName()));
 		return pdfResponse(pdf, "convocation-jury-" + request.projectId() + ".pdf");
 	}
 
@@ -143,10 +128,7 @@ public class DocumentDataController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> schedulePdf(@Valid @RequestBody SessionRequest request) {
 		ScheduleDocResponse schedule = documentDataService.schedule(request.defenseSessionId());
-		Map<String, Object> data = Map.of("sessionName",
-				schedule.defenseSessionName() != null ? schedule.defenseSessionName() : "", "slots",
-				schedule.slots() != null ? schedule.slots() : List.of());
-		byte[] pdf = pdfGenerationService.generatePdf("schedule", data);
+		byte[] pdf = pdfGenerationService.generatePdf("schedule", Map.of("schedule", schedule));
 		return pdfResponse(pdf, "planning-" + request.defenseSessionId() + ".pdf");
 	}
 
@@ -167,12 +149,8 @@ public class DocumentDataController {
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data")})
 	public ResponseEntity<byte[]> minutesPdf(@Valid @RequestBody ProjectIdRequest request) {
 		MinutesResponse minutes = documentDataService.minutes(request.projectId());
-		Map<String, Object> data = Map.of("settings", minutes.settings() != null ? minutes.settings() : "", "grade",
-				minutes.grade() != null ? minutes.grade() : "", "studentNames",
-				minutes.studentNames() != null ? minutes.studentNames() : List.of(), "supervisorName",
-				minutes.supervisorName() != null ? minutes.supervisorName() : "", "juryMembers",
-				minutes.juryMembers() != null ? minutes.juryMembers() : List.of());
-		byte[] pdf = pdfGenerationService.generatePdf("proces-verbal", data);
+		byte[] pdf = pdfGenerationService.generatePdf("proces-verbal",
+				Map.of("pv", minutes, "institutionName", documentDataService.getInstitutionName()));
 		return pdfResponse(pdf, "pv-" + request.projectId() + ".pdf");
 	}
 

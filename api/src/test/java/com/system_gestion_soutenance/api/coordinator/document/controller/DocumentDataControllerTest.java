@@ -167,6 +167,7 @@ class DocumentDataControllerTest {
 
 	@Test
 	void juryConvocationsPdf_returnsPdf() throws Exception {
+		when(documentDataService.getInstitutionName()).thenReturn("Univ");
 		when(documentDataService.juryConvocations(any())).thenReturn(List.of(new JuryConvocationResponse("John",
 				"président", "Projet", List.of("Alice"), "2025-06-01", "09:00", "Room1", "Session PFE")));
 		when(pdfGenerationService.generatePdf(anyString(), anyMap())).thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
@@ -186,6 +187,7 @@ class DocumentDataControllerTest {
 
 	@Test
 	void juryConvocationsPdf_withNullFields_handlesGracefully() throws Exception {
+		when(documentDataService.getInstitutionName()).thenReturn("Univ");
 		when(documentDataService.juryConvocations(any()))
 				.thenReturn(List.of(new JuryConvocationResponse(null, null, null, null, null, null, null, null)));
 		when(pdfGenerationService.generatePdf(anyString(), anyMap())).thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
@@ -206,6 +208,7 @@ class DocumentDataControllerTest {
 
 	@Test
 	void procesVerbalPdf_returnsPdf() throws Exception {
+		when(documentDataService.getInstitutionName()).thenReturn("Univ");
 		when(documentDataService.minutes(1L)).thenReturn(new MinutesResponse(
 				new MinutesResponse.Settings("Univ", "logo.png", "Europe/Paris", "dd/MM/yyyy"), null, List.of("Alice"),
 				"Super", List.of(new MinutesResponse.JuryMemberDetails("Rapporteur", "Dr. X"))));
@@ -218,6 +221,7 @@ class DocumentDataControllerTest {
 
 	@Test
 	void procesVerbalPdf_withNullFields_handlesGracefully() throws Exception {
+		when(documentDataService.getInstitutionName()).thenReturn("Univ");
 		when(documentDataService.minutes(1L)).thenReturn(new MinutesResponse(null, null, null, null, null));
 		when(pdfGenerationService.generatePdf(anyString(), anyMap())).thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46});
 

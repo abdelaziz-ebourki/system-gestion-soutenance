@@ -48,6 +48,10 @@ public class DocumentDataService {
 		this.defenseSessionRepository = defenseSessionRepository;
 	}
 
+	public String getInstitutionName() {
+		return institutionName != null ? institutionName : "";
+	}
+
 	public List<EvaluationSheetResponse> evaluationSheets(DefenseIdsRequest request) {
 		List<Long> ids = resolveDefenseIds(request);
 		List<EvaluationSheetResponse> result = new ArrayList<>();
