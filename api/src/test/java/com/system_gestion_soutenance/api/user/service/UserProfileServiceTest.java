@@ -45,6 +45,10 @@ class UserProfileServiceTest {
 	private PasswordValidator passwordValidator;
 	@Mock
 	private UserRepository userRepository;
+	@Mock
+	private com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService refreshTokenService;
+	@Mock
+	private UserCacheService userCacheService;
 
 	@InjectMocks
 	private UserProfileService userProfileService;

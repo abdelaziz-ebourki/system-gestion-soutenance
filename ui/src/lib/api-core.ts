@@ -23,6 +23,35 @@ export interface ApiResponse<T> {
 interface ApiOptions extends RequestInit {
   responseType?: "json" | "blob";
   timeout?: number;
+  _retried?: boolean;
+}
+
+let refreshPromise: Promise<void> | null = null;
+
+async function doRefresh(): Promise<void> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`refresh failed with status ${response.status}`);
+    }
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function refreshSession(): Promise<void> {
+  if (refreshPromise == null) {
+    refreshPromise = doRefresh().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
 }
 
 export async function api<T>(
@@ -64,6 +93,19 @@ export async function api<T>(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      if (response.status === 401 && !endpoint.startsWith("/auth/") && !options._retried) {
+        let refreshed = false;
+        try {
+          await refreshSession();
+          refreshed = true;
+        } catch {
+          refreshed = false;
+        }
+        if (refreshed) {
+          clearTimeout(timeoutId);
+          return api<T>(endpoint, { ...options, _retried: true });
+        }
+      }
       if (response.status === 401 && !endpoint.startsWith("/auth/")) {
         window.dispatchEvent(new CustomEvent("auth:expired"));
       }

@@ -7,22 +7,28 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 @SuppressWarnings("PMD")
 
 @Component
 public class JwtTokenProvider {
 
 	private final SecretKey key;
-	private final long expirationMs = 2 * 60 * 60 * 1000L;
+	private final long accessExpirationMs;
 
-	public JwtTokenProvider(@Value("${app.jwt.secret}") String secret) {
+	public JwtTokenProvider(@Value("${app.jwt.secret}") String secret,
+			@Value("${app.jwt.access-expiration-ms:900000}") long accessExpirationMs) {
+		Assert.hasText(secret, "app.jwt.secret must be set (env JWT_SECRET) with at least 32 bytes");
+		Assert.isTrue(secret.getBytes(StandardCharsets.UTF_8).length >= 32,
+				"app.jwt.secret must be at least 32 bytes for HS256");
 		this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+		this.accessExpirationMs = accessExpirationMs;
 	}
 
 	public String generateToken(String userId, String role) {
 
 		Date now = new Date();
-		Date expiry = new Date(now.getTime() + expirationMs);
+		Date expiry = new Date(now.getTime() + accessExpirationMs);
 
 		return Jwts.builder().subject(userId).claim("role", role).issuedAt(now).expiration(expiry).signWith(key)
 				.compact();
@@ -33,7 +39,7 @@ public class JwtTokenProvider {
 	}
 
 	public long getExpirationMs() {
-		return expirationMs;
+		return accessExpirationMs;
 	}
 
 	public boolean validateToken(String token) {

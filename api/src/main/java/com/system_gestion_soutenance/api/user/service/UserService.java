@@ -9,6 +9,7 @@ import com.system_gestion_soutenance.api.user.entity.Student;
 import com.system_gestion_soutenance.api.user.entity.Teacher;
 import com.system_gestion_soutenance.api.user.entity.User;
 import com.system_gestion_soutenance.api.user.repository.UserRepository;
+import com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService;
 import com.system_gestion_soutenance.api.common.exception.EntityNotFoundException;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
 import java.util.List;
@@ -28,13 +29,16 @@ public class UserService {
 	private final UserAccountService accountService;
 	private final UserProfileService profileService;
 	private final UserConstraintService constraintService;
+	private final RefreshTokenService refreshTokenService;
 
 	public UserService(UserRepository userRepository, UserAccountService accountService,
-			UserProfileService profileService, UserConstraintService constraintService) {
+			UserProfileService profileService, UserConstraintService constraintService,
+			RefreshTokenService refreshTokenService) {
 		this.userRepository = userRepository;
 		this.accountService = accountService;
 		this.profileService = profileService;
 		this.constraintService = constraintService;
+		this.refreshTokenService = refreshTokenService;
 	}
 
 	public Page<User> listUsers(String role, int page, int limit, String search) {
@@ -105,6 +109,7 @@ public class UserService {
 		}
 
 		userRepository.delete(user);
+		refreshTokenService.revokeAll(id);
 	}
 
 	private Role parseRole(String role) {

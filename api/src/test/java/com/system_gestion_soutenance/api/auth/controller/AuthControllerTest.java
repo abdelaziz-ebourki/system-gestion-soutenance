@@ -37,14 +37,15 @@ class AuthControllerTest {
 
 	@Test
 	void login_withValidCredentials_returns200() throws Exception {
-		LoginResponse response = new LoginResponse(mock(UserDto.class), "jwt-token", 9999999999L);
+		LoginResponse response = new LoginResponse(mock(UserDto.class), "jwt-token", 9999999999L, "refresh-token",
+				9999999999L);
 		when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
 		mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("""
 				{"email":"admin@test.com","password":"password"}
 				""")).andExpect(status().isOk()).andExpect(jsonPath("$.user").exists())
 				.andExpect(jsonPath("$.token").doesNotExist()).andExpect(cookie().httpOnly("jwt_token", true))
-				.andExpect(cookie().secure("jwt_token", true));
+				.andExpect(cookie().httpOnly("refresh_token", true)).andExpect(cookie().secure("jwt_token", false));
 	}
 
 	@Test
@@ -94,5 +95,35 @@ class AuthControllerTest {
 		mockMvc.perform(post("/api/auth/verify-account").contentType(MediaType.APPLICATION_JSON).content("""
 				{"token":"valid-token","password":"secure-pass"}
 				""")).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Compte vérifié avec succès."));
+	}
+
+	@Test
+	void refresh_withValidCookie_rotatesCookies() throws Exception {
+		LoginResponse response = new LoginResponse(mock(UserDto.class), "new-jwt", 9999999999L, "new-refresh",
+				9999999999L);
+		when(authService.refresh("old-refresh")).thenReturn(response);
+
+		mockMvc.perform(
+				post("/api/auth/refresh").cookie(new jakarta.servlet.http.Cookie("refresh_token", "old-refresh")))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.user").exists())
+				.andExpect(cookie().httpOnly("jwt_token", true)).andExpect(cookie().httpOnly("refresh_token", true));
+		verify(authService).refresh("old-refresh");
+	}
+
+	@Test
+	void refresh_withoutCookie_returns401() throws Exception {
+		mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
+		verify(authService, never()).refresh(any());
+	}
+
+	@Test
+	void logout_clearsBothCookiesAndRevokes() throws Exception {
+		doNothing().when(authService).logout("old-refresh");
+
+		mockMvc.perform(
+				post("/api/auth/logout").cookie(new jakarta.servlet.http.Cookie("refresh_token", "old-refresh")))
+				.andExpect(status().isNoContent()).andExpect(cookie().maxAge("jwt_token", 0))
+				.andExpect(cookie().maxAge("refresh_token", 0));
+		verify(authService).logout("old-refresh");
 	}
 }

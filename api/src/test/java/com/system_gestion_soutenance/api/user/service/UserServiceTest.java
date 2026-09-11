@@ -32,6 +32,8 @@ class UserServiceTest {
 	private UserProfileService profileService;
 	@Mock
 	private UserConstraintService constraintService;
+	@Mock
+	private com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService refreshTokenService;
 
 	@InjectMocks
 	private UserService userService;

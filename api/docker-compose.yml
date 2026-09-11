@@ -40,6 +40,8 @@ services:
       DB_NAME: defensedb
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: false
+      DB_ALLOW_PUBLIC_KEY: true
       JWT_SECRET: ${JWT_SECRET}
       SMTP_HOST: mailpit
       SMTP_PORT: 1025

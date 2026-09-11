@@ -11,7 +11,7 @@ class JwtTokenProviderTest {
 
 	@BeforeEach
 	void setUp() {
-		tokenProvider = new JwtTokenProvider("s3cr3t-k3y-f0r-d3f3ns3-m4n4g3m3nt-syst3m-2026");
+		tokenProvider = new JwtTokenProvider("s3cr3t-k3y-f0r-d3f3ns3-m4n4g3m3nt-syst3m-2026", 900000L);
 	}
 
 	@Test
@@ -29,8 +29,18 @@ class JwtTokenProviderTest {
 	}
 
 	@Test
-	void getExpirationMs_shouldReturnTwoHours() {
-		assertEquals(7200000L, tokenProvider.getExpirationMs());
+	void getExpirationMs_shouldReturnConfiguredLifetime() {
+		assertEquals(900000L, tokenProvider.getExpirationMs());
+	}
+
+	@Test
+	void constructor_blankSecret_shouldFailFast() {
+		assertThrows(IllegalArgumentException.class, () -> new JwtTokenProvider("   ", 900000L));
+	}
+
+	@Test
+	void constructor_shortSecret_shouldFailFast() {
+		assertThrows(IllegalArgumentException.class, () -> new JwtTokenProvider("too-short", 900000L));
 	}
 
 	@Test

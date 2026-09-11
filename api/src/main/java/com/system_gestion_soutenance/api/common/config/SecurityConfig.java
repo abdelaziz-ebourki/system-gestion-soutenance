@@ -31,10 +31,16 @@ public class SecurityConfig {
 
 	private final ObjectMapper objectMapper;
 	private final String[] allowedOrigins;
+	private final boolean exposeDevTools;
+	private final boolean disableFrameOptions;
 
-	public SecurityConfig(ObjectMapper objectMapper, @Value("${app.cors.allowed-origins}") String[] allowedOrigins) {
+	public SecurityConfig(ObjectMapper objectMapper, @Value("${app.cors.allowed-origins}") String[] allowedOrigins,
+			@Value("${app.security.expose-dev-tools:false}") boolean exposeDevTools,
+			@Value("${app.security.disable-frame-options:false}") boolean disableFrameOptions) {
 		this.objectMapper = objectMapper;
 		this.allowedOrigins = allowedOrigins;
+		this.exposeDevTools = exposeDevTools;
+		this.disableFrameOptions = disableFrameOptions;
 	}
 
 	@Bean
@@ -47,7 +53,8 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(List.of(allowedOrigins));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-		config.setAllowedHeaders(List.of("*"));
+		config.setAllowedHeaders(
+				List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-XSRF-TOKEN"));
 		config.setAllowCredentials(true);
 		config.setMaxAge(3600L);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -57,9 +64,11 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
-				.headers(headers -> headers.frameOptions(o -> o.disable()))
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable());
+		if (disableFrameOptions) {
+			http.headers(headers -> headers.frameOptions(o -> o.disable()));
+		}
+		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
 					response.setContentType("application/json;charset=UTF-8");
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -69,17 +78,25 @@ public class SecurityConfig {
 					response.setContentType("application/json;charset=UTF-8");
 					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 					objectMapper.writeValue(response.getWriter(), Map.of("message", "Acces refuse"));
-				}))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
-						.requestMatchers("/h2-console/**").permitAll()
-						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs.yml")
-						.permitAll().requestMatchers("/actuator/health").permitAll()
-						.requestMatchers("/api/admin/rooms/**").hasAnyRole("ADMIN", "COORDINATOR")
-						.requestMatchers("/api/admin/**").hasRole("ADMIN").requestMatchers("/api/coordinator/**")
-						.hasAnyRole("ADMIN", "COORDINATOR").requestMatchers("/api/teacher/**").hasRole("TEACHER")
-						.requestMatchers("/api/student/**").hasRole("STUDENT").requestMatchers("/api/notifications/**")
-						.authenticated().anyRequest().authenticated())
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+				})).authorizeHttpRequests(auth -> {
+					auth.requestMatchers("/api/auth/**").permitAll();
+					auth.requestMatchers("/actuator/health").permitAll();
+					if (exposeDevTools) {
+						auth.requestMatchers("/h2-console/**").permitAll();
+						auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml",
+								"/v3/api-docs.yml").permitAll();
+					} else {
+						auth.requestMatchers("/h2-console/**").denyAll();
+						auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").authenticated();
+					}
+					auth.requestMatchers("/api/admin/rooms/**").hasAnyRole("ADMIN", "COORDINATOR");
+					auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
+					auth.requestMatchers("/api/coordinator/**").hasAnyRole("ADMIN", "COORDINATOR");
+					auth.requestMatchers("/api/teacher/**").hasRole("TEACHER");
+					auth.requestMatchers("/api/student/**").hasRole("STUDENT");
+					auth.requestMatchers("/api/notifications/**").authenticated();
+					auth.anyRequest().authenticated();
+				}).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

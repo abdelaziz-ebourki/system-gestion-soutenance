@@ -116,6 +116,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	}
 
 	private String getClientIp(HttpServletRequest request) {
+		// NOTE: X-Forwarded-For is client-controlled. Only trust it behind a proxy that
+		// sanitizes
+		// it (set server.forward-headers-strategy=native/framework +
+		// app.security.trust-proxy-headers=true).
 		if (trustProxyHeaders) {
 			String xff = request.getHeader("X-Forwarded-For");
 			if (xff != null && !xff.isEmpty()) {

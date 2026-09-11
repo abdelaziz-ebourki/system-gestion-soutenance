@@ -7,6 +7,7 @@
             <Class name="~.*\.controller\..*"/>
             <Class name="~.*\.dto\..*"/>
             <Class name="~.*\.config\..*"/>
+            <Class name="~.*\.service\..*"/>
         </Or>
     </Match>
     <Match>

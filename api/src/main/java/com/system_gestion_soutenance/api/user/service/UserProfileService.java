@@ -8,6 +8,7 @@ import com.system_gestion_soutenance.api.admin.config.major.entity.Major;
 import com.system_gestion_soutenance.api.admin.config.major.repository.MajorRepository;
 import com.system_gestion_soutenance.api.admin.department.entity.Department;
 import com.system_gestion_soutenance.api.admin.department.repository.DepartmentRepository;
+import com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService;
 import com.system_gestion_soutenance.api.user.dto.ChangePasswordRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateProfileRequest;
 import com.system_gestion_soutenance.api.user.dto.UpdateUserRequest;
@@ -33,10 +34,13 @@ public class UserProfileService {
 	private final PasswordEncoder passwordEncoder;
 	private final PasswordValidator passwordValidator;
 	private final UserRepository userRepository;
+	private final RefreshTokenService refreshTokenService;
+	private final UserCacheService userCacheService;
 
 	public UserProfileService(MajorRepository majorRepository, LevelRepository levelRepository,
 			TeacherRankRepository teacherRankRepository, DepartmentRepository departmentRepository,
-			PasswordEncoder passwordEncoder, PasswordValidator passwordValidator, UserRepository userRepository) {
+			PasswordEncoder passwordEncoder, PasswordValidator passwordValidator, UserRepository userRepository,
+			RefreshTokenService refreshTokenService, UserCacheService userCacheService) {
 		this.majorRepository = majorRepository;
 		this.levelRepository = levelRepository;
 		this.teacherRankRepository = teacherRankRepository;
@@ -44,6 +48,8 @@ public class UserProfileService {
 		this.passwordEncoder = passwordEncoder;
 		this.passwordValidator = passwordValidator;
 		this.userRepository = userRepository;
+		this.refreshTokenService = refreshTokenService;
+		this.userCacheService = userCacheService;
 	}
 
 	public void updateBasicInfo(User user, UpdateUserRequest request) {
@@ -104,5 +110,7 @@ public class UserProfileService {
 		}
 		user.setPassword(passwordEncoder.encode(request.newPassword()));
 		userRepository.save(user);
+		refreshTokenService.revokeAll(user.getId());
+		userCacheService.evictUser(user.getId());
 	}
 }

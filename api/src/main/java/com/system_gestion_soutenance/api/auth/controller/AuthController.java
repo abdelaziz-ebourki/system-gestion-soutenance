@@ -16,9 +16,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,14 +34,20 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Auth", description = "Authentication endpoints")
 public class AuthController {
 
-	private final AuthService authService;
+	private static final String ACCESS_COOKIE = "jwt_token";
+	private static final String REFRESH_COOKIE = "refresh_token";
+	private static final String REFRESH_PATH = "/api/auth";
 
-	public AuthController(AuthService authService) {
+	private final AuthService authService;
+	private final boolean cookieSecure;
+
+	public AuthController(AuthService authService, @Value("${app.cookie.secure:false}") boolean cookieSecure) {
 		this.authService = authService;
+		this.cookieSecure = cookieSecure;
 	}
 
 	@PostMapping("/auth/login")
-	@Operation(summary = "Authenticate a user", description = "Validates credentials and returns user info. JWT is set as an HTTP-only cookie.")
+	@Operation(summary = "Authenticate a user", description = "Validates credentials and returns user info. JWT access and refresh tokens are set as HTTP-only cookies.")
 	@SecurityRequirements
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = LoginCookieResponse.class))),
@@ -46,22 +56,47 @@ public class AuthController {
 			HttpServletResponse response) {
 		LoginResponse loginResponse = authService.login(request);
 
-		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", loginResponse.token()).path("/").httpOnly(true)
-				.secure(true).sameSite("None").maxAge(7200).build();
-		response.setHeader("Set-Cookie", jwtCookie.toString());
+		long accessMaxAge = Math.max(60, (loginResponse.expiresAt() - System.currentTimeMillis()) / 1000);
+		long refreshMaxAge = Math.max(60, (loginResponse.refreshExpiresAt() - System.currentTimeMillis()) / 1000);
+		response.setHeader(HttpHeaders.SET_COOKIE, accessCookie(loginResponse.token(), accessMaxAge).toString());
+		response.addHeader(HttpHeaders.SET_COOKIE,
+				refreshCookie(loginResponse.refreshToken(), refreshMaxAge).toString());
+
+		return ResponseEntity.ok(new LoginCookieResponse(loginResponse.user(), loginResponse.expiresAt()));
+	}
+
+	@PostMapping("/auth/refresh")
+	@Operation(summary = "Rotate session tokens", description = "Reads the refresh cookie, rotates the token family and returns fresh cookies.")
+	@SecurityRequirements
+	@ApiResponses({
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tokens rotated successfully"),
+			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")})
+	public ResponseEntity<LoginCookieResponse> refresh(
+			@CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken, HttpServletResponse response) {
+		if (refreshToken == null || refreshToken.isBlank()) {
+			return ResponseEntity.status(401).build();
+		}
+		LoginResponse loginResponse = authService.refresh(refreshToken);
+
+		long accessMaxAge = Math.max(60, (loginResponse.expiresAt() - System.currentTimeMillis()) / 1000);
+		long refreshMaxAge = Math.max(60, (loginResponse.refreshExpiresAt() - System.currentTimeMillis()) / 1000);
+		response.setHeader(HttpHeaders.SET_COOKIE, accessCookie(loginResponse.token(), accessMaxAge).toString());
+		response.addHeader(HttpHeaders.SET_COOKIE,
+				refreshCookie(loginResponse.refreshToken(), refreshMaxAge).toString());
 
 		return ResponseEntity.ok(new LoginCookieResponse(loginResponse.user(), loginResponse.expiresAt()));
 	}
 
 	@PostMapping("/auth/logout")
-	@Operation(summary = "Logout", description = "Clears the JWT cookie.")
+	@Operation(summary = "Logout", description = "Revokes the refresh token server-side and clears both cookies.")
 	@SecurityRequirements
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Logged out successfully")})
-	public ResponseEntity<Void> logout(HttpServletResponse response) {
-		ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", "").path("/").httpOnly(true).secure(true)
-				.sameSite("None").maxAge(0).build();
-		response.setHeader("Set-Cookie", jwtCookie.toString());
+	public ResponseEntity<Void> logout(@CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
+			HttpServletResponse response) {
+		authService.logout(refreshToken);
+		response.setHeader(HttpHeaders.SET_COOKIE, accessCookie("", 0).toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie("", 0).toString());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -97,5 +132,18 @@ public class AuthController {
 	public ApiResponse<Void> verifyAccount(@Valid @RequestBody VerifyRequest request) {
 		authService.verifyAccount(request);
 		return ApiResponse.success("Compte vérifié avec succès.", null);
+	}
+
+	private ResponseCookie accessCookie(String value, long maxAgeSeconds) {
+		return cookie(ACCESS_COOKIE, "/", value, maxAgeSeconds);
+	}
+
+	private ResponseCookie refreshCookie(String value, long maxAgeSeconds) {
+		return cookie(REFRESH_COOKIE, REFRESH_PATH, value, maxAgeSeconds);
+	}
+
+	private ResponseCookie cookie(String name, String path, String value, long maxAgeSeconds) {
+		return ResponseCookie.from(name, value).path(path).httpOnly(true).secure(cookieSecure).sameSite("Lax")
+				.maxAge(Duration.ofSeconds(maxAgeSeconds)).build();
 	}
 }

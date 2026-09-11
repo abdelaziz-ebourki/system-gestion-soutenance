@@ -6,7 +6,10 @@ import static org.mockito.Mockito.*;
 
 import com.system_gestion_soutenance.api.auth.dto.*;
 import com.system_gestion_soutenance.api.auth.jwt.JwtTokenProvider;
+import com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService;
+import com.system_gestion_soutenance.api.auth.refresh.service.RefreshTokenService.RotatedTokens;
 import com.system_gestion_soutenance.api.common.util.PasswordValidator;
+import com.system_gestion_soutenance.api.common.util.TokenHasher;
 import com.system_gestion_soutenance.api.common.util.ValidationResult;
 import com.system_gestion_soutenance.api.notification.service.EmailService;
 import com.system_gestion_soutenance.api.user.entity.Role;
@@ -45,12 +48,19 @@ class AuthServiceTest {
 	private com.system_gestion_soutenance.api.common.mapper.UserMapper userMapper;
 	@Mock
 	private com.system_gestion_soutenance.api.common.service.MessageService messageService;
+
+	@Mock
+	private RefreshTokenService refreshTokenService;
+
+	@Mock
+	private com.system_gestion_soutenance.api.user.service.UserCacheService userCacheService;
+
 	private AuthService authService;
 
 	@org.junit.jupiter.api.BeforeEach
 	void setUp() {
-		authService = new AuthService(userRepository, jwtTokenProvider, passwordEncoder, emailService,
-				passwordValidator, userMapper, messageService, "http://localhost:5173");
+		authService = new AuthService(userRepository, jwtTokenProvider, refreshTokenService, userCacheService,
+				passwordEncoder, emailService, passwordValidator, userMapper, messageService, "http://localhost:5173");
 	}
 
 	private User createActiveUser() {
@@ -70,6 +80,8 @@ class AuthServiceTest {
 		when(passwordEncoder.matches("password", "encoded-pass")).thenReturn(true);
 		when(jwtTokenProvider.generateToken("1", "ADMIN")).thenReturn("jwt-token");
 		when(jwtTokenProvider.getExpirationMs()).thenReturn(7200000L);
+		when(refreshTokenService.create(1L)).thenReturn(new RotatedTokens(1L, "refresh-token"));
+		when(refreshTokenService.getRefreshExpirationMs()).thenReturn(604800000L);
 		when(userMapper.toDto(user)).thenReturn(new com.system_gestion_soutenance.api.user.dto.UserDto(user.getId(),
 				user.getEmail(), user.getRole().name().toLowerCase(), user.getLastName(), user.getFirstName(),
 				user.isActive(), null, null, null, null, null, null, null, null, null, null));
@@ -78,8 +90,53 @@ class AuthServiceTest {
 
 		assertNotNull(response);
 		assertEquals("jwt-token", response.token());
+		assertEquals("refresh-token", response.refreshToken());
 		assertEquals("admin@test.com", response.user().email());
 		assertTrue(response.expiresAt() > 0);
+		assertTrue(response.refreshExpiresAt() > 0);
+	}
+
+	@Test
+	void refresh_validToken_rotatesAndReturnsNewPair() {
+		User user = createActiveUser();
+		when(refreshTokenService.rotate("old-refresh")).thenReturn(new RotatedTokens(1L, "new-refresh"));
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(jwtTokenProvider.generateToken("1", "ADMIN")).thenReturn("new-jwt");
+		when(jwtTokenProvider.getExpirationMs()).thenReturn(900000L);
+		when(refreshTokenService.getRefreshExpirationMs()).thenReturn(604800000L);
+		when(userMapper.toDto(user)).thenReturn(new com.system_gestion_soutenance.api.user.dto.UserDto(user.getId(),
+				user.getEmail(), user.getRole().name().toLowerCase(), user.getLastName(), user.getFirstName(),
+				user.isActive(), null, null, null, null, null, null, null, null, null, null));
+
+		LoginResponse response = authService.refresh("old-refresh");
+
+		assertEquals("new-jwt", response.token());
+		assertEquals("new-refresh", response.refreshToken());
+	}
+
+	@Test
+	void refresh_inactiveUser_revokesAllAndThrows() {
+		User user = createActiveUser();
+		user.setActive(false);
+		when(refreshTokenService.rotate("old-refresh")).thenReturn(new RotatedTokens(1L, "new-refresh"));
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+		assertThrows(UnauthorizedException.class, () -> authService.refresh("old-refresh"));
+		verify(refreshTokenService).revokeAll(1L);
+	}
+
+	@Test
+	void logout_withToken_revokesIt() {
+		authService.logout("some-refresh");
+
+		verify(refreshTokenService).revoke("some-refresh");
+	}
+
+	@Test
+	void logout_nullToken_doesNothing() {
+		authService.logout(null);
+
+		verify(refreshTokenService, never()).revoke(any());
 	}
 
 	@Test
@@ -115,8 +172,10 @@ class AuthServiceTest {
 	void verifyAccount_validToken_activatesUser() {
 		User user = createActiveUser();
 		user.setActive(false);
-		user.setVerificationToken("valid-token");
-		when(userRepository.findByVerificationToken("valid-token")).thenReturn(Optional.of(user));
+		user.setVerificationToken(TokenHasher.sha256Hex("valid-token"));
+		user.setVerificationTokenExpires(Instant.now().plusSeconds(3600));
+		when(userRepository.findByVerificationToken(TokenHasher.sha256Hex("valid-token")))
+				.thenReturn(Optional.of(user));
 		when(passwordValidator.validate(anyString())).thenReturn(new ValidationResult(true, null));
 		when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-pass");
 
@@ -124,12 +183,27 @@ class AuthServiceTest {
 
 		assertTrue(user.isActive());
 		assertNull(user.getVerificationToken());
+		assertNull(user.getVerificationTokenExpires());
 		verify(userRepository).save(user);
+		verify(refreshTokenService).revokeAll(1L);
+		verify(userCacheService).evictUser(1L);
+	}
+
+	@Test
+	void verifyAccount_expiredToken_throwsBadRequest() {
+		User user = createActiveUser();
+		user.setVerificationToken(TokenHasher.sha256Hex("stale-token"));
+		user.setVerificationTokenExpires(Instant.now().minusSeconds(60));
+		when(userRepository.findByVerificationToken(TokenHasher.sha256Hex("stale-token")))
+				.thenReturn(Optional.of(user));
+
+		assertThrows(InvalidBusinessStateException.class,
+				() -> authService.verifyAccount(new VerifyRequest("stale-token", "password")));
 	}
 
 	@Test
 	void verifyAccount_invalidToken_throwsNotFound() {
-		when(userRepository.findByVerificationToken("bad-token")).thenReturn(Optional.empty());
+		when(userRepository.findByVerificationToken(TokenHasher.sha256Hex("bad-token"))).thenReturn(Optional.empty());
 
 		assertThrows(EntityNotFoundException.class,
 				() -> authService.verifyAccount(new VerifyRequest("bad-token", "password")));
@@ -161,9 +235,9 @@ class AuthServiceTest {
 	@Test
 	void resetPassword_validToken_resetsPassword() {
 		User user = createActiveUser();
-		user.setResetToken("reset-token");
+		user.setResetToken(TokenHasher.sha256Hex("reset-token"));
 		user.setResetTokenExpires(Instant.now().plusSeconds(3600));
-		when(userRepository.findByResetToken("reset-token")).thenReturn(Optional.of(user));
+		when(userRepository.findByResetToken(TokenHasher.sha256Hex("reset-token"))).thenReturn(Optional.of(user));
 		when(passwordValidator.validate(anyString())).thenReturn(new ValidationResult(true, null));
 		when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-pass");
 
@@ -172,14 +246,16 @@ class AuthServiceTest {
 		assertNull(user.getResetToken());
 		assertNull(user.getResetTokenExpires());
 		verify(userRepository).save(user);
+		verify(refreshTokenService).revokeAll(1L);
+		verify(userCacheService).evictUser(1L);
 	}
 
 	@Test
 	void resetPassword_expiredToken_throwsBadRequest() {
 		User user = createActiveUser();
-		user.setResetToken("expired-token");
+		user.setResetToken(TokenHasher.sha256Hex("expired-token"));
 		user.setResetTokenExpires(Instant.now().minusSeconds(3600));
-		when(userRepository.findByResetToken("expired-token")).thenReturn(Optional.of(user));
+		when(userRepository.findByResetToken(TokenHasher.sha256Hex("expired-token"))).thenReturn(Optional.of(user));
 
 		assertThrows(InvalidBusinessStateException.class,
 				() -> authService.resetPassword(new ResetPasswordRequest("expired-token", "password")));
@@ -188,9 +264,9 @@ class AuthServiceTest {
 	@Test
 	void resetPassword_nullExpiry_throwsBadRequest() {
 		User user = createActiveUser();
-		user.setResetToken("no-expiry-token");
+		user.setResetToken(TokenHasher.sha256Hex("no-expiry-token"));
 		user.setResetTokenExpires(null);
-		when(userRepository.findByResetToken("no-expiry-token")).thenReturn(Optional.of(user));
+		when(userRepository.findByResetToken(TokenHasher.sha256Hex("no-expiry-token"))).thenReturn(Optional.of(user));
 
 		assertThrows(InvalidBusinessStateException.class,
 				() -> authService.resetPassword(new ResetPasswordRequest("no-expiry-token", "password")));
@@ -198,7 +274,7 @@ class AuthServiceTest {
 
 	@Test
 	void resetPassword_invalidToken_throwsBadRequest() {
-		when(userRepository.findByResetToken("bad-token")).thenReturn(Optional.empty());
+		when(userRepository.findByResetToken(TokenHasher.sha256Hex("bad-token"))).thenReturn(Optional.empty());
 
 		assertThrows(InvalidBusinessStateException.class,
 				() -> authService.resetPassword(new ResetPasswordRequest("bad-token", "password")));

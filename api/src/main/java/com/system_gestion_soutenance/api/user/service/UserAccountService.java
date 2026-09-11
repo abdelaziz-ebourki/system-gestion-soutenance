@@ -20,9 +20,9 @@ import com.system_gestion_soutenance.api.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import com.system_gestion_soutenance.api.common.util.TokenHasher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,10 +70,12 @@ public class UserAccountService {
 
 		user.setPassword(passwordEncoder.encode(generateTemporaryPassword()));
 		user.setActive(false);
-		user.setVerificationToken(UUID.randomUUID().toString());
+		String rawVerificationToken = TokenHasher.generateSecureToken();
+		user.setVerificationToken(TokenHasher.sha256Hex(rawVerificationToken));
+		user.setVerificationTokenExpires(java.time.Instant.now().plusSeconds(86400));
 
 		userRepository.save(user);
-		sendVerificationEmail(user);
+		sendVerificationEmail(user, rawVerificationToken);
 		userCacheService.clearCache();
 
 		return user;
@@ -98,10 +100,12 @@ public class UserAccountService {
 
 			user.setPassword(passwordEncoder.encode(generateTemporaryPassword()));
 			user.setActive(false);
-			user.setVerificationToken(UUID.randomUUID().toString());
+			String rawVerificationToken = TokenHasher.generateSecureToken();
+			user.setVerificationToken(TokenHasher.sha256Hex(rawVerificationToken));
+			user.setVerificationTokenExpires(java.time.Instant.now().plusSeconds(86400));
 
 			userRepository.save(user);
-			sendVerificationEmail(user);
+			sendVerificationEmail(user, rawVerificationToken);
 			results.add(user);
 		}
 
@@ -235,8 +239,8 @@ public class UserAccountService {
 		return sb.toString();
 	}
 
-	private void sendVerificationEmail(User user) {
-		String verificationLink = baseUrl + "/verify-account?token=" + user.getVerificationToken();
+	private void sendVerificationEmail(User user, String rawToken) {
+		String verificationLink = baseUrl + "/verify-account?token=" + rawToken;
 		emailService.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationLink);
 	}
 }
