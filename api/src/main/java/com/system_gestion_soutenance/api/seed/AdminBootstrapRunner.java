@@ -50,6 +50,8 @@ public class AdminBootstrapRunner implements CommandLineRunner {
 		admin.setPassword(passwordEncoder.encode(adminPassword));
 		admin.setRole(Role.ADMIN);
 		admin.setActive(true);
+		admin.setFirstName("Root");
+		admin.setLastName("Admin");
 		userRepository.save(admin);
 		LOG.info("Bootstrapped initial admin account {}", adminEmail);
 	}
