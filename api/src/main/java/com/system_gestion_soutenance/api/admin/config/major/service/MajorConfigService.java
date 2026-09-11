@@ -10,21 +10,23 @@ import com.system_gestion_soutenance.api.admin.department.repository.DepartmentR
 import com.system_gestion_soutenance.api.common.audit.Audited;
 import com.system_gestion_soutenance.api.common.dto.PaginatedResponse;
 import com.system_gestion_soutenance.api.common.mapper.ConfigMapper;
-import com.system_gestion_soutenance.api.common.service.BaseCrudService;
+import com.system_gestion_soutenance.api.common.service.AbstractNamedConfigService;
 import com.system_gestion_soutenance.api.user.repository.StudentRepository;
 import com.system_gestion_soutenance.api.common.exception.InvalidBusinessStateException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 @SuppressWarnings("PMD")
 
 @Service
 @Transactional(readOnly = true)
-public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajorRequest> {
+public class MajorConfigService extends AbstractNamedConfigService<Major, CreateMajorRequest, UpdateMajorRequest> {
 
 	private final MajorRepository majorRepository;
 	private final StudentRepository studentRepository;
@@ -57,46 +59,25 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 	@Audited(action = "CREATE", entity = "Major")
 	@Transactional
 	public Major create(CreateMajorRequest request) {
-		if (majorRepository.findByName(request.name()).isPresent()) {
-			throw new InvalidBusinessStateException("Une filière avec ce nom existe déjà");
-		}
-
-		Major major = new Major();
-		major.setName(request.name());
-		if (request.departmentId() != null) {
-			Department dept = departmentRepository.findById(request.departmentId())
-					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
-			major.setDepartment(dept);
-		}
+		Major major = createNamed(request);
+		applyDepartment(major, request.departmentId(), false);
 		return save(major);
 	}
 
 	@Audited(action = "UPDATE", entity = "Major")
 	@Transactional
 	public Major update(Long id, CreateMajorRequest request) {
-		Major major = findByIdOrThrow(id, "Filière");
-		major.setName(request.name());
-		if (request.departmentId() != null) {
-			Department dept = departmentRepository.findById(request.departmentId())
-					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
-			major.setDepartment(dept);
-		} else {
-			major.setDepartment(null);
-		}
+		Major major = updateNamed(id, request);
+		applyDepartment(major, request.departmentId(), true);
 		return save(major);
 	}
 
 	@Audited(action = "UPDATE", entity = "Major")
 	@Transactional
 	public Major updatePartial(Long id, UpdateMajorRequest request) {
-		Major major = findByIdOrThrow(id, "Filière");
-		if (request.name() != null) {
-			major.setName(request.name());
-		}
+		Major major = updatePartialNamed(id, request);
 		if (request.departmentId() != null) {
-			Department dept = departmentRepository.findById(request.departmentId())
-					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
-			major.setDepartment(dept);
+			applyDepartment(major, request.departmentId(), false);
 		}
 		return save(major);
 	}
@@ -104,6 +85,46 @@ public class MajorConfigService extends BaseCrudService<Major, Long, CreateMajor
 	@Audited(action = "DELETE", entity = "Major")
 	@Transactional
 	public void delete(Long id) {
-		deleteWithCheck(id, "Filière", () -> !studentRepository.findByMajorId(id).isEmpty());
+		deleteNamed(id);
+	}
+
+	@Override
+	protected Major newEntity() {
+		return new Major();
+	}
+
+	@Override
+	protected void setName(Major entity, String name) {
+		entity.setName(name);
+	}
+
+	@Override
+	protected Optional<Major> findByName(String name) {
+		return majorRepository.findByName(name);
+	}
+
+	@Override
+	protected String duplicateMessage() {
+		return "Une filière avec ce nom existe déjà";
+	}
+
+	@Override
+	protected String entityLabel() {
+		return "Filière";
+	}
+
+	@Override
+	protected Supplier<Boolean> usageCheck(Long id) {
+		return () -> !studentRepository.findByMajorId(id).isEmpty();
+	}
+
+	private void applyDepartment(Major major, Long departmentId, boolean clearWhenNull) {
+		if (departmentId != null) {
+			Department dept = departmentRepository.findById(departmentId)
+					.orElseThrow(() -> new InvalidBusinessStateException("Département introuvable"));
+			major.setDepartment(dept);
+		} else if (clearWhenNull) {
+			major.setDepartment(null);
+		}
 	}
 }
